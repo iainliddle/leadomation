@@ -1,0 +1,54 @@
+import React from 'react';
+import { Bell, ChevronDown, Download, Plus } from 'lucide-react';
+
+interface TopBarProps {
+    title: string;
+    onNewCampaign?: () => void;
+}
+
+const TopBar: React.FC<TopBarProps> = ({ title, onNewCampaign }) => {
+    return (
+        <header className="sticky top-0 right-0 left-0 bg-white border-b border-[#E5E7EB] h-20 flex items-center justify-between px-8 z-10 shadow-sm">
+            <h2 className="text-xl font-bold text-[#111827]">{title}</h2>
+
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-2 text-sm text-[#374151] font-medium cursor-pointer hover:bg-gray-100 transition-colors">
+                    <span>Jan 1, 2024 - Feb 1, 2024</span>
+                    <ChevronDown size={16} className="text-[#9CA3AF]" />
+                </div>
+
+                <button className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-lg font-bold text-sm text-[#374151] hover:bg-gray-50 transition-colors">
+                    <Download size={16} />
+                    Export
+                </button>
+
+                <button
+                    onClick={onNewCampaign}
+                    className="flex items-center gap-2 px-5 py-2 bg-[#2563EB] text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all shadow-sm active:transform active:scale-95"
+                >
+                    <Plus size={16} />
+                    New Campaign
+                </button>
+
+                <div className="w-px h-8 bg-[#E5E7EB] mx-2"></div>
+
+                <button className="p-2 text-[#9CA3AF] hover:text-[#111827] relative transition-colors">
+                    <Bell size={22} />
+                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#DC2626] rounded-full border-2 border-white"></span>
+                </button>
+
+                <div className="flex items-center gap-3 pl-2">
+                    <div className="flex flex-col items-end">
+                        <span className="text-sm font-bold text-[#111827]">Iain L.</span>
+                        <span className="text-[10px] text-[#9CA3AF] font-bold uppercase tracking-tight">Admin</span>
+                    </div>
+                    <div className="w-11 h-11 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#2563EB] font-black border border-[#BFDBFE] shadow-sm transform hover:scale-105 transition-all cursor-pointer">
+                        IL
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+};
+
+export default TopBar;

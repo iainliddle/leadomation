@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2563EB;
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-accent: #7C3AED;
+
+  --color-dark: #111827;
+  --color-body: #374151;
+  --color-muted: #9CA3AF;
+
+  --color-page-bg: #F9FAFB;
+  --color-card-bg: #FFFFFF;
+  --color-border-color: #E5E7EB;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  --shadow-subtle: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-page-bg text-body font-sans;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-dark font-semibold;
+  }
+}
+
+@layer components {
+  .nav-pill-active {
+    @apply bg-[#EFF6FF] text-primary border-l-4 border-primary;
+  }
+
+  .card {
+    @apply bg-card-bg border border-border-color rounded-lg shadow-subtle hover:shadow-hover transition-shadow duration-300;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-[#E5E7EB] rounded-full hover:bg-[#D1D5DB] transition-colors;
+  }
+}
