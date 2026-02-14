@@ -5,10 +5,11 @@ import { Menu } from 'lucide-react';
 
 interface LayoutProps {
     children: (activePage: string) => React.ReactNode;
+    activePage: string;
+    onPageChange: (page: string) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const [activePage, setActivePage] = useState('Dashboard');
+const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -16,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="min-h-screen bg-[#F9FAFB] flex font-sans">
             <Sidebar
                 activePage={activePage}
-                onPageChange={setActivePage}
+                onPageChange={onPageChange}
                 isOpen={isSidebarOpen}
                 setIsOpen={setIsSidebarOpen}
                 isCollapsed={isCollapsed}
@@ -33,8 +34,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </button>
                     <div className="flex-1">
                         <TopBar
-                            title={activePage}
-                            onNewCampaign={() => setActivePage('New Campaign')}
+                            activePage={activePage}
+                            onNewCampaign={() => onPageChange('New Campaign')}
+                            onSignOut={() => onPageChange('Login')}
                         />
                     </div>
                 </div>
