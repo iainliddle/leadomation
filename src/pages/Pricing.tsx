@@ -3,7 +3,6 @@ import {
     Check,
     Sparkles,
     Zap,
-    Gem,
     ChevronDown,
     ChevronUp,
     ArrowRight,
