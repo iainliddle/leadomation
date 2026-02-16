@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from './layouts/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -13,9 +13,42 @@ import Compliance from './pages/Compliance';
 import UnifiedInbox from './pages/UnifiedInbox';
 import DealPipeline from './pages/DealPipeline';
 import Pricing from './pages/Pricing';
+import { supabase } from './lib/supabase';
+import { Loader2 } from 'lucide-react';
+
+import ActiveCampaigns from './pages/ActiveCampaigns';
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState('Login');
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        if (activePage === 'Login' || activePage === 'Register') {
+          setActivePage('Dashboard');
+        }
+      }
+      setIsLoading(false);
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        if (activePage === 'Login' || activePage === 'Register') {
+          setActivePage('Dashboard');
+        }
+      } else if (activePage !== 'Register') {
+        setActivePage('Login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [activePage]);
 
   const renderPage = (page: string) => {
     switch (page) {
@@ -23,6 +56,8 @@ const App: React.FC = () => {
         return <Dashboard />;
       case 'New Campaign':
         return <NewCampaign />;
+      case 'Active Campaigns':
+        return <ActiveCampaigns />;
       case 'Lead Database':
         return <LeadDatabase />;
       case 'Deal Pipeline':
@@ -56,12 +91,24 @@ const App: React.FC = () => {
     }
   };
 
-  if (activePage === 'Login') {
-    return <Login onLogin={() => setActivePage('Dashboard')} onGoToRegister={() => setActivePage('Register')} />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+        <p className="text-sm font-bold text-[#6B7280] uppercase tracking-widest">Initialising Leadomation...</p>
+      </div>
+    );
   }
 
-  if (activePage === 'Register') {
-    return <Register onRegister={() => setActivePage('Dashboard')} onGoToLogin={() => setActivePage('Login')} />;
+  if (!session && activePage === 'Register') {
+    return <Register onGoToLogin={() => setActivePage('Login')} />;
+  }
+
+  if (!session) {
+    return <Login onLogin={() => setActivePage('Dashboard')} onGoToRegister={() => {
+      console.log('Going to register');
+      setActivePage('Register');
+    }} />;
   }
 
   return (

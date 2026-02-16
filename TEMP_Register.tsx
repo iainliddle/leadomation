@@ -21,7 +21,6 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted');
         setError(null);
         setSuccess(false);
 
@@ -48,14 +47,12 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin }) => {
                 },
             });
 
-            console.log('Signup result:', data, authError);
-
             if (authError) throw authError;
 
             console.log('Registration successful:', data.user);
             setSuccess(true);
+            // Optionally auto-login if email confirmation is disabled, but following instructions to show success message
         } catch (err: any) {
-            console.error('Signup error:', err);
             setError(err.message || 'An error occurred during registration');
         } finally {
             setIsLoading(false);

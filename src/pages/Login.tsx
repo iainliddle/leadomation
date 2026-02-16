@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import logo from '../assets/logo-full.png';
+import { supabase } from '../lib/supabase';
 
 interface LoginProps {
     onLogin: () => void;
@@ -11,11 +12,29 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Login submitted:', { email, password });
-        onLogin();
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            const { data, error: authError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (authError) throw authError;
+
+            console.log('Login successful:', data.session);
+            onLogin();
+        } catch (err: any) {
+            setError(err.message || 'An error occurred during sign in');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -67,18 +86,35 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister }) => {
                         </div>
                     </div>
 
+                    {error && (
+                        <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-xs font-bold text-rose-600 animate-in fade-in slide-in-from-top-2">
+                            {error}
+                        </div>
+                    )}
+
                     <button
                         type="submit"
-                        className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-xl transition-all active:scale-[0.98] mt-4"
+                        disabled={isLoading}
+                        className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-xl transition-all active:scale-[0.98] mt-4 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        SIGN IN
+                        {isLoading ? (
+                            <>
+                                <Loader2 size={18} className="animate-spin" />
+                                SIGNING IN...
+                            </>
+                        ) : (
+                            'SIGN IN'
+                        )}
                     </button>
                 </form>
 
                 <p className="text-center text-sm font-bold text-[#6B7280] mt-10">
                     Don't have an account?{' '}
                     <button
-                        onClick={onGoToRegister}
+                        onClick={() => {
+                            console.log('Login page: Clicked start free trial');
+                            onGoToRegister();
+                        }}
                         className="text-primary hover:underline decoration-2 underline-offset-4"
                     >
                         Start free trial

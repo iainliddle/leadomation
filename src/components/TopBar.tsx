@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell, ChevronDown, Download, Plus, LogOut } from 'lucide-react';
+import { signOut } from '../lib/auth';
 
 interface TopBarProps {
     activePage: string;
@@ -8,6 +9,16 @@ interface TopBarProps {
 }
 
 const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onSignOut }) => {
+    const handleSignOut = async () => {
+        try {
+            console.log('Sign out clicked');
+            await signOut();
+            onSignOut?.();
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    };
+
     return (
         <header className="sticky top-0 right-0 left-0 bg-white border-b border-[#E5E7EB] h-20 flex items-center justify-between px-8 z-10 shadow-sm">
             <h2 className="text-xl font-bold text-[#111827]">{activePage}</h2>
@@ -50,10 +61,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onSignOut })
                     <div className="w-px h-6 bg-[#E5E7EB] mx-1"></div>
 
                     <button
-                        onClick={() => {
-                            console.log('Sign out clicked');
-                            onSignOut?.();
-                        }}
+                        onClick={handleSignOut}
                         className="p-2 text-[#9CA3AF] hover:text-red-500 hover:bg-rose-50 rounded-lg transition-all"
                         title="Sign Out"
                     >

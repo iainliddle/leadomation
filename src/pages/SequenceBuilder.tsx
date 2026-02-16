@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Clock,
     Bold,
@@ -14,8 +14,10 @@ import {
     Info,
     RotateCcw,
     Zap,
-    Layers
+    Layers,
+    Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface SequenceStep {
     id: string;
@@ -32,14 +34,38 @@ const SequenceBuilder: React.FC = () => {
     const [stopOnReply, setStopOnReply] = useState(true);
     const [skipLinkedIn, setSkipLinkedIn] = useState(true);
     const [showSpintaxTooltip, setShowSpintaxTooltip] = useState(false);
+    const [steps, setSteps] = useState<SequenceStep[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [steps, setSteps] = useState<SequenceStep[]>([
-        { id: '1', type: 'Email', title: 'Initial Outreach', subtitle: 'Sent at local 9am' },
-        { id: '2', type: 'LinkedIn', title: 'Connection Request', subtitle: 'Personalised note', delay: 'Wait 3 days', linkedinType: 'Connection Request' },
-        { id: '3', type: 'Email', title: 'Follow-up #1', subtitle: 'If no reply', delay: 'Wait 2 days' },
-        { id: '4', type: 'LinkedIn', title: 'LinkedIn DM', subtitle: 'If connected · Value add', delay: 'Wait 3 days', linkedinType: 'Direct Message' },
-        { id: '5', type: 'Email', title: 'Final Follow-up', subtitle: 'Soft close', delay: 'Wait 4 days' }
-    ]);
+    useEffect(() => {
+        const fetchSequence = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            // Fetching a single sequence (or multiple if we want a list first)
+            // For now, let's assume we are editing one sequence.
+            const { data, error } = await supabase
+                .from('sequences')
+                .select('*')
+                .eq('user_id', user.id)
+                .limit(1)
+                .single();
+
+            if (error) {
+                console.error('Error fetching sequence:', error);
+                // Fallback to empty steps or dummy if none found
+                setSteps([
+                    { id: '1', type: 'Email', title: 'Initial Outreach', subtitle: 'Sent at local 9am' }
+                ]);
+            } else if (data && data.steps) {
+                setSteps(data.steps as SequenceStep[]);
+                if (data.steps.length > 0) setActiveStepId(data.steps[0].id);
+            }
+            setIsLoading(false);
+        };
+
+        fetchSequence();
+    }, []);
 
     const activeStep = steps.find(s => s.id === activeStepId) || steps[0];
 
@@ -96,6 +122,14 @@ Best regards,
     const updateLinkedInType = (type: 'Connection Request' | 'Direct Message') => {
         setSteps(prev => prev.map(s => s.id === activeStepId ? { ...s, linkedinType: type } : s));
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex-1 flex items-center justify-center min-h-[400px]">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-700 max-w-[1600px] mx-auto h-full">

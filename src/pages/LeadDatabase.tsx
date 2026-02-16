@@ -1,58 +1,121 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Search,
     Download,
     Mail,
-    Star,
     ChevronDown,
-    MoreHorizontal
+    MoreHorizontal,
+    Loader2,
+    Building
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface Lead {
     id: string;
-    name: string;
-    flag: string;
-    city: string;
-    country: string;
-    track: 'Direct' | 'Specifier' | 'Warm';
-    contactName: string;
+    company: string;
+    first_name: string;
+    last_name: string;
     email: string;
-    rating: number;
-    status: 'New' | 'Contacted' | 'Replied' | 'Qualified' | 'Not Interested';
-    lastActivity: string;
+    phone: string;
+    location: string;
+    industry: string;
+    status: string;
+    website: string;
+    created_at: string;
+    user_id: string;
 }
 
-const dummyLeads: Lead[] = [
-    { id: '1', name: "Wellness Spa Berlin", flag: "🇩🇪", city: "Berlin", country: "Germany", track: 'Direct', contactName: "Hans Müller", email: "hans@wellness-spa.de", rating: 4.8, status: 'Contacted', lastActivity: "2 hours ago" },
-    { id: '2', name: "Studio Luxe Interior Design", flag: "🇦🇪", city: "Dubai", country: "UAE", track: 'Specifier', contactName: "Amira Z.", email: "info@studioluxe.ae", rating: 4.5, status: 'New', lastActivity: "5 hours ago" },
-    { id: '3', name: "CrossFit Hammersmith", flag: "🇬🇧", city: "London", country: "UK", track: 'Direct', contactName: "James Bond", email: "james@cf-hammersmith.com", rating: 4.2, status: 'Replied', lastActivity: "Yesterday" },
-    { id: '4', name: "Arctic Recovery Lounge", flag: "🇸🇪", city: "Stockholm", country: "Sweden", track: 'Warm', contactName: "Sven G.", email: "sven@arctic-recovery.se", rating: 4.9, status: 'Qualified', lastActivity: "1 hour ago" },
-    { id: '5', name: "The Ritz-Carlton Spa", flag: "🇶🇦", city: "Doha", country: "Qatar", track: 'Direct', contactName: "Fatima A.", email: "spamanager@ritz-doha.com", rating: 4.7, status: 'Contacted', lastActivity: "3 hours ago" },
-    { id: '6', name: "Nordic Architects", flag: "🇩🇰", city: "Copenhagen", country: "Denmark", track: 'Specifier', contactName: "Lars J.", email: "lars@nordic-arch.dk", rating: 4.4, status: 'New', lastActivity: "2 days ago" },
-    { id: '7', name: "ColdPlunge Sydney", flag: "🇦🇺", city: "Sydney", country: "Australia", track: 'Warm', contactName: "Mike R.", email: "mike@coldplunge.com.au", rating: 4.1, status: 'Not Interested', lastActivity: "Yesterday" },
-    { id: '8', name: "Serenity Wellness", flag: "🇸🇬", city: "Singapore", country: "Singapore", track: 'Direct', contactName: "Lee W.", email: "lee@serenity.sg", rating: 4.6, status: 'New', lastActivity: "4 hours ago" },
-    { id: '9', name: "Form Design Studio", flag: "🇺🇸", city: "New York", country: "USA", track: 'Specifier', contactName: "Sarah P.", email: "sarah@formdesign.com", rating: 4.3, status: 'Replied', lastActivity: "3 days ago" },
-    { id: '10', name: "FitZone Recovery", flag: "🇬🇧", city: "Manchester", country: "UK", track: 'Direct', contactName: "Tom H.", email: "tom@fitzone.co.uk", rating: 4.0, status: 'Contacted', lastActivity: "6 hours ago" },
-    { id: '11', name: "Aman Resort & Spa", flag: "🇮🇩", city: "Bali", country: "Indonesia", track: 'Direct', contactName: "Dewi S.", email: "manager@amanbali.com", rating: 5.0, status: 'Qualified', lastActivity: "Yesterday" },
-    { id: '12', name: "IceLab Therapy", flag: "🇳🇴", city: "Oslo", country: "Norway", track: 'Warm', contactName: "Erik K.", email: "erik@icelab.no", rating: 4.5, status: 'Contacted', lastActivity: "Yesterday" },
-];
-
 const LeadDatabase: React.FC = () => {
+    const [leads, setLeads] = useState<Lead[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
-    const [trackFilter, setTrackFilter] = useState('All Tracks');
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExport = async () => {
+        setIsExporting(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('leads')
+                .select('company, email, phone, location, industry, website, status')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                alert('No leads to export');
+                return;
+            }
+
+            // Create CSV content
+            const headers = ['Company', 'Email', 'Phone', 'Location', 'Industry', 'Website', 'Status'];
+            const csvRows = [
+                headers.join(','),
+                ...data.map(lead => [
+                    `"${(lead.company || '').replace(/"/g, '""')}"`,
+                    `"${(lead.email || '').replace(/"/g, '""')}"`,
+                    `"${(lead.phone || '').replace(/"/g, '""')}"`,
+                    `"${(lead.location || '').replace(/"/g, '""')}"`,
+                    `"${(lead.industry || '').replace(/"/g, '""')}"`,
+                    `"${(lead.website || '').replace(/"/g, '""')}"`,
+                    `"${(lead.status || '').replace(/"/g, '""')}"`
+                ].join(','))
+            ];
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'leadomation-leads.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error exporting leads:', error);
+            alert('Error exporting leads. Please try again.');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchLeads = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('leads')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching leads:', error);
+            } else {
+                setLeads(data || []);
+            }
+            setIsLoading(false);
+        };
+
+        fetchLeads();
+    }, []);
 
     const filteredLeads = useMemo(() => {
-        return dummyLeads.filter(lead => {
-            const matchesSearch = lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.city.toLowerCase().includes(searchQuery.toLowerCase());
+        return leads.filter(lead => {
+            const matchesSearch = (lead.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.location?.toLowerCase().includes(searchQuery.toLowerCase()));
             const matchesStatus = statusFilter === 'All' || lead.status === statusFilter;
-            const matchesTrack = trackFilter === 'All Tracks' || lead.track === trackFilter;
-            return matchesSearch && matchesStatus && matchesTrack;
+            return matchesSearch && matchesStatus;
         });
-    }, [searchQuery, statusFilter, trackFilter]);
+    }, [leads, searchQuery, statusFilter]);
 
     const toggleSelectAll = () => {
         if (selectedLeads.length === filteredLeads.length) {
@@ -65,6 +128,14 @@ const LeadDatabase: React.FC = () => {
     const toggleSelectLead = (id: string) => {
         setSelectedLeads(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-6 animate-in fade-in duration-700">
@@ -98,22 +169,6 @@ const LeadDatabase: React.FC = () => {
                             ))}
                         </div>
 
-                        <div className="w-px h-6 bg-[#E5E7EB] mx-1"></div>
-
-                        <div className="flex bg-white border border-[#E5E7EB] rounded-full p-1 shadow-sm">
-                            {["All Tracks", "Direct", "Specifier", "Warm"].map(track => (
-                                <button
-                                    key={track}
-                                    onClick={() => setTrackFilter(track)}
-                                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${trackFilter === track
-                                        ? 'bg-primary text-white shadow-sm'
-                                        : 'text-[#6B7280] hover:text-[#111827]'
-                                        }`}
-                                >
-                                    {track}
-                                </button>
-                            ))}
-                        </div>
                     </div>
                 </div>
 
@@ -123,9 +178,17 @@ const LeadDatabase: React.FC = () => {
                             {selectedLeads.length} selected
                         </span>
                     )}
-                    <button className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] bg-white rounded-lg font-bold text-sm text-[#374151] hover:bg-gray-50 transition-all shadow-sm">
-                        <Download size={16} />
-                        Export CSV
+                    <button
+                        onClick={handleExport}
+                        disabled={isExporting}
+                        className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] bg-white rounded-lg font-bold text-sm text-[#374151] hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isExporting ? (
+                            <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                            <Download size={16} />
+                        )}
+                        {isExporting ? 'Exporting...' : 'Export CSV'}
                     </button>
                     <button
                         disabled={selectedLeads.length === 0}
@@ -142,113 +205,118 @@ const LeadDatabase: React.FC = () => {
 
             {/* Main Content: Data Table */}
             <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                                <th className="w-10 px-6 py-4">
-                                    <input
-                                        type="checkbox"
-                                        className="w-4 h-4 rounded border-[#D1D5DB] text-primary focus:ring-primary/20"
-                                        checked={selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
-                                        onChange={toggleSelectAll}
-                                    />
-                                </th>
-                                <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider cursor-pointer group">
-                                    <div className="flex items-center gap-1.5">
-                                        Business Name
-                                        <ChevronDown size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </div>
-                                </th>
-                                <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Location</th>
-                                <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Track</th>
-                                <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Contact</th>
-                                <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Rating</th>
-                                <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Status</th>
-                                <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Last Activity</th>
-                                <th className="w-10 pr-6 pl-4"></th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#F3F4F6]">
-                            {filteredLeads.map((lead) => (
-                                <tr
-                                    key={lead.id}
-                                    className={`group cursor-pointer transition-colors duration-150 ${selectedLeads.includes(lead.id) ? 'bg-[#F0F7FF]' : 'hover:bg-[#F0F7FF]'
-                                        }`}
-                                    onClick={() => toggleSelectLead(lead.id)}
-                                >
-                                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                {filteredLeads.length === 0 ? (
+                    <div className="p-20 text-center">
+                        <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <Building size={32} />
+                        </div>
+                        <h3 className="text-lg font-black text-[#111827] mb-1">No leads found</h3>
+                        <p className="text-sm font-medium text-[#6B7280]">Try adjusting your search or filters, or launch a campaign to generate more.</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                                    <th className="w-10 px-6 py-4">
                                         <input
                                             type="checkbox"
                                             className="w-4 h-4 rounded border-[#D1D5DB] text-primary focus:ring-primary/20"
-                                            checked={selectedLeads.includes(lead.id)}
-                                            onChange={() => toggleSelectLead(lead.id)}
+                                            checked={selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
+                                            onChange={toggleSelectAll}
                                         />
-                                    </td>
-                                    <td className="px-4 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-bold text-[#111827]">{lead.name}</span>
-                                            <span className="text-base" title={lead.country}>{lead.flag}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
-                                        {lead.city}, {lead.country}
-                                    </td>
-                                    <td className="px-4 py-4">
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight ${lead.track === 'Direct' ? 'bg-[#EFF6FF] text-[#2563EB]' :
-                                            lead.track === 'Specifier' ? 'bg-[#F3E8FF] text-[#7C3AED]' :
-                                                'bg-[#FFFBEB] text-[#D97706]'
-                                            }`}>
-                                            {lead.track}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-[#374151]">{lead.contactName}</span>
-                                            <span className="text-[11px] text-[#9CA3AF] font-medium">{lead.email}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-4">
+                                    </th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider cursor-pointer group">
                                         <div className="flex items-center gap-1.5">
-                                            <Star size={14} className="fill-[#F59E0B] text-[#F59E0B]" />
-                                            <span className="text-sm font-bold text-[#374151]">{lead.rating}</span>
+                                            Company
+                                            <ChevronDown size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
-                                    </td>
-                                    <td className="px-4 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider ${lead.status === 'New' ? 'bg-gray-100 text-[#6B7280]' :
-                                            lead.status === 'Contacted' ? 'bg-[#EFF6FF] text-[#2563EB]' :
-                                                lead.status === 'Replied' ? 'bg-[#ECFDF5] text-[#059669]' :
-                                                    lead.status === 'Qualified' ? 'bg-[#D1FAE5] text-[#059669]' :
-                                                        'bg-[#FEF2F2] text-[#DC2626]'
-                                            }`}>
-                                            {lead.status.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-4 text-xs font-medium text-[#9CA3AF]">
-                                        {lead.lastActivity}
-                                    </td>
-                                    <td className="pr-6 pl-4 text-right" onClick={(e) => e.stopPropagation()}>
-                                        <button className="p-1 hover:bg-gray-100 rounded text-[#9CA3AF] transition-colors">
-                                            <MoreHorizontal size={18} />
-                                        </button>
-                                    </td>
+                                    </th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Email</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Phone</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Location</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Industry</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Website</th>
+                                    <th className="w-10 pr-6 pl-4"></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-[#F3F4F6]">
+                                {filteredLeads.map((lead) => (
+                                    <tr
+                                        key={lead.id}
+                                        className={`group cursor-pointer transition-colors duration-150 ${selectedLeads.includes(lead.id) ? 'bg-[#F0F7FF]' : 'hover:bg-[#F0F7FF]'
+                                            }`}
+                                        onClick={() => toggleSelectLead(lead.id)}
+                                    >
+                                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded border-[#D1D5DB] text-primary focus:ring-primary/20"
+                                                checked={selectedLeads.includes(lead.id)}
+                                                onChange={() => toggleSelectLead(lead.id)}
+                                            />
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-[#111827]">{lead.company || 'N/A'}</span>
+                                                <span className="text-[11px] text-[#9CA3AF] font-medium">{lead.first_name} {lead.last_name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                            {lead.email || 'N/A'}
+                                        </td>
+                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                            {lead.phone || 'N/A'}
+                                        </td>
+                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                            {lead.location || 'N/A'}
+                                        </td>
+                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                            {lead.industry || 'N/A'}
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider ${lead.status === 'New' ? 'bg-gray-100 text-[#6B7280]' :
+                                                lead.status === 'Contacted' ? 'bg-[#EFF6FF] text-[#2563EB]' :
+                                                    lead.status === 'Replied' ? 'bg-[#ECFDF5] text-[#059669]' :
+                                                        lead.status === 'Qualified' ? 'bg-[#D1FAE5] text-[#059669]' :
+                                                            'bg-[#FEF2F2] text-[#DC2626]'
+                                                }`}>
+                                                {lead.status?.toUpperCase() || 'NEW'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            {lead.website ? (
+                                                <a href={lead.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs font-bold" onClick={(e) => e.stopPropagation()}>
+                                                    Link
+                                                </a>
+                                            ) : (
+                                                <span className="text-[#9CA3AF] text-xs">N/A</span>
+                                            )}
+                                        </td>
+                                        <td className="pr-6 pl-4 text-right" onClick={(e) => e.stopPropagation()}>
+                                            <button className="p-1 hover:bg-gray-100 rounded text-[#9CA3AF] transition-colors">
+                                                <MoreHorizontal size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 {/* Bottom Section: Pagination */}
                 <div className="px-6 py-4 flex items-center justify-between border-t border-[#E5E7EB] bg-[#F9FAFB]">
                     <span className="text-xs font-bold text-[#9CA3AF]">
-                        Showing 1-{filteredLeads.length} of 2,847 leads
+                        Showing {filteredLeads.length} of {leads.length} leads
                     </span>
                     <div className="flex items-center gap-2">
                         <button className="px-3 py-1.5 border border-[#E5E7EB] bg-white rounded-lg text-xs font-bold text-[#374151] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
-                            {[1, 2, 3].map(page => (
+                            {[1].map(page => (
                                 <button
                                     key={page}
                                     className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === 1 ? 'bg-primary text-white' : 'hover:bg-gray-200 text-[#6B7280]'
@@ -257,8 +325,6 @@ const LeadDatabase: React.FC = () => {
                                     {page}
                                 </button>
                             ))}
-                            <span className="text-[#9CA3AF] px-1 px-1">...</span>
-                            <button className="w-8 h-8 rounded-lg text-xs font-bold hover:bg-gray-200 text-[#6B7280]">238</button>
                         </div>
                         <button className="px-3 py-1.5 border border-[#E5E7EB] bg-white rounded-lg text-xs font-bold text-[#374151] hover:bg-gray-50 transition-all">
                             Next
