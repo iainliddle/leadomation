@@ -7,7 +7,8 @@ import {
     ChevronUp,
     ArrowRight,
     ShieldCheck,
-    CreditCard
+    CreditCard,
+    X
 } from 'lucide-react';
 
 interface PricingCardProps {
@@ -38,8 +39,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
     buttonText
 }) => (
     <div className={`relative flex flex-col p-8 bg-white rounded-3xl border transition-all duration-300 ${isPopular
-            ? `border-primary shadow-[0_20px_50px_rgba(37,99,235,0.1)] scale-105 z-10`
-            : 'border-gray-100 shadow-sm hover:shadow-md'
+        ? `border-primary shadow-[0_20px_50px_rgba(37,99,235,0.1)] scale-105 z-10`
+        : 'border-gray-100 shadow-sm hover:shadow-md'
         }`}>
         {isPopular && (
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-[10px] font-black px-4 py-1 rounded-full tracking-widest uppercase">
@@ -86,8 +87,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
         </div>
 
         <button className={`w-full py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-center gap-2 ${isPopular
-                ? 'bg-primary text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95'
-                : 'bg-white border-2 border-gray-100 text-[#4B5563] hover:border-primary hover:text-primary active:scale-95'
+            ? 'bg-primary text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95'
+            : 'bg-white border-2 border-gray-100 text-[#4B5563] hover:border-primary hover:text-primary active:scale-95'
             }`}>
             {buttonText} — {isAnnual ? annualPrice : monthlyPrice}
             <ArrowRight size={16} />
@@ -199,6 +200,7 @@ const Pricing: React.FC = () => {
                     icon={<Sparkles size={24} />}
                     buttonText="Upgrade to Pro"
                     features={[
+                        "🤖 AI Voice Call Agent",
                         "Unlimited campaigns",
                         "5,000+ leads per month",
                         "200 emails per day",
@@ -216,6 +218,64 @@ const Pricing: React.FC = () => {
                         "⭐ Priority support"
                     ]}
                 />
+            </div>
+
+            {/* Feature Comparison Table */}
+            <div className="max-w-4xl mx-auto mb-24 overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+                <div className="p-8 border-b border-gray-50 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-xl font-black text-[#111827] tracking-tight">Feature Comparison</h2>
+                        <p className="text-xs font-bold text-[#6B7280] mt-1">Detailed breakdown of what's included in each plan</p>
+                    </div>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-gray-50/50">
+                                <th className="px-8 py-4 text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest border-b border-gray-100">Feature</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest border-b border-gray-100 text-center">Starter</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-primary uppercase tracking-widest border-b border-gray-100 text-center">Pro</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                            {[
+                                { name: "AI Voice Call Agent", starter: false, pro: true, note: "Automated phone outreach" },
+                                { name: "Active Campaigns", starter: "3", pro: "Unlimited" },
+                                { name: "Leads per Month", starter: "500", pro: "5,000+" },
+                                { name: "Email Sending", starter: "50/day", pro: "200/day" },
+                                { name: "Deal Pipeline / CRM", starter: false, pro: true },
+                                { name: "Unified Inbox", starter: false, pro: true },
+                                { name: "AI Email Generation", starter: false, pro: true },
+                                { name: "Global Demand Intel", starter: false, pro: true },
+                                { name: "CSV Export", starter: true, pro: true },
+                                { name: "Priority Support", starter: false, pro: true }
+                            ].map((row, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
+                                    <td className="px-8 py-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-[#111827]">{row.name}</span>
+                                            {row.note && <span className="text-[10px] font-medium text-[#9CA3AF]">{row.note}</span>}
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-4 text-center">
+                                        {typeof row.starter === 'boolean' ? (
+                                            row.starter ? <Check size={16} className="text-emerald-500 mx-auto" strokeWidth={3} /> : <X size={16} className="text-gray-200 mx-auto" />
+                                        ) : (
+                                            <span className="text-xs font-black text-[#6B7280]">{row.starter}</span>
+                                        )}
+                                    </td>
+                                    <td className="px-8 py-4 text-center">
+                                        {typeof row.pro === 'boolean' ? (
+                                            row.pro ? <Check size={16} className="text-primary mx-auto" strokeWidth={3} /> : <X size={16} className="text-gray-200 mx-auto" />
+                                        ) : (
+                                            <span className="text-xs font-black text-primary">{row.pro}</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Trial Terms Section */}

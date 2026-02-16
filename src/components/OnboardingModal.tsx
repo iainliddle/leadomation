@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Rocket, Search, Mail, Zap, CheckCircle2, ChevronRight, ChevronLeft, X } from 'lucide-react';
+import { Rocket, Search, Mail, Zap, CheckCircle2, ChevronRight, ChevronLeft, X, Phone } from 'lucide-react';
 
 interface OnboardingModalProps {
     isOpen: boolean;
@@ -46,13 +46,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                     <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                         <div className="text-center mb-10">
                             <h2 className="text-2xl font-black text-[#111827] tracking-tight">How it works</h2>
-                            <p className="text-sm font-bold text-[#6B7280] mt-2">Three simple steps to scaling your outreach</p>
+                            <p className="text-sm font-bold text-[#6B7280] mt-2">Four simple steps to scaling your outreach</p>
                         </div>
                         <div className="space-y-6">
                             {[
                                 { icon: Search, title: "1. Search for businesses", desc: "Specify industry and location to find your ideal customer profile in our global database." },
                                 { icon: Mail, title: "2. We find contact details", desc: "Our engine retrieves verified business emails, LinkedIn profiles, and verified phone numbers." },
-                                { icon: Zap, title: "3. AI-Powered Outreach", desc: "Launch personalised email and LinkedIn sequences that adapt to your target's style automatically." }
+                                { icon: Zap, title: "3. AI-Powered Outreach", desc: "Launch personalised email and LinkedIn sequences that adapt to your target's style automatically." },
+                                { icon: Phone, title: "4. AI Voice Call Agent", desc: "Our AI even calls leads by phone to introduce your business and book meetings for you." }
                             ].map((item, idx) => (
                                 <div key={idx} className="flex gap-4 p-4 rounded-2xl border border-gray-100 bg-gray-50/30">
                                     <div className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-primary shrink-0 shadow-sm">

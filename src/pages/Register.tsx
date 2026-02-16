@@ -207,7 +207,7 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin, onGoToTerms, onGoToPri
                             </div>
                             <div className="flex items-center gap-2">
                                 <Zap size={14} className="text-amber-500" />
-                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-tight">Pro access for 7 days</span>
+                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-tight">Pro access (inc. AI Voice Agent)</span>
                             </div>
                         </div>
 

@@ -300,7 +300,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500"></div>
                         <p className="text-[10px] font-bold opacity-80 mb-1 uppercase tracking-tight relative z-10">PRO PLAN</p>
                         <p className="text-sm font-bold mb-1 relative z-10 text-white">Upgrade to Pro</p>
-                        <p className="text-[11px] opacity-80 mb-4 leading-tight relative z-10 text-blue-50">Unlock AI email generation & advanced analytics</p>
+                        <p className="text-[11px] opacity-80 mb-4 leading-tight relative z-10 text-blue-50">Unlock AI Voice Call Agent & advanced analytics</p>
                         <button className="w-full py-2.5 bg-white text-primary text-xs font-bold rounded-lg hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5 shadow-sm relative z-10">
                             Upgrade Now
                         </button>
