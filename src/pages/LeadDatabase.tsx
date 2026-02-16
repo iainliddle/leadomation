@@ -12,7 +12,8 @@ import {
     Calendar,
     MapPin,
     Tag,
-    Globe
+    Globe,
+    Trash2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -41,6 +42,7 @@ const LeadDatabase: React.FC = () => {
     const [isExporting, setIsExporting] = useState(false);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -158,6 +160,31 @@ const LeadDatabase: React.FC = () => {
             alert('Failed to update status');
         } finally {
             setIsUpdatingStatus(false);
+        }
+    };
+
+    const handleDeleteLead = async (leadId: string) => {
+        if (!window.confirm('Are you sure you want to delete this lead? This action cannot be undone.')) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const { error } = await supabase
+                .from('leads')
+                .delete()
+                .eq('id', leadId);
+
+            if (error) throw error;
+
+            // Update local state
+            setLeads(prev => prev.filter(l => l.id !== leadId));
+            setSelectedLead(null);
+        } catch (error) {
+            console.error('Error deleting lead:', error);
+            alert('Failed to delete lead');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -481,15 +508,28 @@ const LeadDatabase: React.FC = () => {
                         </div>
 
                         {/* Drawer Footer */}
-                        <div className="p-8 border-t border-[#F3F4F6] bg-gray-50/50 flex gap-4">
+                        <div className="p-8 border-t border-[#F3F4F6] bg-gray-50/50 flex flex-col gap-4">
                             <button
-                                className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                                 onClick={() => {
                                     alert(`Starting email sequence for ${selectedLead.company}`);
                                 }}
                             >
                                 <Mail size={18} />
                                 START OUTREACH
+                            </button>
+
+                            <button
+                                className="w-full py-4 border border-rose-100 bg-white text-rose-600 rounded-2xl font-black text-sm hover:bg-rose-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                                onClick={() => handleDeleteLead(selectedLead.id)}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                ) : (
+                                    <Trash2 size={18} />
+                                )}
+                                DELETE LEAD
                             </button>
                         </div>
                     </div>

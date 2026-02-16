@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import {
     LayoutGrid,
     Globe,
@@ -83,6 +84,51 @@ const Sidebar: React.FC<SidebarProps> = ({
     isCollapsed = false,
     setIsCollapsed
 }) => {
+    const [leadCount, setLeadCount] = useState<number>(0);
+
+    useEffect(() => {
+        let channel: any;
+
+        const setupCount = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const fetchCount = async () => {
+                const { count } = await supabase
+                    .from('leads')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', user.id);
+                setLeadCount(count || 0);
+            };
+
+            await fetchCount();
+
+            channel = supabase
+                .channel('lead-count-sidebar')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'leads',
+                        filter: `user_id=eq.${user.id}`
+                    },
+                    () => {
+                        fetchCount();
+                    }
+                )
+                .subscribe();
+        };
+
+        setupCount();
+
+        return () => {
+            if (channel) {
+                supabase.removeChannel(channel);
+            }
+        };
+    }, []);
+
     return (
         <>
             {/* Mobile Backdrop */}
@@ -174,6 +220,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             active={activePage === 'Lead Database'}
                             onClick={() => { onPageChange('Lead Database'); setIsOpen?.(false); }}
                             isCollapsed={isCollapsed}
+                            badge={leadCount > 0 ? leadCount.toString() : undefined}
                         />
                     </NavSection>
 
