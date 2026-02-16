@@ -5,9 +5,11 @@ import { supabase } from '../lib/supabase';
 
 interface RegisterProps {
     onGoToLogin: () => void;
+    onGoToTerms: () => void;
+    onGoToPrivacy: () => void;
 }
 
-const Register: React.FC<RegisterProps> = ({ onGoToLogin }) => {
+const Register: React.FC<RegisterProps> = ({ onGoToLogin, onGoToTerms, onGoToPrivacy }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -169,7 +171,7 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin }) => {
                                 <CheckIcon className="absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
                             </div>
                             <span className="text-xs font-bold text-[#6B7280] group-hover:text-[#4B5563] transition-colors">
-                                I agree to the <button type="button" className="text-primary hover:underline underline-offset-2">Terms of Service</button> and <button type="button" className="text-primary hover:underline underline-offset-2">Privacy Policy</button>
+                                I agree to the <button onClick={onGoToTerms} type="button" className="text-primary hover:underline underline-offset-2 font-black">Terms of Service</button> and <button onClick={onGoToPrivacy} type="button" className="text-primary hover:underline underline-offset-2 font-black">Privacy Policy</button>
                             </span>
                         </label>
 

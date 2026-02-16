@@ -17,6 +17,8 @@ import { supabase } from './lib/supabase';
 import { Loader2 } from 'lucide-react';
 
 import ActiveCampaigns from './pages/ActiveCampaigns';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState('Login');
@@ -42,7 +44,7 @@ const App: React.FC = () => {
         if (activePage === 'Login' || activePage === 'Register') {
           setActivePage('Dashboard');
         }
-      } else if (activePage !== 'Register') {
+      } else if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy') {
         setActivePage('Login');
       }
     });
@@ -100,15 +102,33 @@ const App: React.FC = () => {
     );
   }
 
+  if (activePage === 'Terms') {
+    return <TermsOfService onGoToLogin={() => setActivePage('Login')} />;
+  }
+
+  if (activePage === 'Privacy') {
+    return <PrivacyPolicy onGoToLogin={() => setActivePage('Login')} />;
+  }
+
   if (!session && activePage === 'Register') {
-    return <Register onGoToLogin={() => setActivePage('Login')} />;
+    return (
+      <Register
+        onGoToLogin={() => setActivePage('Login')}
+        onGoToTerms={() => setActivePage('Terms')}
+        onGoToPrivacy={() => setActivePage('Privacy')}
+      />
+    );
   }
 
   if (!session) {
-    return <Login onLogin={() => setActivePage('Dashboard')} onGoToRegister={() => {
-      console.log('Going to register');
-      setActivePage('Register');
-    }} />;
+    return (
+      <Login
+        onLogin={() => setActivePage('Dashboard')}
+        onGoToRegister={() => setActivePage('Register')}
+        onGoToTerms={() => setActivePage('Terms')}
+        onGoToPrivacy={() => setActivePage('Privacy')}
+      />
+    );
   }
 
   return (

@@ -6,9 +6,11 @@ import { supabase } from '../lib/supabase';
 interface LoginProps {
     onLogin: () => void;
     onGoToRegister: () => void;
+    onGoToTerms: () => void;
+    onGoToPrivacy: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onGoToTerms, onGoToPrivacy }) => {
     const [view, setView] = useState<'login' | 'forgot-password'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -218,6 +220,21 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister }) => {
                         )}
                     </>
                 )}
+            </div>
+
+            <div className="mt-8 flex items-center gap-6 animate-in fade-in duration-1000 delay-500">
+                <button
+                    onClick={onGoToTerms}
+                    className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest hover:text-primary transition-all underline underline-offset-4 decoration-gray-200"
+                >
+                    Terms of Service
+                </button>
+                <button
+                    onClick={onGoToPrivacy}
+                    className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest hover:text-primary transition-all underline underline-offset-4 decoration-gray-200"
+                >
+                    Privacy Policy
+                </button>
             </div>
         </div>
     );
