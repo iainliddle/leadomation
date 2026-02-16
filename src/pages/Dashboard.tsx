@@ -54,6 +54,18 @@ const Dashboard: React.FC = () => {
         fetchDashboardData();
     }, []);
 
+    const formatRelativeTime = (dateString: string) => {
+        const now = new Date();
+        const created = new Date(dateString);
+        const diffInSeconds = Math.floor((now.getTime() - created.getTime()) / 1000);
+
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+        return created.toLocaleDateString();
+    };
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -123,7 +135,7 @@ const Dashboard: React.FC = () => {
                     <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm h-full hover:shadow-md transition-all">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-[#111827] tracking-tight">Recent Leads</h3>
-                            <span className="text-[10px] font-black text-primary bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-wider">New</span>
+                            <button className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">View All</button>
                         </div>
                         <div className="space-y-4">
                             {recentLeads.length === 0 ? (
@@ -132,28 +144,25 @@ const Dashboard: React.FC = () => {
                                 recentLeads.map((lead) => (
                                     <div key={lead.id} className="flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-gray-100 hover:bg-gray-50/50 transition-all group cursor-pointer">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary font-black animate-in zoom-in duration-300">
-                                                {lead.company ? lead.company.substring(0, 1).toUpperCase() : lead.first_name ? lead.first_name.substring(0, 1).toUpperCase() : 'L'}
+                                            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 font-black animate-in zoom-in duration-300 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                                                {lead.company ? lead.company.substring(0, 1).toUpperCase() : 'L'}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-[#111827] group-hover:text-primary transition-colors">{lead.company || `${lead.first_name} ${lead.last_name}`}</p>
-                                                <p className="text-[11px] font-medium text-[#9CA3AF] tracking-tight">{lead.industry || 'Unknown Industry'}</p>
+                                                <p className="text-sm font-bold text-[#111827] group-hover:text-primary transition-colors">{lead.company || 'N/A'}</p>
+                                                <p className="text-[11px] font-medium text-[#9CA3AF] tracking-tight">{lead.industry || 'Lead'}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${lead.status === 'Contacted' ? 'bg-blue-50 text-blue-600' :
-                                                    lead.status === 'Replied' ? 'bg-green-50 text-green-600' :
-                                                        'bg-gray-50 text-gray-500'
-                                                }`}>
-                                                {lead.status || 'New'}
-                                            </span>
+                                            <p className="text-[11px] font-bold text-[#6B7280]">
+                                                {formatRelativeTime(lead.created_at)}
+                                            </p>
                                         </div>
                                     </div>
                                 ))
                             )}
                         </div>
-                        <button className="w-full mt-6 py-3 border border-gray-100 rounded-xl text-xs font-black text-[#6B7280] hover:bg-gray-50 hover:text-primary transition-all uppercase tracking-widest pt-5 border-t mt-auto">
-                            View All Leads
+                        <button className="w-full mt-6 py-3 border border-gray-100 rounded-xl text-xs font-black text-[#6B7280] hover:bg-gray-50 hover:text-primary transition-all uppercase tracking-widest pt-5 border-t">
+                            Refresh Dashboard
                         </button>
                     </div>
                 </div>

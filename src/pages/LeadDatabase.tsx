@@ -6,7 +6,13 @@ import {
     ChevronDown,
     MoreHorizontal,
     Loader2,
-    Building
+    Building,
+    X,
+    ExternalLink,
+    Calendar,
+    MapPin,
+    Tag,
+    Globe
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -21,6 +27,7 @@ interface Lead {
     industry: string;
     status: string;
     website: string;
+    source?: string;
     created_at: string;
     user_id: string;
 }
@@ -32,6 +39,8 @@ const LeadDatabase: React.FC = () => {
     const [statusFilter, setStatusFilter] = useState('All');
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [isExporting, setIsExporting] = useState(false);
+    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -127,6 +136,29 @@ const LeadDatabase: React.FC = () => {
 
     const toggleSelectLead = (id: string) => {
         setSelectedLeads(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+    };
+
+    const handleUpdateStatus = async (leadId: string, newStatus: string) => {
+        setIsUpdatingStatus(true);
+        try {
+            const { error } = await supabase
+                .from('leads')
+                .update({ status: newStatus })
+                .eq('id', leadId);
+
+            if (error) throw error;
+
+            // Update local state
+            setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+            if (selectedLead && selectedLead.id === leadId) {
+                setSelectedLead({ ...selectedLead, status: newStatus });
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Failed to update status');
+        } finally {
+            setIsUpdatingStatus(false);
+        }
     };
 
     if (isLoading) {
@@ -247,7 +279,7 @@ const LeadDatabase: React.FC = () => {
                                         key={lead.id}
                                         className={`group cursor-pointer transition-colors duration-150 ${selectedLeads.includes(lead.id) ? 'bg-[#F0F7FF]' : 'hover:bg-[#F0F7FF]'
                                             }`}
-                                        onClick={() => toggleSelectLead(lead.id)}
+                                        onClick={() => setSelectedLead(lead)}
                                     >
                                         <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                             <input
@@ -340,6 +372,129 @@ const LeadDatabase: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Lead Details Drawer */}
+            {selectedLead && (
+                <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setSelectedLead(null)}></div>
+                    <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
+                        {/* Drawer Header */}
+                        <div className="p-8 border-b border-[#F3F4F6] flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
+                                    <Building size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-[#111827]">{selectedLead.company}</h2>
+                                    <p className="text-sm text-[#6B7280] font-medium">{selectedLead.first_name} {selectedLead.last_name}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedLead(null)}
+                                className="p-2 hover:bg-gray-50 rounded-xl text-[#9CA3AF] transition-all"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Drawer Content */}
+                        <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                            {/* Status Section */}
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest block pl-1">Lead Status</label>
+                                <div className="flex items-center gap-3">
+                                    <select
+                                        className="flex-1 px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary focus:bg-white transition-all appearance-none cursor-pointer"
+                                        value={selectedLead.status}
+                                        onChange={(e) => handleUpdateStatus(selectedLead.id, e.target.value)}
+                                        disabled={isUpdatingStatus}
+                                    >
+                                        <option value="New">New</option>
+                                        <option value="Contacted">Contacted</option>
+                                        <option value="Replied">Replied</option>
+                                        <option value="Qualified">Qualified</option>
+                                        <option value="Not Interested">Not Interested</option>
+                                    </select>
+                                    {isUpdatingStatus && <Loader2 size={18} className="animate-spin text-primary" />}
+                                </div>
+                            </div>
+
+                            {/* Details Grid */}
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
+                                        <Mail size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Email</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-[#111827] break-all">{selectedLead.email || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
+                                        <Globe size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Website</span>
+                                    </div>
+                                    {selectedLead.website ? (
+                                        <a href={selectedLead.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5">
+                                            Visit Site <ExternalLink size={12} />
+                                        </a>
+                                    ) : (
+                                        <p className="text-sm font-bold text-[#111827]">N/A</p>
+                                    )}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
+                                        <MapPin size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Location</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.location || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
+                                        <Tag size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Industry</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.industry || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
+                                        <Calendar size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Created</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.created_at ? new Date(selectedLead.created_at).toLocaleDateString() : 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
+                                        <Search size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Source</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.source || 'Direct'}</p>
+                                </div>
+                            </div>
+
+                            {/* Actions Header */}
+                            <div className="pt-8 border-t border-[#F3F4F6]">
+                                <h4 className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-6">Engagement History</h4>
+                                <div className="bg-gray-50 rounded-2xl p-6 text-center">
+                                    <p className="text-xs font-bold text-[#6B7280]">No activity recorded yet for this lead.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Drawer Footer */}
+                        <div className="p-8 border-t border-[#F3F4F6] bg-gray-50/50 flex gap-4">
+                            <button
+                                className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                onClick={() => {
+                                    alert(`Starting email sequence for ${selectedLead.company}`);
+                                }}
+                            >
+                                <Mail size={18} />
+                                START OUTREACH
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
