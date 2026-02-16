@@ -3,8 +3,13 @@ import {
     Lightbulb,
     ExternalLink,
     CheckCircle2,
-    Edit
+    Edit,
+    Calendar,
+    Save,
+    Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useState, useEffect } from 'react';
 
 interface Integration {
     id: string;
@@ -156,11 +161,103 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
 );
 
 const Integrations: React.FC = () => {
+    const [meetingLink, setMeetingLink] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('meeting_link')
+                .eq('id', user.id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching profile:', error);
+            } else if (data) {
+                setMeetingLink(data.meeting_link || '');
+            }
+            setIsLoading(false);
+        };
+
+        fetchProfile();
+    }, []);
+
+    const handleSaveMeetingLink = async () => {
+        setIsSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    meeting_link: meetingLink,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) throw error;
+            alert('Meeting link saved successfully!');
+        } catch (error) {
+            console.error('Error saving meeting link:', error);
+            alert('Error saving meeting link. Please ensure the "meeting_link" column exists in the profiles table.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div className="animate-in fade-in duration-700 max-w-[1200px] mx-auto pb-12">
             <div className="mb-10">
                 <h1 className="text-2xl font-black text-[#111827] tracking-tight">Integrations</h1>
                 <p className="text-sm text-[#6B7280] font-medium mt-1">Connect your tools and services to power Leadomation's pipeline.</p>
+            </div>
+
+            {/* Meeting Link Section */}
+            <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 mb-10 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-blue-100/50 transition-colors duration-500"></div>
+
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 bg-blue-50 text-primary rounded-2xl flex items-center justify-center shadow-sm shrink-0">
+                            <Calendar size={28} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-black text-[#111827]">Meeting Link</h3>
+                            <p className="text-sm text-[#6B7280] font-medium mt-1">Paste your Calendly or Cal.com booking URL for email sequences.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-1 max-w-md">
+                        <div className="relative flex-1">
+                            <input
+                                type="text"
+                                placeholder="https://calendly.com/your-name"
+                                className="w-full px-4 py-3 bg-gray-50/50 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary focus:bg-white transition-all placeholder:text-gray-300"
+                                value={meetingLink}
+                                onChange={(e) => setMeetingLink(e.target.value)}
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <button
+                            onClick={handleSaveMeetingLink}
+                            disabled={isSaving || isLoading}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                        >
+                            {isSaving ? (
+                                <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                                <Save size={18} />
+                            )}
+                            SAVE
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">

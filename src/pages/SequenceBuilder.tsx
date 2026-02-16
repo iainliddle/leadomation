@@ -94,7 +94,8 @@ Best regards,
         { label: '{{city}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
         { label: '{{country}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
         { label: '{{rating}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
-        { label: '{{website}}', color: 'bg-gray-50 text-gray-600 border-gray-100' }
+        { label: '{{website}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
+        { label: '{{meeting_link}}', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' }
     ];
 
     const insertTag = (tag: string) => {
@@ -116,7 +117,8 @@ Best regards,
             .replace(/{{city}}/g, 'Berlin')
             .replace(/{{country}}/g, 'Germany')
             .replace(/{{rating}}/g, '4.8')
-            .replace(/{{website}}/g, 'wellness-spa.de');
+            .replace(/{{website}}/g, 'wellness-spa.de')
+            .replace(/{{meeting_link}}/g, 'calendly.com/leadomation-demo');
     };
 
     const updateLinkedInType = (type: 'Connection Request' | 'Direct Message') => {
