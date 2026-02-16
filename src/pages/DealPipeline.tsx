@@ -148,6 +148,24 @@ const DealPipeline: React.FC = () => {
                 <div className="flex-1 flex items-center justify-center">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
+            ) : deals.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center p-8">
+                    <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center shadow-sm max-w-lg w-full">
+                        <div className="w-16 h-16 bg-blue-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <Star size={32} />
+                        </div>
+                        <h3 className="text-xl font-black text-[#111827] mb-2">No deals in pipeline</h3>
+                        <p className="text-[#6B7280] font-medium mb-8 max-w-sm mx-auto">
+                            Track and manage your revenue pipeline as soon as leads start replying to your campaigns.
+                        </p>
+                        <button
+                            onClick={() => window.location.hash = '/leads'}
+                            className="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/10 active:scale-95 flex items-center justify-center gap-2 mx-auto"
+                        >
+                            View Lead Database
+                        </button>
+                    </div>
+                </div>
             ) : (
                 <div className="flex-1 overflow-x-auto pb-4 custom-scrollbar-horizontal">
                     <div className="flex gap-4 h-full min-w-max">

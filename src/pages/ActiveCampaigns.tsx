@@ -65,9 +65,9 @@ const ActiveCampaigns: React.FC = () => {
                     <div className="w-16 h-16 bg-blue-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
                         <Rocket size={32} />
                     </div>
-                    <h3 className="text-xl font-black text-[#111827] mb-2">No active campaigns</h3>
+                    <h3 className="text-xl font-black text-[#111827] mb-2">No campaigns yet</h3>
                     <p className="text-[#6B7280] font-medium mb-8 max-w-sm mx-auto">
-                        Launch your first campaign to start generating leads and closing deals automatically.
+                        Create your first campaign to start generating leads and closing deals automatically.
                     </p>
                     <button className="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-all">
                         Create Your First Campaign

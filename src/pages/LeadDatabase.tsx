@@ -120,10 +120,14 @@ const LeadDatabase: React.FC = () => {
 
     const filteredLeads = useMemo(() => {
         return leads.filter(lead => {
-            const matchesSearch = (lead.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.location?.toLowerCase().includes(searchQuery.toLowerCase()));
-            const matchesStatus = statusFilter === 'All' || lead.status === statusFilter;
+            const matchesSearch = lead.company?.toLowerCase().includes(searchQuery.toLowerCase());
+
+            const matchesStatus = statusFilter === 'All'
+                ? true
+                : statusFilter === 'Lost'
+                    ? (lead.status === 'Lost' || lead.status === 'Not Interested')
+                    : lead.status === statusFilter;
+
             return matchesSearch && matchesStatus;
         });
     }, [leads, searchQuery, statusFilter]);
@@ -213,21 +217,22 @@ const LeadDatabase: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="flex bg-white border border-[#E5E7EB] rounded-full p-1 shadow-sm">
-                            {["All", "New", "Contacted", "Replied", "Qualified", "Not Interested"].map(status => (
-                                <button
-                                    key={status}
-                                    onClick={() => setStatusFilter(status)}
-                                    className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${statusFilter === status
-                                        ? 'bg-primary text-white shadow-sm'
-                                        : 'text-[#6B7280] hover:text-[#111827]'
-                                        }`}
-                                >
-                                    {status}
-                                </button>
-                            ))}
+                        <div className="flex items-center bg-white border border-[#E5E7EB] rounded-full px-4 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all group h-[42px]">
+                            <Tag className="text-[#9CA3AF] group-focus-within:text-primary transition-colors shrink-0" size={16} />
+                            <select
+                                className="pl-3 pr-8 py-2 bg-transparent border-none focus:outline-none text-sm font-bold text-[#374151] appearance-none cursor-pointer"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="All">All Statuses</option>
+                                <option value="New">New</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="Replied">Replied</option>
+                                <option value="Qualified">Qualified</option>
+                                <option value="Lost">Lost / Not Interested</option>
+                            </select>
+                            <ChevronDown className="text-[#9CA3AF] -ml-6 pointer-events-none group-focus-within:text-primary transition-colors" size={14} />
                         </div>
-
                     </div>
                 </div>
 
