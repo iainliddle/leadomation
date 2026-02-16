@@ -276,14 +276,22 @@ const LeadDatabase: React.FC = () => {
                                             {lead.industry || 'N/A'}
                                         </td>
                                         <td className="px-4 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider ${lead.status === 'New' ? 'bg-gray-100 text-[#6B7280]' :
-                                                lead.status === 'Contacted' ? 'bg-[#EFF6FF] text-[#2563EB]' :
-                                                    lead.status === 'Replied' ? 'bg-[#ECFDF5] text-[#059669]' :
-                                                        lead.status === 'Qualified' ? 'bg-[#D1FAE5] text-[#059669]' :
-                                                            'bg-[#FEF2F2] text-[#DC2626]'
-                                                }`}>
-                                                {lead.status?.toUpperCase() || 'NEW'}
-                                            </span>
+                                            {(() => {
+                                                const status = lead.status?.toLowerCase() || 'new';
+                                                let classes = 'bg-gray-100 text-[#6B7280] border-gray-200'; // Default
+
+                                                if (status === 'new') classes = 'bg-blue-50 text-blue-600 border-blue-100';
+                                                else if (status === 'contacted') classes = 'bg-amber-50 text-amber-600 border-amber-100';
+                                                else if (status === 'replied') classes = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                                                else if (status === 'qualified') classes = 'bg-purple-50 text-purple-600 border-purple-100';
+                                                else if (status === 'lost' || status === 'not interested') classes = 'bg-rose-50 text-rose-600 border-rose-100';
+
+                                                return (
+                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider border ${classes}`}>
+                                                        {status.toUpperCase()}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-4 py-4">
                                             {lead.website ? (
