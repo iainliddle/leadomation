@@ -4,6 +4,7 @@ import StatCard from '../components/StatCard';
 import CampaignPerformance from '../components/CampaignPerformance';
 import TopCampaigns from '../components/TopCampaigns';
 import RecentActivity from '../components/RecentActivity';
+import OnboardingModal from '../components/OnboardingModal';
 import { supabase } from '../lib/supabase';
 
 const Dashboard: React.FC = () => {
@@ -14,8 +15,8 @@ const Dashboard: React.FC = () => {
         dealsCount: 0
     });
     const [isLoading, setIsLoading] = useState(true);
-
     const [recentLeads, setRecentLeads] = useState<any[]>([]);
+    const [showOnboarding, setShowOnboarding] = useState(false);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -49,10 +50,21 @@ const Dashboard: React.FC = () => {
             });
             setRecentLeads(recentLeadsData || []);
             setIsLoading(false);
+
+            // Trigger onboarding if 0 leads and not seen before
+            const onboardingCompleted = localStorage.getItem('leadomation_onboarding_completed');
+            if ((totalLeads || 0) === 0 && !onboardingCompleted) {
+                setShowOnboarding(true);
+            }
         };
 
         fetchDashboardData();
     }, []);
+
+    const handleCloseOnboarding = () => {
+        localStorage.setItem('leadomation_onboarding_completed', 'true');
+        setShowOnboarding(false);
+    };
 
     const formatRelativeTime = (dateString: string) => {
         const now = new Date();
@@ -167,6 +179,11 @@ const Dashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            <OnboardingModal
+                isOpen={showOnboarding}
+                onClose={handleCloseOnboarding}
+            />
         </div>
     );
 };
