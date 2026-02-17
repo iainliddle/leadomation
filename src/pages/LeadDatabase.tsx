@@ -40,10 +40,9 @@ interface Lead {
 }
 
 interface LeadDatabaseProps {
-    onPageChange?: (page: string) => void;
 }
 
-const LeadDatabase: React.FC<LeadDatabaseProps> = ({ onPageChange }) => {
+const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');

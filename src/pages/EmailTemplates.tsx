@@ -6,7 +6,6 @@ import {
     Edit3,
     Copy,
     Trash2,
-    ExternalLink,
     Loader2,
     X,
     Eye,

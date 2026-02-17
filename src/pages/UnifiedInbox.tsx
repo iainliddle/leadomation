@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
     Search,
-    Star,
     Archive,
     ExternalLink,
     Bold,
     Italic,
     Link as LinkIcon,
     Sparkles,
-    MapPin,
-    Tag,
     MessageSquare,
-    MoreHorizontal,
     Send,
     Check,
     Loader2,

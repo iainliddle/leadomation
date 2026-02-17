@@ -3,13 +3,9 @@ import {
     Lightbulb,
     ExternalLink,
     CheckCircle2,
-    Edit,
     Calendar,
     Save,
-    Loader2,
-    Shield,
-    Database,
-    Globe
+    Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 

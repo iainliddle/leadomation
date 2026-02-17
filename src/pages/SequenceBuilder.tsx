@@ -13,8 +13,7 @@ import {
     Mail,
     Linkedin,
     Layers,
-    Loader2,
-    Sparkles
+    Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 

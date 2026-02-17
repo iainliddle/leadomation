@@ -8,7 +8,6 @@ import {
     Download,
     Trash2,
     Upload,
-    History,
     AlertTriangle,
     Loader2,
     Save
