@@ -84,7 +84,7 @@ const App: React.FC = () => {
       case 'Active Campaigns':
         return <ActiveCampaigns onPageChange={setActivePage} />;
       case 'Lead Database':
-        return <LeadDatabase onPageChange={setActivePage} />;
+        return <LeadDatabase />;
       case 'Deal Pipeline':
         return <DealPipeline onPageChange={setActivePage} />;
       case 'Sequence Builder':
