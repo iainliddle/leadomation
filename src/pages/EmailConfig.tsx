@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     CheckCircle2,
     XCircle,
@@ -6,18 +6,94 @@ import {
     Globe,
     ShieldCheck,
     Save,
-    ChevronDown,
     Bold,
     Italic,
     Link,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Loader2,
+    Eye
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+interface ProfileData {
+    id: string;
+    sender_name: string;
+    sender_email: string;
+    reply_to_email: string;
+    daily_send_limit: number;
+    send_delay_seconds: number;
+    signature_html: string;
+    include_signature_outgoing: boolean;
+    include_signature_replies: boolean;
+    auto_detect_timezone: boolean;
+}
 
 const EmailConfig: React.FC = () => {
-    const [dailyLimit, setDailyLimit] = useState(50);
-    const [autoDetectTimezone, setAutoDetectTimezone] = useState(true);
-    const [includeOutgoing, setIncludeOutgoing] = useState(true);
-    const [includeInbox, setIncludeInbox] = useState(true);
+    const [profile, setProfile] = useState<Partial<ProfileData>>({
+        daily_send_limit: 50,
+        send_delay_seconds: 30,
+        auto_detect_timezone: true,
+        include_signature_outgoing: true,
+        include_signature_replies: true
+    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState<string | null>(null);
+    const [showSignaturePreview, setShowSignaturePreview] = useState(false);
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        setIsLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+        } else if (data) {
+            setProfile(prev => ({ ...prev, ...data }));
+        }
+        setIsLoading(false);
+    };
+
+    const handleSave = async (sectionId: string) => {
+        setIsSaving(sectionId);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    ...profile,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) throw error;
+            // Success feedback or toast could go here
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            alert('Error saving configuration. Make sure the columns exist in the profiles table.');
+        } finally {
+            setIsSaving(null);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
@@ -27,119 +103,88 @@ const EmailConfig: React.FC = () => {
             </div>
 
             <div className="space-y-8">
-                {/* Section 1: Sending Domain */}
+                {/* Section 1: Sending Limits */}
                 <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-50 text-primary rounded-xl flex items-center justify-center shadow-sm">
-                                <Globe size={20} />
+                            <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shadow-sm">
+                                <Clock size={20} />
                             </div>
-                            <h3 className="text-base font-bold text-[#111827]">Sending Domain</h3>
+                            <h3 className="text-base font-bold text-[#111827]">Sending Controls</h3>
                         </div>
+                        <button
+                            onClick={() => handleSave('limits')}
+                            disabled={isSaving === 'limits'}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            {isSaving === 'limits' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                            SAVE
+                        </button>
                     </div>
 
-                    <div className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 mb-8 group">
-                        <span className="text-sm font-bold text-[#4B5563]">outreach.leadomation.co.uk</span>
-                        <button className="text-[10px] font-black text-primary hover:underline transition-all">EDIT</button>
-                    </div>
-
-                    <div className="space-y-4 mb-8">
-                        <div className="flex items-center justify-between py-1">
-                            <div className="flex items-center gap-3">
-                                <CheckCircle2 size={16} className="text-emerald-500" />
-                                <span className="text-sm font-bold text-[#4B5563]">SPF Record</span>
-                            </div>
-                            <span className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Configured</span>
-                        </div>
-                        <div className="flex items-center justify-between py-1">
-                            <div className="flex items-center gap-3">
-                                <CheckCircle2 size={16} className="text-emerald-500" />
-                                <span className="text-sm font-bold text-[#4B5563]">DKIM Record</span>
-                            </div>
-                            <span className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Configured</span>
-                        </div>
-                        <div className="flex items-center justify-between py-1">
-                            <div className="flex items-center gap-3">
-                                <XCircle size={16} className="text-rose-500" />
-                                <span className="text-sm font-bold text-[#4B5563]">DMARC Record</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="text-[11px] font-black text-rose-600 uppercase tracking-widest">Not Configured</span>
-                                <button className="text-[11px] font-black text-primary hover:underline tracking-widest uppercase">Fix</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button className="px-6 py-2.5 border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
-                        Run Health Check
-                    </button>
-                </div>
-
-                {/* Section 2: Sending Limits */}
-                <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shadow-sm">
-                            <Clock size={20} />
-                        </div>
-                        <h3 className="text-base font-bold text-[#111827]">Daily Sending Limits</h3>
-                    </div>
-
-                    <div className="mb-8">
-                        <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">DAILY EMAIL LIMIT</label>
-                        <div className="flex gap-2">
-                            {[25, 50, 100].map(limit => (
-                                <button
-                                    key={limit}
-                                    onClick={() => setDailyLimit(limit)}
-                                    className={`px-6 py-2 rounded-full text-xs font-bold transition-all border ${dailyLimit === limit
-                                        ? 'bg-primary text-white border-primary shadow-md shadow-blue-500/20'
-                                        : 'bg-white text-[#6B7280] border-[#E5E7EB] hover:border-gray-300'
-                                        }`}
-                                >
-                                    {limit}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">START WINDOW</label>
-                            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] cursor-pointer hover:bg-gray-100 transition-all">
-                                9:00 AM <ChevronDown size={16} className="text-[#9CA3AF]" />
+                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">DAILY EMAIL LIMIT</label>
+                            <div className="flex gap-2">
+                                {[25, 50, 100, 200].map(limit => (
+                                    <button
+                                        key={limit}
+                                        onClick={() => setProfile(prev => ({ ...prev, daily_send_limit: limit }))}
+                                        className={`px-5 py-2 rounded-lg text-xs font-bold transition-all border ${profile.daily_send_limit === limit
+                                            ? 'bg-primary text-white border-primary shadow-sm'
+                                            : 'bg-white text-[#6B7280] border-[#E5E7EB] hover:border-gray-300'
+                                            }`}
+                                    >
+                                        {limit}
+                                    </button>
+                                ))}
                             </div>
                         </div>
+
                         <div>
-                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">END WINDOW</label>
-                            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] cursor-pointer hover:bg-gray-100 transition-all">
-                                5:00 PM <ChevronDown size={16} className="text-[#9CA3AF]" />
-                            </div>
+                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">SEND DELAY (SECONDS)</label>
+                            <input
+                                type="number"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+                                value={profile.send_delay_seconds || 30}
+                                onChange={e => setProfile(prev => ({ ...prev, send_delay_seconds: parseInt(e.target.value) }))}
+                            />
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4">
+                    <div className="mt-8 flex flex-col gap-4">
                         <label className="flex items-center justify-between cursor-pointer group p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed">
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-[#111827]">Auto-detect recipient timezone</span>
                                 <span className="text-[11px] text-[#6B7280] font-medium mt-1">Emails will arrive during their local business hours</span>
                             </div>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${autoDetectTimezone ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => setAutoDetectTimezone(!autoDetectTimezone)}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.auto_detect_timezone ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => setProfile(prev => ({ ...prev, auto_detect_timezone: !prev.auto_detect_timezone }))}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${autoDetectTimezone ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.auto_detect_timezone ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                     </div>
                 </div>
 
-                {/* Section 3: Sender Identity */}
+                {/* Section 2: Sender Identity */}
                 <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-                            <ShieldCheck size={20} />
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+                                <ShieldCheck size={20} />
+                            </div>
+                            <h3 className="text-base font-bold text-[#111827]">Sender Identity</h3>
                         </div>
-                        <h3 className="text-base font-bold text-[#111827]">Sender Identity</h3>
+                        <button
+                            onClick={() => handleSave('identity')}
+                            disabled={isSaving === 'identity'}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            {isSaving === 'identity' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                            SAVE
+                        </button>
                     </div>
 
                     <div className="space-y-6">
@@ -147,8 +192,10 @@ const EmailConfig: React.FC = () => {
                             <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">FROM NAME</label>
                             <input
                                 type="text"
-                                defaultValue="Iain Liddle"
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                value={profile.sender_name || ''}
+                                onChange={e => setProfile(prev => ({ ...prev, sender_name: e.target.value }))}
+                                placeholder="e.g. Iain Liddle"
                             />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -156,80 +203,92 @@ const EmailConfig: React.FC = () => {
                                 <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">FROM EMAIL</label>
                                 <input
                                     type="email"
-                                    defaultValue="iain@outreach.leadomation.co.uk"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    value={profile.sender_email || ''}
+                                    onChange={e => setProfile(prev => ({ ...prev, sender_email: e.target.value }))}
+                                    placeholder="your@outreach-domain.com"
                                 />
                             </div>
                             <div>
                                 <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">REPLY-TO EMAIL</label>
                                 <input
                                     type="email"
-                                    defaultValue="iain@leadomation.co.uk"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    value={profile.reply_to_email || ''}
+                                    onChange={e => setProfile(prev => ({ ...prev, reply_to_email: e.target.value }))}
+                                    placeholder="your@main-email.com"
                                 />
                             </div>
                         </div>
                     </div>
-
-                    <div className="flex justify-end mt-10">
-                        <button className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 group">
-                            <Save size={18} className="group-hover:translate-y-[-1px] transition-transform" />
-                            SAVE CHANGES
-                        </button>
-                    </div>
                 </div>
 
-                {/* Section 4: Email Signature */}
+                {/* Section 3: Email Signature */}
                 <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
-                    <div className="flex flex-col gap-1 mb-8">
-                        <h3 className="text-base font-bold text-[#111827]">Email Signature</h3>
-                        <p className="text-sm text-[#6B7280] font-medium">Automatically appended to all outgoing emails and replies</p>
-                    </div>
-
-                    <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-8 group focus-within:border-primary transition-all">
-                        {/* Editor Toolbar */}
-                        <div className="flex items-center gap-1 p-2 bg-gray-50 border-b border-[#E5E7EB]">
-                            <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"><Bold size={16} /></button>
-                            <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"><Italic size={16} /></button>
-                            <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"><Link size={16} /></button>
-                            <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg transition-all"><ImageIcon size={16} /></button>
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex flex-col gap-1">
+                            <h3 className="text-base font-bold text-[#111827]">Email Signature</h3>
+                            <p className="text-sm text-[#6B7280] font-medium">Automatically appended to outgoing emails</p>
                         </div>
-                        {/* Editor Area */}
-                        <textarea
-                            className="w-full p-6 text-sm font-semibold text-[#4B5563] focus:outline-none min-h-[160px] bg-white leading-relaxed"
-                            defaultValue={`Iain Liddle\nFounder & CEO\nLeadomation\n\n📞 +44 7XXX XXXXXX\n🌐 www.leadomation.co.uk\n📍 Newcastle upon Tyne, UK`}
-                        />
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setShowSignaturePreview(!showSignaturePreview)}
+                                className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-xl text-xs font-black text-[#4B5563] hover:bg-gray-50 transition-all"
+                            >
+                                <Eye size={14} />
+                                PREVIEW
+                            </button>
+                            <button
+                                onClick={() => handleSave('signature')}
+                                disabled={isSaving === 'signature'}
+                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                            >
+                                {isSaving === 'signature' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                SAVE
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                    {showSignaturePreview ? (
+                        <div className="border border-[#E5E7EB] rounded-xl p-6 mb-8 bg-gray-50 text-sm font-medium text-[#4B5563] whitespace-pre-wrap leading-relaxed">
+                            {profile.signature_html}
+                        </div>
+                    ) : (
+                        <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-8 group focus-within:border-primary transition-all">
+                            <div className="flex items-center gap-1 p-2 bg-gray-50 border-b border-[#E5E7EB]">
+                                <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg"><Bold size={16} /></button>
+                                <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg"><Italic size={16} /></button>
+                                <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg"><Link size={16} /></button>
+                                <button className="p-1.5 text-gray-400 hover:text-primary hover:bg-white rounded-lg"><ImageIcon size={16} /></button>
+                            </div>
+                            <textarea
+                                className="w-full p-6 text-sm font-semibold text-[#4B5563] focus:outline-none min-h-[160px] bg-white leading-relaxed"
+                                value={profile.signature_html || ''}
+                                onChange={e => setProfile(prev => ({ ...prev, signature_html: e.target.value }))}
+                                placeholder="Kind regards,\nIain Liddle"
+                            />
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <label className="flex items-center justify-between cursor-pointer group p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed hover:border-primary transition-all">
-                            <span className="text-xs font-bold text-[#111827]">Include signature in all outgoing emails</span>
+                            <span className="text-xs font-bold text-[#111827]">Full Outgoing Sequence</span>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${includeOutgoing ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => setIncludeOutgoing(!includeOutgoing)}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.include_signature_outgoing ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => setProfile(prev => ({ ...prev, include_signature_outgoing: !prev.include_signature_outgoing }))}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${includeOutgoing ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.include_signature_outgoing ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                         <label className="flex items-center justify-between cursor-pointer group p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed hover:border-primary transition-all">
-                            <span className="text-xs font-bold text-[#111827]">Include signature in inbox replies</span>
+                            <span className="text-xs font-bold text-[#111827]">Inbox Replies Only</span>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${includeInbox ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => setIncludeInbox(!includeInbox)}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.include_signature_replies ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => setProfile(prev => ({ ...prev, include_signature_replies: !prev.include_signature_replies }))}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${includeInbox ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.include_signature_replies ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                        <button className="px-6 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-black text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm active:scale-95 uppercase tracking-widest">
-                            Preview
-                        </button>
-                        <button className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 group">
-                            <Save size={18} className="group-hover:translate-y-[-1px] transition-transform" />
-                            SAVE SIGNATURE
-                        </button>
                     </div>
                 </div>
             </div>

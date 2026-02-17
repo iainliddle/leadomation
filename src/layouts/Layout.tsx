@@ -7,9 +7,10 @@ interface LayoutProps {
     children: (activePage: string) => React.ReactNode;
     activePage: string;
     onPageChange: (page: string) => void;
+    userPlan?: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free' }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -22,6 +23,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange }) =
                 setIsOpen={setIsSidebarOpen}
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
+                userPlan={userPlan}
             />
 
             <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'} flex flex-col min-w-0`}>

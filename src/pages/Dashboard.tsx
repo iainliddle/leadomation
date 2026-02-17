@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mail, MessageCircle, Linkedin, Loader2 } from 'lucide-react';
+import { Users, Mail, MessageCircle, Linkedin, Loader2, Zap } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import CampaignPerformance from '../components/CampaignPerformance';
 import TopCampaigns from '../components/TopCampaigns';
@@ -7,7 +7,12 @@ import RecentActivity from '../components/RecentActivity';
 import OnboardingModal from '../components/OnboardingModal';
 import { supabase } from '../lib/supabase';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+    onPageChange: (page: string) => void;
+    userPlan?: string;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onPageChange, userPlan = 'free' }) => {
     const [stats, setStats] = useState({
         totalLeads: 0,
         leadsWithEmails: 0,
@@ -19,6 +24,14 @@ const Dashboard: React.FC = () => {
     const [showOnboarding, setShowOnboarding] = useState(false);
 
     useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('checkout') === 'success') {
+            alert('Welcome to Leadomation! Your 7-day free trial has started.');
+            // Remove the query param without refreshing
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+        }
+
         const fetchDashboardData = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
@@ -117,15 +130,38 @@ const Dashboard: React.FC = () => {
                     icon={MessageCircle}
                     iconColor="text-success"
                 />
-                <StatCard
-                    label="Total Deals"
-                    value={stats.dealsCount.toLocaleString()}
-                    change="+0%"
-                    isPositive={true}
-                    subtitle="current pipeline"
-                    icon={Linkedin}
-                    iconColor="text-accent"
-                />
+                <div className="flex flex-col gap-1">
+                    <StatCard
+                        label="Total Deals"
+                        value={stats.dealsCount.toLocaleString()}
+                        change="+0%"
+                        isPositive={true}
+                        subtitle="current pipeline"
+                        icon={Linkedin}
+                        iconColor="text-accent"
+                    />
+                    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${userPlan === 'pro' ? 'bg-purple-50 text-purple-600' : userPlan === 'starter' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600'}`}>
+                                <Zap size={20} className={userPlan !== 'free' ? 'animate-pulse' : ''} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Current Plan</p>
+                                <p className={`text-sm font-black uppercase tracking-tight ${userPlan === 'pro' ? 'text-purple-600' : userPlan === 'starter' ? 'text-blue-600' : 'text-[#111827]'}`}>
+                                    {userPlan} Tier
+                                </p>
+                            </div>
+                        </div>
+                        {userPlan === 'free' && (
+                            <button
+                                onClick={() => onPageChange('Pricing')}
+                                className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest"
+                            >
+                                Upgrade
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Charts Row */}
@@ -147,7 +183,12 @@ const Dashboard: React.FC = () => {
                     <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm h-full hover:shadow-md transition-all">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-[#111827] tracking-tight">Recent Leads</h3>
-                            <button className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">View All</button>
+                            <button
+                                onClick={() => onPageChange('Lead Database')}
+                                className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest"
+                            >
+                                View All
+                            </button>
                         </div>
                         <div className="space-y-4">
                             {recentLeads.length === 0 ? (
@@ -173,7 +214,10 @@ const Dashboard: React.FC = () => {
                                 ))
                             )}
                         </div>
-                        <button className="w-full mt-6 py-3 border border-gray-100 rounded-xl text-xs font-black text-[#6B7280] hover:bg-gray-50 hover:text-primary transition-all uppercase tracking-widest pt-5 border-t">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="w-full mt-6 py-3 border border-gray-100 rounded-xl text-xs font-black text-[#6B7280] hover:bg-gray-50 hover:text-primary transition-all uppercase tracking-widest pt-5 border-t"
+                        >
                             Refresh Dashboard
                         </button>
                     </div>

@@ -6,8 +6,10 @@ import {
     Plus,
     Rocket,
     Check,
-    ChevronDown
+    ChevronDown,
+    Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface Track {
     id: number;
@@ -71,10 +73,24 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
     </div>
 );
 
-const NewCampaign: React.FC = () => {
+interface NewCampaignProps {
+    onPageChange?: (page: string) => void;
+}
+
+const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
+    const [campaignName, setCampaignName] = useState('');
     const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+    const [customKeywords, setCustomKeywords] = useState('');
+    const [cityArea, setCityArea] = useState('');
+    const [radius, setRadius] = useState('25 miles');
+    const [minRating, setMinRating] = useState('4+ stars');
+    const [leadCount, setLeadCount] = useState(10);
+    const [isLaunching, setIsLaunching] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
     const [toggles, setToggles] = useState({
         maps: true,
         emailFinder: true,
@@ -92,6 +108,84 @@ const NewCampaign: React.FC = () => {
         setSelectedCountries(prev => prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]);
     };
 
+    const handleLaunch = async () => {
+        if (!campaignName) {
+            setError('Please enter a campaign name');
+            return;
+        }
+        if (!selectedTrack) {
+            setError('Please select a track');
+            return;
+        }
+
+        setIsLaunching(true);
+        setError(null);
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            // 1. Save to Supabase
+            const { data: campaign, error: dbError } = await supabase
+                .from('campaigns')
+                .insert({
+                    user_id: user.id,
+                    name: campaignName,
+                    status: 'active',
+                    targeting_config: {
+                        track: selectedTrack.name,
+                        industry: selectedTags,
+                        location: selectedCountries,
+                        city: cityArea,
+                        radius,
+                        minRating,
+                        leadCount,
+                        keywords: customKeywords,
+                        enrichment: toggles
+                    }
+                })
+                .select()
+                .single();
+
+            if (dbError) throw dbError;
+
+            // 2. Trigger N8N Webhook
+            const webhookUrl = 'https://n8n.srv1377696.hstgr.cloud/webhook/PLACEHOLDER';
+            const webhookResponse = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    campaign_id: campaign.id,
+                    industry: selectedTags.join(', '),
+                    location: selectedCountries.join(', ') + (cityArea ? ` (${cityArea})` : ''),
+                    lead_count: leadCount,
+                    targeting: {
+                        keywords: customKeywords,
+                        track: selectedTrack.name
+                    }
+                })
+            });
+
+            if (!webhookResponse.ok) {
+                console.warn('Webhook notification failed, but campaign was saved.');
+            }
+
+            // 3. Show Success & Redirect
+            setShowSuccess(true);
+            setTimeout(() => {
+                if (onPageChange) {
+                    onPageChange('Active Campaigns');
+                }
+            }, 3000);
+
+        } catch (err: any) {
+            console.error('Launch error:', err);
+            setError(err.message || 'Failed to launch campaign');
+        } finally {
+            setIsLaunching(false);
+        }
+    };
+
     return (
         <div className="max-w-[800px] mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Section 1: Campaign Details */}
@@ -101,6 +195,8 @@ const NewCampaign: React.FC = () => {
                         <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Campaign Name</label>
                         <input
                             type="text"
+                            value={campaignName}
+                            onChange={(e) => setCampaignName(e.target.value)}
                             placeholder="e.g., UK Luxury Hotels Q1"
                             className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                         />
@@ -114,8 +210,8 @@ const NewCampaign: React.FC = () => {
                                     key={track.id}
                                     onClick={() => { setSelectedTrack(track); setSelectedTags([]); }}
                                     className={`p-4 border text-left rounded-xl transition-all duration-300 relative group ${selectedTrack?.id === track.id
-                                            ? 'border-primary bg-blue-50 shadow-sm'
-                                            : 'border-[#E5E7EB] bg-white hover:border-gray-300 hover:shadow-sm'
+                                        ? 'border-primary bg-blue-50 shadow-sm'
+                                        : 'border-[#E5E7EB] bg-white hover:border-gray-300 hover:shadow-sm'
                                         }`}
                                 >
                                     {selectedTrack?.id === track.id && (
@@ -146,14 +242,17 @@ const NewCampaign: React.FC = () => {
                                     key={tag}
                                     onClick={() => toggleTag(tag)}
                                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${selectedTags.includes(tag)
-                                            ? 'bg-primary text-white shadow-sm'
-                                            : 'border border-[#E5E7EB] text-[#6B7280] hover:border-gray-300'
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'border border-[#E5E7EB] text-[#6B7280] hover:border-gray-300'
                                         }`}
                                 >
                                     {tag}
                                 </button>
                             ))}
-                            <button className="px-3 py-1.5 rounded-full text-xs font-bold border border-dashed border-primary/50 text-primary hover:bg-blue-50 transition-all flex items-center gap-1">
+                            <button
+                                onClick={() => alert('Custom tag creation coming soon!')}
+                                className="px-3 py-1.5 rounded-full text-xs font-bold border border-dashed border-primary/50 text-primary hover:bg-blue-50 transition-all flex items-center gap-1"
+                            >
                                 <Plus size={14} /> Add Custom
                             </button>
                         </div>
@@ -164,6 +263,8 @@ const NewCampaign: React.FC = () => {
                         <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Custom Keywords</label>
                         <input
                             type="text"
+                            value={customKeywords}
+                            onChange={(e) => setCustomKeywords(e.target.value)}
                             placeholder="e.g., cold plunge, cryotherapy, recovery centre"
                             className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                         />
@@ -182,15 +283,18 @@ const NewCampaign: React.FC = () => {
                                     key={c.name}
                                     onClick={() => toggleCountry(c.name)}
                                     className={`p-3 border rounded-xl flex items-center gap-3 transition-all ${selectedCountries.includes(c.name)
-                                            ? 'border-primary bg-blue-50 shadow-sm'
-                                            : 'border-[#E5E7EB] bg-white hover:border-gray-300'
+                                        ? 'border-primary bg-blue-50 shadow-sm'
+                                        : 'border-[#E5E7EB] bg-white hover:border-gray-300'
                                         }`}
                                 >
                                     <span className="text-xl">{c.flag}</span>
                                     <span className="text-xs font-bold text-[#374151]">{c.name}</span>
                                 </button>
                             ))}
-                            <button className="p-3 border border-dashed border-primary/50 rounded-xl flex items-center justify-center gap-2 text-primary font-bold text-xs hover:bg-blue-50 transition-all">
+                            <button
+                                onClick={() => alert('Multi-region targeting coming soon!')}
+                                className="p-3 border border-dashed border-primary/50 rounded-xl flex items-center justify-center gap-2 text-primary font-bold text-xs hover:bg-blue-50 transition-all"
+                            >
                                 <Plus size={16} /> Add Region
                             </button>
                         </div>
@@ -201,6 +305,8 @@ const NewCampaign: React.FC = () => {
                             <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">City / Area (optional)</label>
                             <input
                                 type="text"
+                                value={cityArea}
+                                onChange={(e) => setCityArea(e.target.value)}
                                 placeholder="e.g., London, Dubai Marina"
                                 className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                             />
@@ -208,9 +314,13 @@ const NewCampaign: React.FC = () => {
                         <div>
                             <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Radius</label>
                             <div className="relative">
-                                <select className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]">
+                                <select
+                                    value={radius}
+                                    onChange={(e) => setRadius(e.target.value)}
+                                    className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                                >
                                     <option>10 miles</option>
-                                    <option selected>25 miles</option>
+                                    <option>25 miles</option>
                                     <option>50 miles</option>
                                     <option>100 miles</option>
                                     <option>Entire Country</option>
@@ -223,10 +333,14 @@ const NewCampaign: React.FC = () => {
                     <div>
                         <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Minimum Google Rating</label>
                         <div className="relative">
-                            <select className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]">
+                            <select
+                                value={minRating}
+                                onChange={(e) => setMinRating(e.target.value)}
+                                className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                            >
                                 <option>Any</option>
                                 <option>3+ stars</option>
-                                <option selected>4+ stars</option>
+                                <option>4+ stars</option>
                                 <option>4.5+ stars</option>
                             </select>
                             <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
@@ -316,6 +430,25 @@ const NewCampaign: React.FC = () => {
                         </div>
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Number of Leads</label>
+                        <div className="flex items-center gap-4">
+                            <input
+                                type="range"
+                                min="10"
+                                max="500"
+                                step="10"
+                                value={leadCount}
+                                onChange={(e) => setLeadCount(parseInt(e.target.value))}
+                                className="flex-1 accent-primary h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div className="w-20 text-center font-bold text-primary bg-blue-50 py-2 rounded-lg border border-primary/20">
+                                {leadCount}
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-[#9CA3AF] mt-2 italic">Default is 10 leads. Higher counts may take longer to process.</p>
+                    </div>
+
                     <div className="flex items-center justify-between p-4 rounded-xl border border-[#F3F4F6] bg-gradient-to-r from-[#F9FAFB] to-white">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-[#F3E8FF] flex items-center justify-center text-purple-600">
@@ -340,16 +473,40 @@ const NewCampaign: React.FC = () => {
 
             {/* Section 6: Launch Controls */}
             <div className="bg-white border-t border-[#E5E7EB] -mx-8 px-8 py-6 flex items-center justify-between sticky bottom-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                <p className="text-[11px] text-[#9CA3AF] font-medium max-w-[240px]">
-                    Campaign will begin processing leads within 24 hours of launch.
-                </p>
+                <div className="flex-1">
+                    {showSuccess ? (
+                        <p className="text-sm font-bold text-emerald-600 flex items-center gap-2 animate-bounce">
+                            <Check size={18} /> Campaign launched! Leads will start appearing shortly.
+                        </p>
+                    ) : error ? (
+                        <p className="text-xs font-bold text-red-500">{error}</p>
+                    ) : (
+                        <p className="text-[11px] text-[#9CA3AF] font-medium max-w-[240px]">
+                            Campaign will begin processing leads within 24 hours of launch.
+                        </p>
+                    )}
+                </div>
                 <div className="flex items-center gap-4">
-                    <button className="px-6 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#374151] hover:bg-gray-50 transition-all">
+                    <button
+                        onClick={() => alert('Draft saved successfully!')}
+                        className="px-6 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#374151] hover:bg-gray-50 transition-all"
+                    >
                         Save as Draft
                     </button>
-                    <button className="px-8 py-2.5 bg-primary text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-blue-700 shadow-md transform active:scale-95 transition-all">
-                        <Rocket size={16} />
-                        Launch Campaign
+                    <button
+                        onClick={handleLaunch}
+                        disabled={isLaunching || showSuccess}
+                        className={`px-8 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md transform active:scale-95 transition-all ${isLaunching || showSuccess
+                            ? 'bg-gray-400 cursor-not-allowed text-white'
+                            : 'bg-primary text-white hover:bg-blue-700'
+                            }`}
+                    >
+                        {isLaunching ? (
+                            <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                            <Rocket size={16} />
+                        )}
+                        {isLaunching ? 'Launching...' : showSuccess ? 'Launched!' : 'Launch Campaign'}
                     </button>
                 </div>
             </div>

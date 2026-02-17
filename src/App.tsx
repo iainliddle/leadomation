@@ -23,13 +23,34 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState('Login');
   const [session, setSession] = useState<any>(null);
+  const [userPlan, setUserPlan] = useState<string>('free');
   const [isLoading, setIsLoading] = useState(true);
+
+  const fetchUserPlan = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        console.error('Error fetching plan:', error);
+      }
+      if (data) {
+        setUserPlan(data.plan || 'free');
+      }
+    } catch (err) {
+      console.error('Catch error fetching plan:', err);
+    }
+  };
 
   useEffect(() => {
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
+        fetchUserPlan(session.user.id);
         if (activePage === 'Login' || activePage === 'Register') {
           setActivePage('Dashboard');
         }
@@ -41,11 +62,13 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
+        fetchUserPlan(session.user.id);
         if (activePage === 'Login' || activePage === 'Register') {
           setActivePage('Dashboard');
         }
       } else if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy') {
         setActivePage('Login');
+        setUserPlan('free');
       }
     });
 
@@ -55,15 +78,15 @@ const App: React.FC = () => {
   const renderPage = (page: string) => {
     switch (page) {
       case 'Dashboard':
-        return <Dashboard />;
+        return <Dashboard onPageChange={setActivePage} userPlan={userPlan} />;
       case 'New Campaign':
-        return <NewCampaign />;
+        return <NewCampaign onPageChange={setActivePage} />;
       case 'Active Campaigns':
-        return <ActiveCampaigns />;
+        return <ActiveCampaigns onPageChange={setActivePage} />;
       case 'Lead Database':
-        return <LeadDatabase />;
+        return <LeadDatabase onPageChange={setActivePage} />;
       case 'Deal Pipeline':
-        return <DealPipeline />;
+        return <DealPipeline onPageChange={setActivePage} />;
       case 'Sequence Builder':
         return <SequenceBuilder />;
       case 'Inbox':
@@ -78,6 +101,8 @@ const App: React.FC = () => {
         return <Compliance />;
       case 'Pricing':
         return <Pricing />;
+      case 'Dashboard':
+        return <Dashboard onPageChange={setActivePage} userPlan={userPlan} />;
       default:
         return (
           <div className="h-[60vh] flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
@@ -132,7 +157,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <Layout activePage={activePage} onPageChange={setActivePage}>
+    <Layout activePage={activePage} onPageChange={setActivePage} userPlan={userPlan}>
       {(page) => renderPage(page)}
     </Layout>
   );

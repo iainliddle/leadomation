@@ -74,6 +74,7 @@ interface SidebarProps {
     setIsOpen?: (isOpen: boolean) => void;
     isCollapsed?: boolean;
     setIsCollapsed?: (collapsed: boolean) => void;
+    userPlan?: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -82,7 +83,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     isOpen,
     setIsOpen,
     isCollapsed = false,
-    setIsCollapsed
+    setIsCollapsed,
+    userPlan = 'free'
 }) => {
     const [leadCount, setLeadCount] = useState<number>(0);
 
@@ -292,20 +294,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </NavSection>
                 </nav>
 
-                <div className={`p-4 border-t border-[#E5E7EB] transition-all duration-300 ${isCollapsed ? 'opacity-0 h-0 overflow-hidden p-0 border-0' : 'opacity-100 h-auto'}`}>
-                    <div
-                        className="bg-gradient-to-br from-[#2563EB] to-[#1E40AF] rounded-xl p-5 text-white shadow-lg overflow-hidden relative group cursor-pointer hover:shadow-xl transition-all active:scale-[0.98]"
-                        onClick={() => onPageChange('Pricing')}
-                    >
-                        <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500"></div>
-                        <p className="text-[10px] font-bold opacity-80 mb-1 uppercase tracking-tight relative z-10">PRO PLAN</p>
-                        <p className="text-sm font-bold mb-1 relative z-10 text-white">Upgrade to Pro</p>
-                        <p className="text-[11px] opacity-80 mb-4 leading-tight relative z-10 text-blue-50">Unlock AI Voice Call Agent & advanced analytics</p>
-                        <button className="w-full py-2.5 bg-white text-primary text-xs font-bold rounded-lg hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5 shadow-sm relative z-10">
-                            Upgrade Now
-                        </button>
+                {userPlan === 'free' && (
+                    <div className={`p-4 border-t border-[#E5E7EB] transition-all duration-300 ${isCollapsed ? 'opacity-0 h-0 overflow-hidden p-0 border-0' : 'opacity-100 h-auto'}`}>
+                        <div
+                            className="bg-gradient-to-br from-[#2563EB] to-[#1E40AF] rounded-xl p-5 text-white shadow-lg overflow-hidden relative group cursor-pointer hover:shadow-xl transition-all active:scale-[0.98]"
+                            onClick={() => onPageChange('Pricing')}
+                        >
+                            <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500"></div>
+                            <p className="text-[10px] font-bold opacity-80 mb-1 uppercase tracking-tight relative z-10">PRO PLAN</p>
+                            <p className="text-sm font-bold mb-1 relative z-10 text-white">Upgrade to Pro</p>
+                            <p className="text-[11px] opacity-80 mb-4 leading-tight relative z-10 text-blue-50">Unlock AI Voice Call Agent & advanced analytics</p>
+                            <button className="w-full py-2.5 bg-white text-primary text-xs font-bold rounded-lg hover:bg-blue-50 transition-all flex items-center justify-center gap-1.5 shadow-sm relative z-10">
+                                Upgrade Now
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </aside>
         </>
     );

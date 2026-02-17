@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Lightbulb,
     ExternalLink,
@@ -6,189 +6,52 @@ import {
     Edit,
     Calendar,
     Save,
-    Loader2
+    Loader2,
+    Shield,
+    Database,
+    Globe
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useState, useEffect } from 'react';
 
-interface Integration {
+interface ProfileData {
     id: string;
-    name: string;
-    description: string;
-    status: 'Connected' | 'Not Connected';
-    iconText: string;
-    iconBg: string;
-    apiKey?: string;
-    type?: 'API' | 'Webhook' | 'Free';
-    webhookUrl?: string;
+    meeting_link: string;
+    hunter_api_key: string;
+    apify_api_key: string;
+    linkedin_connected: boolean;
+    calendly_url?: string;
 }
 
-const integrations: Integration[] = [
-    {
-        id: '1',
-        name: 'Apify',
-        description: 'Google Maps business scraping. Extract leads from any location worldwide.',
-        status: 'Connected',
-        iconText: 'A',
-        iconBg: 'bg-orange-500',
-        apiKey: '••••••••••••ap-7x2m',
-        type: 'API'
-    },
-    {
-        id: '2',
-        name: 'SendGrid',
-        description: 'Email delivery and tracking. Send cold email sequences with open and click tracking.',
-        status: 'Connected',
-        iconText: 'S',
-        iconBg: 'bg-blue-500',
-        apiKey: '••••••••••••sg-9k1p',
-        type: 'API'
-    },
-    {
-        id: '3',
-        name: 'Supabase',
-        description: 'Database storage. All leads, campaigns, and analytics data.',
-        status: 'Connected',
-        iconText: 'S',
-        iconBg: 'bg-green-500',
-        apiKey: '••••••••••••sb-3n8w',
-        type: 'API'
-    },
-    {
-        id: '4',
-        name: 'Hunter.io',
-        description: 'Email finding by domain. Find contact email addresses from business websites.',
-        status: 'Not Connected',
-        iconText: 'H',
-        iconBg: 'bg-orange-600',
-        type: 'API'
-    },
-    {
-        id: '5',
-        name: 'ZeroBounce',
-        description: 'Email verification. Validate email addresses before sending to reduce bounces.',
-        status: 'Not Connected',
-        iconText: 'Z',
-        iconBg: 'bg-teal-500',
-        type: 'API'
-    },
-    {
-        id: '6',
-        name: 'Phantombuster',
-        description: 'LinkedIn automation. Automated connection requests and direct messages.',
-        status: 'Not Connected',
-        iconText: 'P',
-        iconBg: 'bg-purple-500',
-        type: 'API'
-    },
-    {
-        id: '7',
-        name: 'Google Trends',
-        description: 'Search trend data. Monitor global demand and seasonal patterns by region.',
-        status: 'Connected',
-        iconText: 'G',
-        iconBg: 'bg-red-500',
-        type: 'Free'
-    },
-    {
-        id: '8',
-        name: 'N8N',
-        description: 'Workflow orchestration. Automates the scrape, enrich, verify, and send pipeline.',
-        status: 'Connected',
-        iconText: 'N',
-        iconBg: 'bg-orange-400',
-        webhookUrl: 'https://n8n.yourdomain.com/webhook/leadomation',
-        type: 'Webhook'
-    }
-];
-
-const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }) => (
-    <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-6 transition-all duration-300 hover:shadow-xl group">
-        <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-lg shadow-sm ${integration.iconBg}`}>
-                    {integration.iconText}
-                </div>
-                <div>
-                    <h3 className="text-base font-bold text-[#111827]">{integration.name}</h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <div className={`w-2 h-2 rounded-full ${integration.status === 'Connected' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-gray-300'}`}></div>
-                        <span className={`text-[11px] font-bold ${integration.status === 'Connected' ? 'text-emerald-600' : 'text-gray-500'}`}>
-                            {integration.status}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            {integration.status === 'Connected' ? (
-                <button className="px-4 py-2 border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
-                    Configure
-                </button>
-            ) : (
-                <button className="px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/10 active:scale-95">
-                    Connect
-                </button>
-            )}
-        </div>
-
-        <p className="text-sm text-[#6B7280] leading-relaxed mb-6 h-10 line-clamp-2">
-            {integration.description}
-        </p>
-
-        {integration.status === 'Connected' && (
-            <div className="pt-4 border-t border-[#F3F4F6] animate-in fade-in slide-in-from-top-2 duration-300">
-                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">
-                    {integration.type === 'Webhook' ? 'WEBHOOK URL' : 'API KEY'}
-                </label>
-                <div className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 group/field">
-                    {integration.type === 'Free' ? (
-                        <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1.5">
-                            <CheckCircle2 size={12} /> Free — No key required
-                        </span>
-                    ) : (
-                        <>
-                            <code className="text-[11px] font-mono font-bold text-[#4B5563] truncate mr-2">
-                                {integration.type === 'Webhook' ? integration.webhookUrl : integration.apiKey}
-                            </code>
-                            <button className="flex items-center gap-1 text-[10px] font-black text-primary hover:underline transition-all opacity-0 group-hover/field:opacity-100 transform translate-x-1 group-hover/field:translate-x-0 transition-opacity-transform duration-200">
-                                <Edit size={10} /> EDIT
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
-        )}
-    </div>
-);
-
 const Integrations: React.FC = () => {
-    const [meetingLink, setMeetingLink] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
+    const [profile, setProfile] = useState<Partial<ProfileData>>({});
+    const [isSaving, setIsSaving] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('meeting_link')
-                .eq('id', user.id)
-                .single();
-
-            if (error) {
-                console.error('Error fetching profile:', error);
-            } else if (data) {
-                setMeetingLink(data.meeting_link || '');
-            }
-            setIsLoading(false);
-        };
-
         fetchProfile();
     }, []);
 
-    const handleSaveMeetingLink = async () => {
-        setIsSaving(true);
+    const fetchProfile = async () => {
+        setIsLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+        } else if (data) {
+            setProfile(data);
+        }
+        setIsLoading(false);
+    };
+
+    const handleSave = async (field: keyof ProfileData, value: any, sectionId: string) => {
+        setIsSaving(sectionId);
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
@@ -197,19 +60,63 @@ const Integrations: React.FC = () => {
                 .from('profiles')
                 .upsert({
                     id: user.id,
-                    meeting_link: meetingLink,
+                    [field]: value,
                     updated_at: new Date().toISOString()
                 });
 
             if (error) throw error;
-            alert('Meeting link saved successfully!');
+            setProfile(prev => ({ ...prev, [field]: value }));
         } catch (error) {
-            console.error('Error saving meeting link:', error);
-            alert('Error saving meeting link. Please ensure the "meeting_link" column exists in the profiles table.');
+            console.error(`Error saving ${field}:`, error);
+            alert(`Error saving ${field}. Make sure the column exists in the profiles table.`);
         } finally {
-            setIsSaving(false);
+            setIsSaving(null);
         }
     };
+
+    const integrations = [
+        {
+            id: 'apify',
+            name: 'Apify',
+            description: 'Google Maps business scraping. Extract leads from any location worldwide.',
+            status: profile.apify_api_key ? 'Connected' : 'Not Connected',
+            iconText: 'A',
+            iconBg: 'bg-orange-500',
+            apiKey: profile.apify_api_key,
+            field: 'apify_api_key',
+            type: 'API'
+        },
+        {
+            id: 'hunter',
+            name: 'Hunter.io',
+            description: 'Email finding by domain. Find contact email addresses from business websites.',
+            status: profile.hunter_api_key ? 'Connected' : 'Not Connected',
+            iconText: 'H',
+            iconBg: 'bg-orange-600',
+            apiKey: profile.hunter_api_key,
+            field: 'hunter_api_key',
+            type: 'API'
+        },
+        {
+            id: 'linkedin',
+            name: 'LinkedIn Automation',
+            description: 'Reach leads directly on LinkedIn. Automated connection requests and direct messages.',
+            status: profile.linkedin_connected ? 'Connected' : 'Not Connected',
+            iconText: 'L',
+            iconBg: 'bg-blue-600',
+            field: 'linkedin_connected',
+            type: 'Toggle'
+        },
+        {
+            id: 'supabase',
+            name: 'Supabase',
+            description: 'Core platform database. All your leads and campaign data is stored here.',
+            status: 'Connected',
+            iconText: 'S',
+            iconBg: 'bg-emerald-500',
+            type: 'Managed'
+        }
+    ];
 
     return (
         <div className="animate-in fade-in duration-700 max-w-[1200px] mx-auto pb-12">
@@ -234,26 +141,20 @@ const Integrations: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <div className="relative flex-1">
-                            <input
-                                type="text"
-                                placeholder="https://calendly.com/your-name"
-                                className="w-full px-4 py-3 bg-gray-50/50 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary focus:bg-white transition-all placeholder:text-gray-300"
-                                value={meetingLink}
-                                onChange={(e) => setMeetingLink(e.target.value)}
-                                disabled={isLoading}
-                            />
-                        </div>
+                        <input
+                            type="text"
+                            placeholder="https://calendly.com/your-name"
+                            className="w-full px-4 py-3 bg-gray-50/50 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary focus:bg-white transition-all"
+                            value={profile.meeting_link || ''}
+                            onChange={(e) => setProfile(prev => ({ ...prev, meeting_link: e.target.value }))}
+                            disabled={isLoading}
+                        />
                         <button
-                            onClick={handleSaveMeetingLink}
-                            disabled={isSaving || isLoading}
-                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                            onClick={() => handleSave('meeting_link', profile.meeting_link, 'meeting')}
+                            disabled={isSaving === 'meeting' || isLoading}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 shrink-0"
                         >
-                            {isSaving ? (
-                                <Loader2 size={18} className="animate-spin" />
-                            ) : (
-                                <Save size={18} />
-                            )}
+                            {isSaving === 'meeting' ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                             SAVE
                         </button>
                     </div>
@@ -262,7 +163,67 @@ const Integrations: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 {integrations.map(integration => (
-                    <IntegrationCard key={integration.id} integration={integration} />
+                    <div key={integration.id} className="card bg-white border border-[#E5E7EB] rounded-2xl p-6 transition-all duration-300 hover:shadow-xl group">
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-lg shadow-sm ${integration.iconBg}`}>
+                                    {integration.iconText}
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-[#111827]">{integration.name}</h3>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <div className={`w-2 h-2 rounded-full ${integration.status === 'Connected' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-gray-300'}`}></div>
+                                        <span className={`text-[11px] font-bold ${integration.status === 'Connected' ? 'text-emerald-600' : 'text-gray-500'}`}>
+                                            {integration.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p className="text-sm text-[#6B7280] leading-relaxed mb-6 h-10 line-clamp-2">
+                            {integration.description}
+                        </p>
+
+                        <div className="pt-4 border-t border-[#F3F4F6]">
+                            {integration.type === 'API' ? (
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest block">API KEY</label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="password"
+                                            className="flex-1 px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white transition-all"
+                                            value={integration.apiKey || ''}
+                                            onChange={(e) => setProfile(prev => ({ ...prev, [integration.field!]: e.target.value }))}
+                                            placeholder="Paste API key here..."
+                                        />
+                                        <button
+                                            onClick={() => handleSave(integration.field as any, profile[integration.field as keyof ProfileData], integration.id)}
+                                            disabled={isSaving === integration.id || isLoading}
+                                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-[#4B5563] rounded-lg text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                        >
+                                            {isSaving === integration.id ? <Loader2 size={12} className="animate-spin" /> : 'Update'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : integration.type === 'Toggle' ? (
+                                <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                                    <span className="text-xs font-bold text-[#4B5563]">Account Connected</span>
+                                    <div
+                                        className={`relative w-10 h-5 rounded-full transition-all duration-300 cursor-pointer ${profile.linkedin_connected ? 'bg-primary' : 'bg-gray-300'}`}
+                                        onClick={() => handleSave('linkedin_connected', !profile.linkedin_connected, 'linkedin')}
+                                    >
+                                        <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.linkedin_connected ? 'translate-x-5' : ''}`} />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-600">
+                                    <CheckCircle2 size={14} />
+                                    Managed by Leadomation
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 ))}
             </div>
 
@@ -274,8 +235,7 @@ const Integrations: React.FC = () => {
                     <h4 className="text-sm font-bold text-[#1E40AF]">Need help connecting?</h4>
                     <p className="text-xs text-blue-700/80 font-medium mt-1 leading-relaxed">
                         Integrating your services is a key part of automating your outreach.
-                        If you're having trouble connects, check our <span className="underline cursor-pointer hover:text-blue-900">integration guides</span> or
-                        <span className="underline cursor-pointer ml-1 hover:text-blue-900">contact support</span> for assistance.
+                        Check our <span className="underline cursor-pointer hover:text-blue-900">integration guides</span> for setup instructions.
                     </p>
                 </div>
                 <button className="ml-auto p-2 text-primary hover:bg-white rounded-lg transition-all hidden sm:block">

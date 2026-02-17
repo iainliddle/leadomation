@@ -1,127 +1,181 @@
 import React, { useState, useEffect } from 'react';
 import {
     Clock,
-    Bold,
-    Italic,
-    Underline,
-    Link as LinkIcon,
-    List,
-    Sparkles,
-    Eye,
-    Type,
+    Plus,
+    Trash2,
+    Play,
+    Pause,
+    ChevronRight,
+    Phone,
+    GripVertical,
+    Save,
+    X,
     Mail,
     Linkedin,
-    Info,
-    RotateCcw,
-    Zap,
     Layers,
-    Loader2
+    Loader2,
+    Sparkles
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-interface SequenceStep {
+interface Step {
+    step: number;
+    channel: 'email' | 'linkedin' | 'phone';
+    subject: string;
+    body: string;
+    delay_days: number;
+}
+
+interface Sequence {
     id: string;
-    type: 'Email' | 'LinkedIn';
-    title: string;
-    subtitle: string;
-    delay?: string;
-    linkedinType?: 'Connection Request' | 'Direct Message';
+    name: string;
+    status: 'active' | 'paused' | 'draft';
+    steps: Step[];
+    created_at: string;
+    user_id: string;
 }
 
 const SequenceBuilder: React.FC = () => {
-    const [activeStepId, setActiveStepId] = useState('1');
-    const [isPreview, setIsPreview] = useState(false);
-    const [stopOnReply, setStopOnReply] = useState(true);
-    const [skipLinkedIn, setSkipLinkedIn] = useState(true);
-    const [showSpintaxTooltip, setShowSpintaxTooltip] = useState(false);
-    const [steps, setSteps] = useState<SequenceStep[]>([]);
+    const [sequences, setSequences] = useState<Sequence[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [editingSequence, setEditingSequence] = useState<Sequence | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Editor State
+    const [activeStepIndex, setActiveStepIndex] = useState(0);
+    const [isPreview, setIsPreview] = useState(false);
+    const [draggedStepIndex, setDraggedStepIndex] = useState<number | null>(null);
 
     useEffect(() => {
-        const fetchSequence = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            // Fetching a single sequence (or multiple if we want a list first)
-            // For now, let's assume we are editing one sequence.
-            const { data, error } = await supabase
-                .from('sequences')
-                .select('*')
-                .eq('user_id', user.id)
-                .limit(1)
-                .single();
-
-            if (error) {
-                console.error('Error fetching sequence:', error);
-                setSteps([]); // No fallback dummy data
-            } else if (data && data.steps) {
-                setSteps(data.steps as SequenceStep[]);
-                if (data.steps.length > 0) setActiveStepId(data.steps[0].id);
-            } else {
-                setSteps([]);
-            }
-            setIsLoading(false);
-        };
-
-        fetchSequence();
+        fetchSequences();
     }, []);
 
-    const activeStep = steps.find(s => s.id === activeStepId) || steps[0];
+    const fetchSequences = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-    // Email State
-    const [emailSubject, setEmailSubject] = useState('');
-    const [emailBody, setEmailBody] = useState(`Hi {{first_name}},
+        const { data, error } = await supabase
+            .from('sequences')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
 
-I came across {{business_name}} and was genuinely impressed by your {{rating}}-star reputation in {{city}}.
+        if (error) {
+            console.error('Error fetching sequences:', error);
+        } else {
+            setSequences(data || []);
+        }
+        setIsLoading(false);
+    };
 
-We handcraft bespoke cold plunge pools and ice baths here in Dubai, built to order for wellness-focused businesses like yours. Each unit is designed around your space, your brand, and your clients' experience.
+    const handleCreateNew = () => {
+        const newSequence: Partial<Sequence> = {
+            name: 'New Sequence',
+            status: 'draft',
+            steps: [
+                { step: 1, channel: 'email', subject: 'Quick question', body: '', delay_days: 0 }
+            ]
+        };
+        setEditingSequence(newSequence as Sequence);
+        setActiveStepIndex(0);
+    };
 
-Would you be open to a quick chat about how a premium cold therapy offering could enhance your facility?
+    const handleSave = async () => {
+        if (!editingSequence) return;
+        setIsSaving(true);
 
-Happy to share some examples of recent installations.
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-Best regards,
-[Your name]`);
+        const payload = {
+            ...editingSequence,
+            user_id: user.id,
+            steps: editingSequence.steps.map((s, i) => ({ ...s, step: i + 1 }))
+        };
 
-    // LinkedIn State
-    const [linkedinNote, setLinkedinNote] = useState('');
-    const [linkedinDM, setLinkedinDM] = useState('');
+        const { error } = await supabase
+            .from('sequences')
+            .upsert(payload);
+
+        if (!error) {
+            fetchSequences();
+            setEditingSequence(null);
+        } else {
+            console.error('Save error:', error);
+        }
+        setIsSaving(false);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this sequence?')) return;
+        const { error } = await supabase.from('sequences').delete().eq('id', id);
+        if (!error) fetchSequences();
+    };
+
+    const handleToggleStatus = async (seq: Sequence) => {
+        const newStatus = seq.status === 'active' ? 'paused' : 'active';
+        const { error } = await supabase
+            .from('sequences')
+            .update({ status: newStatus })
+            .eq('id', seq.id);
+        if (!error) fetchSequences();
+    };
+
+    const addStep = (channel: 'email' | 'linkedin' | 'phone') => {
+        if (!editingSequence) return;
+        const newStep: Step = {
+            step: editingSequence.steps.length + 1,
+            channel: channel,
+            subject: channel === 'email' ? 'Follow up' : '',
+            body: '',
+            delay_days: 2
+        };
+        setEditingSequence({
+            ...editingSequence,
+            steps: [...editingSequence.steps, newStep]
+        });
+        setActiveStepIndex(editingSequence.steps.length);
+    };
+
+    const removeStep = (index: number) => {
+        if (!editingSequence || editingSequence.steps.length <= 1) return;
+        const newSteps = editingSequence.steps.filter((_, i) => i !== index);
+        setEditingSequence({ ...editingSequence, steps: newSteps });
+        setActiveStepIndex(Math.max(0, index - 1));
+    };
+
+    const updateStep = (index: number, updates: Partial<Step>) => {
+        if (!editingSequence) return;
+        const newSteps = editingSequence.steps.map((s, i) => i === index ? { ...s, ...updates } : s);
+        setEditingSequence({ ...editingSequence, steps: newSteps });
+    };
+
+    const handleDragStart = (index: number) => setDraggedStepIndex(index);
+    const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+    const handleDrop = (index: number) => {
+        if (draggedStepIndex === null || !editingSequence) return;
+        const newSteps = [...editingSequence.steps];
+        const [removed] = newSteps.splice(draggedStepIndex, 1);
+        newSteps.splice(index, 0, removed);
+        setEditingSequence({ ...editingSequence, steps: newSteps });
+        setDraggedStepIndex(null);
+        setActiveStepIndex(index);
+    };
 
     const mergeTags = [
         { label: '{{business_name}}', color: 'bg-blue-50 text-blue-600 border-blue-100' },
         { label: '{{first_name}}', color: 'bg-blue-50 text-blue-600 border-blue-100' },
         { label: '{{city}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
-        { label: '{{country}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
         { label: '{{rating}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
         { label: '{{website}}', color: 'bg-gray-50 text-gray-600 border-gray-100' },
-        { label: '{{meeting_link}}', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' }
     ];
-
-    const insertTag = (tag: string) => {
-        if (activeStep.type === 'Email') {
-            setEmailBody(prev => prev + ' ' + tag);
-        } else {
-            if (activeStep.linkedinType === 'Connection Request') {
-                setLinkedinNote(prev => prev + ' ' + tag);
-            } else {
-                setLinkedinDM(prev => prev + ' ' + tag);
-            }
-        }
-    };
 
     const getPreviewText = (text: string) => {
         return text
             .replace(/{{business_name}}/g, 'Wellness Spa Berlin')
             .replace(/{{first_name}}/g, 'Hans')
             .replace(/{{city}}/g, 'Berlin')
-            .replace(/{{country}}/g, 'Germany')
-            .replace(/{{rating}}/g, '4.8')
-            .replace(/{{website}}/g, 'wellness-spa.de')
-            .replace(/{{meeting_link}}/g, 'calendly.com/leadomation-demo');
-    };
-
-    const updateLinkedInType = (type: 'Connection Request' | 'Direct Message') => {
-        setSteps(prev => prev.map(s => s.id === activeStepId ? { ...s, linkedinType: type } : s));
+            .replace(/{{rating}}/g, '4.8');
     };
 
     if (isLoading) {
@@ -133,362 +187,250 @@ Best regards,
     }
 
     return (
-        <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-700 max-w-[1600px] mx-auto h-full w-full">
-            {steps.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center p-8 min-h-[600px]">
-                    <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center shadow-sm max-w-lg w-full">
-                        <div className="w-16 h-16 bg-blue-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <Layers size={32} />
+        <div className="max-w-[1600px] mx-auto w-full h-full">
+            {!editingSequence ? (
+                /* Sequence List View */
+                <div className="animate-in fade-in duration-700">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-2xl font-black text-[#111827] mb-1">Outreach Sequences</h1>
+                            <p className="text-sm font-bold text-[#6B7280]">Manage your multi-channel automation flows</p>
                         </div>
-                        <h3 className="text-xl font-black text-[#111827] mb-2">No sequences yet</h3>
-                        <p className="text-[#6B7280] font-medium mb-8 max-w-sm mx-auto">
-                            Build multi-channel outreach sequences that combine email and LinkedIn to automate your growth.
-                        </p>
                         <button
-                            onClick={() => setSteps([{ id: '1', type: 'Email', title: 'Initial Outreach', subtitle: 'Start by editing this step' }])}
-                            className="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/10 active:scale-95 flex items-center justify-center gap-2 mx-auto"
+                            onClick={handleCreateNew}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all shadow-lg active:scale-95"
                         >
-                            Create Your First Sequence
+                            <Plus size={18} />
+                            NEW SEQUENCE
                         </button>
                     </div>
+
+                    {sequences.length === 0 ? (
+                        <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center shadow-sm">
+                            <Layers size={48} className="mx-auto text-blue-100 mb-4" />
+                            <h3 className="text-xl font-black text-[#111827] mb-2">No sequences yet</h3>
+                            <button onClick={handleCreateNew} className="text-primary font-bold hover:underline">Create your first one</button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4">
+                            {sequences.map(seq => (
+                                <div key={seq.id} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 flex items-center justify-between hover:shadow-md transition-all group">
+                                    <div className="flex items-center gap-6">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${seq.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'}`}>
+                                            {seq.status === 'active' ? <Play size={20} /> : <Pause size={20} />}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-base font-black text-[#111827] mb-0.5">{seq.name}</h3>
+                                            <div className="flex items-center gap-3 text-xs font-bold text-[#6B7280]">
+                                                <span>{seq.steps?.length || 0} Steps</span>
+                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                <span>Created {new Date(seq.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={() => handleToggleStatus(seq)}
+                                            className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${seq.status === 'active' ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+                                        >
+                                            {seq.status === 'active' ? 'PAUSE' : 'ACTIVATE'}
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingSequence(seq)}
+                                            className="p-2 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-all"
+                                        >
+                                            <ChevronRight size={20} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(seq.id)}
+                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             ) : (
-                <>
-                    {/* Left Panel: Sequence Timeline */}
-                    <aside className="w-full lg:w-[320px] shrink-0 flex flex-col gap-6 lg:h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-2 custom-scrollbar pb-10 pt-4 mt-2">
-                        <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden p-5 shrink-0">
+                /* Detail/Editor View */
+                <div className="flex flex-col lg:flex-row gap-8 animate-in slide-in-from-right duration-500 h-full w-full">
+                    {/* Left Panel: Steps list */}
+                    <aside className="w-full lg:w-[320px] shrink-0 flex flex-col gap-6 lg:h-[calc(100vh-140px)]">
+                        <div className="card bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-5 flex flex-col h-full overflow-hidden">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-[11px] font-black text-[#9CA3AF] uppercase tracking-widest">Sequence Timeline</h3>
-                                <span className="px-2 py-0.5 bg-blue-50 text-primary rounded-full text-[10px] font-black">{steps.length} STEPS</span>
+                                <button onClick={() => setEditingSequence(null)} className="text-gray-400 hover:text-[#111827]">
+                                    <X size={20} />
+                                </button>
+                                <span className="px-3 py-1 bg-blue-50 text-primary rounded-full text-[10px] font-black uppercase">
+                                    Editing Sequence
+                                </span>
                             </div>
 
-                            <div className="flex flex-col relative">
-                                {/* Timeline background line */}
-                                <div className="absolute left-[22px] top-10 bottom-10 w-0.5 border-l-2 border-dashed border-gray-100 z-0"></div>
+                            <input
+                                type="text"
+                                className="w-full text-lg font-black text-[#111827] mb-6 focus:outline-none placeholder:text-gray-300"
+                                value={editingSequence.name}
+                                onChange={(e) => setEditingSequence({ ...editingSequence, name: e.target.value })}
+                                placeholder="Sequence Name"
+                            />
 
-                                {steps.map((step, index) => (
-                                    <React.Fragment key={step.id}>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2 relative">
+                                <div className="absolute left-[22px] top-4 bottom-4 w-0.5 bg-gray-100 z-0 border-l-2 border-dashed border-gray-100"></div>
+
+                                {editingSequence.steps.map((step, index) => (
+                                    <React.Fragment key={index}>
                                         {index > 0 && (
-                                            <div className="flex flex-col items-center py-1 relative z-10">
-                                                <div className="flex items-center gap-2 py-1 px-2.5 bg-gray-50 rounded-full border border-gray-100 my-1">
-                                                    <Clock size={10} className="text-[#9CA3AF]" />
-                                                    <span className="text-[9px] font-bold text-[#6B7280]">{step.delay}</span>
+                                            <div className="flex justify-center py-1">
+                                                <div className="px-3 py-1 bg-gray-50 border border-gray-100 rounded-full text-[9px] font-black text-gray-400 flex items-center gap-1 z-10">
+                                                    <Clock size={10} />
+                                                    WAIT {step.delay_days} DAYS
                                                 </div>
                                             </div>
                                         )}
-                                        <button
-                                            onClick={() => setActiveStepId(step.id)}
-                                            className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all relative z-10 ${activeStepId === step.id
-                                                ? 'bg-[#F0F7FF] border-primary shadow-sm ring-1 ring-primary'
-                                                : 'bg-white border-[#E5E7EB] hover:border-gray-300'
-                                                }`}
+                                        <div
+                                            draggable
+                                            onDragStart={() => handleDragStart(index)}
+                                            onDragOver={handleDragOver}
+                                            onDrop={() => handleDrop(index)}
+                                            className={`group relative flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing z-10 ${activeStepIndex === index ? 'bg-blue-50 border-primary ring-1 ring-primary shadow-sm' : 'bg-white border-[#E5E7EB] hover:border-gray-300'}`}
+                                            onClick={() => setActiveStepIndex(index)}
                                         >
-                                            <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-sm border-2 ${activeStepId === step.id
-                                                ? 'bg-primary text-white border-primary'
-                                                : step.type === 'Email'
-                                                    ? 'bg-blue-50 text-primary border-blue-100'
-                                                    : 'bg-[#0A66C2]/10 text-[#0A66C2] border-[#0A66C2]/20'
-                                                }`}>
-                                                {step.type === 'Email' ? <Mail size={18} /> : <Linkedin size={18} />}
+                                            <div className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <GripVertical size={14} className="text-gray-300" />
                                             </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className={`text-xs font-bold truncate ${activeStepId === step.id ? 'text-primary' : 'text-[#111827]'}`}>
-                                                    Step {index + 1}: {step.type}
-                                                </span>
-                                                <span className="text-[10px] text-[#4B5563] font-bold truncate">{step.title}</span>
-                                                <span className="text-[9px] text-[#9CA3AF] font-medium truncate">{step.subtitle}</span>
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${activeStepIndex === index ? 'bg-primary text-white' : 'bg-gray-50 text-gray-400'}`}>
+                                                {step.channel === 'email' ? <Mail size={18} /> : step.channel === 'linkedin' ? <Linkedin size={18} /> : <Phone size={18} />}
                                             </div>
-                                        </button>
+                                            <div className="min-w-0 flex-1">
+                                                <p className={`text-[11px] font-black truncate uppercase ${activeStepIndex === index ? 'text-primary' : 'text-[#111827]'}`}>Step {index + 1}: {step.channel}</p>
+                                                <p className="text-[10px] text-gray-400 font-bold truncate">{step.subject || step.body.slice(0, 20) || 'Empty step'}</p>
+                                            </div>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); removeStep(index); }}
+                                                className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-red-500 transition-all"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
                                     </React.Fragment>
                                 ))}
-
-                                <div className="mt-6 p-4 border-2 border-dashed border-[#E5E7EB] rounded-xl relative z-10">
-                                    <span className="text-[10px] font-bold text-gray-400 block mb-3 text-center uppercase tracking-wider">+ Add Step</span>
-                                    <div className="flex flex-col gap-2">
-                                        <button className="flex items-center justify-center gap-2 py-2 bg-white border border-gray-100 rounded-lg text-[10px] font-bold text-gray-600 hover:border-primary hover:text-primary transition-all shadow-sm">
-                                            <Mail size={12} /> Add Email Step
-                                        </button>
-                                        <button className="flex items-center justify-center gap-2 py-2 bg-white border border-gray-100 rounded-lg text-[10px] font-bold text-gray-600 hover:border-[#0A66C2] hover:text-[#0A66C2] transition-all shadow-sm">
-                                            <Linkedin size={12} /> Add LinkedIn Step
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
-                        </div>
 
-                        <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm p-6 shrink-0 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-blue-100/50 transition-colors duration-500"></div>
-                            <h3 className="text-sm font-semibold text-[#111827] mb-5 relative z-10">Sequence Settings</h3>
-
-                            <div className="flex flex-col gap-5 relative z-10">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary shrink-0">
-                                        <Layers size={14} />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[11px] font-black text-[#111827]">5 steps · 2 channels</span>
-                                        <span className="text-[10px] text-[#6B7280] font-bold">Estimated duration: ~12 days</span>
-                                    </div>
-                                </div>
-
-                                <div className="h-px bg-gray-100"></div>
-
-                                <div className="flex flex-col gap-4">
-                                    <label className="flex items-center justify-between cursor-pointer group">
-                                        <span className="text-[11px] font-bold text-[#4B5563] group-hover:text-primary transition-colors">Stop sequence on any reply</span>
-                                        <div
-                                            className={`relative w-8 h-4 rounded-full transition-all duration-300 shrink-0 ${stopOnReply ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.3)]' : 'bg-gray-200'}`}
-                                            onClick={(e) => { e.preventDefault(); setStopOnReply(!stopOnReply); }}
-                                        >
-                                            <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-300 ${stopOnReply ? 'translate-x-4' : ''}`} />
-                                        </div>
-                                    </label>
-
-                                    <label className="flex items-center justify-between cursor-pointer group">
-                                        <span className="text-[11px] font-bold text-[#4B5563] group-hover:text-primary transition-colors">Skip LinkedIn if not connected</span>
-                                        <div
-                                            className={`relative w-8 h-4 rounded-full transition-all duration-300 shrink-0 ${skipLinkedIn ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.3)]' : 'bg-gray-200'}`}
-                                            onClick={(e) => { e.preventDefault(); setSkipLinkedIn(!skipLinkedIn); }}
-                                        >
-                                            <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-300 ${skipLinkedIn ? 'translate-x-4' : ''}`} />
-                                        </div>
-                                    </label>
-                                </div>
+                            <div className="mt-6 pt-6 border-t border-gray-100 space-y-2">
+                                <button onClick={() => addStep('email')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-[#6B7280] rounded-xl text-xs font-black hover:bg-blue-50 hover:text-primary transition-all">
+                                    <Mail size={14} /> + EMAIL STEP
+                                </button>
+                                <button onClick={() => addStep('linkedin')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-[#6B7280] rounded-xl text-xs font-black hover:bg-blue-50 hover:text-primary transition-all">
+                                    <Linkedin size={14} /> + LINKEDIN STEP
+                                </button>
+                                <button onClick={() => addStep('phone')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-[#6B7280] rounded-xl text-xs font-black hover:bg-blue-50 hover:text-primary transition-all">
+                                    <Phone size={14} /> + PHONE STEP
+                                </button>
                             </div>
-                        </div>
-
-                        <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm p-5 shrink-0 bg-gradient-to-br from-white to-purple-50/30">
-                            <h3 className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest font-mono mb-4 flex items-center gap-2">
-                                <Zap size={12} className="text-purple-500" /> AI ASSIST
-                            </h3>
-                            <button className="w-full flex items-center justify-center gap-2 py-3 bg-white border border-purple-100 text-purple-600 rounded-xl text-[11px] font-black shadow-sm group hover:bg-purple-600 hover:text-white transition-all duration-300">
-                                <Sparkles size={14} className="group-hover:animate-bounce" />
-                                🤖 GENERATE WITH AI
-                            </button>
-                            <p className="text-[9px] text-[#9CA3AF] font-medium mt-3 leading-relaxed text-center italic">
-                                Describe your product and target — AI creates the full multi-channel sequence
-                            </p>
                         </div>
                     </aside>
 
-                    {/* Right Panel: Context-Aware Editor */}
-                    <main className="flex-1 min-w-0">
-                        <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm flex flex-col h-full min-h-[800px] overflow-hidden">
+                    {/* Right Panel: Editor Canvas */}
+                    <main className="flex-1 flex flex-col gap-6">
+                        <div className="card bg-white border border-[#E5E7EB] rounded-2xl shadow-sm flex flex-col flex-1 overflow-hidden min-h-[700px]">
                             {/* Editor Header */}
-                            <div className="px-8 py-4 border-b border-[#F3F4F6] flex items-center justify-between bg-white sticky top-0 z-20">
-                                <div className="flex items-center gap-3">
-                                    <div className={`px-4 py-1.5 rounded-full text-[11px] font-black flex items-center gap-2 ${activeStep.type === 'Email'
-                                        ? 'bg-blue-50 text-[#2563EB]'
-                                        : 'bg-[#0A66C2]/10 text-[#0A66C2]'
-                                        }`}>
-                                        {activeStep.type === 'Email' ? <Mail size={14} /> : <Linkedin size={14} />}
-                                        {activeStep.type} · Step {activeStepId}
-                                    </div>
-                                    {activeStep.type === 'LinkedIn' && (
-                                        <div className="flex bg-gray-50 border border-[#E5E7EB] rounded-lg p-1 shadow-sm">
-                                            <button
-                                                onClick={() => updateLinkedInType('Connection Request')}
-                                                className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${activeStep.linkedinType === 'Connection Request' ? 'bg-[#0A66C2] text-white shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                                            >
-                                                Connection Request
-                                            </button>
-                                            <button
-                                                onClick={() => updateLinkedInType('Direct Message')}
-                                                className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${activeStep.linkedinType === 'Direct Message' ? 'bg-[#0A66C2] text-white shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                                            >
-                                                Direct Message
-                                            </button>
-                                        </div>
-                                    )}
+                            <div className="px-8 py-4 border-b border-gray-50 flex items-center justify-between">
+                                <div className="flex bg-gray-100 p-1 rounded-xl">
+                                    <button onClick={() => setIsPreview(false)} className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${!isPreview ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>EDITOR</button>
+                                    <button onClick={() => setIsPreview(true)} className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${isPreview ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>PREVIEW</button>
                                 </div>
-
-                                <div className="flex bg-white border border-[#E5E7EB] rounded-lg p-1 shadow-sm">
+                                <div className="flex items-center gap-3">
                                     <button
-                                        onClick={() => setIsPreview(false)}
-                                        className={`px-4 py-1.5 rounded-md text-[10px] font-black flex items-center gap-2 transition-all ${!isPreview ? 'bg-primary text-white shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
-                                            }`}
+                                        onClick={handleSave}
+                                        disabled={isSaving}
+                                        className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all disabled:opacity-50"
                                     >
-                                        <Type size={14} /> EDITOR
-                                    </button>
-                                    <button
-                                        onClick={() => setIsPreview(true)}
-                                        className={`px-4 py-1.5 rounded-md text-[10px] font-black flex items-center gap-2 transition-all ${isPreview ? 'bg-primary text-white shadow-sm' : 'text-[#6B7280] hover:text-[#111827]'
-                                            }`}
-                                    >
-                                        <Eye size={14} /> PREVIEW
+                                        {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                        SAVE SEQUENCE
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Editor Content Area */}
-                            <div className="flex flex-col flex-1 overflow-y-auto">
-                                {activeStep.type === 'Email' ? (
-                                    <div className="flex flex-col flex-1 animate-in slide-in-from-right-2 duration-300">
-                                        {/* Email Specific Header */}
-                                        <div className="p-8 border-b border-[#F3F4F6] bg-gray-50/30">
-                                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">SUBJECT LINE</label>
-                                            <div className="space-y-3">
+                            {/* Editor Body */}
+                            <div className="p-8 flex-1 flex flex-col animate-in fade-in duration-300">
+                                {editingSequence.steps[activeStepIndex] && (
+                                    <div className="space-y-8 max-w-3xl">
+                                        {editingSequence.steps[activeStepIndex].channel === 'email' && (
+                                            <div>
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Subject Line</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="e.g., Bespoke cold plunge pools for {{business_name}}"
-                                                    className="w-full py-1.5 text-xl font-bold text-[#111827] focus:outline-none placeholder:text-[#D1D5DB] bg-transparent"
-                                                    value={emailSubject}
-                                                    onChange={(e) => setEmailSubject(e.target.value)}
+                                                    className="w-full text-2xl font-black text-[#111827] focus:outline-none placeholder:text-gray-200"
+                                                    value={editingSequence.steps[activeStepIndex].subject}
+                                                    onChange={(e) => updateStep(activeStepIndex, { subject: e.target.value })}
+                                                    placeholder="Enter subject line..."
                                                 />
-                                                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
-                                                    {mergeTags.slice(0, 3).map(tag => (
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Message Body</label>
+                                                <div className="flex gap-2">
+                                                    {mergeTags.map(tag => (
                                                         <button
                                                             key={tag.label}
-                                                            onClick={() => insertTag(tag.label)}
-                                                            className="px-2 py-1 rounded bg-white border border-gray-100 text-[9px] font-bold text-gray-500 hover:border-primary hover:text-primary transition-all"
+                                                            onClick={() => updateStep(activeStepIndex, { body: (editingSequence.steps[activeStepIndex].body || '') + ' ' + tag.label })}
+                                                            className={`px-2 py-1 rounded-md text-[9px] font-bold border transition-all ${tag.color}`}
                                                         >
                                                             {tag.label}
                                                         </button>
                                                     ))}
-                                                    <button className="px-2 py-1 text-[9px] font-bold text-primary hover:underline">All tags +</button>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        {/* Toolbar */}
-                                        <div className="px-8 py-3.5 bg-white border-b border-[#F3F4F6] flex items-center justify-between">
-                                            <div className="flex items-center gap-1">
-                                                {[Bold, Italic, Underline, LinkIcon, List].map((Icon, i) => (
-                                                    <button key={i} className="p-2 text-[#6B7280] hover:text-[#111827] hover:bg-gray-50 rounded-lg transition-all">
-                                                        <Icon size={18} />
-                                                    </button>
-                                                ))}
-                                                <div className="w-px h-6 bg-[#E5E7EB] mx-2"></div>
-                                                <div className="relative">
-                                                    <button
-                                                        className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 text-amber-600 rounded-lg text-[11px] font-black group hover:bg-amber-100 transition-all"
-                                                        onMouseEnter={() => setShowSpintaxTooltip(true)}
-                                                        onMouseLeave={() => setShowSpintaxTooltip(false)}
-                                                    >
-                                                        <RotateCcw size={14} /> SPINTAX
-                                                    </button>
-                                                    {showSpintaxTooltip && (
-                                                        <div className="absolute top-full mt-2 left-0 w-64 p-3 bg-white border border-gray-200 rounded-lg shadow-xl z-50 animate-in fade-in zoom-in duration-200">
-                                                            <div className="flex items-start gap-2">
-                                                                <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                                                                <div>
-                                                                    <p className="text-[10px] font-bold text-gray-900 mb-1">About Spintax</p>
-                                                                    <p className="text-[10px] text-gray-500 leading-relaxed font-medium">
-                                                                        Spintax creates message variations to improve deliverability. <br />
-                                                                        <span className="text-gray-900 block mt-1">Example: <code className="bg-gray-50 px-1 rounded">{"{Hi|Hey|Hello}"}</code></span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <button className="flex items-center gap-2 px-3 py-2 bg-purple-50 border border-purple-100 text-purple-600 rounded-lg text-[11px] font-black group hover:bg-purple-100 transition-all ml-1">
-                                                    <Sparkles size={14} /> ✨ AI GENERATE
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Editor Canvas */}
-                                        <div className="flex-1 p-8 relative min-h-[400px]">
                                             {isPreview ? (
-                                                <div className="prose prose-sm max-w-none text-[#374151] font-medium leading-relaxed animate-in fade-in duration-300">
-                                                    <div className="mb-6 font-bold text-[#111827] pb-4 border-b border-gray-100">
-                                                        Subject: {getPreviewText(emailSubject || 'e.g., Bespoke cold plunge pools for {{business_name}}')}
-                                                    </div>
-                                                    <div className="whitespace-pre-line text-sm text-[#4B5563]">
-                                                        {getPreviewText(emailBody)}
-                                                    </div>
+                                                <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100 min-h-[300px] whitespace-pre-line text-sm font-medium text-[#4B5563] leading-relaxed">
+                                                    {getPreviewText(editingSequence.steps[activeStepIndex].body) || 'No content to preview'}
                                                 </div>
                                             ) : (
                                                 <textarea
-                                                    className="w-full h-full min-h-[400px] resize-none focus:outline-none text-[#374151] font-medium leading-relaxed placeholder:text-[#D1D5DB] bg-transparent"
-                                                    placeholder="Start writing your email..."
-                                                    value={emailBody}
-                                                    onChange={(e) => setEmailBody(e.target.value)}
+                                                    className="w-full min-h-[300px] p-6 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 text-sm font-medium leading-relaxed"
+                                                    value={editingSequence.steps[activeStepIndex].body}
+                                                    onChange={(e) => updateStep(activeStepIndex, { body: e.target.value })}
+                                                    placeholder={`Write your ${editingSequence.steps[activeStepIndex].channel} message here...`}
                                                 />
                                             )}
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col flex-1 animate-in slide-in-from-right-2 duration-300">
-                                        <div className="flex-1 flex flex-col p-8">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">{activeStep.linkedinType} CONTENT</label>
-                                                {activeStep.linkedinType === 'Connection Request' && (
-                                                    <span className={`text-[10px] font-black ${linkedinNote.length > 300 ? 'text-red-500' : 'text-gray-400'}`}>
-                                                        {linkedinNote.length} / 300
-                                                    </span>
-                                                )}
-                                            </div>
 
-                                            <div className="flex-1 bg-gray-50/50 rounded-2xl border border-gray-100 p-6 shadow-inner">
-                                                {activeStep.linkedinType === 'Connection Request' ? (
-                                                    <textarea
-                                                        className="w-full h-full min-h-[250px] resize-none focus:outline-none text-[#374151] font-medium leading-relaxed placeholder:text-gray-300 bg-transparent"
-                                                        placeholder={`Hi {{first_name}}, I noticed {{business_name}} in {{city}} — impressive {{rating}} star reputation. I work with premium wellness venues on bespoke cold therapy solutions. Would love to connect.`}
-                                                        value={linkedinNote}
-                                                        onChange={(e) => setLinkedinNote(e.target.value)}
+                                        <div className="flex items-center gap-8 pt-6 border-t border-gray-100">
+                                            <div>
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Wait Time (Days)</label>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="number"
+                                                        className="w-20 p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-black text-center focus:outline-none focus:ring-2 focus:ring-primary/10"
+                                                        value={editingSequence.steps[activeStepIndex].delay_days}
+                                                        onChange={(e) => updateStep(activeStepIndex, { delay_days: parseInt(e.target.value) || 0 })}
                                                     />
-                                                ) : (
-                                                    <textarea
-                                                        className="w-full h-full min-h-[400px] resize-none focus:outline-none text-[#374151] font-medium leading-relaxed placeholder:text-gray-300 bg-transparent"
-                                                        placeholder={`Hi {{first_name}}, thanks for connecting! I wanted to share a quick look at what we do — we design and handcraft bespoke cold plunge pools and ice baths here in Dubai, shipped globally. Several premium venues in {{country}} are now offering these as a signature experience. Would you be open to seeing some examples? Happy to send over our portfolio. Best, [Your Name]`}
-                                                        value={linkedinDM}
-                                                        onChange={(e) => setLinkedinDM(e.target.value)}
-                                                    />
-                                                )}
+                                                    <span className="text-xs font-bold text-gray-400">days after previous step</span>
+                                                </div>
                                             </div>
-
-                                            {activeStep.linkedinType === 'Connection Request' && (
-                                                <div className="mt-6 p-4 bg-blue-50/50 border border-blue-100 rounded-xl flex gap-3 items-start">
-                                                    <Info size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                                                    <p className="text-[11px] font-bold text-blue-700 leading-relaxed">
-                                                        Connection requests have a 300 character limit. Keep it short, personal, and don't sell — just open the door.
-                                                    </p>
-                                                </div>
-                                            )}
-
-                                            {activeStep.linkedinType === 'Direct Message' && (
-                                                <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-xl flex gap-3 items-start">
-                                                    <Info size={16} className="text-gray-400 shrink-0 mt-0.5" />
-                                                    <p className="text-[11px] font-bold text-gray-500 leading-relaxed">
-                                                        LinkedIn DMs support basic formatting. Keep messages conversational — this isn't email.
-                                                    </p>
-                                                </div>
-                                            )}
+                                            <div>
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Channel</label>
+                                                <select
+                                                    className="p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-black focus:outline-none focus:ring-2 focus:ring-primary/10"
+                                                    value={editingSequence.steps[activeStepIndex].channel}
+                                                    onChange={(e) => updateStep(activeStepIndex, { channel: e.target.value as Step['channel'] })}
+                                                >
+                                                    <option value="email">Email</option>
+                                                    <option value="linkedin">LinkedIn</option>
+                                                    <option value="phone">Phone Call</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
-
-                            {/* Merge Tags Bar (Bottom) */}
-                            <div className="px-8 py-4 border-t border-[#F3F4F6] bg-white sticky bottom-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mr-2">MERGE TAGS:</span>
-                                    {mergeTags.map(tag => (
-                                        <button
-                                            key={tag.label}
-                                            onClick={() => insertTag(tag.label)}
-                                            className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all hover:shadow-sm hover:scale-105 active:scale-95 ${tag.color}`}
-                                        >
-                                            {tag.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Footer Actions */}
-                            <div className="p-8 border-t border-[#F3F4F6] flex items-center justify-end gap-3 bg-gray-50/50">
-                                <button className="px-6 py-2.5 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm font-bold hover:bg-gray-50 transition-all shadow-sm">
-                                    Save Template
-                                </button>
-                                <button className="px-9 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all shadow-sm active:scale-95">
-                                    Save & Close
-                                </button>
-                            </div>
                         </div>
                     </main>
-                </>
+                </div>
             )}
         </div>
     );

@@ -24,12 +24,18 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onSignOut })
             <h2 className="text-xl font-bold text-[#111827]">{activePage}</h2>
 
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-2 text-sm text-[#374151] font-medium cursor-pointer hover:bg-gray-100 transition-colors">
+                <div
+                    onClick={() => alert('Date range filtering coming soon!')}
+                    className="flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-2 text-sm text-[#374151] font-medium cursor-pointer hover:bg-gray-100 transition-colors"
+                >
                     <span>Jan 1, 2024 - Feb 1, 2024</span>
                     <ChevronDown size={16} className="text-[#9CA3AF]" />
                 </div>
 
-                <button className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-lg font-bold text-sm text-[#374151] hover:bg-gray-50 transition-colors">
+                <button
+                    onClick={() => alert('Exporting functionality coming soon!')}
+                    className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-lg font-bold text-sm text-[#374151] hover:bg-gray-50 transition-colors"
+                >
                     <Download size={16} />
                     Export
                 </button>
@@ -44,7 +50,10 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onSignOut })
 
                 <div className="w-px h-8 bg-[#E5E7EB] mx-2"></div>
 
-                <button className="p-2 text-[#9CA3AF] hover:text-[#111827] relative transition-colors">
+                <button
+                    onClick={() => alert('You have no new notifications.')}
+                    className="p-2 text-[#9CA3AF] hover:text-[#111827] relative transition-colors"
+                >
                     <Bell size={22} />
                     <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#DC2626] rounded-full border-2 border-white"></span>
                 </button>

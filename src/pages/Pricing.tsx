@@ -8,8 +8,10 @@ import {
     ArrowRight,
     ShieldCheck,
     CreditCard,
-    X
+    X,
+    Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface PricingCardProps {
     title: string;
@@ -23,6 +25,7 @@ interface PricingCardProps {
     accentColor: string;
     icon: React.ReactNode;
     buttonText: string;
+    onCheckout: (plan: string) => void;
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({
@@ -36,7 +39,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
     isAnnual,
     accentColor,
     icon,
-    buttonText
+    buttonText,
+    onCheckout
 }) => (
     <div className={`relative flex flex-col p-8 bg-white rounded-3xl border transition-all duration-300 ${isPopular
         ? `border-primary shadow-[0_20px_50px_rgba(37,99,235,0.1)] scale-105 z-10`
@@ -86,11 +90,13 @@ const PricingCard: React.FC<PricingCardProps> = ({
             </ul>
         </div>
 
-        <button className={`w-full py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-center gap-2 ${isPopular
-            ? 'bg-primary text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95'
-            : 'bg-white border-2 border-gray-100 text-[#4B5563] hover:border-primary hover:text-primary active:scale-95'
-            }`}>
-            {buttonText} — {isAnnual ? annualPrice : monthlyPrice}
+        <button
+            onClick={() => onCheckout(title)}
+            className={`w-full py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-center gap-2 ${isPopular
+                ? 'bg-primary text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95'
+                : 'bg-white border-2 border-gray-100 text-[#4B5563] hover:border-primary hover:text-primary active:scale-95'
+                }`}>
+            {buttonText}
             <ArrowRight size={16} />
         </button>
     </div>
@@ -100,6 +106,54 @@ const Pricing: React.FC = () => {
     const [isAnnual, setIsAnnual] = useState(true);
     const [expandedTerms, setExpandedTerms] = useState(false);
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [cancelled, setCancelled] = useState(false);
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('checkout') === 'cancelled') {
+            setCancelled(true);
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+        }
+    }, []);
+
+    const handleCheckout = async (plan: string) => {
+        setIsLoading(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                alert('Please sign in to subscribe.');
+                return;
+            }
+
+            const correctPriceId = plan === 'Starter'
+                ? (isAnnual ? 'price_1T1nCe2LCoJYV9n6X6dU6Ybe' : 'price_1T1nCe2LCoJYV9n6l20Wnd9Y')
+                : (isAnnual ? 'price_1T1nFP2LCoJYV9n6CyKYDjKE' : 'price_1T1nFP2LCoJYV9n6iKcaO1ZY');
+
+            const response = await fetch('/api/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    priceId: correctPriceId,
+                    userId: session.user.id,
+                    userEmail: session.user.email
+                })
+            });
+
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error(data.error || 'Failed to create checkout session');
+            }
+        } catch (error: any) {
+            console.error('Checkout error:', error);
+            alert(`Error: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const faqs = [
         {
@@ -122,32 +176,38 @@ const Pricing: React.FC = () => {
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-[1200px] mx-auto pb-24 pt-8 px-4">
-            {/* Header Section */}
             <div className="text-center mb-16">
                 <h1 className="text-5xl font-black text-[#111827] tracking-tight mb-4">Choose Your Plan</h1>
                 <p className="text-lg text-[#6B7280] font-medium max-w-2xl mx-auto">
                     Scale your outreach with the right plan for your business
                 </p>
 
-                {/* Annual/Monthly Toggle */}
-                <div className="mt-12 flex items-center justify-center gap-4">
-                    <span className={`text-sm font-bold ${!isAnnual ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>Monthly</span>
-                    <button
-                        onClick={() => setIsAnnual(!isAnnual)}
-                        className="relative w-14 h-7 bg-gray-100 rounded-full p-1 transition-all"
-                    >
-                        <div className={`w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 transform ${isAnnual ? 'translate-x-7 bg-primary' : 'translate-x-0'}`} />
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <span className={`text-sm font-bold ${isAnnual ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>Annual</span>
-                        <div className="bg-emerald-100 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
-                            Save 2 months free
+                <div className="mt-12 flex flex-col items-center gap-4">
+                    <div className="flex items-center justify-center gap-4">
+                        <span className={`text-sm font-bold ${!isAnnual ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>Monthly</span>
+                        <button
+                            onClick={() => setIsAnnual(!isAnnual)}
+                            className="relative w-14 h-7 bg-gray-100 rounded-full p-1 transition-all"
+                        >
+                            <div className={`w-5 h-5 rounded-full shadow-md transition-all duration-300 transform ${isAnnual ? 'translate-x-7 bg-primary' : 'translate-x-0 bg-white'}`}
+                                style={{ backgroundColor: isAnnual ? '#2563EB' : 'white' }} />
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${isAnnual ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>Annual</span>
+                            <div className="bg-emerald-100 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                                Save 20%
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {cancelled && (
+                    <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-2xl text-amber-700 text-sm font-bold animate-in fade-in slide-in-from-top-2 duration-500 max-w-md mx-auto">
+                        Checkout was cancelled. You can try again anytime.
+                    </div>
+                )}
             </div>
 
-            {/* Trial Banner */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-6 mb-16 max-w-4xl mx-auto shadow-sm">
                 <div className="flex flex-col items-center gap-2">
                     <div className="flex items-center gap-3">
@@ -161,18 +221,18 @@ const Pricing: React.FC = () => {
                 </div>
             </div>
 
-            {/* Pricing Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
                 <PricingCard
                     title="Starter"
                     description="Everything you need to start generating leads"
                     monthlyPrice="£49"
-                    annualPrice="£490"
-                    annualMonthlyRate="£40.83"
+                    annualPrice="£470"
+                    annualMonthlyRate="£39.17"
                     isAnnual={isAnnual}
                     accentColor="bg-blue-50 text-primary"
                     icon={<Zap size={24} />}
-                    buttonText="Get Started"
+                    buttonText={isLoading ? "Loading..." : "Start 7-Day Free Trial"}
+                    onCheckout={() => handleCheckout('Starter')}
                     features={[
                         "3 active campaigns",
                         "500 leads per month",
@@ -192,13 +252,14 @@ const Pricing: React.FC = () => {
                     title="Pro"
                     description="The full arsenal for serious outreach teams"
                     monthlyPrice="£149"
-                    annualPrice="£1,490"
-                    annualMonthlyRate="£124.17"
+                    annualPrice="£1,430"
+                    annualMonthlyRate="£119.17"
                     isAnnual={isAnnual}
                     isPopular={true}
                     accentColor="bg-purple-50 text-purple-600"
                     icon={<Sparkles size={24} />}
-                    buttonText="Upgrade to Pro"
+                    buttonText={isLoading ? "Loading..." : "Start 7-Day Free Trial"}
+                    onCheckout={() => handleCheckout('Pro')}
                     features={[
                         "🤖 AI Voice Call Agent",
                         "Unlimited campaigns",
@@ -220,7 +281,6 @@ const Pricing: React.FC = () => {
                 />
             </div>
 
-            {/* Feature Comparison Table */}
             <div className="max-w-4xl mx-auto mb-24 overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
                 <div className="p-8 border-b border-gray-50 flex items-center justify-between">
                     <div>
@@ -278,7 +338,6 @@ const Pricing: React.FC = () => {
                 </div>
             </div>
 
-            {/* Trial Terms Section */}
             <div className="max-w-4xl mx-auto mb-24 border-t border-gray-100 pt-8">
                 <button
                     onClick={() => setExpandedTerms(!expandedTerms)}
@@ -311,7 +370,6 @@ const Pricing: React.FC = () => {
                 )}
             </div>
 
-            {/* FAQ Section */}
             <div className="max-w-3xl mx-auto mb-24">
                 <h2 className="text-3xl font-black text-[#111827] text-center mb-12">Frequently Asked Questions</h2>
                 <div className="space-y-4">
@@ -339,7 +397,6 @@ const Pricing: React.FC = () => {
                 </div>
             </div>
 
-            {/* Bottom CTA */}
             <div className="text-center bg-gray-900 rounded-[40px] p-16 text-white overflow-hidden relative group">
                 <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all duration-700" />
                 <div className="relative z-10">
@@ -347,7 +404,12 @@ const Pricing: React.FC = () => {
                     <p className="text-lg text-gray-400 font-medium mb-10 max-w-xl mx-auto">
                         Start your free trial and see the results for yourself.
                     </p>
-                    <button className="px-12 py-5 bg-primary text-white text-lg font-black rounded-3xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/40 active:scale-95">
+                    <button
+                        onClick={() => handleCheckout('Pro')}
+                        disabled={isLoading}
+                        className="px-12 py-5 bg-primary text-white text-lg font-black rounded-3xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/40 active:scale-95 flex items-center gap-2 mx-auto"
+                    >
+                        {isLoading && <Loader2 size={24} className="animate-spin" />}
                         Start 7-Day Free Trial
                     </button>
                     <div className="mt-8 flex items-center justify-center gap-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">

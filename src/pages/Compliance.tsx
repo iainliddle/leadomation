@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Shield,
     Lock,
@@ -9,26 +9,107 @@ import {
     Trash2,
     Upload,
     History,
-    AlertTriangle
+    AlertTriangle,
+    Loader2,
+    Save
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+interface ProfileData {
+    id: string;
+    unsubscribe_text: string;
+    include_physical_address: boolean;
+    physical_address: string;
+    auto_suppress_bounces: boolean;
+    gdpr_compliant: boolean;
+    b2b_only_filter: boolean;
+    log_consent_basis: boolean;
+}
 
 const Compliance: React.FC = () => {
-    const [toggles, setToggles] = useState({
-        footerAddress: true,
-        b2bFilter: true,
-        consentLogs: false,
-        canSpamAuto: true
+    const [profile, setProfile] = useState<Partial<ProfileData>>({
+        include_physical_address: true,
+        b2b_only_filter: true,
+        log_consent_basis: false,
+        auto_suppress_bounces: true,
+        gdpr_compliant: true
     });
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleToggle = (key: keyof typeof toggles) => {
-        setToggles(prev => ({ ...prev, [key]: !prev[key] }));
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        setIsLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+        } else if (data) {
+            setProfile(prev => ({ ...prev, ...data }));
+        }
+        setIsLoading(false);
     };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    ...profile,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) throw error;
+        } catch (error) {
+            console.error('Error saving compliance profile:', error);
+            alert('Error saving compliance settings. Make sure the columns exist in the profiles table.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleToggle = (key: keyof ProfileData) => {
+        setProfile(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
-            <div className="mb-10">
-                <h1 className="text-2xl font-black text-[#111827] tracking-tight">Compliance</h1>
-                <p className="text-sm text-[#6B7280] font-medium mt-1">Manage global regulatory compliance and data protection.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+                <div>
+                    <h1 className="text-2xl font-black text-[#111827] tracking-tight">Compliance</h1>
+                    <p className="text-sm text-[#6B7280] font-medium mt-1">Manage global regulatory compliance and data protection.</p>
+                </div>
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                >
+                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                    SAVE SETTINGS
+                </button>
             </div>
 
             <div className="space-y-8">
@@ -42,7 +123,6 @@ const Compliance: React.FC = () => {
                     </div>
 
                     <div className="space-y-4">
-                        {/* Unsubscribe - Locked */}
                         <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl opacity-80 cursor-not-allowed">
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-[#111827] flex items-center gap-2">
@@ -59,39 +139,36 @@ const Compliance: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Footer Address */}
                         <label className="flex items-center justify-between p-4 bg-white border border-[#E5E7EB] rounded-xl hover:bg-gray-50/50 transition-all cursor-pointer">
                             <span className="text-sm font-bold text-[#4B5563]">Include sender business address in email footer</span>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${toggles.footerAddress ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('footerAddress')}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.include_physical_address ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => handleToggle('include_physical_address')}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${toggles.footerAddress ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.include_physical_address ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
 
-                        {/* B2B Only */}
                         <label className="flex items-center justify-between p-4 bg-white border border-[#E5E7EB] rounded-xl hover:bg-gray-50/50 transition-all cursor-pointer">
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-[#4B5563]">B2B only filter</span>
                                 <span className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">Exclude personal addresses like Gmail, Yahoo, etc.</span>
                             </div>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${toggles.b2bFilter ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('b2bFilter')}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.b2b_only_filter ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => handleToggle('b2b_only_filter')}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${toggles.b2bFilter ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.b2b_only_filter ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
 
-                        {/* Consent Logs */}
                         <label className="flex items-center justify-between p-4 bg-white border border-[#E5E7EB] rounded-xl hover:bg-gray-50/50 transition-all cursor-pointer">
                             <span className="text-sm font-bold text-[#4B5563]">Log consent basis for each lead</span>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${toggles.consentLogs ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('consentLogs')}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.log_consent_basis ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => handleToggle('log_consent_basis')}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${toggles.consentLogs ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.log_consent_basis ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                     </div>
@@ -112,20 +189,21 @@ const Compliance: React.FC = () => {
                             <textarea
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none h-24"
                                 placeholder="Business Address 123, Floor 4, Wellness District..."
-                                defaultValue="Unit 42, Innovation Center, Silicon Oasis, Dubai, UAE"
+                                value={profile.physical_address || ''}
+                                onChange={e => setProfile(prev => ({ ...prev, physical_address: e.target.value }))}
                             />
                         </div>
 
                         <label className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed cursor-pointer">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-bold text-[#111827]">Auto-include in US campaigns</span>
-                                <span className="text-[11px] text-[#9CA3AF] font-medium tracking-tight whitespace-nowrap hidden sm:inline">(Required for targeting US leads)</span>
+                                <span className="text-sm font-bold text-[#111827]">Automatic Bounce Suppression</span>
+                                <span className="text-[11px] text-[#9CA3AF] font-medium tracking-tight hidden sm:inline">(Prevents re-sending to bounced addresses)</span>
                             </div>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${toggles.canSpamAuto ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('canSpamAuto')}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.auto_suppress_bounces ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => handleToggle('auto_suppress_bounces')}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${toggles.canSpamAuto ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.auto_suppress_bounces ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                     </div>
@@ -140,12 +218,6 @@ const Compliance: React.FC = () => {
                             </div>
                             <h3 className="text-base font-bold text-[#111827]">Suppression List</h3>
                         </div>
-                        <div className="flex flex-col items-end">
-                            <span className="text-base font-black text-[#111827]">127 suppressed emails</span>
-                            <span className="text-[10px] font-bold text-[#9CA3AF] flex items-center gap-1 mt-0.5">
-                                <History size={10} /> Last updated: 2 hours ago
-                            </span>
-                        </div>
                     </div>
 
                     <p className="text-sm text-[#6B7280] leading-relaxed mb-8 max-w-2xl">
@@ -159,7 +231,6 @@ const Compliance: React.FC = () => {
                         <button className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
                             <Upload size={14} /> Import Suppression List
                         </button>
-                        <button className="text-[11px] font-black text-primary hover:underline uppercase tracking-widest ml-1">Export List</button>
                     </div>
                 </div>
 
