@@ -1,8 +1,6 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-    apiVersion: '2025-01-27' as any, // Use latest stable version
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 const VALID_PRICE_IDS = [
     'price_1T1nCe2LCoJYV9n6l20Wnd9Y', // Starter Monthly
