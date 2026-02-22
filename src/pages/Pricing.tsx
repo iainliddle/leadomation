@@ -307,7 +307,7 @@ const Pricing: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {[
+                            {([
                                 { name: "Keyword searches", starter: "50/month", pro: "Unlimited" },
                                 { name: "Active campaigns", starter: "3", pro: "Unlimited" },
                                 { name: "Leads per month", starter: "500", pro: "Unlimited" },
@@ -318,7 +318,7 @@ const Pricing: React.FC = () => {
                                 { name: "AI Voice Agent", starter: false, pro: true },
                                 { name: "Global Demand", starter: false, pro: true },
                                 { name: "LinkedIn automation", starter: false, pro: true }
-                            ].map((row, idx) => (
+                            ] as { name: string; starter: string | boolean; pro: string | boolean; note?: string }[]).map((row, idx) => (
                                 <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
                                     <td className="px-8 py-4">
                                         <div className="flex flex-col">

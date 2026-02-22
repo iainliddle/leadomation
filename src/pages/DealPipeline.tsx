@@ -22,11 +22,9 @@ interface Deal {
     created_at: string;
 }
 
-interface DealPipelineProps {
-    onPageChange?: (page: string) => void;
-}
+interface DealPipelineProps { }
 
-const DealPipeline: React.FC<DealPipelineProps> = ({ onPageChange }) => {
+const DealPipeline: React.FC<DealPipelineProps> = () => {
     const [deals, setDeals] = useState<Deal[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
