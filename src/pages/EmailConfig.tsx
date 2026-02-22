@@ -8,83 +8,76 @@ import {
     Link,
     Image as ImageIcon,
     Loader2,
-    Eye
+    Eye,
+    Lightbulb
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-interface ProfileData {
-    id: string;
-    sender_name: string;
-    sender_email: string;
-    reply_to_email: string;
-    daily_send_limit: number;
-    send_delay_seconds: number;
-    signature_html: string;
-    include_signature_outgoing: boolean;
-    include_signature_replies: boolean;
-    auto_detect_timezone: boolean;
-}
-
 const EmailConfig: React.FC = () => {
-    const [profile, setProfile] = useState<Partial<ProfileData>>({
-        daily_send_limit: 50,
-        send_delay_seconds: 30,
-        auto_detect_timezone: true,
-        include_signature_outgoing: true,
-        include_signature_replies: true
-    });
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [dailyEmailLimit, setDailyEmailLimit] = useState(50);
+    const [emailSendDelay, setEmailSendDelay] = useState(30);
+    const [autoDetectTimezone, setAutoDetectTimezone] = useState(true);
+    const [fromName, setFromName] = useState('');
+    const [fromEmail, setFromEmail] = useState('');
+    const [replyToEmail, setReplyToEmail] = useState('');
+    const [emailSignature, setEmailSignature] = useState('');
     const [showSignaturePreview, setShowSignaturePreview] = useState(false);
 
     useEffect(() => {
-        fetchProfile();
+        const loadSettings = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('daily_email_limit, email_send_delay, auto_detect_timezone, email_from_name, email_from_address, email_reply_to, email_signature')
+                    .eq('id', user.id)
+                    .single();
+
+                if (data) {
+                    setDailyEmailLimit(data.daily_email_limit || 50);
+                    setEmailSendDelay(data.email_send_delay || 30);
+                    setAutoDetectTimezone(data.auto_detect_timezone ?? true);
+                    setFromName(data.email_from_name || '');
+                    setFromEmail(data.email_from_address || '');
+                    setReplyToEmail(data.email_reply_to || '');
+                    setEmailSignature(data.email_signature || '');
+                }
+            } catch (err) {
+                console.error('Error loading email config:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadSettings();
     }, []);
 
-    const fetchProfile = async () => {
-        setIsLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-        if (error) {
-            console.error('Error fetching profile:', error);
-        } else if (data) {
-            setProfile(prev => ({ ...prev, ...data }));
-        }
-        setIsLoading(false);
-    };
-
-    const handleSave = async (sectionId: string) => {
-        setIsSaving(sectionId);
+    const saveSettings = async (fields: Record<string, any>) => {
+        setSaving(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
             const { error } = await supabase
                 .from('profiles')
-                .upsert({
-                    id: user.id,
-                    ...profile,
-                    updated_at: new Date().toISOString()
-                });
+                .update(fields)
+                .eq('id', user.id);
 
-            if (error) throw error;
-            // Success feedback or toast could go here
-        } catch (error) {
-            console.error('Error saving profile:', error);
-            alert('Error saving configuration. Make sure the columns exist in the profiles table.');
+            if (error) {
+                console.error('Error saving:', error);
+                alert('Failed to save. Please try again.');
+            }
+        } catch (err) {
+            console.error('Save error:', err);
         } finally {
-            setIsSaving(null);
+            setTimeout(() => setSaving(false), 1000);
         }
     };
 
-    if (isLoading) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -110,11 +103,11 @@ const EmailConfig: React.FC = () => {
                             <h3 className="text-base font-bold text-[#111827]">Sending Controls</h3>
                         </div>
                         <button
-                            onClick={() => handleSave('limits')}
-                            disabled={isSaving === 'limits'}
+                            onClick={() => saveSettings({ daily_email_limit: dailyEmailLimit, email_send_delay: emailSendDelay, auto_detect_timezone: autoDetectTimezone })}
+                            disabled={saving}
                             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
                         >
-                            {isSaving === 'limits' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                             SAVE
                         </button>
                     </div>
@@ -126,8 +119,11 @@ const EmailConfig: React.FC = () => {
                                 {[25, 50, 100, 200].map(limit => (
                                     <button
                                         key={limit}
-                                        onClick={() => setProfile(prev => ({ ...prev, daily_send_limit: limit }))}
-                                        className={`px-5 py-2 rounded-lg text-xs font-bold transition-all border ${profile.daily_send_limit === limit
+                                        onClick={() => {
+                                            setDailyEmailLimit(limit);
+                                            saveSettings({ daily_email_limit: limit });
+                                        }}
+                                        className={`px-5 py-2 rounded-lg text-xs font-bold transition-all border ${dailyEmailLimit === limit
                                             ? 'bg-primary text-white border-primary shadow-sm'
                                             : 'bg-white text-[#6B7280] border-[#E5E7EB] hover:border-gray-300'
                                             }`}
@@ -143,8 +139,8 @@ const EmailConfig: React.FC = () => {
                             <input
                                 type="number"
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-                                value={profile.send_delay_seconds || 30}
-                                onChange={e => setProfile(prev => ({ ...prev, send_delay_seconds: parseInt(e.target.value) }))}
+                                value={emailSendDelay}
+                                onChange={e => setEmailSendDelay(parseInt(e.target.value))}
                             />
                         </div>
                     </div>
@@ -156,10 +152,14 @@ const EmailConfig: React.FC = () => {
                                 <span className="text-[11px] text-[#6B7280] font-medium mt-1">Emails will arrive during their local business hours</span>
                             </div>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.auto_detect_timezone ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => setProfile(prev => ({ ...prev, auto_detect_timezone: !prev.auto_detect_timezone }))}
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer ${autoDetectTimezone ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => {
+                                    const newValue = !autoDetectTimezone;
+                                    setAutoDetectTimezone(newValue);
+                                    saveSettings({ auto_detect_timezone: newValue });
+                                }}
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.auto_detect_timezone ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${autoDetectTimezone ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                     </div>
@@ -175,11 +175,11 @@ const EmailConfig: React.FC = () => {
                             <h3 className="text-base font-bold text-[#111827]">Sender Identity</h3>
                         </div>
                         <button
-                            onClick={() => handleSave('identity')}
-                            disabled={isSaving === 'identity'}
+                            onClick={() => saveSettings({ email_from_name: fromName, email_from_address: fromEmail, email_reply_to: replyToEmail })}
+                            disabled={saving}
                             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
                         >
-                            {isSaving === 'identity' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                             SAVE
                         </button>
                     </div>
@@ -190,8 +190,8 @@ const EmailConfig: React.FC = () => {
                             <input
                                 type="text"
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                value={profile.sender_name || ''}
-                                onChange={e => setProfile(prev => ({ ...prev, sender_name: e.target.value }))}
+                                value={fromName}
+                                onChange={e => setFromName(e.target.value)}
                                 placeholder="e.g. Iain Liddle"
                             />
                         </div>
@@ -201,8 +201,8 @@ const EmailConfig: React.FC = () => {
                                 <input
                                     type="email"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                    value={profile.sender_email || ''}
-                                    onChange={e => setProfile(prev => ({ ...prev, sender_email: e.target.value }))}
+                                    value={fromEmail}
+                                    onChange={e => setFromEmail(e.target.value)}
                                     placeholder="your@outreach-domain.com"
                                 />
                             </div>
@@ -211,8 +211,8 @@ const EmailConfig: React.FC = () => {
                                 <input
                                     type="email"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                    value={profile.reply_to_email || ''}
-                                    onChange={e => setProfile(prev => ({ ...prev, reply_to_email: e.target.value }))}
+                                    value={replyToEmail}
+                                    onChange={e => setReplyToEmail(e.target.value)}
                                     placeholder="your@main-email.com"
                                 />
                             </div>
@@ -236,11 +236,11 @@ const EmailConfig: React.FC = () => {
                                 PREVIEW
                             </button>
                             <button
-                                onClick={() => handleSave('signature')}
-                                disabled={isSaving === 'signature'}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                                onClick={() => saveSettings({ email_signature: emailSignature })}
+                                disabled={saving}
+                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-indigo-500/10 hover:bg-[#4338CA] transition-all active:scale-95 disabled:opacity-50"
                             >
-                                {isSaving === 'signature' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                                 SAVE
                             </button>
                         </div>
@@ -248,7 +248,7 @@ const EmailConfig: React.FC = () => {
 
                     {showSignaturePreview ? (
                         <div className="border border-[#E5E7EB] rounded-xl p-6 mb-8 bg-gray-50 text-sm font-medium text-[#4B5563] whitespace-pre-wrap leading-relaxed">
-                            {profile.signature_html}
+                            {emailSignature}
                         </div>
                     ) : (
                         <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-8 group focus-within:border-primary transition-all">
@@ -260,8 +260,8 @@ const EmailConfig: React.FC = () => {
                             </div>
                             <textarea
                                 className="w-full p-6 text-sm font-semibold text-[#4B5563] focus:outline-none min-h-[160px] bg-white leading-relaxed"
-                                value={profile.signature_html || ''}
-                                onChange={e => setProfile(prev => ({ ...prev, signature_html: e.target.value }))}
+                                value={emailSignature}
+                                onChange={e => setEmailSignature(e.target.value)}
                                 placeholder="Kind regards,\nIain Liddle"
                             />
                         </div>
@@ -270,22 +270,29 @@ const EmailConfig: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <label className="flex items-center justify-between cursor-pointer group p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed hover:border-primary transition-all">
                             <span className="text-xs font-bold text-[#111827]">Full Outgoing Sequence</span>
-                            <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.include_signature_outgoing ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => setProfile(prev => ({ ...prev, include_signature_outgoing: !prev.include_signature_outgoing }))}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.include_signature_outgoing ? 'translate-x-5' : ''}`} />
+                            <div className="relative w-11 h-6 rounded-full transition-all duration-300 bg-primary">
+                                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 translate-x-5" />
                             </div>
                         </label>
                         <label className="flex items-center justify-between cursor-pointer group p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed hover:border-primary transition-all">
                             <span className="text-xs font-bold text-[#111827]">Inbox Replies Only</span>
-                            <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.include_signature_replies ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => setProfile(prev => ({ ...prev, include_signature_replies: !prev.include_signature_replies }))}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.include_signature_replies ? 'translate-x-5' : ''}`} />
+                            <div className="relative w-11 h-6 rounded-full transition-all duration-300 bg-primary">
+                                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 translate-x-5" />
                             </div>
                         </label>
+                    </div>
+                </div>
+
+                {/* Bottom Info Banner */}
+                <div className="mt-10 bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#4F46E5] shadow-sm shrink-0">
+                        <Lightbulb size={20} />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-blue-900">Outreach Deliverability</h4>
+                        <p className="text-xs text-blue-700/80 font-medium mt-1.5 leading-relaxed">
+                            These settings control how your outreach emails are sent. Daily limits help protect your sender reputation and ensure high deliverability. Your sending identity should match the email account connected in Integrations to avoid spam filters.
+                        </p>
                     </div>
                 </div>
             </div>

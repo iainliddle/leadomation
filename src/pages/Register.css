@@ -1,0 +1,270 @@
+.register-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(180deg, #EEEDF7 0%, #F4F2FC 25%, #EEF8F5 50%, #FAFAFC 100%);
+}
+
+.register-logo {
+    height: 56px;
+    width: auto;
+    margin-bottom: 32px;
+}
+
+.register-card {
+    width: 100%;
+    max-width: 460px;
+    background: white;
+    border-radius: 20px;
+    padding: 48px 40px;
+    border: 1px solid #E2E4ED;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 32px 80px rgba(79, 70, 229, 0.1);
+}
+
+.register-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: #0F172A;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
+
+.register-subtitle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    color: #475569;
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.register-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+}
+
+.register-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: #F8FAFC;
+    border: 1px solid #E2E4ED;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0F172A;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.register-input::placeholder {
+    color: #CBD5E1;
+}
+
+.register-input:focus {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    background: white;
+}
+
+.register-input-wrap {
+    position: relative;
+}
+
+.register-eye-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #94A3B8;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.register-eye-btn:hover {
+    color: #4F46E5;
+}
+
+.register-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.register-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid #E2E4ED;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.register-checkbox:checked {
+    border-color: #4F46E5;
+    background: #4F46E5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-size: 14px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.register-terms-text {
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.register-terms-link {
+    color: #4F46E5;
+    font-weight: 700;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.register-terms-link:hover {
+    text-decoration: underline;
+}
+
+.register-submit {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.register-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(79, 70, 229, 0.35);
+}
+
+.register-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.register-error {
+    padding: 12px;
+    background: #FFF1F2;
+    border: 1px solid #FECDD3;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #E11D48;
+}
+
+.register-trust-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 24px;
+    padding: 12px;
+    background: #F8FAFC;
+    border: 1px solid #E2E4ED;
+    border-radius: 12px;
+}
+
+.register-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.register-signin-link {
+    text-align: center;
+    font-size: 14px;
+    color: #475569;
+    font-weight: 500;
+    margin-top: 24px;
+}
+
+.register-signin-link button {
+    color: #4F46E5;
+    font-weight: 700;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.register-signin-link button:hover {
+    text-decoration: underline;
+}
+
+.register-success {
+    text-align: center;
+    padding: 32px 0;
+}
+
+.register-success-icon {
+    width: 64px;
+    height: 64px;
+    background: #ECFDF5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: #059669;
+}
+
+.register-success h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0F172A;
+    margin-bottom: 8px;
+}
+
+.register-success p {
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}

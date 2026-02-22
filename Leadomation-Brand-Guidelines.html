@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadomation Brand Guidelines</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1a1a2e;
+            background: #fff;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        @media print {
+            body { padding: 20px; }
+            .page-break { page-break-before: always; }
+            h2 { page-break-after: avoid; }
+        }
+
+        /* Cover */
+        .cover {
+            text-align: center;
+            padding: 100px 0 80px;
+            border-bottom: 3px solid #4F46E5;
+            margin-bottom: 40px;
+        }
+
+        .cover-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .logo-mark {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06D6A0 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 24px;
+            color: white;
+        }
+
+        .logo-text {
+            font-weight: 800;
+            font-size: 32px;
+            color: #1a1a2e;
+            letter-spacing: -1px;
+        }
+
+        .cover h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #4F46E5;
+            margin-bottom: 10px;
+        }
+
+        .cover .tagline {
+            font-size: 18px;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .cover .company {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        /* Sections */
+        h2 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #4F46E5;
+            margin: 40px 0 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #E2E8F0;
+        }
+
+        h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 24px 0 12px;
+        }
+
+        h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748B;
+            margin: 16px 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #374151;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 24px;
+            font-size: 10pt;
+        }
+
+        th {
+            background: #F1F5F9;
+            color: #4F46E5;
+            font-weight: 700;
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 2px solid #E2E8F0;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #E2E8F0;
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Color Swatches */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .color-swatch {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .swatch-color {
+            height: 60px;
+        }
+
+        .swatch-info {
+            padding: 10px;
+            background: #F8FAFC;
+        }
+
+        .swatch-name {
+            font-weight: 700;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .swatch-hex {
+            font-family: monospace;
+            font-size: 10px;
+            color: #64748B;
+        }
+
+        /* Gradient Display */
+        .gradient-box {
+            height: 40px;
+            border-radius: 8px;
+            margin: 8px 0 16px;
+        }
+
+        /* Code Blocks */
+        .code {
+            font-family: 'Courier New', monospace;
+            font-size: 9pt;
+            background: #F1F5F9;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border-left: 3px solid #4F46E5;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 12px 0 12px 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+            color: #374151;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #F0F9FF;
+            border: 1px solid #BAE6FD;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .info-box.success {
+            background: #ECFDF5;
+            border-color: #A7F3D0;
+        }
+
+        .info-box.warning {
+            background: #FEF3C7;
+            border-color: #FCD34D;
+        }
+
+        /* Two Column */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Specs List */
+        .specs {
+            background: #F8FAFC;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .specs dt {
+            font-weight: 600;
+            color: #4F46E5;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .specs dd {
+            margin: 0 0 12px 0;
+            color: #1a1a2e;
+        }
+
+        .specs dd:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #E2E8F0;
+            text-align: center;
+            font-size: 10px;
+            color: #94A3B8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COVER -->
+    <div class="cover">
+        <div class="cover-logo">
+            <div class="logo-mark">L</div>
+            <span class="logo-text">Leadomation</span>
+        </div>
+        <h1>Brand Guidelines</h1>
+        <p class="tagline">"Stop Searching. Start Closing."</p>
+        <p class="company">Leadomation by Lumarr Ltd | www.leadomation.co.uk</p>
+    </div>
+
+    <!-- COMPANY INFO -->
+    <h2>1. Company Information</h2>
+    <div class="specs">
+        <dl>
+            <dt>Brand Name</dt>
+            <dd>Leadomation</dd>
+            <dt>Parent Company</dt>
+            <dd>Lumarr Ltd</dd>
+            <dt>Primary Tagline</dt>
+            <dd>"Stop Searching. Start Closing."</dd>
+            <dt>Website</dt>
+            <dd>www.leadomation.co.uk</dd>
+            <dt>Industry</dt>
+            <dd>B2B Lead Generation & Sales Automation</dd>
+        </dl>
+    </div>
+
+    <!-- LOGO -->
+    <h2>2. Logo</h2>
+
+    <h3>Primary Logo Components</h3>
+    <div class="two-col">
+        <div>
+            <h4>Logo Mark</h4>
+            <ul>
+                <li>Square shape with 10px rounded corners</li>
+                <li>Size: 36-38px digital</li>
+                <li>Background: Primary brand gradient</li>
+                <li>Contains white "L" letter, centered</li>
+                <li>Letter weight: 800-900 (Extra Bold)</li>
+            </ul>
+        </div>
+        <div>
+            <h4>Logo Text</h4>
+            <ul>
+                <li>Font: Outfit</li>
+                <li>Weight: 800 (Extra Bold)</li>
+                <li>Size: 22px relative to 36px mark</li>
+                <li>Color: White on dark, Black on light</li>
+                <li>Letter spacing: -0.5px</li>
+            </ul>
+        </div>
+    </div>
+
+    <h4>Clear Space</h4>
+    <p>Maintain clear space around the logo equal to the height of the "L" letter in all directions.</p>
+
+    <h4>Minimum Size</h4>
+    <p>36px height for digital applications, 12mm for print materials.</p>
+
+    <!-- COLORS -->
+    <div class="page-break"></div>
+    <h2>3. Color Palette</h2>
+
+    <h3>Primary Colors</h3>
+    <div class="color-grid">
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #4F46E5;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Indigo (Primary)</div>
+                <div class="swatch-hex">#4F46E5 | RGB 79, 70, 229</div>
+            </div>
+        </div>
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #818CF8;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Indigo Light</div>
+                <div class="swatch-hex">#818CF8 | RGB 129, 140, 248</div>
+            </div>
+        </div>
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #3730A3;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Indigo Dark</div>
+                <div class="swatch-hex">#3730A3 | RGB 55, 48, 163</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Secondary Colors</h3>
+    <div class="color-grid">
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #06D6A0;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Emerald (Accent)</div>
+                <div class="swatch-hex">#06D6A0 | RGB 6, 214, 160</div>
+            </div>
+        </div>
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #7C3AED;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Violet</div>
+                <div class="swatch-hex">#7C3AED | RGB 124, 58, 237</div>
+            </div>
+        </div>
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #F59E0B;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Amber</div>
+                <div class="swatch-hex">#F59E0B | RGB 245, 158, 11</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Dark Theme Backgrounds</h3>
+    <div class="color-grid">
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #0B0F1A;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Dark (Primary BG)</div>
+                <div class="swatch-hex">#0B0F1A | RGB 11, 15, 26</div>
+            </div>
+        </div>
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #111827;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Dark Card</div>
+                <div class="swatch-hex">#111827 | RGB 17, 24, 39</div>
+            </div>
+        </div>
+        <div class="color-swatch">
+            <div class="swatch-color" style="background: #1E293B;"></div>
+            <div class="swatch-info">
+                <div class="swatch-name">Dark Border</div>
+                <div class="swatch-hex">#1E293B | RGB 30, 41, 59</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Text Colors</h3>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Hex</th>
+            <th>RGB</th>
+            <th>Usage</th>
+        </tr>
+        <tr>
+            <td><strong>Text Primary</strong></td>
+            <td>#F1F5F9</td>
+            <td>241, 245, 249</td>
+            <td>Headings, primary text on dark</td>
+        </tr>
+        <tr>
+            <td><strong>Text Secondary</strong></td>
+            <td>#94A3B8</td>
+            <td>148, 163, 184</td>
+            <td>Body text, descriptions</td>
+        </tr>
+        <tr>
+            <td><strong>Text Muted</strong></td>
+            <td>#64748B</td>
+            <td>100, 116, 139</td>
+            <td>Subtle text, labels, captions</td>
+        </tr>
+    </table>
+
+    <!-- GRADIENTS -->
+    <h2>4. Gradients</h2>
+
+    <h4>Primary Brand Gradient</h4>
+    <div class="gradient-box" style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06D6A0 100%);"></div>
+    <div class="code">linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06D6A0 100%)</div>
+    <p><strong>Usage:</strong> Logo mark, featured badges, avatar backgrounds, hero accents</p>
+
+    <h4>Text/Accent Gradient</h4>
+    <div class="gradient-box" style="background: linear-gradient(135deg, #06D6A0 0%, #4F46E5 100%);"></div>
+    <div class="code">linear-gradient(135deg, #06D6A0 0%, #4F46E5 100%)</div>
+    <p><strong>Usage:</strong> Gradient text, stat numbers, step numbers, key metrics</p>
+
+    <h4>Button Gradient</h4>
+    <div class="gradient-box" style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);"></div>
+    <div class="code">linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)</div>
+    <p><strong>Usage:</strong> Primary buttons, CTAs</p>
+
+    <!-- TYPOGRAPHY -->
+    <div class="page-break"></div>
+    <h2>5. Typography</h2>
+
+    <h3>Primary Font: Outfit</h3>
+    <p>Google Fonts: <code>https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900</code></p>
+
+    <table>
+        <tr>
+            <th>Usage</th>
+            <th>Weight</th>
+            <th>Size</th>
+            <th>Letter Spacing</th>
+        </tr>
+        <tr>
+            <td>Hero Headline (H1)</td>
+            <td>800-900</td>
+            <td>44-78px</td>
+            <td>-2px to -3px</td>
+        </tr>
+        <tr>
+            <td>Section Headings (H2)</td>
+            <td>800</td>
+            <td>32-50px</td>
+            <td>-1.5px to -2px</td>
+        </tr>
+        <tr>
+            <td>Card Headings (H3)</td>
+            <td>800</td>
+            <td>17-20px</td>
+            <td>-0.3px</td>
+        </tr>
+        <tr>
+            <td>Body Text</td>
+            <td>400-500</td>
+            <td>14-18px</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Buttons</td>
+            <td>700</td>
+            <td>13-16px</td>
+            <td>0.2px-0.5px</td>
+        </tr>
+        <tr>
+            <td>Navigation</td>
+            <td>500-600</td>
+            <td>13-14px</td>
+            <td>0.3px</td>
+        </tr>
+    </table>
+
+    <h3>Monospace Font: JetBrains Mono</h3>
+    <p>Google Fonts: <code>https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700</code></p>
+
+    <table>
+        <tr>
+            <th>Usage</th>
+            <th>Weight</th>
+            <th>Size</th>
+            <th>Letter Spacing</th>
+        </tr>
+        <tr>
+            <td>Section Labels/Eyebrows</td>
+            <td>600</td>
+            <td>11-12px</td>
+            <td>2px-3px</td>
+        </tr>
+        <tr>
+            <td>Step Numbers</td>
+            <td>700</td>
+            <td>48-52px</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Code/Technical Text</td>
+            <td>400-500</td>
+            <td>11px</td>
+            <td>0</td>
+        </tr>
+    </table>
+
+    <!-- BUTTONS -->
+    <h2>6. Button Styles</h2>
+
+    <h3>Primary Button</h3>
+    <div class="specs">
+        <dl>
+            <dt>Background</dt>
+            <dd>Primary gradient or solid #4F46E5</dd>
+            <dt>Text</dt>
+            <dd>White, 700 weight, 13-16px</dd>
+            <dt>Padding</dt>
+            <dd>16-18px vertical, 36-40px horizontal</dd>
+            <dt>Border Radius</dt>
+            <dd>12-16px</dd>
+            <dt>Shadow</dt>
+            <dd>0 4px 20px rgba(79, 70, 229, 0.3)</dd>
+            <dt>Hover</dt>
+            <dd>Lift -2px, increase shadow intensity</dd>
+        </dl>
+    </div>
+
+    <h3>Secondary/Ghost Button</h3>
+    <div class="specs">
+        <dl>
+            <dt>Background</dt>
+            <dd>Transparent</dd>
+            <dt>Border</dt>
+            <dd>1px solid rgba(255, 255, 255, 0.08)</dd>
+            <dt>Text</dt>
+            <dd>#F1F5F9 or #94A3B8, 600 weight</dd>
+            <dt>Padding</dt>
+            <dd>16px vertical, 36px horizontal</dd>
+            <dt>Border Radius</dt>
+            <dd>12px</dd>
+            <dt>Hover</dt>
+            <dd>Border lightens, subtle background fill</dd>
+        </dl>
+    </div>
+
+    <!-- CARDS -->
+    <div class="page-break"></div>
+    <h2>7. Card Styles</h2>
+
+    <h3>Standard Card</h3>
+    <div class="specs">
+        <dl>
+            <dt>Background</dt>
+            <dd>#111827 or rgba(17, 24, 39, 0.6) with backdrop blur</dd>
+            <dt>Border</dt>
+            <dd>1px solid #1E293B</dd>
+            <dt>Border Radius</dt>
+            <dd>18-24px</dd>
+            <dt>Padding</dt>
+            <dd>32-44px</dd>
+            <dt>Hover Border</dt>
+            <dd>rgba(79, 70, 229, 0.4)</dd>
+            <dt>Hover Transform</dt>
+            <dd>translateY(-4px to -6px)</dd>
+        </dl>
+    </div>
+
+    <h3>Featured Card</h3>
+    <div class="specs">
+        <dl>
+            <dt>Border</dt>
+            <dd>1px solid rgba(79, 70, 229, 0.3)</dd>
+            <dt>Background</dt>
+            <dd>Subtle indigo gradient overlay</dd>
+            <dt>Shadow</dt>
+            <dd>0 0 80px rgba(79, 70, 229, 0.08)</dd>
+            <dt>Badge</dt>
+            <dd>"MOST POPULAR" pill positioned at top center</dd>
+        </dl>
+    </div>
+
+    <!-- BADGES -->
+    <h2>8. Badges & Tags</h2>
+
+    <h3>Status Badge (Hero)</h3>
+    <div class="specs">
+        <dl>
+            <dt>Background</dt>
+            <dd>rgba(6, 214, 160, 0.06-0.1)</dd>
+            <dt>Border</dt>
+            <dd>1px solid rgba(6, 214, 160, 0.15-0.2)</dd>
+            <dt>Border Radius</dt>
+            <dd>100px (pill shape)</dd>
+            <dt>Padding</dt>
+            <dd>7-8px vertical, 18-20px horizontal</dd>
+            <dt>Text</dt>
+            <dd>#06D6A0, 13px, 600 weight</dd>
+            <dt>Special</dt>
+            <dd>Includes animated pulse dot indicator</dd>
+        </dl>
+    </div>
+
+    <h3>Feature Tag</h3>
+    <div class="specs">
+        <dl>
+            <dt>Background</dt>
+            <dd>rgba(6, 214, 160, 0.1-0.12)</dd>
+            <dt>Border</dt>
+            <dd>1px solid rgba(6, 214, 160, 0.12-0.15)</dd>
+            <dt>Border Radius</dt>
+            <dd>6px</dd>
+            <dt>Padding</dt>
+            <dd>4px vertical, 10-12px horizontal</dd>
+            <dt>Text</dt>
+            <dd>#06D6A0, 10-11px, 700 weight, UPPERCASE</dd>
+        </dl>
+    </div>
+
+    <!-- VISUAL ELEMENTS -->
+    <h2>9. Visual Elements</h2>
+
+    <h3>Feature Icon Container</h3>
+    <ul>
+        <li>Size: 48px x 48px</li>
+        <li>Border Radius: 12-13px</li>
+        <li>Background: Color-specific glow (indigo, emerald, violet, amber)</li>
+        <li>Border: 1px solid with 15-20% opacity of icon color</li>
+        <li>Icon Size: 22px</li>
+    </ul>
+
+    <h3>Decorative Orbs (Background)</h3>
+    <ul>
+        <li>Shape: Circle</li>
+        <li>Sizes: 400px-700px diameter</li>
+        <li>Filter: blur(120px-140px)</li>
+        <li>Opacity: 5%-15%</li>
+        <li>Colors: Primary (#4F46E5), Violet (#7C3AED), Emerald (#06D6A0)</li>
+        <li>Animation: Slow floating movement (20-30s duration)</li>
+    </ul>
+
+    <h3>Grid Pattern Background</h3>
+    <ul>
+        <li>Line Color: rgba(79, 70, 229, 0.03)</li>
+        <li>Grid Size: 60-64px</li>
+        <li>Mask: Radial gradient fade to edges</li>
+    </ul>
+
+    <!-- BRAND VOICE -->
+    <div class="page-break"></div>
+    <h2>10. Brand Voice & Messaging</h2>
+
+    <h3>Tone</h3>
+    <ul>
+        <li>Professional yet approachable</li>
+        <li>Confident and results-focused</li>
+        <li>Clear and concise</li>
+    </ul>
+
+    <h3>Key Messages</h3>
+    <div class="info-box success">
+        <ul>
+            <li><strong>"Stop Searching. Start Closing."</strong> - Primary tagline</li>
+            <li>"AI-Powered B2B Lead Generation"</li>
+            <li>"Go from zero leads to booked meetings in under 10 minutes"</li>
+            <li>"No spreadsheets. No guesswork."</li>
+        </ul>
+    </div>
+
+    <h3>Value Propositions</h3>
+    <ul>
+        <li>20+ countries covered</li>
+        <li>3 minutes to first leads</li>
+        <li>10x faster than manual prospecting</li>
+    </ul>
+
+    <!-- USAGE GUIDELINES -->
+    <h2>11. Usage Guidelines</h2>
+
+    <div class="two-col">
+        <div>
+            <h4 style="color: #059669;">Do</h4>
+            <ul>
+                <li>Use the primary gradient for key brand moments</li>
+                <li>Maintain high contrast for text readability</li>
+                <li>Apply subtle hover animations for interactivity</li>
+                <li>Use the emerald accent for success states and CTAs</li>
+                <li>Keep consistent border radius (10-24px range)</li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="color: #DC2626;">Don't</h4>
+            <ul>
+                <li>Place logo on busy or low-contrast backgrounds</li>
+                <li>Use colors outside the defined palette</li>
+                <li>Apply heavy shadows that overpower the design</li>
+                <li>Mix different gradient directions inconsistently</li>
+                <li>Distort or rotate the logo</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- QUICK REFERENCE -->
+    <h2>12. Quick Reference - CSS Variables</h2>
+
+    <div class="code">:root {
+    --primary: #4F46E5;
+    --primary-light: #818CF8;
+    --primary-dark: #3730A3;
+    --accent: #06D6A0;
+    --violet: #7C3AED;
+    --amber: #F59E0B;
+    --dark: #0B0F1A;
+    --dark-card: #111827;
+    --dark-border: #1E293B;
+    --text: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --gradient-1: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06D6A0 100%);
+    --gradient-2: linear-gradient(135deg, #06D6A0 0%, #4F46E5 100%);
+}</div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p><strong>Leadomation Brand Guidelines</strong> | Version 1.0 | February 2026</p>
+        <p>Leadomation by Lumarr Ltd | www.leadomation.co.uk</p>
+    </div>
+
+</body>
+</html>

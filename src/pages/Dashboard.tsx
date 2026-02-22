@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mail, MessageCircle, Linkedin, Loader2, Zap } from 'lucide-react';
+import { Users, Mail, MessageCircle, Linkedin, Loader2 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import CampaignPerformance from '../components/CampaignPerformance';
 import TopCampaigns from '../components/TopCampaigns';
 import RecentActivity from '../components/RecentActivity';
 import OnboardingModal from '../components/OnboardingModal';
 import { supabase } from '../lib/supabase';
+import UsageLimitBar from '../components/UsageLimitBar';
+import { usePlan } from '../hooks/usePlan';
 
 interface DashboardProps {
     onPageChange: (page: string) => void;
-    userPlan?: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onPageChange, userPlan = 'free' }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
+    const { plan, usage, limits, trialDaysRemaining } = usePlan();
     const [stats, setStats] = useState({
         totalLeads: 0,
         leadsWithEmails: 0,
@@ -101,6 +103,60 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange, userPlan = 'free' }
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
+            {/* Usage Summary (Conditional) */}
+            {plan === 'trial' && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 animate-in slide-in-from-top duration-500">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-[#111827]">Trial Usage</span>
+                            <span className="px-1.5 py-0.5 bg-indigo-50 text-[10px] font-black text-[#4F46E5] rounded uppercase tracking-tighter">Pro Features Active</span>
+                        </div>
+                        <span className="text-xs font-bold text-[#6B7280]">{trialDaysRemaining} days remaining</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
+                            <div className="text-lg font-black text-[#4F46E5]">{usage.leadsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxLeads}</span></div>
+                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Leads</div>
+                        </div>
+                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
+                            <div className="text-lg font-black text-[#4F46E5]">{usage.emailsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxEmails}</span></div>
+                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Emails</div>
+                        </div>
+                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
+                            <div className="text-lg font-black text-[#4F46E5]">{usage.voiceCallsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxVoiceCalls}</span></div>
+                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Voice Calls</div>
+                        </div>
+                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
+                            <div className="text-lg font-black text-[#4F46E5]">{usage.aiEmailsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxAiEmails}</span></div>
+                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">AI Emails</div>
+                        </div>
+                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all sm:col-span-2 lg:col-span-1">
+                            <div className="text-lg font-black text-[#4F46E5]">{usage.keywordSearchesUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxKeywordSearches}</span></div>
+                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Searches</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {plan === 'starter' && (usage.monthlyLeadsUsed / limits.maxLeadsPerMonth > 0.4 || usage.monthlyKeywordSearchesUsed / limits.maxKeywordSearches > 0.4) && (
+                <div className="mb-6 bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                        <UsageLimitBar
+                            label="Monthly Leads"
+                            used={usage.monthlyLeadsUsed || 0}
+                            max={limits.maxLeadsPerMonth}
+                            onUpgradeClick={() => onPageChange('Pricing')}
+                        />
+                        <UsageLimitBar
+                            label="Keyword Searches"
+                            used={usage.monthlyKeywordSearchesUsed || 0}
+                            max={limits.maxKeywordSearches}
+                            onUpgradeClick={() => onPageChange('Pricing')}
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
@@ -140,22 +196,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange, userPlan = 'free' }
                         icon={Linkedin}
                         iconColor="text-accent"
                     />
-                    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${userPlan === 'pro' ? 'bg-purple-50 text-purple-600' : userPlan === 'starter' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600'}`}>
-                                <Zap size={20} className={userPlan !== 'free' ? 'animate-pulse' : ''} />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Current Plan</p>
-                                <p className={`text-sm font-black uppercase tracking-tight ${userPlan === 'pro' ? 'text-purple-600' : userPlan === 'starter' ? 'text-blue-600' : 'text-[#111827]'}`}>
-                                    {userPlan} Tier
-                                </p>
-                            </div>
+                    <div className="bg-gradient-to-br from-[#EEF2FF] to-white border border-[#C7D2FE] rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                        <div className="absolute top-0 right-0 -mr-4 -mt-4 w-12 h-12 bg-[#4F46E5]/5 rounded-full blur-xl"></div>
+                        <div className="text-2xl mb-1 relative z-10">
+                            {plan === 'pro' ? '⭐' : plan === 'trial' ? '⚡' : '🛡️'}
                         </div>
-                        {userPlan === 'free' && (
+                        <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest relative z-10">Current Plan</div>
+                        <div className="text-lg font-black text-[#4F46E5] relative z-10 leading-none mt-1">
+                            {plan === 'trial' ? 'PRO TRIAL' : plan.toUpperCase()}
+                        </div>
+                        {plan === 'trial' && (
+                            <div className="text-[10px] font-bold text-[#6B7280] mt-1 relative z-10">{trialDaysRemaining} days left</div>
+                        )}
+                        {(plan === 'expired' || plan === 'cancelled') && (
                             <button
                                 onClick={() => onPageChange('Pricing')}
-                                className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest"
+                                className="mt-2 text-[10px] font-black text-primary hover:underline uppercase tracking-widest relative z-10"
                             >
                                 Upgrade
                             </button>

@@ -1,24 +1,12 @@
 import React from 'react';
-import { Bell, ChevronDown, Download, Plus, LogOut } from 'lucide-react';
-import { signOut } from '../lib/auth';
+import { Bell, ChevronDown, Download, Plus } from 'lucide-react';
 
 interface TopBarProps {
     activePage: string;
     onNewCampaign?: () => void;
-    onSignOut?: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onSignOut }) => {
-    const handleSignOut = async () => {
-        try {
-            console.log('Sign out clicked');
-            await signOut();
-            onSignOut?.();
-        } catch (error) {
-            console.error('Error signing out:', error);
-        }
-    };
-
+const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign }) => {
     return (
         <header className="sticky top-0 right-0 left-0 bg-white border-b border-[#E5E7EB] h-20 flex items-center justify-between px-8 z-10 shadow-sm">
             <h2 className="text-xl font-bold text-[#111827]">{activePage}</h2>
@@ -58,7 +46,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onSignOut })
                     <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#DC2626] rounded-full border-2 border-white"></span>
                 </button>
 
-                <div className="flex items-center gap-3 pl-2 group relative">
+                <div className="flex items-center gap-3 pl-2 group">
                     <div className="flex flex-col items-end">
                         <span className="text-sm font-bold text-[#111827]">Iain L.</span>
                         <span className="text-[10px] text-[#9CA3AF] font-bold uppercase tracking-tight">Admin</span>
@@ -66,16 +54,6 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onSignOut })
                     <div className="w-10 h-10 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#2563EB] font-black border border-[#BFDBFE] shadow-sm transform group-hover:scale-105 transition-all cursor-pointer">
                         IL
                     </div>
-
-                    <div className="w-px h-6 bg-[#E5E7EB] mx-1"></div>
-
-                    <button
-                        onClick={handleSignOut}
-                        className="p-2 text-[#9CA3AF] hover:text-red-500 hover:bg-rose-50 rounded-lg transition-all"
-                        title="Sign Out"
-                    >
-                        <LogOut size={20} />
-                    </button>
                 </div>
             </div>
         </header>

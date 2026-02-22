@@ -25,6 +25,7 @@ interface PricingCardProps {
     accentColor: string;
     icon: React.ReactNode;
     buttonText: string;
+    savingsBadge?: string;
     onCheckout: (plan: string) => void;
 }
 
@@ -40,6 +41,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
     accentColor,
     icon,
     buttonText,
+    savingsBadge,
     onCheckout
 }) => (
     <div className={`relative flex flex-col p-8 bg-white rounded-3xl border transition-all duration-300 ${isPopular
@@ -66,6 +68,11 @@ const PricingCard: React.FC<PricingCardProps> = ({
             <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-black text-[#111827]">{isAnnual ? annualPrice : monthlyPrice}</span>
                 <span className="text-sm font-bold text-[#6B7280]">{isAnnual ? '/year' : '/month'}</span>
+                {isAnnual && savingsBadge && (
+                    <span className="text-xs font-bold text-[#059669] bg-[#D1FAE5] px-2 py-0.5 rounded-full ml-2">
+                        {savingsBadge}
+                    </span>
+                )}
             </div>
             {isAnnual && (
                 <p className="text-xs font-bold text-[#9CA3AF] mt-1">({annualMonthlyRate}/mo)</p>
@@ -93,7 +100,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         <button
             onClick={() => onCheckout(title)}
             className={`w-full py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-center gap-2 ${isPopular
-                ? 'bg-primary text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95'
+                ? 'bg-primary text-white shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] active:scale-95'
                 : 'bg-white border-2 border-gray-100 text-[#4B5563] hover:border-primary hover:text-primary active:scale-95'
                 }`}>
             {buttonText}
@@ -226,9 +233,10 @@ const Pricing: React.FC = () => {
                     title="Starter"
                     description="Everything you need to start generating leads"
                     monthlyPrice="£49"
-                    annualPrice="£470"
-                    annualMonthlyRate="£39.17"
+                    annualPrice="£490"
+                    annualMonthlyRate="£40.83"
                     isAnnual={isAnnual}
+                    savingsBadge="Save £98"
                     accentColor="bg-blue-50 text-primary"
                     icon={<Zap size={24} />}
                     buttonText={isLoading ? "Loading..." : "Start 7-Day Free Trial"}
@@ -237,8 +245,8 @@ const Pricing: React.FC = () => {
                         "3 active campaigns",
                         "500 leads per month",
                         "50 emails per day",
+                        "Keyword searches (50/mo)",
                         "Email sequences up to 4 steps",
-                        "LinkedIn automation",
                         "Lead database with search & filters",
                         "6 pre-built email templates",
                         "Email signature builder",
@@ -255,6 +263,7 @@ const Pricing: React.FC = () => {
                     annualPrice="£1,430"
                     annualMonthlyRate="£119.17"
                     isAnnual={isAnnual}
+                    savingsBadge="Save £358"
                     isPopular={true}
                     accentColor="bg-purple-50 text-purple-600"
                     icon={<Sparkles size={24} />}
@@ -263,20 +272,20 @@ const Pricing: React.FC = () => {
                     features={[
                         "🤖 AI Voice Call Agent",
                         "Unlimited campaigns",
-                        "5,000+ leads per month",
-                        "200 emails per day",
+                        "Unlimited leads per month",
+                        "Unlimited emails per day",
+                        "Unlimited keyword searches",
                         "Unlimited sequence steps",
                         "🌍 Global Demand Intelligence",
                         "📊 Deal Pipeline / Kanban CRM",
                         "📥 Unified Inbox",
-                        "✨ AI email generation & suggestions",
-                        "🔀 Multi-channel sequence builder",
+                        "✨ AI email personalisation",
+                        "🔗 LinkedIn automation",
                         "🔀 Spintax support",
                         "📈 Advanced analytics & reporting",
                         "🔥 Inbox warm-up tools",
                         "📬 Inbox rotation (multi-account)",
-                        "👤 Decision Maker enrichment",
-                        "⭐ Priority support"
+                        "👤 Decision Maker enrichment"
                     ]}
                 />
             </div>
@@ -299,16 +308,16 @@ const Pricing: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {[
-                                { name: "AI Voice Call Agent", starter: false, pro: true, note: "Automated phone outreach" },
-                                { name: "Active Campaigns", starter: "3", pro: "Unlimited" },
-                                { name: "Leads per Month", starter: "500", pro: "5,000+" },
-                                { name: "Email Sending", starter: "50/day", pro: "200/day" },
-                                { name: "Deal Pipeline / CRM", starter: false, pro: true },
+                                { name: "Keyword searches", starter: "50/month", pro: "Unlimited" },
+                                { name: "Active campaigns", starter: "3", pro: "Unlimited" },
+                                { name: "Leads per month", starter: "500", pro: "Unlimited" },
+                                { name: "Emails per day", starter: "50", pro: "Unlimited" },
+                                { name: "AI email personalisation", starter: false, pro: true },
+                                { name: "Deal Pipeline (CRM)", starter: false, pro: true },
                                 { name: "Unified Inbox", starter: false, pro: true },
-                                { name: "AI Email Generation", starter: false, pro: true },
-                                { name: "Global Demand Intel", starter: false, pro: true },
-                                { name: "CSV Export", starter: true, pro: true },
-                                { name: "Priority Support", starter: false, pro: true }
+                                { name: "AI Voice Agent", starter: false, pro: true },
+                                { name: "Global Demand", starter: false, pro: true },
+                                { name: "LinkedIn automation", starter: false, pro: true }
                             ].map((row, idx) => (
                                 <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
                                     <td className="px-8 py-4">
@@ -407,7 +416,7 @@ const Pricing: React.FC = () => {
                     <button
                         onClick={() => handleCheckout('Pro')}
                         disabled={isLoading}
-                        className="px-12 py-5 bg-primary text-white text-lg font-black rounded-3xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/40 active:scale-95 flex items-center gap-2 mx-auto"
+                        className="px-12 py-5 bg-primary text-white text-lg font-black rounded-3xl hover:bg-[#4338CA] transition-all shadow-2xl shadow-indigo-500/40 active:scale-95 flex items-center gap-2 mx-auto"
                     >
                         {isLoading && <Loader2 size={24} className="animate-spin" />}
                         Start 7-Day Free Trial
@@ -418,7 +427,7 @@ const Pricing: React.FC = () => {
                             No credit card required
                         </div>
                         <div className="flex items-center gap-2">
-                            <CreditCard size={14} className="text-blue-500" />
+                            <CreditCard size={14} className="text-[#4F46E5]" />
                             Secure processing via Stripe
                         </div>
                     </div>

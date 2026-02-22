@@ -8,6 +8,8 @@ interface Campaign {
     type: string;
     status: 'active' | 'paused' | 'draft' | 'Active' | 'Paused' | 'Draft';
     leadsCount: number;
+    leads_found?: number;
+    scraping_status?: string;
     repliesCount: number;
     replyRate: string;
     progress: number;
@@ -18,6 +20,33 @@ interface ActiveCampaignsProps {
     onPageChange?: (page: string) => void;
 }
 
+const ScrapingBadge = ({ status }: { status: string }) => {
+    const config: Record<string, { label: string; color: string; bg: string; animate?: boolean }> = {
+        idle: { label: 'Queued', color: '#6B7280', bg: '#F3F4F6' },
+        scraping: { label: 'Scraping…', color: '#D97706', bg: '#FEF3C7', animate: true },
+        enriching: { label: 'Finding Emails…', color: '#7C3AED', bg: '#F3E8FF', animate: true },
+        complete: { label: 'Complete', color: '#059669', bg: '#D1FAE5' },
+        failed: { label: 'Failed', color: '#DC2626', bg: '#FEE2E2' },
+    };
+
+    const c = config[status] || config.idle;
+
+    return (
+        <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+            style={{ color: c.color, backgroundColor: c.bg }}
+        >
+            {c.animate && (
+                <span
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+                    style={{ backgroundColor: c.color }}
+                />
+            )}
+            {c.label}
+        </span>
+    );
+};
+
 const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -26,9 +55,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch campaigns and join with leads count if possible, 
-        // or fetch lead counts separately
-        const { data: campaignData, error } = await supabase
+        const { data, error } = await supabase
             .from('campaigns')
             .select('*')
             .eq('user_id', user.id)
@@ -40,54 +67,80 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
             return;
         }
 
-        // Fetch lead counts for each campaign
-        const campaignsWithLeads = await Promise.all((campaignData || []).map(async (camp: any) => {
-            const { count } = await supabase
-                .from('leads')
-                .select('*', { count: 'exact', head: true })
-                .eq('campaign_id', camp.id);
-
-            return {
-                ...camp,
-                leadsCount: count || 0,
-                // These might need real logic later
-                type: camp.targeting_config?.track || 'General',
-                repliesCount: 0,
-                replyRate: '0.0%',
-                progress: camp.status === 'active' ? 10 : 0
-            };
-        }));
-
-        setCampaigns(campaignsWithLeads);
+        if (data) {
+            setCampaigns(data as Campaign[]);
+        }
         setIsLoading(false);
     };
 
     useEffect(() => {
         fetchCampaigns();
+
+        const setupRealtime = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const channel = supabase
+                .channel('campaigns-changes')
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'campaigns',
+                    filter: `user_id=eq.${user.id}`
+                }, () => {
+                    fetchCampaigns(); // Re-fetch on any update
+                })
+                .subscribe();
+
+            return channel;
+        };
+
+        const channelPromise = setupRealtime();
+
+        return () => {
+            channelPromise.then(channel => {
+                if (channel) supabase.removeChannel(channel);
+            });
+        };
     }, []);
 
-    const handlePause = async (id: string, currentStatus: string) => {
-        const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-        const { error } = await supabase
-            .from('campaigns')
-            .update({ status: newStatus })
-            .eq('id', id);
+    const deleteCampaign = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this campaign? This cannot be undone.')) return;
 
-        if (!error) {
-            setCampaigns(prev => prev.map(c => c.id === id ? { ...c, status: newStatus as any } : c));
+        try {
+            const { error } = await supabase
+                .from('campaigns')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            // Refresh the campaigns list by removing it from state
+            setCampaigns((prev: any[]) => prev.filter((c: any) => c.id !== id));
+        } catch (err) {
+            console.error('Error deleting campaign:', err);
+            alert('Failed to delete campaign.');
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this campaign?')) return;
+    const toggleCampaignStatus = async (id: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'active' ? 'paused' : 'active';
 
-        const { error } = await supabase
-            .from('campaigns')
-            .delete()
-            .eq('id', id);
+        try {
+            const { error } = await supabase
+                .from('campaigns')
+                .update({ status: newStatus })
+                .eq('id', id);
 
-        if (!error) {
-            setCampaigns(prev => prev.filter(c => c.id !== id));
+            if (error) throw error;
+
+            // Update local state
+            setCampaigns((prev: any[]) => prev.map((c: any) =>
+                c.id === id ? { ...c, status: newStatus as any } : c
+            ));
+        } catch (err) {
+            console.error('Error updating campaign:', err);
+            alert('Failed to update campaign status.');
         }
     };
 
@@ -105,6 +158,22 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                     <Plus size={18} />
                     NEW CAMPAIGN
                 </button>
+            </div>
+
+            {/* Info Banner */}
+            <div className="flex items-start gap-3 bg-[#F8FAFF] border border-[#E0E7FF] rounded-xl px-5 py-4 mb-6">
+                <div className="mt-0.5 text-[#4F46E5] shrink-0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                </div>
+                <p className="text-sm text-[#4B5563] leading-relaxed">
+                    <span className="font-bold text-[#111827]">How it works: </span>
+                    When you launch a campaign, Leadomation scrapes Google Maps for matching businesses, finds their contact details, and adds them to your Lead Database.
+                    <span className="font-semibold text-[#4F46E5]"> Scraping typically takes 2–5 minutes</span> — the status badge will update automatically when complete. If a campaign shows "Scraping…" it is actively running in the background.
+                </p>
             </div>
 
             {isLoading ? (
@@ -140,13 +209,13 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                     </div>
                                     <div className="flex gap-2">
                                         <button
-                                            onClick={() => handlePause(campaign.id, campaign.status)}
+                                            onClick={() => toggleCampaignStatus(campaign.id, campaign.status)}
                                             className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-[#6B7280] rounded-full text-[10px] font-black uppercase tracking-widest transition-colors"
                                         >
-                                            {campaign.status === 'active' ? 'Pause' : 'Resume'}
+                                            {campaign.status === 'active' ? 'PAUSE' : 'RESUME'}
                                         </button>
                                         <button
-                                            onClick={() => handleDelete(campaign.id)}
+                                            onClick={() => deleteCampaign(campaign.id)}
                                             className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors"
                                         >
                                             Delete
@@ -157,9 +226,12 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                 <h3 className="text-lg font-black text-[#111827] mb-1 group-hover:text-primary transition-colors">{campaign.name}</h3>
                                 <div className="flex items-center justify-between mb-6">
                                     <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-tight">{campaign.type}</p>
-                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${campaign.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                                        {campaign.status}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <ScrapingBadge status={campaign.scraping_status || 'complete'} />
+                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${campaign.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                                            {campaign.status}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
@@ -168,7 +240,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                             <Users size={12} />
                                             <span className="text-[9px] font-black uppercase tracking-tight">Leads</span>
                                         </div>
-                                        <p className="text-lg font-black text-[#111827]">{campaign.leadsCount || 0}</p>
+                                        <p className="text-lg font-black text-[#111827]">{campaign.leads_found || 0}</p>
                                     </div>
                                     <div className="bg-[#F9FAFB] p-3 rounded-xl border border-gray-100">
                                         <div className="flex items-center gap-1.5 text-primary mb-1">
@@ -194,7 +266,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                             </div>
 
                             <button
-                                onClick={() => alert('Detailed analytics dashboard coming soon!')}
+                                onClick={() => alert('Campaign analytics coming soon!')}
                                 className="w-full py-4 bg-gray-50 border-t border-[#E5E7EB] text-xs font-black text-[#6B7280] hover:bg-blue-50 hover:text-primary transition-all flex items-center justify-center gap-2 group/btn uppercase tracking-widest"
                             >
                                 <BarChart3 size={14} />

@@ -1,126 +1,26 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Plus,
-    Star,
     Loader2,
     X,
     Trash2,
-    Phone,
-    Mail,
-    Building2,
-    Briefcase
+    ChevronLeft,
+    ChevronRight,
+    TrendingUp,
+    Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Deal {
     id: string;
-    stage: string;
+    title: string;
     value: number;
+    currency: string;
+    stage: string;
+    notes: string;
     user_id: string;
     created_at: string;
-    lead_id: string;
-    leads: {
-        id: string;
-        company: string;
-        first_name: string;
-        last_name: string;
-        industry: string;
-        email?: string;
-        phone?: string;
-    } | null;
 }
-
-interface Lead {
-    id: string;
-    company: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string;
-    industry: string;
-}
-
-const DealCard: React.FC<{
-    deal: Deal;
-    onDelete: (id: string) => void;
-    onClick: (deal: Deal) => void;
-    onDragStart: (e: React.DragEvent, deal: Deal) => void;
-}> = ({ deal, onDelete, onClick, onDragStart }) => (
-    <div
-        draggable
-        onDragStart={(e) => onDragStart(e, deal)}
-        onClick={() => onClick(deal)}
-        className="bg-white rounded-xl p-4 border border-[#E5E7EB] shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group mb-3 relative"
-    >
-        <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 min-w-0">
-                <h4 className="text-xs font-bold text-[#111827] truncate">{deal.leads?.company || 'N/A'}</h4>
-            </div>
-            <button
-                onClick={(e) => { e.stopPropagation(); onDelete(deal.id); }}
-                className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
-            >
-                <Trash2 size={12} />
-            </button>
-        </div>
-
-        <p className="text-[10px] text-[#6B7280] font-medium mb-1">{deal.leads?.first_name} {deal.leads?.last_name}</p>
-        <p className="text-[10px] text-[#4B5563] leading-relaxed mb-3 line-clamp-1">{deal.leads?.industry || 'No industry listed'}</p>
-
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
-            <span className="text-xs font-black text-[#111827]">£{Number(deal.value || 0).toLocaleString()}</span>
-            <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-[#9CA3AF] lowercase">
-                    {new Date(deal.created_at).toLocaleDateString()}
-                </span>
-            </div>
-        </div>
-    </div>
-);
-
-const PipelineColumn: React.FC<{
-    title: string;
-    deals: Deal[];
-    accentColor: string;
-    totalValue: string;
-    count: number;
-    onDelete: (id: string) => void;
-    onClick: (deal: Deal) => void;
-    onDragStart: (e: React.DragEvent, deal: Deal) => void;
-    onDrop: (e: React.DragEvent, stage: string) => void;
-    onAddClick: (stage: string) => void;
-}> = ({ title, deals, accentColor, totalValue, count, onDelete, onClick, onDragStart, onDrop, onAddClick }) => (
-    <div
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => onDrop(e, title)}
-        className="w-[300px] shrink-0 flex flex-col h-full bg-[#F3F4F6]/50 rounded-2xl border border-gray-100/50"
-    >
-        <div className={`p-4 border-t-2 ${accentColor} bg-white rounded-t-2xl border-b border-gray-100`}>
-            <div className="flex items-center justify-between mb-1">
-                <h3 className="text-xs font-black text-[#111827] uppercase tracking-widest">{title}</h3>
-                <span className="text-[10px] font-black text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{count}</span>
-            </div>
-            <p className="text-[10px] font-bold text-[#6B7280]">Total: <span className="text-[#111827]">{totalValue}</span></p>
-        </div>
-        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-            {deals.map(deal => (
-                <DealCard
-                    key={deal.id}
-                    deal={deal}
-                    onDelete={onDelete}
-                    onClick={onClick}
-                    onDragStart={onDragStart}
-                />
-            ))}
-            <button
-                onClick={() => onAddClick(title)}
-                className="w-full py-2 border-2 border-dashed border-gray-200 rounded-xl text-[10px] font-bold text-gray-400 hover:border-primary hover:text-primary transition-all mt-1"
-            >
-                + Add Deal
-            </button>
-        </div>
-    </div>
-);
 
 interface DealPipelineProps {
     onPageChange?: (page: string) => void;
@@ -128,165 +28,162 @@ interface DealPipelineProps {
 
 const DealPipeline: React.FC<DealPipelineProps> = ({ onPageChange }) => {
     const [deals, setDeals] = useState<Deal[]>([]);
-    const [leads, setLeads] = useState<Lead[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-    const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [showAddModal, setShowAddModal] = useState(false);
 
-    // Form state
-    const [newDealLead, setNewDealLead] = useState('');
+    // New Deal Form State
+    const [newDealTitle, setNewDealTitle] = useState('');
     const [newDealValue, setNewDealValue] = useState('');
-    const [newDealStage, setNewDealStage] = useState('New Lead');
-    const [isSaving, setIsSaving] = useState(false);
+    const [newDealStage, setNewDealStage] = useState('new_reply');
+    const [newDealNotes, setNewDealNotes] = useState('');
+    const [saving, setSaving] = useState(false);
 
-    const STAGES = ['New Lead', 'Contacted', 'Meeting Booked', 'Proposal Sent', 'Won', 'Lost'];
+    const stages = [
+        { id: 'new_reply', label: 'New Reply', color: 'blue' },
+        { id: 'qualified', label: 'Qualified', color: 'purple' },
+        { id: 'proposal_sent', label: 'Proposal Sent', color: 'yellow' },
+        { id: 'negotiating', label: 'Negotiating', color: 'orange' },
+        { id: 'won', label: 'Won', color: 'green' },
+        { id: 'lost', label: 'Lost', color: 'red' }
+    ];
 
-    const fetchDeals = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+    const loadDeals = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-        const { data, error } = await supabase
-            .from('deals')
-            .select('*, leads(id, company, first_name, last_name, industry, email, phone)')
-            .eq('user_id', user.id);
+            const { data } = await supabase
+                .from('deals')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching deals:', error);
-        } else {
-            setDeals((data as any) || []);
-        }
-        setIsLoading(false);
-    };
-
-    const fetchLeads = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data, error } = await supabase
-            .from('leads')
-            .select('*')
-            .eq('user_id', user.id);
-
-        if (error) {
-            console.error('Error fetching leads:', error);
-        } else {
-            setLeads(data || []);
+            if (data) setDeals(data);
+        } catch (err) {
+            console.error('Error loading deals:', err);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchDeals();
-        fetchLeads();
+        loadDeals();
     }, []);
 
-    const handleAddDeal = async () => {
-        if (!newDealLead || !newDealValue) return;
+    const addDeal = async () => {
+        if (!newDealTitle.trim()) {
+            alert('Please enter a deal title.');
+            return;
+        }
 
-        setIsSaving(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        setSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-        const { error } = await supabase
-            .from('deals')
-            .insert({
-                user_id: user.id,
-                lead_id: newDealLead,
-                value: parseFloat(newDealValue),
-                stage: newDealStage
-            });
+            const { error } = await supabase
+                .from('deals')
+                .insert({
+                    user_id: user.id,
+                    title: newDealTitle.trim(),
+                    value: parseFloat(newDealValue) || 0,
+                    currency: '£',
+                    stage: newDealStage,
+                    notes: newDealNotes.trim()
+                });
 
-        if (!error) {
-            fetchDeals();
-            setIsAddModalOpen(false);
-            setNewDealLead('');
+            if (error) throw error;
+
+            setNewDealTitle('');
             setNewDealValue('');
-        }
-        setIsSaving(false);
-    };
-
-    const handleDeleteDeal = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this deal?')) return;
-
-        const { error } = await supabase
-            .from('deals')
-            .delete()
-            .eq('id', id);
-
-        if (!error) {
-            setDeals(prev => prev.filter(d => d.id !== id));
+            setNewDealStage('new_reply');
+            setNewDealNotes('');
+            setShowAddModal(false);
+            loadDeals();
+        } catch (err) {
+            console.error('Error adding deal:', err);
+            alert('Failed to add deal.');
+        } finally {
+            setSaving(false);
         }
     };
 
-    const handleDragStart = (_e: React.DragEvent, deal: Deal) => {
-        setDraggedDeal(deal);
-    };
+    const updateDealStage = async (dealId: string, newStage: string) => {
+        try {
+            const { error } = await supabase
+                .from('deals')
+                .update({ stage: newStage })
+                .eq('id', dealId);
 
-    const handleDrop = async (_e: React.DragEvent, stage: string) => {
-        if (!draggedDeal || draggedDeal.stage === stage) return;
+            if (error) throw error;
 
-        // Optimistic update
-        const originalDeals = [...deals];
-        setDeals(prev => prev.map(d => d.id === draggedDeal.id ? { ...d, stage } : d));
-
-        const { error } = await supabase
-            .from('deals')
-            .update({ stage })
-            .eq('id', draggedDeal.id);
-
-        if (error) {
-            console.error('Error updating status:', error);
-            setDeals(originalDeals);
+            setDeals(prev => prev.map(d =>
+                d.id === dealId ? { ...d, stage: newStage } : d
+            ));
+        } catch (err) {
+            console.error('Error updating deal:', err);
         }
-        setDraggedDeal(null);
     };
 
-    const pipelineData = useMemo(() => {
-        const grouped: Record<string, Deal[]> = {};
-        STAGES.forEach(stage => grouped[stage] = []);
-        deals.forEach(deal => {
-            if (grouped[deal.stage]) {
-                grouped[deal.stage].push(deal);
-            }
-        });
-        return grouped;
-    }, [deals]);
+    const deleteDeal = async (dealId: string) => {
+        if (!confirm('Delete this deal?')) return;
 
-    const calculateTotal = (dealsGroup: Deal[]) => {
-        const sum = dealsGroup.reduce((acc, deal) => {
-            // Simple value parsing, assuming format like "£8,200" or just numbers
-            const val = parseFloat(deal.value?.toString().replace(/[^\d.]/g, '') || '0');
-            return acc + val;
-        }, 0);
-        return `£${sum.toLocaleString()}`;
+        try {
+            const { error } = await supabase
+                .from('deals')
+                .delete()
+                .eq('id', dealId);
+
+            if (error) throw error;
+            setDeals(prev => prev.filter(d => d.id !== dealId));
+        } catch (err) {
+            console.error('Error deleting deal:', err);
+        }
     };
 
     const totalPipelineValue = useMemo(() => {
-        const sum = deals.reduce((acc, deal) => {
-            const val = Number(deal.value || 0);
-            return acc + (deal.stage !== 'Lost' ? val : 0);
-        }, 0);
-        return `£${sum.toLocaleString()}`;
+        return deals
+            .filter(d => d.stage !== 'lost')
+            .reduce((sum, d) => sum + (d.value || 0), 0);
     }, [deals]);
 
+    const moveStage = (deal: Deal, direction: 'left' | 'right') => {
+        const currentIndex = stages.findIndex(s => s.id === deal.stage);
+        if (direction === 'left' && currentIndex > 0) {
+            updateDealStage(deal.id, stages[currentIndex - 1].id);
+        } else if (direction === 'right' && currentIndex < stages.length - 1) {
+            updateDealStage(deal.id, stages[currentIndex + 1].id);
+        }
+    };
+
+    const getStageColor = (color: string) => {
+        switch (color) {
+            case 'blue': return 'border-t-blue-500';
+            case 'purple': return 'border-t-purple-500';
+            case 'yellow': return 'border-t-yellow-500';
+            case 'orange': return 'border-t-orange-500';
+            case 'green': return 'border-t-green-500';
+            case 'red': return 'border-t-red-500';
+            default: return 'border-t-gray-500';
+        }
+    };
 
     return (
         <div className="flex flex-col h-[calc(100vh-100px)] animate-in fade-in duration-700">
-            {/* Page Header */}
+            {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-black text-[#111827] mb-1">Deal Pipeline</h1>
-                    <p className="text-sm font-bold text-[#6B7280]">Track and manage deals from first reply to closed won</p>
+                    <p className="text-sm font-bold text-[#6B7280]">Manage your revenue pipeline from reply to won</p>
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="text-right">
                         <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Total Pipeline Value</p>
-                        <p className="text-xl font-black text-primary">{totalPipelineValue}</p>
+                        <p className="text-xl font-black text-primary">£{totalPipelineValue.toLocaleString()}</p>
                     </div>
                     <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all shadow-[0_4px_12px_rgba(37,99,235,0.2)] active:scale-95"
+                        onClick={() => setShowAddModal(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-[#4338CA] transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
                     >
                         <Plus size={18} />
                         ADD DEAL
@@ -294,182 +191,160 @@ const DealPipeline: React.FC<DealPipelineProps> = ({ onPageChange }) => {
                 </div>
             </div>
 
-            {isLoading ? (
+            {loading ? (
                 <div className="flex-1 flex items-center justify-center">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
-            ) : deals.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center p-8">
-                    <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center shadow-sm max-w-lg w-full">
-                        <div className="w-16 h-16 bg-blue-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <Star size={32} />
-                        </div>
-                        <h3 className="text-xl font-black text-[#111827] mb-2">No deals in pipeline</h3>
-                        <p className="text-[#6B7280] font-medium mb-8 max-w-sm mx-auto">
-                            Track and manage your revenue pipeline as soon as leads start replying to your campaigns.
-                        </p>
-                        <button
-                            onClick={() => onPageChange?.('Lead Database')}
-                            className="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/10 active:scale-95 flex items-center justify-center gap-2 mx-auto"
-                        >
-                            View Lead Database
-                        </button>
-                    </div>
-                </div>
             ) : (
                 <div className="flex-1 overflow-x-auto pb-4 custom-scrollbar-horizontal">
-                    <div className="flex gap-4 h-full min-w-max">
-                        {STAGES.map(stage => (
-                            <PipelineColumn
-                                key={stage}
-                                title={stage}
-                                deals={pipelineData[stage]}
-                                accentColor={
-                                    stage === 'Won' ? 'border-t-green-600' :
-                                        stage === 'Lost' ? 'border-t-red-300' :
-                                            stage === 'Proposal Sent' ? 'border-t-purple-400' :
-                                                stage === 'Meeting Booked' ? 'border-t-amber-400' :
-                                                    stage === 'Contacted' ? 'border-t-blue-400' :
-                                                        'border-t-gray-300'
-                                }
-                                totalValue={calculateTotal(pipelineData[stage])}
-                                count={pipelineData[stage].length}
-                                onDelete={handleDeleteDeal}
-                                onClick={(deal) => { setSelectedDeal(deal); setIsDetailModalOpen(true); }}
-                                onDragStart={handleDragStart}
-                                onDrop={handleDrop}
-                                onAddClick={(s) => { setNewDealStage(s); setIsAddModalOpen(true); }}
-                            />
-                        ))}
+                    <div className="flex gap-4 h-full min-w-max pb-4">
+                        {stages.map(stage => {
+                            const stageDeals = deals.filter(d => d.stage === stage.id);
+                            const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+
+                            return (
+                                <div key={stage.id} className="w-[280px] flex flex-col h-full bg-[#F9FAFB] rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                    <div className={`p-4 border-t-4 ${getStageColor(stage.color)} bg-white border-b border-gray-100`}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h3 className="text-xs font-black text-[#111827] uppercase tracking-widest">{stage.label}</h3>
+                                            <span className="text-[10px] font-black text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded-full">{stageDeals.length}</span>
+                                        </div>
+                                        <p className="text-[10px] font-bold text-[#6B7280]">£{stageValue.toLocaleString()}</p>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                                        {stageDeals.map(deal => (
+                                            <div key={deal.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h4 className="text-sm font-black text-[#111827] line-clamp-1">{deal.title}</h4>
+                                                    <button onClick={() => deleteDeal(deal.id)} className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all">
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
+                                                <p className="text-lg font-black text-primary mb-2">£{Number(deal.value || 0).toLocaleString()}</p>
+                                                {deal.notes && (
+                                                    <p className="text-[10px] text-[#6B7280] font-medium line-clamp-2 mb-4 italic">"{deal.notes}"</p>
+                                                )}
+                                                <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-2">
+                                                    <button
+                                                        onClick={() => moveStage(deal, 'left')}
+                                                        disabled={stages.findIndex(s => s.id === deal.stage) === 0}
+                                                        className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-primary transition-all disabled:opacity-0"
+                                                    >
+                                                        <ChevronLeft size={16} />
+                                                    </button>
+                                                    <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Move</span>
+                                                    <button
+                                                        onClick={() => moveStage(deal, 'right')}
+                                                        disabled={stages.findIndex(s => s.id === deal.stage) === stages.length - 1}
+                                                        className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-primary transition-all disabled:opacity-0"
+                                                    >
+                                                        <ChevronRight size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {stageDeals.length === 0 && (
+                                            <div className="py-8 text-center px-4">
+                                                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest italic">No deals yet</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
 
+            {/* Info Banner */}
+            <div className="mt-auto pt-6">
+                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
+                    <div className="bg-white p-2 rounded-xl text-[#4F46E5] shadow-sm">
+                        <Info size={20} />
+                    </div>
+                    <div>
+                        <h4 className="text-xs font-black text-[#111827] uppercase tracking-widest mb-1">Pipeline Management</h4>
+                        <p className="text-sm font-bold text-blue-800 leading-relaxed">
+                            Track your deals from first reply to closed won. Move deals between stages using the arrow buttons. The pipeline value shows the total of all active deals excluding lost opportunities.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Add Deal Modal */}
-            {isAddModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                            <h3 className="text-lg font-black text-[#111827]">Add New Deal</h3>
-                            <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+            {showAddModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-blue-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary text-white rounded-lg shadow-sm">
+                                    <TrendingUp size={20} />
+                                </div>
+                                <h3 className="text-lg font-black text-[#111827]">New Pipeline Opportunity</h3>
+                            </div>
+                            <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-black text-[#6B7280] uppercase tracking-widest mb-2">Select Lead</label>
-                                <select
-                                    className="w-full p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                    value={newDealLead}
-                                    onChange={(e) => setNewDealLead(e.target.value)}
-                                >
-                                    <option value="">Choose a lead...</option>
-                                    {leads.map(lead => (
-                                        <option key={lead.id} value={lead.id}>
-                                            {lead.company} ({lead.first_name} {lead.last_name})
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-[#6B7280] uppercase tracking-widest mb-2">Deal Value (£)</label>
+                                <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Deal Title / Company</label>
                                 <input
-                                    type="number"
-                                    placeholder="e.g. 5000"
-                                    className="w-full p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                    value={newDealValue}
-                                    onChange={(e) => setNewDealValue(e.target.value)}
+                                    autoFocus
+                                    type="text"
+                                    placeholder="e.g. Acme Corp Contract"
+                                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-inter"
+                                    value={newDealTitle}
+                                    onChange={(e) => setNewDealTitle(e.target.value)}
                                 />
                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Value (£)</label>
+                                    <input
+                                        type="number"
+                                        placeholder="0.00"
+                                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        value={newDealValue}
+                                        onChange={(e) => setNewDealValue(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Stage</label>
+                                    <select
+                                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+                                        value={newDealStage}
+                                        onChange={(e) => setNewDealStage(e.target.value)}
+                                    >
+                                        {stages.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                                    </select>
+                                </div>
+                            </div>
                             <div>
-                                <label className="block text-xs font-black text-[#6B7280] uppercase tracking-widest mb-2">Initial Stage</label>
-                                <select
-                                    className="w-full p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                    value={newDealStage}
-                                    onChange={(e) => setNewDealStage(e.target.value)}
-                                >
-                                    {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
+                                <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Notes / Context</label>
+                                <textarea
+                                    placeholder="Add any extra details here..."
+                                    rows={3}
+                                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                                    value={newDealNotes}
+                                    onChange={(e) => setNewDealNotes(e.target.value)}
+                                />
                             </div>
                         </div>
                         <div className="p-6 bg-gray-50 flex gap-3">
                             <button
-                                onClick={() => setIsAddModalOpen(false)}
-                                className="flex-1 px-6 py-3 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#6B7280] hover:bg-white transition-all"
+                                onClick={() => setShowAddModal(false)}
+                                className="flex-1 px-6 py-4 border border-gray-200 rounded-xl text-sm font-bold text-[#6B7280] hover:bg-white transition-all"
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={handleAddDeal}
-                                disabled={isSaving || !newDealLead || !newDealValue}
-                                className="flex-1 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                onClick={addDeal}
+                                disabled={saving || !newDealTitle.trim()}
+                                className="flex-2 px-8 py-4 bg-primary text-white rounded-xl text-sm font-black hover:bg-[#4338CA] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
                             >
-                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                                Add Deal
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Deal Detail Modal */}
-            {isDetailModalOpen && selectedDeal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                            <h3 className="text-lg font-black text-[#111827]">Deal Details</h3>
-                            <button onClick={() => setIsDetailModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-blue-50 text-primary rounded-xl flex items-center justify-center">
-                                    <Building2 size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-[#111827]">{selectedDeal.leads?.company}</p>
-                                    <p className="text-xs font-bold text-[#6B7280]">{selectedDeal.leads?.first_name} {selectedDeal.leads?.last_name}</p>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-gray-100">
-                                    <Mail size={16} className="text-primary" />
-                                    <div>
-                                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Email Address</p>
-                                        <p className="text-sm font-bold text-[#111827]">{selectedDeal.leads?.email || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-gray-100">
-                                    <Phone size={16} className="text-primary" />
-                                    <div>
-                                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Phone Number</p>
-                                        <p className="text-sm font-bold text-[#111827]">{selectedDeal.leads?.phone || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-gray-100">
-                                    <Briefcase size={16} className="text-primary" />
-                                    <div>
-                                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Industry</p>
-                                        <p className="text-sm font-bold text-[#111827]">{selectedDeal.leads?.industry || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-xl border border-gray-100">
-                                    <Star size={16} className="text-primary" />
-                                    <div>
-                                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Deal Value</p>
-                                        <p className="text-sm font-black text-[#111827]">£{Number(selectedDeal.value || 0).toLocaleString()}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-6 bg-gray-50">
-                            <button
-                                onClick={() => setIsDetailModalOpen(false)}
-                                className="w-full px-6 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm font-black text-[#111827] hover:bg-gray-100 transition-all"
-                            >
-                                Close Details
+                                {saving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                                CREATE DEAL
                             </button>
                         </div>
                     </div>

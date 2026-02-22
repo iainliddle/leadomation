@@ -8,9 +8,11 @@ interface LayoutProps {
     activePage: string;
     onPageChange: (page: string) => void;
     userPlan?: string;
+    canAccess: (feature: any) => boolean;
+    triggerUpgrade: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free' }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free', canAccess, triggerUpgrade }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -24,9 +26,23 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
                 userPlan={userPlan}
+                canAccess={canAccess}
+                triggerUpgrade={triggerUpgrade}
             />
 
-            <div className={`flex-1 transition-all duration-300 ${isCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'} flex flex-col min-w-0`}>
+            <div
+                className="flex-1 main-content-area flex flex-col min-w-0"
+                style={{
+                    transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+            >
+                <style>{`
+                    @media (min-width: 1024px) {
+                        .main-content-area {
+                            margin-left: ${isCollapsed ? '72px' : '260px'};
+                        }
+                    }
+                `}</style>
                 <div className="flex items-center lg:sticky lg:top-0 z-30 bg-white">
                     <button
                         className="lg:hidden p-4 text-[#9CA3AF] hover:text-[#111827] transition-colors"
@@ -38,7 +54,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                         <TopBar
                             activePage={activePage}
                             onNewCampaign={() => onPageChange('New Campaign')}
-                            onSignOut={() => onPageChange('Login')}
                         />
                     </div>
                 </div>

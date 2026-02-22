@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Search,
-    Download,
     Mail,
     ChevronDown,
     MoreHorizontal,
@@ -39,10 +38,15 @@ interface Lead {
     user_id: string;
 }
 
+import { Lock } from 'lucide-react';
+import type { FeatureAccess } from '../lib/planLimits';
+
 interface LeadDatabaseProps {
+    canAccess?: (feature: keyof FeatureAccess) => boolean;
+    triggerUpgrade?: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
 
-const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
+const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }) => {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -116,48 +120,70 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
     }, [leads, searchQuery, statusFilter]);
 
     const handleExport = async () => {
+        if (canAccess && !canAccess('csvExport')) {
+            triggerUpgrade?.('CSV Export', 'starter');
+            return;
+        }
+
+        if (!filteredLeads || filteredLeads.length === 0) {
+            alert('No leads to export.');
+            return;
+        }
+
         setIsExporting(true);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const { data, error } = await supabase
-                .from('leads')
-                .select('company, email, phone, location, industry, website, status')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            if (!data || data.length === 0) {
-                alert('No leads to export');
-                return;
-            }
-
-            const headers = ['Company', 'Email', 'Phone', 'Location', 'Industry', 'Website', 'Status'];
-            const csvRows = [
-                headers.join(','),
-                ...data.map(lead => [
-                    `"${(lead.company || '').replace(/"/g, '""')}"`,
-                    `"${(lead.email || '').replace(/"/g, '""')}"`,
-                    `"${(lead.phone || '').replace(/"/g, '""')}"`,
-                    `"${(lead.location || '').replace(/"/g, '""')}"`,
-                    `"${(lead.industry || '').replace(/"/g, '""')}"`,
-                    `"${(lead.website || '').replace(/"/g, '""')}"`,
-                    `"${(lead.status || '').replace(/"/g, '""')}"`
-                ].join(','))
+            // Define CSV columns
+            const headers = [
+                'Company',
+                'First Name',
+                'Last Name',
+                'Email',
+                'Phone',
+                'Website',
+                'Location',
+                'Industry',
+                'Source',
+                'Status'
             ];
 
-            const csvContent = csvRows.join('\n');
+            // Map leads to CSV rows
+            const rows = filteredLeads.map(lead => [
+                lead.company || '',
+                lead.first_name || '',
+                lead.last_name || '',
+                lead.email || '',
+                lead.phone || '',
+                lead.website || '',
+                lead.location || '',
+                lead.industry || '',
+                lead.source || 'Direct',
+                lead.status || ''
+            ]);
+
+            // Build CSV string
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row =>
+                    row.map(cell => {
+                        // Wrap in quotes if contains comma, quote, or newline
+                        const str = String(cell).replace(/"/g, '""');
+                        return str.includes(',') || str.includes('"') || str.includes('\n')
+                            ? `"${str}"`
+                            : str;
+                    }).join(',')
+                )
+            ].join('\n');
+
+            // Trigger download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'leadomation-leads.csv');
-            link.style.visibility = 'hidden';
+            link.href = url;
+            link.download = `leadomation-leads-${new Date().toISOString().split('T')[0]}.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Error exporting leads:', error);
             alert('Error exporting leads. Please try again.');
@@ -327,10 +353,26 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
                     <button
                         onClick={handleExport}
                         disabled={isExporting}
-                        className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] bg-white rounded-lg font-bold text-sm text-[#374151] hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${canAccess && !canAccess('csvExport')
+                            ? 'border-[#E5E7EB] text-gray-400 bg-white'
+                            : 'border-[#4F46E5] text-[#4F46E5] bg-white hover:bg-[#EEF2FF]'
+                            }`}
                     >
-                        {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                        {isExporting ? 'Exporting...' : 'Export CSV'}
+                        {isExporting ? (
+                            <Loader2 size={15} className="animate-spin" />
+                        ) : canAccess && !canAccess('csvExport') ? (
+                            <Lock size={15} className="text-gray-400" />
+                        ) : (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 -2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                        )}
+                        <span>{isExporting ? 'Exporting...' : 'Export CSV'}</span>
+                        {canAccess && !canAccess('csvExport') && (
+                            <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-1 font-black">PRO</span>
+                        )}
                     </button>
                     <button
                         onClick={() => setIsAddModalOpen(true)}
@@ -652,7 +694,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
                         {/* Drawer Footer */}
                         <div className="p-8 border-t border-[#F3F4F6] bg-gray-50/50 flex flex-col gap-4">
                             <button
-                                className={`w-full py-4 rounded-2xl font-black text-sm shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${enrichingLeads.includes(selectedLead.id) ? 'bg-blue-50 text-primary shadow-blue-500/5' : 'bg-white border border-[#E5E7EB] text-primary hover:bg-blue-50 shadow-blue-500/10'}`}
+                                className={`w-full py-4 rounded-2xl font-black text-sm shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${enrichingLeads.includes(selectedLead.id) ? 'bg-indigo-50 text-primary shadow-indigo-500/5' : 'bg-white border border-[#E5E7EB] text-primary hover:bg-indigo-50 shadow-indigo-500/10'}`}
                                 onClick={() => handleEnrichLead(selectedLead.id)}
                                 disabled={enrichingLeads.includes(selectedLead.id)}
                             >
@@ -661,7 +703,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
                             </button>
 
                             <button
-                                className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-500/10 hover:bg-[#4338CA] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                                 onClick={() => {
                                     alert(`Starting email sequence for ${selectedLead.company}`);
                                 }}
@@ -826,11 +868,11 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4">
-                                <Search size={20} className="text-primary mt-1" />
+                            <div className="p-6 bg-[#EEF2FF]/50 rounded-2xl border border-indigo-100 flex items-start gap-4">
+                                <Search size={20} className="text-[#4F46E5] mt-1" />
                                 <div className="flex-1">
-                                    <p className="text-xs font-black text-primary uppercase tracking-widest mb-1">PRO TIP</p>
-                                    <p className="text-xs text-[#1e40af] font-medium leading-relaxed">
+                                    <p className="text-xs font-black text-[#4F46E5] uppercase tracking-widest mb-1">PRO TIP</p>
+                                    <p className="text-xs text-[#3730A3] font-medium leading-relaxed">
                                         You can also import leads in bulk via CSV or use our Search filters and click "Save to CRM" from the Global Demand Intel view to automatically sync decision makers.
                                     </p>
                                 </div>
@@ -847,7 +889,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = () => {
                             <button
                                 onClick={handleSaveLead}
                                 disabled={isSaving || !newLead.company}
-                                className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                                 SAVE LEAD

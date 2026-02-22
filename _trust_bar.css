@@ -1,0 +1,80 @@
+/* ===== TRUST BAR — Marquee ===== */
+.lp-trust {
+    padding: 32px 0 0;
+    border-top: 1px solid var(--lp-border);
+    background: var(--lp-light);
+}
+
+.lp-trust-label {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--lp-muted);
+    margin-bottom: 20px;
+}
+
+.lp-marquee-wrapper {
+    overflow: hidden;
+    padding-bottom: 32px;
+}
+
+.lp-marquee {
+    width: 100%;
+}
+
+.lp-marquee-track {
+    display: flex;
+    gap: 24px;
+    animation: lp-scroll 30s linear infinite;
+    width: max-content;
+}
+
+@keyframes lp-scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-33.33%);
+    }
+}
+
+.lp-trust-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: 1px solid var(--lp-border);
+    background: var(--lp-white);
+    color: var(--lp-dark);
+    transition: all 0.2s;
+}
+
+.lp-trust-logo:hover {
+    border-color: var(--lp-indigo-pale);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.lp-trust-logo-img {
+    height: 22px;
+    width: auto;
+    object-fit: contain;
+}
+
+.lp-trust-logo-svg {
+    flex-shrink: 0;
+}
+
+.lp-trust-logo span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--lp-dark);
+}

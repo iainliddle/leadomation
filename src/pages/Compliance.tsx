@@ -14,79 +14,66 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-interface ProfileData {
-    id: string;
-    unsubscribe_text: string;
-    include_physical_address: boolean;
-    physical_address: string;
-    auto_suppress_bounces: boolean;
-    gdpr_compliant: boolean;
-    b2b_only_filter: boolean;
-    log_consent_basis: boolean;
-}
-
 const Compliance: React.FC = () => {
-    const [profile, setProfile] = useState<Partial<ProfileData>>({
-        include_physical_address: true,
-        b2b_only_filter: true,
-        log_consent_basis: false,
-        auto_suppress_bounces: true,
-        gdpr_compliant: true
-    });
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [includeUnsubscribe, setIncludeUnsubscribe] = useState(true);
+    const [includeBusinessAddress, setIncludeBusinessAddress] = useState(true);
+    const [b2bOnlyFilter, setB2bOnlyFilter] = useState(true);
+    const [logConsent, setLogConsent] = useState(false);
+    const [businessAddress, setBusinessAddress] = useState('');
 
     useEffect(() => {
-        fetchProfile();
+        const loadSettings = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('include_unsubscribe, include_business_address, b2b_only_filter, log_consent, business_address')
+                    .eq('id', user.id)
+                    .single();
+
+                if (data) {
+                    setIncludeUnsubscribe(data.include_unsubscribe ?? true);
+                    setIncludeBusinessAddress(data.include_business_address ?? true);
+                    setB2bOnlyFilter(data.b2b_only_filter ?? true);
+                    setLogConsent(data.log_consent ?? false);
+                    setBusinessAddress(data.business_address || '');
+                }
+            } catch (err) {
+                console.error('Error loading compliance settings:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadSettings();
     }, []);
 
-    const fetchProfile = async () => {
-        setIsLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-        if (error) {
-            console.error('Error fetching profile:', error);
-        } else if (data) {
-            setProfile(prev => ({ ...prev, ...data }));
-        }
-        setIsLoading(false);
-    };
-
-    const handleSave = async () => {
-        setIsSaving(true);
+    const saveSettings = async (fields: Record<string, any>) => {
+        setSaving(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
             const { error } = await supabase
                 .from('profiles')
-                .upsert({
-                    id: user.id,
-                    ...profile,
-                    updated_at: new Date().toISOString()
-                });
+                .update(fields)
+                .eq('id', user.id);
 
-            if (error) throw error;
-        } catch (error) {
-            console.error('Error saving compliance profile:', error);
-            alert('Error saving compliance settings. Make sure the columns exist in the profiles table.');
+            if (error) {
+                console.error('Error saving:', error);
+                alert('Failed to save. Please try again.');
+            }
+        } catch (err) {
+            console.error('Save error:', err);
         } finally {
-            setIsSaving(false);
+            setTimeout(() => setSaving(false), 1000);
         }
     };
 
-    const handleToggle = (key: keyof ProfileData) => {
-        setProfile(prev => ({ ...prev, [key]: !prev[key] }));
-    };
-
-    if (isLoading) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -102,12 +89,18 @@ const Compliance: React.FC = () => {
                     <p className="text-sm text-[#6B7280] font-medium mt-1">Manage global regulatory compliance and data protection.</p>
                 </div>
                 <button
-                    onClick={handleSave}
-                    disabled={isSaving}
+                    onClick={() => saveSettings({
+                        include_unsubscribe: includeUnsubscribe,
+                        include_business_address: includeBusinessAddress,
+                        b2b_only_filter: b2bOnlyFilter,
+                        log_consent: logConsent,
+                        business_address: businessAddress
+                    })}
+                    disabled={saving}
                     className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
                 >
-                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                    SAVE SETTINGS
+                    {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                    {saving ? 'Saving...' : '💾 SAVE SETTINGS'}
                 </button>
             </div>
 
@@ -130,7 +123,9 @@ const Compliance: React.FC = () => {
                                 </span>
                                 <span className="text-[11px] text-[#6B7280] font-medium mt-1">Automatically appends to your template footer</span>
                             </div>
-                            <div className="relative w-11 h-6 rounded-full bg-primary flex items-center px-1">
+                            <div
+                                className={`relative w-11 h-6 rounded-full bg-primary flex items-center px-1 cursor-not-allowed`}
+                            >
                                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
                                     <Lock size={10} className="text-[#9CA3AF]" />
                                 </div>
@@ -140,11 +135,21 @@ const Compliance: React.FC = () => {
 
                         <label className="flex items-center justify-between p-4 bg-white border border-[#E5E7EB] rounded-xl hover:bg-gray-50/50 transition-all cursor-pointer">
                             <span className="text-sm font-bold text-[#4B5563]">Include sender business address in email footer</span>
-                            <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.include_physical_address ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('include_physical_address')}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.include_physical_address ? 'translate-x-5' : ''}`} />
+                            <div className="flex items-center h-6">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={includeBusinessAddress}
+                                    onChange={(e) => {
+                                        setIncludeBusinessAddress(e.target.checked);
+                                        saveSettings({ include_business_address: e.target.checked });
+                                    }}
+                                />
+                                <div
+                                    className={`relative w-11 h-6 rounded-full transition-all duration-300 ${includeBusinessAddress ? 'bg-primary' : 'bg-gray-200'}`}
+                                >
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${includeBusinessAddress ? 'translate-x-5' : ''}`} />
+                                </div>
                             </div>
                         </label>
 
@@ -153,21 +158,41 @@ const Compliance: React.FC = () => {
                                 <span className="text-sm font-bold text-[#4B5563]">B2B only filter</span>
                                 <span className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">Exclude personal addresses like Gmail, Yahoo, etc.</span>
                             </div>
-                            <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.b2b_only_filter ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('b2b_only_filter')}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.b2b_only_filter ? 'translate-x-5' : ''}`} />
+                            <div className="flex items-center h-6">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={b2bOnlyFilter}
+                                    onChange={(e) => {
+                                        setB2bOnlyFilter(e.target.checked);
+                                        saveSettings({ b2b_only_filter: e.target.checked });
+                                    }}
+                                />
+                                <div
+                                    className={`relative w-11 h-6 rounded-full transition-all duration-300 ${b2bOnlyFilter ? 'bg-primary' : 'bg-gray-200'}`}
+                                >
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${b2bOnlyFilter ? 'translate-x-5' : ''}`} />
+                                </div>
                             </div>
                         </label>
 
                         <label className="flex items-center justify-between p-4 bg-white border border-[#E5E7EB] rounded-xl hover:bg-gray-50/50 transition-all cursor-pointer">
                             <span className="text-sm font-bold text-[#4B5563]">Log consent basis for each lead</span>
-                            <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.log_consent_basis ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('log_consent_basis')}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.log_consent_basis ? 'translate-x-5' : ''}`} />
+                            <div className="flex items-center h-6">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={logConsent}
+                                    onChange={(e) => {
+                                        setLogConsent(e.target.checked);
+                                        saveSettings({ log_consent: e.target.checked });
+                                    }}
+                                />
+                                <div
+                                    className={`relative w-11 h-6 rounded-full transition-all duration-300 ${logConsent ? 'bg-primary' : 'bg-gray-200'}`}
+                                >
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${logConsent ? 'translate-x-5' : ''}`} />
+                                </div>
                             </div>
                         </label>
                     </div>
@@ -188,8 +213,8 @@ const Compliance: React.FC = () => {
                             <textarea
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none h-24"
                                 placeholder="Business Address 123, Floor 4, Wellness District..."
-                                value={profile.physical_address || ''}
-                                onChange={e => setProfile(prev => ({ ...prev, physical_address: e.target.value }))}
+                                value={businessAddress}
+                                onChange={e => setBusinessAddress(e.target.value)}
                             />
                         </div>
 
@@ -199,10 +224,9 @@ const Compliance: React.FC = () => {
                                 <span className="text-[11px] text-[#9CA3AF] font-medium tracking-tight hidden sm:inline">(Prevents re-sending to bounced addresses)</span>
                             </div>
                             <div
-                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${profile.auto_suppress_bounces ? 'bg-primary' : 'bg-gray-200'}`}
-                                onClick={() => handleToggle('auto_suppress_bounces')}
+                                className="relative w-11 h-6 rounded-full transition-all duration-300 bg-primary"
                             >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${profile.auto_suppress_bounces ? 'translate-x-5' : ''}`} />
+                                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 translate-x-5" />
                             </div>
                         </label>
                     </div>
@@ -274,6 +298,19 @@ const Compliance: React.FC = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Bottom Info Banner */}
+            <div className="mt-10 bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm shrink-0">
+                    <Shield size={20} />
+                </div>
+                <div>
+                    <h4 className="text-sm font-bold text-blue-900">Compliance & Protection</h4>
+                    <p className="text-xs text-blue-700/80 font-medium mt-1.5 leading-relaxed">
+                        Compliance settings help ensure your outreach follows GDPR, CAN-SPAM, and other regulations. The unsubscribe link is required by law in most jurisdictions and cannot be disabled. B2B filtering helps protect your sender reputation by excluding personal email addresses.
+                    </p>
                 </div>
             </div>
         </div>
