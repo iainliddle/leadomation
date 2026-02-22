@@ -98,7 +98,7 @@ const App: React.FC = () => {
       case 'Deal Pipeline':
         return (
           <FeatureGate feature="Deal Pipeline / Kanban CRM" hasAccess={canAccess('dealPipeline')} targetPlan="pro">
-            <DealPipeline onPageChange={setActivePage} />
+            <DealPipeline />
           </FeatureGate>
         );
       case 'Sequence Builder':
