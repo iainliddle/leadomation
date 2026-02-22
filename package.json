@@ -20,6 +20,11 @@
     "react-simple-maps": "^3.0.0",
     "stripe": "^20.3.1"
   },
+  "overrides": {
+    "react-simple-maps": {
+      "react": "^19.0.0"
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
