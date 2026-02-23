@@ -102,11 +102,11 @@ const App: React.FC = () => {
           </FeatureGate>
         );
       case 'Sequence Builder':
-        return <SequenceBuilder />;
+        return <SequenceBuilder onPageChange={setActivePage} />;
       case 'Inbox':
         return (
           <FeatureGate feature="Unified Inbox" hasAccess={canAccess('inbox')} targetPlan="pro">
-            <UnifiedInbox />
+            <UnifiedInbox onPageChange={setActivePage} />
           </FeatureGate>
         );
       case 'Email Templates':

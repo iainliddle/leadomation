@@ -1,5 +1,75 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const BASE_LAYOUT = (subject: string, bodyContent: string) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F8F9FF;font-family:Inter,system-ui,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8F9FF;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+          <tr>
+            <td style="background:linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
+              <div style="display:inline-flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:8px;display:inline-block;line-height:36px;text-align:center;font-weight:900;color:white;font-size:18px;">L</div>
+                <span style="color:white;font-size:22px;font-weight:700;letter-spacing:-0.5px;">Leadomation</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#FFFFFF;padding:40px;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">
+              ${bodyContent}
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#F3F4F6;border-radius:0 0 16px 16px;padding:24px 40px;border:1px solid #E5E7EB;border-top:none;">
+              <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;line-height:1.6;">
+                You're receiving this email because you signed up for Leadomation.<br>
+                <a href="#" style="color:#6B7280;text-decoration:underline;">Unsubscribe</a> · 
+                <a href="https://leadomation.co.uk" style="color:#6B7280;text-decoration:underline;">Visit Leadomation</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
+const CANCELLATION_EMAIL_BODY = `
+<h1 style="margin:0 0 24px;font-size:24px;font-weight:800;color:#111827;">We've cancelled your subscription</h1>
+<p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">Hi {{first_name}},</p>
+<p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+  Your Leadomation subscription has been cancelled. Your data will be kept safe for 30 days in case you change your mind.
+</p>
+<p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+  I'd love to know why you cancelled — it only takes one click:
+</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Too expensive" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">💰 It was too expensive</a></td></tr>
+  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Missing features" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">🔧 It was missing features I needed</a></td></tr>
+  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Too complicated" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">😕 It was too complicated to use</a></td></tr>
+  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: No longer needed" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">📦 I no longer need it</a></td></tr>
+</table>
+<p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+  If price was the issue, reply to this email — I may be able to help.
+</p>
+<p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
+  Iain<br>
+  <span style="color:#6B7280;">Founder, Leadomation</span>
+</p>
+`;
 
 // Disable Vercel's default body parsing — Stripe needs the raw body for signature verification
 export const config = {
@@ -173,6 +243,27 @@ export default async function handler(req: any, res: any) {
                     console.error('Failed to cancel plan:', error);
                 } else {
                     console.log(`✅ Plan cancelled for customer ${customerId}`);
+
+                    // Send cancellation email
+                    try {
+                        const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+                        if (customer && !customer.deleted && customer.email) {
+                            const firstName = (customer.name || 'there').split(' ')[0];
+                            const subject = 'Sorry to see you go — can I ask why?';
+                            const body = CANCELLATION_EMAIL_BODY.replace(/{{first_name}}/g, firstName);
+                            const html = BASE_LAYOUT(subject, body);
+
+                            await resend.emails.send({
+                                from: 'Iain from Leadomation <iainliddle@leadomation.co.uk>',
+                                to: customer.email,
+                                replyTo: 'iainliddle@leadomation.co.uk',
+                                subject: subject,
+                                html: html,
+                            });
+                        }
+                    } catch (emailErr) {
+                        console.error('Failed to send cancellation email:', emailErr);
+                    }
                 }
 
                 break;

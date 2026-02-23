@@ -1096,7 +1096,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <div className="lp-price-card">
               <div className="lp-price-header"><h3>Starter</h3>
                 <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">49</span><span className="lp-price-period">/month</span></div>
-                <p className="lp-price-annual">or £470/year (save 20%)</p>
+                <p className="lp-price-annual">or £490/year (save 20%)</p>
               </div>
               <ul className="lp-price-features">
                 <li>3 active campaigns</li><li>500 leads per month</li><li>50 emails per day</li>

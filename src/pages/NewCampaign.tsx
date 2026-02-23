@@ -11,6 +11,7 @@ import {
     X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import UpgradePrompt from '../components/UpgradePrompt';
 
 interface Track {
     id: number;
@@ -124,6 +125,8 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
     const [emailSequence, setEmailSequence] = useState('Custom — Build from Scratch');
     const [followUpCount, setFollowUpCount] = useState(3);
     const [sendingDelay, setSendingDelay] = useState('3 days');
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [upgradeMessage, setUpgradeMessage] = useState('');
 
     const [toggles, setToggles] = useState({
         maps: true,
@@ -142,6 +145,48 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
         setSelectedCountries(prev => prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]);
     };
 
+    const checkLeadsLimit = async (): Promise<boolean> => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('plan')
+            .eq('id', user.id)
+            .single();
+
+        const plan = profile?.plan || 'trial';
+        if (plan === 'pro') return true;
+
+        const limits: Record<string, number> = { trial: 100, starter: 500 };
+        const limit = limits[plan] || 100;
+
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count } = await supabase
+            .from('leads')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .gte('created_at', startOfMonth.toISOString());
+
+        const currentCount = count || 0;
+        const remaining = Math.max(0, limit - currentCount);
+
+        if (currentCount + leadCount > limit) {
+            const msg = remaining === 0
+                ? `Monthly leads limit reached. Your ${plan} plan includes ${limit} leads/month. Upgrade to Pro for unlimited leads.`
+                : `This campaign would exceed your monthly limit. You have ${remaining} leads remaining this month.`;
+
+            setUpgradeMessage(msg);
+            setShowUpgradeModal(true);
+            setError(msg);
+            return false;
+        }
+        return true;
+    };
+
     const saveCampaign = async (status: 'draft' | 'active') => {
         // Validate required fields
         if (!campaignName?.trim()) {
@@ -156,6 +201,14 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
             if (!user) {
                 alert('Please log in first.');
                 return;
+            }
+
+            if (status === 'active') {
+                const canLaunch = await checkLeadsLimit();
+                if (!canLaunch) {
+                    setSaving(false);
+                    return;
+                }
             }
 
             // Plan limit check for trial users
@@ -655,6 +708,17 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                     </button>
                 </div>
             </div>
+
+            {showUpgradeModal && (
+                <UpgradePrompt
+                    message={upgradeMessage}
+                    onClose={() => setShowUpgradeModal(false)}
+                    onUpgrade={() => {
+                        setShowUpgradeModal(false);
+                        if (onPageChange) onPageChange('Pricing');
+                    }}
+                />
+            )}
         </div>
     );
 };

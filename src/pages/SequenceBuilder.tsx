@@ -16,6 +16,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import UpgradePrompt from '../components/UpgradePrompt';
 
 interface Step {
     step: number;
@@ -34,11 +35,16 @@ interface Sequence {
     user_id: string;
 }
 
-const SequenceBuilder: React.FC = () => {
+interface SequenceBuilderProps {
+    onPageChange?: (page: string) => void;
+}
+
+const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
     const [sequences, setSequences] = useState<Sequence[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingSequence, setEditingSequence] = useState<Sequence | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [upgradeModal, setUpgradeModal] = useState({ show: false, message: '' });
 
     // Editor State
     const [activeStepIndex, setActiveStepIndex] = useState(0);
@@ -120,8 +126,39 @@ const SequenceBuilder: React.FC = () => {
         if (!error) fetchSequences();
     };
 
-    const addStep = (channel: 'email' | 'linkedin' | 'phone') => {
+    const checkSequenceStepLimit = async (): Promise<boolean> => {
+        if (!editingSequence) return false;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('plan')
+            .eq('id', user.id)
+            .single();
+
+        const plan = profile?.plan || 'trial';
+        if (plan === 'pro') return true;
+
+        const limits: Record<string, number> = { trial: 2, starter: 4 };
+        const limit = limits[plan] || 2;
+
+        if (editingSequence.steps.length >= limit) {
+            setUpgradeModal({
+                show: true,
+                message: `Your ${plan} plan includes up to ${limit} sequence steps. Upgrade to Pro for unlimited steps.`,
+            });
+            return false;
+        }
+        return true;
+    };
+
+    const addStep = async (channel: 'email' | 'linkedin' | 'phone') => {
         if (!editingSequence) return;
+
+        const canAdd = await checkSequenceStepLimit();
+        if (!canAdd) return;
+
         const newStep: Step = {
             step: editingSequence.steps.length + 1,
             channel: channel,
@@ -430,6 +467,17 @@ const SequenceBuilder: React.FC = () => {
                         </div>
                     </main>
                 </div>
+            )}
+
+            {upgradeModal.show && (
+                <UpgradePrompt
+                    message={upgradeModal.message}
+                    onClose={() => setUpgradeModal({ ...upgradeModal, show: false })}
+                    onUpgrade={() => {
+                        setUpgradeModal({ ...upgradeModal, show: false });
+                        if (onPageChange) onPageChange('Pricing');
+                    }}
+                />
             )}
         </div>
     );

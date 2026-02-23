@@ -7,14 +7,21 @@ import {
     Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import UpgradePrompt from '../components/UpgradePrompt';
 
-const UnifiedInbox: React.FC = () => {
+interface UnifiedInboxProps {
+    onPageChange?: (page: string) => void;
+}
+
+const UnifiedInbox: React.FC<UnifiedInboxProps> = ({ onPageChange }) => {
     // STEP 2 — Add state variables
     const [emails, setEmails] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedEmail, setSelectedEmail] = useState<any>(null);
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [upgradeMessage, setUpgradeMessage] = useState('');
 
     // STEP 3 — Load emails from Supabase
     useEffect(() => {
@@ -37,6 +44,44 @@ const UnifiedInbox: React.FC = () => {
             console.error('Error loading emails:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkEmailLimit = async (): Promise<boolean> => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('plan')
+            .eq('id', user.id)
+            .single();
+
+        const plan = profile?.plan || 'trial';
+        const limits: Record<string, number> = { trial: 20, starter: 50, pro: 200 };
+        const limit = limits[plan] || 20;
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const { count } = await supabase
+            .from('emails')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .gte('sent_at', startOfDay.toISOString());
+
+        if ((count || 0) >= limit) {
+            setUpgradeMessage(`Daily email limit reached. Your ${plan} plan includes ${limit} emails/day. Upgrade to Pro for 200 emails/day.`);
+            setShowUpgradeModal(true);
+            return false;
+        }
+        return true;
+    };
+
+    const handleComposeClick = async () => {
+        const canSend = await checkEmailLimit();
+        if (canSend) {
+            alert('Email composing will be available once your email account is connected in Integrations.');
         }
     };
 
@@ -96,7 +141,7 @@ const UnifiedInbox: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                             {/* STEP 9 — Wire the COMPOSE button */}
                             <button
-                                onClick={() => alert('Email composing will be available once your email account is connected in Integrations.')}
+                                onClick={handleComposeClick}
                                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black hover:bg-[#4338CA] transition-all shadow-sm"
                             >
                                 <Plus size={14} />
@@ -241,6 +286,17 @@ const UnifiedInbox: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {showUpgradeModal && (
+                <UpgradePrompt
+                    message={upgradeMessage}
+                    onClose={() => setShowUpgradeModal(false)}
+                    onUpgrade={() => {
+                        setShowUpgradeModal(false);
+                        if (onPageChange) onPageChange('Pricing');
+                    }}
+                />
+            )}
         </div>
     );
 };

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Rocket, Search, Mail, Zap, CheckCircle2, ChevronRight, ChevronLeft, X, Phone } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { sendWelcomeEmail } from '../lib/emailService';
 
 interface OnboardingModalProps {
     isOpen: boolean;
@@ -12,10 +14,20 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
     if (!isOpen) return null;
 
-    const nextStep = () => {
+    const nextStep = async () => {
         if (step < totalSteps) {
             setStep(step + 1);
         } else {
+            // Trigger welcome email on completion
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const firstName = user.user_metadata?.first_name || 'there';
+                    await sendWelcomeEmail(user.email!, firstName);
+                }
+            } catch (err) {
+                console.error('Failed to send welcome email:', err);
+            }
             onClose();
         }
     };
