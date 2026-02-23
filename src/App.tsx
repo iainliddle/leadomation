@@ -91,7 +91,15 @@ const App: React.FC = () => {
 
       if (session) {
         if (event === 'SIGNED_IN') {
-          setActivePage('Dashboard');
+          // Send welcome email
+          const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
+          fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: session.user.email, type: 'welcome', firstName })
+          }).catch(err => console.error('Failed to send welcome email:', err));
+
+          window.location.href = '/dashboard';
         } else if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
           setActivePage('Dashboard');
         }
