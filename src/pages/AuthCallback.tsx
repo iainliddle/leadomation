@@ -3,13 +3,24 @@ import { supabase } from '../lib/supabase';
 
 export default function AuthCallback() {
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
+        const handleCallback = async () => {
+            const { data } = await supabase.auth.exchangeCodeForSession(window.location.href);
+            if (data.session) {
                 window.location.href = '/dashboard';
             } else {
-                window.location.href = '/';
+                // Try getting session from URL hash
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const accessToken = hashParams.get('access_token');
+                const refreshToken = hashParams.get('refresh_token');
+                if (accessToken && refreshToken) {
+                    await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+                    window.location.href = '/dashboard';
+                } else {
+                    window.location.href = '/';
+                }
             }
-        });
+        };
+        handleCallback();
     }, []);
 
     return (
