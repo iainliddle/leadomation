@@ -1,3 +1,4 @@
+// v2 - sequence builder with info cards
 import React, { useState, useEffect } from 'react';
 import {
     Clock,
