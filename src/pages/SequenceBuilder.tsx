@@ -274,7 +274,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                 How Sequences Work
                             </p>
                             <p style={{ margin: 0, fontSize: '13px', color: '#6B7280', lineHeight: '1.6' }}>
-                                Build multi-step outreach flows that run automatically. Assign a sequence to a campaign and every lead found will be enrolled. Sequences stop automatically when a lead replies.
+                                Build multi-step outreach flows that run automatically. Assign a sequence to a campaign and every lead found will be enrolled. Sequences pause automatically when a lead replies.
                             </p>
                         </div>
                     </div>
@@ -392,6 +392,28 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                         </div>
                                     </React.Fragment>
                                 ))}
+                            </div>
+
+                            {/* Merge Tags Tip Card */}
+                            <div style={{
+                                background: '#F8F9FF',
+                                border: '1px solid #E0E7FF',
+                                borderRadius: '8px',
+                                padding: '12px 16px',
+                                marginTop: '16px',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: '10px'
+                            }}>
+                                <span style={{ fontSize: '16px' }}>💡</span>
+                                <div>
+                                    <p style={{ margin: '0 0 2px', fontSize: '12px', fontWeight: '600', color: '#4F46E5' }}>
+                                        Merge Tags
+                                    </p>
+                                    <p style={{ margin: 0, fontSize: '11px', color: '#6B7280', lineHeight: '1.4' }}>
+                                        Click the merge tags above the message body to personalise each email automatically with the lead's details.
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="mt-6 pt-6 border-t border-gray-100 space-y-2">
