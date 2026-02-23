@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Building,
     PenTool,
@@ -139,19 +139,20 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
         linkedin: false
     });
 
-    React.useEffect(() => {
-        fetchSequences();
+    useEffect(() => {
+        const loadSequences = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data } = await supabase
+                .from('sequences')
+                .select('id, name')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .order('created_at', { ascending: false });
+            setSequences(data || []);
+        };
+        loadSequences();
     }, []);
-
-    const fetchSequences = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        const { data } = await supabase
-            .from('sequences')
-            .select('id, name')
-            .eq('user_id', user.id);
-        if (data) setSequences(data);
-    };
 
     const toggleTag = (tag: string) => {
         setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -595,40 +596,21 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
             <Section title="Outreach Configuration">
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Assign Sequence</label>
+                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Email Sequence</label>
                         <div className="relative">
                             <select
                                 value={selectedSequenceId}
                                 onChange={(e) => setSelectedSequenceId(e.target.value)}
                                 className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
                             >
-                                <option value="">None — Do not enrol leads</option>
+                                <option value="">Custom — Build from Scratch</option>
                                 {sequences.map(seq => (
                                     <option key={seq.id} value={seq.id}>{seq.name}</option>
                                 ))}
                             </select>
                             <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
                         </div>
-                        <p className="text-[10px] text-[#9CA3AF] mt-2 italic">Select the sequence that leads will be automatically enrolled into.</p>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Email Sequence Template</label>
-                        <div className="relative">
-                            <select
-                                value={emailSequence}
-                                onChange={(e) => setEmailSequence(e.target.value)}
-                                className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
-                            >
-                                <option>Direct — Gym/Wellness Intro</option>
-                                <option>Direct — Luxury Hotel/Spa</option>
-                                <option>Direct — GCC Premium</option>
-                                <option>Specifier — Design Partnership</option>
-                                <option>Warm — Upgrade Pitch</option>
-                                <option>Custom — Build from Scratch</option>
-                            </select>
-                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-                        </div>
+                        <p className="text-[10px] text-[#9CA3AF] mt-2 italic">Select a sequence to automatically enrol leads into your outreach flow.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
