@@ -65,30 +65,36 @@ const App: React.FC = () => {
       setLoading(false);
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Listen for auth changes - General session handling
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
 
-      if (session) {
-        if (event === 'SIGNED_IN' && session && window.location.pathname === '/auth/callback') {
-          // Send welcome email
-          const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
-          fetch('/api/send-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: session.user.email, type: 'welcome', firstName })
-          }).catch(err => console.error('Failed to send welcome email:', err));
-
-          window.location.href = '/dashboard';
-        } else if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
-          setActivePage('Dashboard');
-        }
-      } else if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Login') {
+      // Auto-navigate to dashboard if logged in and on public pages
+      if (session && (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register')) {
+        setActivePage('Dashboard');
+      }
+      // Auto-navigate to landing if logged out and on protected pages
+      else if (!session && activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Login') {
         setActivePage('Landing');
       }
     });
 
     return () => subscription.unsubscribe();
+  }, [activePage]);
+
+  // Dedicated handler for auth callback / welcome email
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && window.location.pathname === '/auth/callback') {
+        const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
+        fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: session.user.email, type: 'welcome', firstName })
+        });
+        window.location.href = '/dashboard';
+      }
+    });
   }, []);
 
   const renderPage = (page: string) => {
