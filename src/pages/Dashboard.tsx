@@ -8,6 +8,7 @@ import OnboardingModal from '../components/OnboardingModal';
 import { supabase } from '../lib/supabase';
 import UsageLimitBar from '../components/UsageLimitBar';
 import { usePlan } from '../hooks/usePlan';
+import { sendWelcomeEmail } from '../lib/emailService';
 
 interface DashboardProps {
     onPageChange: (page: string) => void;
@@ -70,6 +71,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             const onboardingCompleted = localStorage.getItem('leadomation_onboarding_completed');
             if ((totalLeads || 0) === 0 && !onboardingCompleted) {
                 setShowOnboarding(true);
+            }
+
+            // Welcome email insurance check
+            const createdAt = new Date(user.created_at);
+            const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+            const welcomeEmailSent = localStorage.getItem('welcome_email_sent') === 'true';
+
+            if (createdAt > tenMinutesAgo && !welcomeEmailSent) {
+                const fullName = user.user_metadata?.full_name || '';
+                const firstName = fullName.split(' ')[0] || 'there';
+                try {
+                    await sendWelcomeEmail(user.email!, firstName);
+                    localStorage.setItem('welcome_email_sent', 'true');
+                    console.log('✅ Welcome email insurance triggered');
+                } catch (err) {
+                    console.error('Failed to send insurance welcome email:', err);
+                }
             }
         };
 

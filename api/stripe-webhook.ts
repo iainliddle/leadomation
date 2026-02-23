@@ -246,8 +246,8 @@ export default async function handler(req: any, res: any) {
 
                     // Send cancellation email
                     try {
-                        const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
-                        if (customer && !customer.deleted && customer.email) {
+                        const customer = await stripe.customers.retrieve(customerId);
+                        if (customer && !('deleted' in customer) && customer.email) {
                             const firstName = (customer.name || 'there').split(' ')[0];
                             const subject = 'Sorry to see you go — can I ask why?';
                             const body = CANCELLATION_EMAIL_BODY.replace(/{{first_name}}/g, firstName);

@@ -6,7 +6,7 @@ import {
     URGENCY_EMAIL_BODY,
     TRIAL_ENDING_EMAIL_BODY,
     WIN_BACK_EMAIL_BODY
-} from '../../src/lib/emailTemplates';
+} from '../../src/lib/emailTemplates.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabase = createClient(

@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Rocket, Search, Mail, Zap, CheckCircle2, ChevronRight, ChevronLeft, X, Phone } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { sendWelcomeEmail } from '../lib/emailService';
 
 interface OnboardingModalProps {
     isOpen: boolean;
@@ -14,21 +12,15 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
     if (!isOpen) return null;
 
+    const completeOnboarding = async () => {
+        onClose();
+    };
+
     const nextStep = async () => {
         if (step < totalSteps) {
             setStep(step + 1);
         } else {
-            // Trigger welcome email on completion
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    const firstName = user.user_metadata?.first_name || 'there';
-                    await sendWelcomeEmail(user.email!, firstName);
-                }
-            } catch (err) {
-                console.error('Failed to send welcome email:', err);
-            }
-            onClose();
+            await completeOnboarding();
         }
     };
 
@@ -91,7 +83,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                             Head over to <span className="text-[#111827] font-black">New Campaign</span> to start scraping your first batch of leads. Your journey to automated growth starts here.
                         </p>
                         <button
-                            onClick={onClose}
+                            onClick={completeOnboarding}
                             className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-xl transition-all active:scale-[0.98]"
                         >
                             GO TO DASHBOARD
