@@ -53,25 +53,49 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Check initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
+    const handleAuthCallback = async () => {
+      // Check for auth tokens in the URL (both hash and query)
+      const hasToken = window.location.hash.includes('access_token=') ||
+        window.location.search.includes('code=') ||
+        window.location.hash.includes('type=signup');
+
+      if (hasToken) {
+        setLoading(true);
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (session && !error) {
+          setSession(session);
           setActivePage('Dashboard');
+          // Clean up the URL
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
+        setLoading(false);
+      } else {
+        // Normal session check
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        if (session) {
+          if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
+            setActivePage('Dashboard');
+          }
+        }
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    handleAuthCallback();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+
       if (session) {
-        if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
+        if (event === 'SIGNED_IN') {
+          setActivePage('Dashboard');
+        } else if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
           setActivePage('Dashboard');
         }
-      } else if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy') {
+      } else if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Login') {
         setActivePage('Landing');
       }
     });
