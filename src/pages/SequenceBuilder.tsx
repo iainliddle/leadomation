@@ -243,27 +243,13 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
             {!editingSequence ? (
                 /* Sequence List View */
                 <div className="animate-in fade-in duration-700">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h1 className="text-2xl font-black text-[#111827] mb-1">Outreach Sequences</h1>
-                            <p className="text-sm font-bold text-[#6B7280]">Manage your multi-channel automation flows</p>
-                        </div>
-                        <button
-                            onClick={handleCreateNew}
-                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all shadow-lg active:scale-95"
-                        >
-                            <Plus size={18} />
-                            NEW SEQUENCE
-                        </button>
-                    </div>
-
-                    {/* Part 8: Info Card */}
+                    {/* Part 8: Info Card - Positioned at the very top */}
                     <div style={{
                         background: 'linear-gradient(135deg, #EEF2FF 0%, #E0F2FE 100%)',
                         border: '1px solid #C7D2FE',
                         borderRadius: '12px',
                         padding: '16px 20px',
-                        marginBottom: '24px',
+                        marginBottom: '32px',
                         display: 'flex',
                         alignItems: 'flex-start',
                         gap: '12px'
@@ -277,6 +263,20 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                 Build multi-step outreach flows that run automatically. Assign a sequence to a campaign and every lead found will be enrolled. Sequences pause automatically when a lead replies.
                             </p>
                         </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-2xl font-black text-[#111827] mb-1">Outreach Sequences</h1>
+                            <p className="text-sm font-bold text-[#6B7280]">Manage your multi-channel automation flows</p>
+                        </div>
+                        <button
+                            onClick={handleCreateNew}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all shadow-lg active:scale-95"
+                        >
+                            <Plus size={18} />
+                            NEW SEQUENCE
+                        </button>
                     </div>
 
                     {sequences.length === 0 ? (
