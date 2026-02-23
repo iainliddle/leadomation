@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface UpgradePromptProps {
     message: string;
     onClose: () => void;
