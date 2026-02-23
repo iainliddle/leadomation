@@ -127,6 +127,8 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
     const [sendingDelay, setSendingDelay] = useState('3 days');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [upgradeMessage, setUpgradeMessage] = useState('');
+    const [sequences, setSequences] = useState<any[]>([]);
+    const [selectedSequenceId, setSelectedSequenceId] = useState<string>('');
 
     const [toggles, setToggles] = useState({
         maps: true,
@@ -136,6 +138,20 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
         timezone: true,
         linkedin: false
     });
+
+    React.useEffect(() => {
+        fetchSequences();
+    }, []);
+
+    const fetchSequences = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase
+            .from('sequences')
+            .select('id, name')
+            .eq('user_id', user.id);
+        if (data) setSequences(data);
+    };
 
     const toggleTag = (tag: string) => {
         setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -277,7 +293,8 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                 leads_found: 0,
                 emails_sent: 0,
                 replies: 0,
-                reply_rate: 0
+                reply_rate: 0,
+                sequence_id: selectedSequenceId || null
             };
 
             console.log('Inserting:', JSON.stringify(insertData));
@@ -578,7 +595,25 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
             <Section title="Outreach Configuration">
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Email Sequence</label>
+                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Assign Sequence</label>
+                        <div className="relative">
+                            <select
+                                value={selectedSequenceId}
+                                onChange={(e) => setSelectedSequenceId(e.target.value)}
+                                className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                            >
+                                <option value="">None — Do not enrol leads</option>
+                                {sequences.map(seq => (
+                                    <option key={seq.id} value={seq.id}>{seq.name}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                        </div>
+                        <p className="text-[10px] text-[#9CA3AF] mt-2 italic">Select the sequence that leads will be automatically enrolled into.</p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Email Sequence Template</label>
                         <div className="relative">
                             <select
                                 value={emailSequence}

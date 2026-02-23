@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
+import { stopSequenceOnReply } from '../lib/sequenceUtils';
 
 interface UnifiedInboxProps {
     onPageChange?: (page: string) => void;
@@ -39,7 +40,15 @@ const UnifiedInbox: React.FC<UnifiedInboxProps> = ({ onPageChange }) => {
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
-            if (data) setEmails(data);
+            if (data) {
+                setEmails(data);
+                // Stop sequences for leads that have replied
+                data.forEach(email => {
+                    if (email.replied_at && email.lead_id) {
+                        stopSequenceOnReply(email.lead_id);
+                    }
+                });
+            }
         } catch (err) {
             console.error('Error loading emails:', err);
         } finally {

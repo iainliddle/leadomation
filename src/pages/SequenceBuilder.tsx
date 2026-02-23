@@ -61,7 +61,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 
         const { data, error } = await supabase
             .from('sequences')
-            .select('*')
+            .select('*, sequence_enrollments(count)')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
 
@@ -86,28 +86,44 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
     };
 
     const handleSave = async () => {
-        if (!editingSequence) return;
+        if (!editingSequence || !editingSequence.name) {
+            alert('Please add a name and at least one step');
+            return;
+        }
         setIsSaving(true);
 
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const payload = {
-            ...editingSequence,
+        const sequenceData = {
             user_id: user.id,
-            steps: editingSequence.steps.map((s, i) => ({ ...s, step: i + 1 }))
+            name: editingSequence.name,
+            steps: editingSequence.steps.map((s, i) => ({
+                index: i,
+                channel: s.channel,
+                subject: s.subject,
+                body: s.body,
+                waitDays: s.delay_days
+            })),
+            status: 'active',
+            updated_at: new Date().toISOString()
         };
 
-        const { error } = await supabase
-            .from('sequences')
-            .upsert(payload);
-
-        if (!error) {
-            fetchSequences();
-            setEditingSequence(null);
+        if (editingSequence.id) {
+            const { error } = await supabase
+                .from('sequences')
+                .update(sequenceData)
+                .eq('id', editingSequence.id);
+            if (!error) console.log('Sequence updated!');
         } else {
-            console.error('Save error:', error);
+            const { error } = await supabase
+                .from('sequences')
+                .insert(sequenceData);
+            if (!error) console.log('Sequence saved!');
         }
+
+        fetchSequences();
+        setEditingSequence(null);
         setIsSaving(false);
     };
 
@@ -241,6 +257,28 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                         </button>
                     </div>
 
+                    {/* Part 8: Info Card */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, #EEF2FF 0%, #E0F2FE 100%)',
+                        border: '1px solid #C7D2FE',
+                        borderRadius: '12px',
+                        padding: '16px 20px',
+                        marginBottom: '24px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px'
+                    }}>
+                        <span style={{ fontSize: '20px' }}>⚡</span>
+                        <div>
+                            <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '600', color: '#4F46E5' }}>
+                                How Sequences Work
+                            </p>
+                            <p style={{ margin: 0, fontSize: '13px', color: '#6B7280', lineHeight: '1.6' }}>
+                                Build multi-step outreach flows that run automatically. Assign a sequence to a campaign and every lead found will be enrolled. Sequences stop automatically when a lead replies.
+                            </p>
+                        </div>
+                    </div>
+
                     {sequences.length === 0 ? (
                         <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center shadow-sm">
                             <Layers size={48} className="mx-auto text-blue-100 mb-4" />
@@ -259,6 +297,8 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                             <h3 className="text-base font-black text-[#111827] mb-0.5">{seq.name}</h3>
                                             <div className="flex items-center gap-3 text-xs font-bold text-[#6B7280]">
                                                 <span>{seq.steps?.length || 0} Steps</span>
+                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                <span className="text-primary">{(seq as any).sequence_enrollments?.[0]?.count || 0} enrolled leads</span>
                                                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                                 <span>Created {new Date(seq.created_at).toLocaleDateString()}</span>
                                             </div>
