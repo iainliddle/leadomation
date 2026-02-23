@@ -25,6 +25,7 @@ import TrialBanner from './components/TrialBanner';
 import FeatureGate from './components/FeatureGate';
 import ExpiredOverlay from './components/ExpiredOverlay';
 import UpgradeModal from './components/UpgradeModal';
+import AuthCallback from './pages/AuthCallback';
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState('Landing');
@@ -53,37 +54,16 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    const handleAuthCallback = async () => {
-      // Check for auth tokens in the URL (both hash and query)
-      const hasToken = window.location.hash.includes('access_token=') ||
-        window.location.search.includes('code=') ||
-        window.location.hash.includes('type=signup');
-
-      if (hasToken) {
-        setLoading(true);
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (session && !error) {
-          setSession(session);
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
           setActivePage('Dashboard');
-          // Clean up the URL
-          window.history.replaceState({}, document.title, window.location.pathname);
         }
-        setLoading(false);
-      } else {
-        // Normal session check
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        if (session) {
-          if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
-            setActivePage('Dashboard');
-          }
-        }
-        setLoading(false);
       }
-    };
-
-    handleAuthCallback();
+      setLoading(false);
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -174,6 +154,11 @@ const App: React.FC = () => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  // Handle dedicated auth callback route
+  if (window.location.pathname === '/auth/callback') {
+    return <AuthCallback />;
   }
 
   // Handle public pages
