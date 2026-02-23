@@ -70,7 +70,7 @@ const App: React.FC = () => {
       setSession(session);
 
       if (session) {
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' && session && window.location.pathname === '/auth/callback') {
           // Send welcome email
           const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
           fetch('/api/send-email', {
