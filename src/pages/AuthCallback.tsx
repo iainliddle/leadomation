@@ -8,10 +8,10 @@ export default function AuthCallback() {
                 subscription.unsubscribe();
                 const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
                 try {
-                    await fetch('/api/send-email', {
+                    await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ to: session.user.email, type: 'welcome', firstName })
+                        body: JSON.stringify({ to: session.user.email, firstName })
                     });
                 } catch (e) {
                     console.error('Welcome email failed:', e);
