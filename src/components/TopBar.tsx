@@ -69,7 +69,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign }) => {
                 <div className="flex items-center gap-3 pl-2 group">
                     <div className="flex flex-col items-end">
                         <span className="text-sm font-bold text-[#111827]">{userName || 'User'}</span>
-                        <span className="text-[10px] text-[#9CA3AF] font-bold uppercase tracking-tight">Admin</span>
+                        <span className="text-[10px] text-[#9CA3AF] font-bold uppercase tracking-tight">admin</span>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#2563EB] font-black border border-[#BFDBFE] shadow-sm transform group-hover:scale-105 transition-all cursor-pointer">
                         {userInitials || '?'}
