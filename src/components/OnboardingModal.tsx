@@ -8,6 +8,24 @@ interface OnboardingModalProps {
 
 const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) => {
     const [step, setStep] = useState(1);
+
+    React.useEffect(() => {
+        if (isOpen) {
+            import('../lib/supabase').then(({ supabase }) => {
+                supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user) {
+                        const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'there';
+                        fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ to: user.email, firstName })
+                        });
+                    }
+                });
+            });
+        }
+    }, [isOpen]);
+
     const totalSteps = 3;
 
     if (!isOpen) return null;
@@ -100,7 +118,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
             <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] overflow-hidden">
-                {/* Close Button */}
                 <button
                     onClick={onClose}
                     className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111827] transition-colors z-10"
