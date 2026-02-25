@@ -547,5 +547,3 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 };
 
 export default SequenceBuilder;
- 
- 
