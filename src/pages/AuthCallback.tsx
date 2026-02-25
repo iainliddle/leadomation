@@ -1,25 +1,38 @@
 import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+const sendWelcomeEmail = async (email: string, firstName: string) => {
+    try {
+        await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: email, firstName })
+        });
+    } catch (e) {
+        console.error('Welcome email failed:', e);
+    }
+};
+
 export default function AuthCallback() {
     useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
-                subscription.unsubscribe();
+        const handleAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
                 const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
-                try {
-                    await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ to: session.user.email, firstName })
-                    });
-                } catch (e) {
-                    console.error('Welcome email failed:', e);
-                }
+                await sendWelcomeEmail(session.user.email!, firstName);
                 window.location.href = '/dashboard';
+                return;
             }
-        });
-        return () => subscription.unsubscribe();
+            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+                    subscription.unsubscribe();
+                    const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
+                    await sendWelcomeEmail(session.user.email!, firstName);
+                    window.location.href = '/dashboard';
+                }
+            });
+        };
+        handleAuth();
     }, []);
 
     return (
