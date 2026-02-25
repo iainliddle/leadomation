@@ -122,7 +122,6 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
     const [leadCount, setLeadCount] = useState(10);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [emailSequence, setEmailSequence] = useState('Custom — Build from Scratch');
     const [followUpCount, setFollowUpCount] = useState(3);
     const [sendingDelay, setSendingDelay] = useState('3 days');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
