@@ -14,6 +14,9 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
             import('../lib/supabase').then(({ supabase }) => {
                 supabase.auth.getUser().then(({ data: { user } }) => {
                     if (user) {
+                        const alreadySent = localStorage.getItem(`welcome_sent_${user.id}`);
+                        if (alreadySent) return;
+                        localStorage.setItem(`welcome_sent_${user.id}`, 'true');
                         const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'there';
                         fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
                             method: 'POST',
