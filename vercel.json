@@ -18,12 +18,12 @@
 }
 ```
 
-Then run:
+Press **Ctrl+S** to save, then run:
 ```
 git add .
 ```
 ```
-git commit -m "fix: remove cron for now"
+git commit -m "fix: clean vercel.json"
 ```
 ```
 git push
