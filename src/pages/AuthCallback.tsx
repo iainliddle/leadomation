@@ -5,6 +5,12 @@ export default function AuthCallback() {
     useEffect(() => {
         supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
+                const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
+                fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to: session.user.email, type: 'welcome', firstName })
+                });
                 window.location.href = '/dashboard';
             } else if (event === 'TOKEN_REFRESHED') {
                 window.location.href = '/dashboard';
