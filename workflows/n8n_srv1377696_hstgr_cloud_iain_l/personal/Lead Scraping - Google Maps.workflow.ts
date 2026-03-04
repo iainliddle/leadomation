@@ -47,7 +47,7 @@ export class LeadScrapingGoogleMapsWorkflow {
     })
     HttpRequest = {
         method: 'POST',
-        url: 'https://api.apify.com/v2/acts/compass~crawler-google-places/runs?token=apify_api_7AbLmTedmvzrZQk58ltCvzQlIqSpE20xShAx',
+        url: 'https://api.apify.com/v2/acts/compass~crawler-google-places/runs?token=apify_api_M8MJyyn9uJuABi94V73yx3smIQzRlZ2RaaVm',
         sendHeaders: true,
         headerParameters: {
             parameters: [

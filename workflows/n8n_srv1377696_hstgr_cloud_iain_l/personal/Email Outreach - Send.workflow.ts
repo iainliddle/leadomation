@@ -27,7 +27,7 @@ import { workflow, node, links } from '@n8n-as-code/transformer';
 @workflow({
     id: 'xrDMkL7RSEqk0zqt',
     name: 'Email Outreach - Send',
-    active: false,
+    active: true,
     settings: { executionOrder: 'v1', binaryMode: 'separate', availableInMCP: false },
 })
 export class EmailOutreachSendWorkflow {
@@ -90,7 +90,7 @@ export class EmailOutreachSendWorkflow {
             parameters: [
                 {
                     name: 'x-api-key',
-                    value: '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',
+                    value: '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',
                 },
                 {
                     name: 'anthropic-version',

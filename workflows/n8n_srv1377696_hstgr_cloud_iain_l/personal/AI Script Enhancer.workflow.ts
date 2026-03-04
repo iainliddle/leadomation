@@ -64,7 +64,7 @@ export class AiScriptEnhancerWorkflow {
             parameters: [
                 {
                     name: 'x-api-key',
-                    value: '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',
+                    value: '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',
                 },
                 {
                     name: 'anthropic-version',
