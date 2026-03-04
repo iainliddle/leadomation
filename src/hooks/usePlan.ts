@@ -19,6 +19,7 @@ interface UsePlanReturn {
     trialDaysRemaining: number;
     isTrialActive: boolean;
     billingInterval: string | null;
+    stripeCustomerId: string | null;
     limits: PlanLimits;
     features: FeatureAccess;
     canAccess: (feature: keyof FeatureAccess) => boolean;
@@ -47,6 +48,7 @@ export const usePlan = (): UsePlanReturn => {
     const [rawPlan, setRawPlan] = useState<string>('trial');
     const [trialEnd, setTrialEnd] = useState<string | null>(null);
     const [billingInterval, setBillingInterval] = useState<string | null>(null);
+    const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [usage, setUsage] = useState({
         leadsUsed: 0,
@@ -67,7 +69,7 @@ export const usePlan = (): UsePlanReturn => {
 
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('plan, trial_end, billing_interval, trial_leads_used, trial_emails_used, trial_voice_calls_used, trial_ai_emails_used, trial_keyword_searches_used, trial_campaigns_used, monthly_leads_used, monthly_emails_used, monthly_keyword_searches_used, monthly_reset_date')
+                .select('plan, trial_end, billing_interval, stripe_customer_id, trial_leads_used, trial_emails_used, trial_voice_calls_used, trial_ai_emails_used, trial_keyword_searches_used, trial_campaigns_used, monthly_leads_used, monthly_emails_used, monthly_keyword_searches_used, monthly_reset_date')
                 .eq('id', user.id)
                 .single();
 
@@ -75,6 +77,7 @@ export const usePlan = (): UsePlanReturn => {
                 setRawPlan(profile.plan || 'trial');
                 setTrialEnd(profile.trial_end);
                 setBillingInterval(profile.billing_interval);
+                setStripeCustomerId(profile.stripe_customer_id);
                 setUsage({
                     leadsUsed: profile.trial_leads_used || 0,
                     emailsUsed: profile.trial_emails_used || 0,
@@ -245,6 +248,7 @@ export const usePlan = (): UsePlanReturn => {
         trialDaysRemaining,
         isTrialActive: isTrialActiveNow,
         billingInterval,
+        stripeCustomerId,
         limits,
         features,
         canAccess,

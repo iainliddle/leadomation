@@ -28,11 +28,13 @@ import FeatureGate from './components/FeatureGate';
 import ExpiredOverlay from './components/ExpiredOverlay';
 import UpgradeModal from './components/UpgradeModal';
 import AuthCallback from './pages/AuthCallback';
+import TrialSetup from './pages/TrialSetup';
+import { AlertTriangle } from 'lucide-react'; // Added for the TrialBanner
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState('Landing');
   const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const {
     plan,
@@ -55,30 +57,84 @@ const App: React.FC = () => {
     setActivePage('Pricing');
   };
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
-          setActivePage('Dashboard');
-        }
+  const [planCheckDone, setPlanCheckDone] = useState(false);
+
+  const checkTrialStatus = async (user: any) => {
+    try {
+      if (localStorage.getItem('trial_skipped') === 'true') return 'Dashboard';
+      const { data } = await supabase.from('profiles').select('stripe_customer_id, plan').eq('id', user.id).single();
+      if (data && (!data.stripe_customer_id || data.stripe_customer_id.trim() === '') && (!data.plan || data.plan === 'free' || data.plan === 'trial')) {
+        return 'TrialSetup';
       }
+      return 'Dashboard';
+    } catch {
+      return 'Dashboard';
+    }
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
       setLoading(false);
+      setPlanCheckDone(true);
+    }, 5000);
+
+    setLoading(true);
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+
+      if (!session) {
+        setLoading(false);
+        setPlanCheckDone(true);
+        clearTimeout(timeoutId);
+        return;
+      }
+
+      if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
+        const nextPage = await checkTrialStatus(session.user);
+        setActivePage(nextPage);
+      }
+
+      setLoading(false);
+      setPlanCheckDone(true);
+      clearTimeout(timeoutId);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
+
+      if (event === 'SIGNED_OUT' || !session) {
+        setLoading(false);
+        setPlanCheckDone(true);
+        if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Refund' && activePage !== 'Login') {
+          setActivePage('Landing');
+        }
+        return;
+      }
 
       if (session && (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register')) {
-        setActivePage('Dashboard');
-      }
-      else if (!session && activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Refund' && activePage !== 'Login') {
-        setActivePage('Landing');
+        setLoading(true);
+        const nextPage = await checkTrialStatus(session.user);
+        setActivePage(nextPage);
+        setLoading(false);
+        setPlanCheckDone(true);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, [activePage]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      setActivePage('CheckoutSuccess');
+      window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => setActivePage('Dashboard'), 3000);
+    }
+  }, []);
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -153,11 +209,33 @@ const App: React.FC = () => {
     }
   };
 
-  if (loading || planLoading) {
+  // Wait until plan is loaded and our local check is done
+  if (loading || planLoading || !planCheckDone) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  if (activePage === 'CheckoutSuccess') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 animate-in fade-in duration-500 p-4 text-center">
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 shadow-sm border border-green-200">
+          <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+        </div>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-3">Trial Activated!</h1>
+        <p className="text-gray-600 font-medium">Your account is fully set up. Redirecting you to the dashboard...</p>
+      </div>
+    );
+  }
+
+  if (activePage === 'TrialSetup') {
+    return (
+      <TrialSetup onSkip={() => {
+        localStorage.setItem('trial_skipped', 'true');
+        setActivePage('Dashboard');
+      }} />
     );
   }
 
@@ -222,7 +300,23 @@ const App: React.FC = () => {
         triggerUpgrade={triggerUpgrade}
       >
         {(page: string) => (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full relative">
+            {localStorage.getItem('trial_skipped') === 'true' && !canAccess('aiVoiceAgent') /* proxy for missing plan assuming trial without card */ && (
+              <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center justify-between z-40 sticky top-0">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle size={18} className="text-amber-500 shrink-0" />
+                  <span className="text-xs font-bold text-amber-800">
+                    ⚠️ Your trial is not fully activated — add your card to ensure uninterrupted access after 7 days.
+                  </span>
+                </div>
+                <button
+                  onClick={() => setActivePage('TrialSetup')}
+                  className="text-xs font-black text-white bg-amber-500 hover:bg-amber-600 px-4 py-1.5 rounded-lg shadow-sm shrink-0 transition-colors"
+                >
+                  Add Card Now
+                </button>
+              </div>
+            )}
             <TrialBanner
               daysRemaining={trialDaysRemaining}
               plan={plan}
