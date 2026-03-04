@@ -29,7 +29,6 @@ import ExpiredOverlay from './components/ExpiredOverlay';
 import UpgradeModal from './components/UpgradeModal';
 import AuthCallback from './pages/AuthCallback';
 import TrialSetup from './pages/TrialSetup';
-import { AlertTriangle } from 'lucide-react'; // Added for the TrialBanner
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState('Landing');
@@ -61,7 +60,6 @@ const App: React.FC = () => {
 
   const checkTrialStatus = async (user: any) => {
     try {
-      if (localStorage.getItem('trial_skipped') === 'true') return 'Dashboard';
       const profilePromise = supabase.from('profiles').select('stripe_customer_id, plan').eq('id', user.id).single();
       const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
       const { data } = await Promise.race([profilePromise, timeoutPromise]) as any;
@@ -222,10 +220,7 @@ const App: React.FC = () => {
 
   if (activePage === 'TrialSetup') {
     return (
-      <TrialSetup onSkip={() => {
-        localStorage.setItem('trial_skipped', 'true');
-        setActivePage('Dashboard');
-      }} />
+      <TrialSetup />
     );
   }
 
@@ -291,22 +286,6 @@ const App: React.FC = () => {
       >
         {(page: string) => (
           <div className="flex flex-col h-full relative">
-            {localStorage.getItem('trial_skipped') === 'true' && !canAccess('aiVoiceAgent') /* proxy for missing plan assuming trial without card */ && (
-              <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center justify-between z-40 sticky top-0">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle size={18} className="text-amber-500 shrink-0" />
-                  <span className="text-xs font-bold text-amber-800">
-                    ⚠️ Your trial is not fully activated — add your card to ensure uninterrupted access after 7 days.
-                  </span>
-                </div>
-                <button
-                  onClick={() => setActivePage('TrialSetup')}
-                  className="text-xs font-black text-white bg-amber-500 hover:bg-amber-600 px-4 py-1.5 rounded-lg shadow-sm shrink-0 transition-colors"
-                >
-                  Add Card Now
-                </button>
-              </div>
-            )}
             <TrialBanner
               daysRemaining={trialDaysRemaining}
               plan={plan}

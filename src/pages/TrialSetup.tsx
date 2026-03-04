@@ -4,11 +4,7 @@ import logo from '../assets/logo-full.png';
 import { supabase } from '../lib/supabase';
 import './Register.css';
 
-interface TrialSetupProps {
-    onSkip: () => void;
-}
-
-const TrialSetup: React.FC<TrialSetupProps> = ({ onSkip }) => {
+const TrialSetup: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('pro');
@@ -142,13 +138,6 @@ const TrialSetup: React.FC<TrialSetupProps> = ({ onSkip }) => {
                         <Lock size={12} />
                         <span>Secured by Stripe · No charge for 7 days · Cancel anytime</span>
                     </div>
-
-                    <button
-                        onClick={onSkip}
-                        className="mt-2 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer underline decoration-gray-300 underline-offset-4"
-                    >
-                        Skip for now
-                    </button>
                 </div>
             </div>
         </div>
