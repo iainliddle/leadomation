@@ -194,6 +194,26 @@ export default async function handler(req: any, res: any) {
                     console.error('Failed to activate plan:', error);
                 } else {
                     console.log(`✅ Plan activated: user ${profile.id} → ${plan}`);
+
+                    // Trigger n8n welcome email webhook
+                    try {
+                        const customer = await stripe.customers.retrieve(customerId);
+                        if (customer && !('deleted' in customer) && customer.email) {
+                            const firstName = (customer.name || 'there').split(' ')[0];
+
+                            await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    to: customer.email,
+                                    first_name: firstName
+                                })
+                            });
+                            console.log(`✅ Welcome email webhook triggered for ${customer.email}`);
+                        }
+                    } catch (webhookErr) {
+                        console.error('Failed to trigger welcome email webhook:', webhookErr);
+                    }
                 }
 
                 break;

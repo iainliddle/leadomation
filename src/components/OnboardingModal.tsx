@@ -17,12 +17,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                         const alreadySent = localStorage.getItem(`welcome_sent_${user.id}`);
                         if (alreadySent) return;
                         localStorage.setItem(`welcome_sent_${user.id}`, 'true');
-                        const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'there';
-                        fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ to: user.email, firstName })
-                        });
+                        // Welcome email trigger migrated to backend stripe-webhook checkout.session.completed
                     }
                 });
             });
