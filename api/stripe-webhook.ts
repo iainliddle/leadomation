@@ -149,18 +149,44 @@ export default async function handler(req: any, res: any) {
                 const expandedSession = await stripe.checkout.sessions.retrieve(session.id, {
                     expand: ['line_items']
                 });
-                const priceId = expandedSession.line_items?.data[0]?.price?.id;
+
+                // Get price ID from either expanded session or original session, and trim it
+                const rawPriceId = expandedSession.line_items?.data[0]?.price?.id || session.line_items?.data[0]?.price?.id || '';
+                const priceId = typeof rawPriceId === 'string' ? rawPriceId.trim() : '';
+
+                console.log('Price ID from session:', priceId);
+                console.log('Pro monthly:', process.env.STRIPE_PRICE_PRO_MONTHLY);
+                console.log('Pro annual:', process.env.STRIPE_PRICE_PRO_ANNUAL);
+                console.log('Starter monthly:', process.env.STRIPE_PRICE_STARTER_MONTHLY);
+                console.log('Starter annual:', process.env.STRIPE_PRICE_STARTER_ANNUAL);
 
                 let plan: 'starter' | 'pro' | undefined;
-                if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY || priceId === process.env.STRIPE_PRICE_PRO_ANNUAL) {
-                    plan = 'pro';
-                } else if (priceId === process.env.STRIPE_PRICE_STARTER_MONTHLY || priceId === process.env.STRIPE_PRICE_STARTER_ANNUAL) {
-                    plan = 'starter';
+
+                if (priceId) {
+                    if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY?.trim() || priceId === process.env.STRIPE_PRICE_PRO_ANNUAL?.trim()) {
+                        plan = 'pro';
+                    } else if (priceId === process.env.STRIPE_PRICE_STARTER_MONTHLY?.trim() || priceId === process.env.STRIPE_PRICE_STARTER_ANNUAL?.trim()) {
+                        plan = 'starter';
+                    }
                 }
 
+                // Fallback plan detection
                 if (!plan) {
-                    console.error('Unrecognised price ID:', priceId);
-                    break;
+                    console.log('Price ID exact match failed. Falling back to amount_total or metadata check. Session amount_total:', session.amount_total, 'Metadata:', session.metadata);
+                    const amount = session.amount_total || expandedSession.amount_total;
+
+                    if (session.metadata?.plan === 'pro') {
+                        plan = 'pro';
+                    } else if (session.metadata?.plan === 'starter') {
+                        plan = 'starter';
+                    } else if (amount && amount >= 14900) {
+                        plan = 'pro';
+                    } else if (amount && amount >= 4900) {
+                        plan = 'starter';
+                    } else {
+                        console.error('Unrecognised price ID:', priceId, 'and all fallbacks failed.');
+                        break;
+                    }
                 }
 
                 // Try to find the user by Stripe customer ID first

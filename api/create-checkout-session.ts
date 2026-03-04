@@ -41,6 +41,7 @@ export default async function handler(req: any, res: any) {
                 trial_period_days: 7,
                 metadata: {
                     userId: userId,
+                    plan: plan,
                 },
             },
             payment_method_collection: 'always',
@@ -49,6 +50,7 @@ export default async function handler(req: any, res: any) {
             cancel_url: 'https://leadomation.co.uk/trial-setup',
             metadata: {
                 userId: userId,
+                plan: plan,
             },
             allow_promotion_codes: true,
         });
