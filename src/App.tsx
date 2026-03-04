@@ -317,7 +317,7 @@ const App: React.FC = () => {
         )}
       </Layout>
 
-      {(plan === 'expired' || plan === 'cancelled') && (
+      {(plan === 'expired' || plan === 'cancelled') && activePage !== 'Pricing' && (
         <ExpiredOverlay
           type={plan as 'expired' | 'cancelled'}
           onViewPlans={goToPricing}

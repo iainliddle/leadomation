@@ -1,5 +1,6 @@
 import React from 'react';
-import { AlertTriangle, Zap, Check } from 'lucide-react';
+import { AlertTriangle, Zap, Check, LogOut } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface ExpiredOverlayProps {
     type: 'expired' | 'cancelled';
@@ -7,8 +8,19 @@ interface ExpiredOverlayProps {
 }
 
 const ExpiredOverlay: React.FC<ExpiredOverlayProps> = ({ type, onViewPlans }) => {
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+    };
+
     return (
-        <div className="fixed inset-0 z-[90] bg-white/95 backdrop-blur-sm flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[90] bg-white/95 backdrop-blur-sm flex items-center justify-center p-6 relative">
+            <button
+                onClick={handleSignOut}
+                className="absolute top-6 right-6 flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
+            >
+                <LogOut size={16} />
+                Sign Out
+            </button>
             <div className="max-w-md w-full text-center">
                 <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
                     <AlertTriangle size={40} className="text-red-500" />
@@ -63,6 +75,15 @@ const ExpiredOverlay: React.FC<ExpiredOverlayProps> = ({ type, onViewPlans }) =>
                     <Zap size={16} />
                     View Plans & Pricing
                 </button>
+
+                <div className="mt-6 text-center">
+                    <button
+                        onClick={handleSignOut}
+                        className="text-xs font-semibold text-gray-400 hover:text-gray-600 underline underline-offset-4 transition-colors"
+                    >
+                        Sign out of Leadomation
+                    </button>
+                </div>
             </div>
         </div>
     );
