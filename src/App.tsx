@@ -62,7 +62,9 @@ const App: React.FC = () => {
   const checkTrialStatus = async (user: any) => {
     try {
       if (localStorage.getItem('trial_skipped') === 'true') return 'Dashboard';
-      const { data } = await supabase.from('profiles').select('stripe_customer_id, plan').eq('id', user.id).single();
+      const profilePromise = supabase.from('profiles').select('stripe_customer_id, plan').eq('id', user.id).single();
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
+      const { data } = await Promise.race([profilePromise, timeoutPromise]) as any;
       if (data && (!data.stripe_customer_id || data.stripe_customer_id.trim() === '') && (!data.plan || data.plan === 'free' || data.plan === 'trial')) {
         return 'TrialSetup';
       }
@@ -74,39 +76,42 @@ const App: React.FC = () => {
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
+      try {
+        setSession(session);
 
-      if (!session) {
+        if (!session) {
+          return;
+        }
+
+        if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
+          const nextPage = await checkTrialStatus(session.user);
+          setActivePage(nextPage);
+        }
+      } finally {
         setLoading(false);
         setSessionChecked(true);
-        return;
       }
-
-      if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
-        const nextPage = await checkTrialStatus(session.user);
-        setActivePage(nextPage);
-      }
-
-      setLoading(false);
-      setSessionChecked(true);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
+      try {
+        setSession(session);
 
-      if (event === 'SIGNED_OUT' || !session) {
-        setLoading(false);
-        if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Refund' && activePage !== 'Login') {
-          setActivePage('Landing');
+        if (event === 'SIGNED_OUT' || !session) {
+          if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Refund' && activePage !== 'Login') {
+            setActivePage('Landing');
+          }
+          return;
         }
-        return;
-      }
 
-      if (session && (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register')) {
-        setLoading(true);
-        const nextPage = await checkTrialStatus(session.user);
-        setActivePage(nextPage);
+        if (session && (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register')) {
+          setLoading(true);
+          const nextPage = await checkTrialStatus(session.user);
+          setActivePage(nextPage);
+        }
+      } finally {
         setLoading(false);
+        setSessionChecked(true);
       }
     });
 
