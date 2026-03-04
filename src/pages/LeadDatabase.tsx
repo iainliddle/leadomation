@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Search,
     Mail,
@@ -16,7 +16,21 @@ import {
     Plus,
     Wand2,
     Linkedin,
-    Save
+    Save,
+    Phone,
+    PhoneCall,
+    PhoneOff,
+    Info,
+    CheckCircle,
+    Clock,
+    Star,
+    UserPlus,
+    Play,
+    Pause,
+    Volume2,
+    VolumeX,
+    Mic,
+    Pencil
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -46,7 +60,88 @@ interface LeadDatabaseProps {
     triggerUpgrade?: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
 
+const getTimezoneOffset = (location: string): number => {
+    if (!location) return 0;
+    const loc = location.toLowerCase().trim();
+
+    // UK
+    if (['london', 'manchester', 'birmingham', 'liverpool', 'leeds', 'bristol', 'edinburgh', 'glasgow', 'cardiff', 'belfast', 'newcastle', 'sheffield', 'nottingham', 'uk', 'united kingdom', 'england', 'scotland', 'wales'].some(c => loc.includes(c))) return 0;
+    // UAE
+    if (['dubai', 'abu dhabi', 'sharjah', 'uae', 'united arab emirates'].some(c => loc.includes(c))) return 4;
+    // US East
+    if (['new york', 'boston', 'miami', 'atlanta', 'philadelphia', 'washington', 'charlotte', 'orlando'].some(c => loc.includes(c))) return -5;
+    // US Central
+    if (['chicago', 'dallas', 'houston', 'austin', 'nashville', 'san antonio'].some(c => loc.includes(c))) return -6;
+    // US Mountain
+    if (['denver', 'phoenix', 'salt lake', 'albuquerque'].some(c => loc.includes(c))) return -7;
+    // US West
+    if (['los angeles', 'san francisco', 'seattle', 'portland', 'las vegas', 'san diego'].some(c => loc.includes(c))) return -8;
+    // Europe
+    if (['paris', 'berlin', 'madrid', 'rome', 'amsterdam', 'brussels', 'vienna', 'zurich', 'munich', 'barcelona', 'milan', 'france', 'germany', 'spain', 'italy', 'netherlands'].some(c => loc.includes(c))) return 1;
+    // Ireland
+    if (['dublin', 'cork', 'ireland'].some(c => loc.includes(c))) return 0;
+    // Australia East
+    if (['sydney', 'melbourne', 'brisbane', 'australia'].some(c => loc.includes(c))) return 10;
+    // Singapore
+    if (['singapore'].some(c => loc.includes(c))) return 8;
+    // Saudi Arabia / Qatar
+    if (['riyadh', 'jeddah', 'saudi', 'doha', 'qatar'].some(c => loc.includes(c))) return 3;
+    // Canada East
+    if (['toronto', 'montreal', 'ottawa'].some(c => loc.includes(c))) return -5;
+    // Canada West
+    if (['vancouver', 'calgary'].some(c => loc.includes(c))) return -8;
+
+    return 0; // Default to UTC
+};
+
+const getLocalTime = (location: string): { time: string; hour: number; status: 'green' | 'amber' | 'red'; reason: string } => {
+    const offset = getTimezoneOffset(location);
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const localTime = new Date(utc + (offset * 3600000));
+    const hour = localTime.getHours();
+    const day = localTime.getDay(); // 0 = Sunday, 6 = Saturday
+    const time = localTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+    const isWeekend = day === 0 || day === 6;
+
+    let status: 'green' | 'amber' | 'red';
+    let reason: string;
+
+    if (isWeekend) {
+        status = 'red';
+        reason = 'Weekend';
+    } else if (hour >= 9 && hour < 17) {
+        status = 'green';
+        reason = 'Business hours';
+    } else if ((hour >= 8 && hour < 9) || (hour >= 17 && hour < 18)) {
+        status = 'amber';
+        reason = hour < 9 ? 'Early morning' : 'End of day';
+    } else {
+        status = 'red';
+        reason = 'Outside hours';
+    }
+
+    return { time, hour, status, reason };
+};
+
+const timeStatusColors = {
+    green: '#10B981',
+    amber: '#F59E0B',
+    red: '#EF4444'
+};
+
 const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }) => {
+    const [campaignFilter, setCampaignFilter] = useState<string | null>(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        return searchParams.get('campaign');
+    });
+
+    const clearCampaignFilter = () => {
+        setCampaignFilter(null);
+        window.history.pushState({}, '', window.location.pathname);
+    };
+
     const [leads, setLeads] = useState<Lead[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -54,11 +149,60 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [isExporting, setIsExporting] = useState(false);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [isEditingLead, setIsEditingLead] = useState(false);
+    const [editLeadForm, setEditLeadForm] = useState<Partial<Lead>>({});
+    const [isSavingLead, setIsSavingLead] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [enrichingLeads, setEnrichingLeads] = useState<string[]>([]);
+
+    // Call Agent State
+    const [callScripts, setCallScripts] = useState<any[]>([]);
+    const [selectedScriptId, setSelectedScriptId] = useState<string>('');
+    const [showCallModal, setShowCallModal] = useState(false);
+    const [callInProgress, setCallInProgress] = useState(false);
+    const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'connected' | 'ended' | 'error'>('idle');
+    const [callLeadTarget, setCallLeadTarget] = useState<Lead | null>(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [showInfoCard, setShowInfoCard] = useState(true);
+
+    // Batch Email Modal State
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [sequences, setSequences] = useState<any[]>([]);
+    const [selectedSequenceId, setSelectedSequenceId] = useState<string>('');
+    const [isEnrolling, setIsEnrolling] = useState(false);
+
+    // Batch Call Queue Modal State
+    const [showBatchCallModal, setShowBatchCallModal] = useState(false);
+    const [batchCallScriptId, setBatchCallScriptId] = useState<string>('');
+    const [businessHoursOnly, setBusinessHoursOnly] = useState(true);
+    const [isQueueing, setIsQueueing] = useState(false);
+
+    // Toast State
+    const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+    // Activity Timeline State
+    const [activityItems, setActivityItems] = useState<any[]>([]);
+    const [activityLoading, setActivityLoading] = useState(false);
+    const [expandedTranscripts, setExpandedTranscripts] = useState<Set<string>>(new Set());
+
+    // Audio Player State
+    const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
+    const progressBarRefs = useRef<Record<string, HTMLDivElement | null>>({});
+    const [audioStates, setAudioStates] = useState<Record<string, { isPlaying: boolean; currentTime: number; duration: number; isMuted: boolean }>>({});
+
+    const showToast = (message: string) => {
+        setToast({ message, visible: true });
+        setTimeout(() => setToast({ message: '', visible: false }), 4000);
+    };
+
+    // Update time every minute for live local time indicators
+    useEffect(() => {
+        const interval = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(interval);
+    }, []);
+    void currentTime; // Used to trigger re-renders for live time display
 
     // Add Lead Form State
     const [newLead, setNewLead] = useState({
@@ -81,11 +225,16 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data, error } = await supabase
+            let query = supabase
                 .from('leads')
                 .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
+                .eq('user_id', user.id);
+
+            if (campaignFilter) {
+                query = query.eq('campaign_id', campaignFilter);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
 
             if (error) {
                 console.error('Error fetching leads:', error);
@@ -99,9 +248,235 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         }
     };
 
+    const fetchCallScripts = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data } = await supabase
+            .from('call_scripts')
+            .select('id, name, system_prompt')
+            .eq('user_id', user.id)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false });
+
+        if (data && data.length > 0) {
+            setCallScripts(data);
+            setSelectedScriptId(data[0].id);
+        }
+    };
+
+    const fetchSequences = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data } = await supabase
+            .from('sequences')
+            .select('id, name')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (data) {
+            setSequences(data);
+            if (data.length > 0) setSelectedSequenceId(data[0].id);
+        }
+    };
+
+    const handleBatchEnroll = async () => {
+        if (!selectedSequenceId || selectedLeads.length === 0) return;
+        setIsEnrolling(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('Not authenticated');
+
+            const rows = selectedLeads.map(leadId => ({
+                lead_id: leadId,
+                sequence_id: selectedSequenceId,
+                user_id: user.id,
+                status: 'active',
+                enrolled_at: new Date().toISOString()
+            }));
+
+            const { error } = await supabase.from('sequence_enrollments').insert(rows);
+            if (error) throw error;
+
+            const seqName = sequences.find(s => s.id === selectedSequenceId)?.name || 'sequence';
+            showToast(`${selectedLeads.length} lead${selectedLeads.length > 1 ? 's' : ''} enrolled in ${seqName}`);
+            setShowEmailModal(false);
+            setSelectedLeads([]);
+        } catch (error) {
+            console.error('Error enrolling leads:', error);
+            alert('Failed to enrol leads. Please try again.');
+        } finally {
+            setIsEnrolling(false);
+        }
+    };
+
+    const handleBatchQueueCalls = async () => {
+        if (!batchCallScriptId || selectedLeads.length === 0) return;
+        setIsQueueing(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('Not authenticated');
+
+            const selectedLeadObjects = leads.filter(l => selectedLeads.includes(l.id));
+            const eligibleLeads = businessHoursOnly
+                ? selectedLeadObjects.filter(l => {
+                    if (!l.location) return true; // unknown location still included
+                    const { status } = getLocalTime(l.location);
+                    return status === 'green' || status === 'amber';
+                })
+                : selectedLeadObjects;
+
+            const rows = eligibleLeads.map(lead => ({
+                lead_id: lead.id,
+                script_id: batchCallScriptId,
+                user_id: user.id,
+                status: 'queued',
+                queued_at: new Date().toISOString()
+            }));
+
+            if (rows.length === 0) {
+                alert('No eligible leads to queue based on current filters.');
+                setIsQueueing(false);
+                return;
+            }
+
+            const { error } = await supabase.from('call_queue').insert(rows);
+            if (error) throw error;
+
+            showToast(`${rows.length} call${rows.length > 1 ? 's' : ''} queued`);
+            setShowBatchCallModal(false);
+            setSelectedLeads([]);
+        } catch (error) {
+            console.error('Error queueing calls:', error);
+            alert('Failed to queue calls. Please try again.');
+        } finally {
+            setIsQueueing(false);
+        }
+    };
+
+    // Relative time helper
+    const getRelativeTime = (dateStr: string): string => {
+        const now = new Date();
+        const date = new Date(dateStr);
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+        return date.toLocaleDateString();
+    };
+
+    const formatAudioTime = (seconds: number): string => {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const toggleAudioPlay = (id: string) => {
+        const audio = audioRefs.current[id];
+        if (!audio) return;
+        if (audio.paused) {
+            // Pause all other playing audios
+            Object.entries(audioRefs.current).forEach(([key, el]) => {
+                if (key !== id && el && !el.paused) {
+                    el.pause();
+                    setAudioStates(prev => ({ ...prev, [key]: { ...prev[key], isPlaying: false } }));
+                }
+            });
+            audio.play();
+            setAudioStates(prev => ({ ...prev, [id]: { ...prev[id], isPlaying: true } }));
+        } else {
+            audio.pause();
+            setAudioStates(prev => ({ ...prev, [id]: { ...prev[id], isPlaying: false } }));
+        }
+    };
+
+    const toggleAudioMute = (id: string) => {
+        const audio = audioRefs.current[id];
+        if (!audio) return;
+        audio.muted = !audio.muted;
+        setAudioStates(prev => ({ ...prev, [id]: { ...prev[id], isMuted: audio.muted } }));
+    };
+
+    const handleProgressClick = (id: string, e: React.MouseEvent<HTMLDivElement>) => {
+        const audio = audioRefs.current[id];
+        const bar = progressBarRefs.current[id];
+        if (!audio || !bar) return;
+        const rect = bar.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        audio.currentTime = ratio * (audio.duration || 0);
+    };
+
+    // Fetch activity timeline data when a lead is selected
+    useEffect(() => {
+        if (!selectedLead) {
+            setActivityItems([]);
+            setExpandedTranscripts(new Set());
+            return;
+        }
+
+        const fetchActivity = async () => {
+            setActivityLoading(true);
+            setExpandedTranscripts(new Set());
+            try {
+                const [callRes, dealRes, enrollRes] = await Promise.all([
+                    supabase.from('call_logs').select('id, created_at, duration, ended_reason, transcript, recording_url').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
+                    supabase.from('deals').select('id, created_at, title, stage').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
+                    supabase.from('sequence_enrollments').select('id, enrolled_at, sequence_id, status').eq('lead_id', selectedLead.id).order('enrolled_at', { ascending: false })
+                ]);
+
+                const items: any[] = [];
+
+                (callRes.data || []).forEach((c: any) => {
+                    const mins = Math.floor((c.duration || 0) / 60);
+                    const secs = (c.duration || 0) % 60;
+                    const durationStr = c.duration ? `${mins}m ${secs}s` : '';
+                    const sublabel = [durationStr, c.ended_reason].filter(Boolean).join(' · ');
+                    items.push({ type: 'call', date: c.created_at, label: 'AI Call Made', sublabel: sublabel || 'No details', icon: 'phone', id: c.id, transcript: c.transcript, recording_url: c.recording_url });
+                });
+
+                (dealRes.data || []).forEach((d: any) => {
+                    items.push({ type: 'deal', date: d.created_at, label: 'Deal Created', sublabel: d.title, icon: 'star', id: d.id });
+                });
+
+                (enrollRes.data || []).forEach((e: any) => {
+                    items.push({ type: 'email', date: e.enrolled_at, label: 'Enrolled in Sequence', sublabel: e.sequence_id, icon: 'mail', id: e.id });
+                });
+
+                // Synthetic lead-created event
+                items.push({
+                    type: 'created',
+                    date: selectedLead.created_at,
+                    label: 'Lead Added',
+                    sublabel: selectedLead.source || 'Direct',
+                    icon: 'userplus',
+                    id: 'created'
+                });
+
+                items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                setActivityItems(items);
+            } catch (err) {
+                console.error('Error fetching activity:', err);
+                setActivityItems([{ type: 'created', date: selectedLead.created_at, label: 'Lead Added', sublabel: selectedLead.source || 'Direct', icon: 'userplus', id: 'created' }]);
+            } finally {
+                setActivityLoading(false);
+            }
+        };
+
+        fetchActivity();
+    }, [selectedLead?.id]);
+
     useEffect(() => {
         fetchLeads();
-    }, []);
+        fetchCallScripts();
+        fetchSequences();
+    }, [campaignFilter]);
 
     const filteredLeads = useMemo(() => {
         return leads.filter(lead => {
@@ -132,7 +507,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
         setIsExporting(true);
         try {
-            // Define CSV columns
             const headers = [
                 'Company',
                 'First Name',
@@ -146,7 +520,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 'Status'
             ];
 
-            // Map leads to CSV rows
             const rows = filteredLeads.map(lead => [
                 lead.company || '',
                 lead.first_name || '',
@@ -160,12 +533,10 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 lead.status || ''
             ]);
 
-            // Build CSV string
             const csvContent = [
                 headers.join(','),
                 ...rows.map(row =>
                     row.map(cell => {
-                        // Wrap in quotes if contains comma, quote, or newline
                         const str = String(cell).replace(/"/g, '""');
                         return str.includes(',') || str.includes('"') || str.includes('\n')
                             ? `"${str}"`
@@ -174,7 +545,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 )
             ].join('\n');
 
-            // Trigger download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -204,6 +574,26 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         setSelectedLeads(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
     };
 
+    const handleSaveLeadEdit = async () => {
+        if (!selectedLead) return;
+        setIsSavingLead(true);
+        try {
+            const { error } = await supabase.from('leads').update(editLeadForm).eq('id', selectedLead.id);
+            if (error) throw error;
+
+            const updatedLead = { ...selectedLead, ...editLeadForm } as Lead;
+            setLeads(prev => prev.map(l => l.id === selectedLead.id ? updatedLead : l));
+            setSelectedLead(updatedLead);
+            setIsEditingLead(false);
+            showToast('Lead updated successfully');
+        } catch (error) {
+            console.error('Error saving lead edit:', error);
+            showToast('Failed to save changes — please try again');
+        } finally {
+            setIsSavingLead(false);
+        }
+    };
+
     const handleUpdateStatus = async (leadId: string, newStatus: string) => {
         setIsUpdatingStatus(true);
         try {
@@ -214,9 +604,40 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
             if (error) throw error;
 
+            const targetLead = leads.find(l => l.id === leadId);
+
             setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
             if (selectedLead && selectedLead.id === leadId) {
                 setSelectedLead({ ...selectedLead, status: newStatus });
+            }
+
+            // Auto-create deal if status changes to Qualified
+            if (newStatus === 'Qualified' && targetLead) {
+                const { data: dealData, error: dealError } = await supabase
+                    .from('deals')
+                    .select('id')
+                    .eq('lead_id', leadId)
+                    .maybeSingle();
+
+                if (!dealError && !dealData) {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        const { error: insertError } = await supabase.from('deals').insert({
+                            user_id: user.id,
+                            lead_id: leadId,
+                            title: `${targetLead.company || 'Unknown Company'} - Discovery Call`,
+                            stage: 'discovery',
+                            value: 0,
+                            notes: 'Auto-created from qualified lead'
+                        });
+
+                        if (!insertError) {
+                            console.log(`Auto-created deal for qualified lead: ${targetLead.company}`);
+                        } else {
+                            console.error('Failed to auto-create deal:', insertError);
+                        }
+                    }
+                }
             }
         } catch (error) {
             console.error('Error updating status:', error);
@@ -251,14 +672,184 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     };
 
     const handleEnrichLead = async (leadId: string) => {
-        console.log('Enrich lead:', leadId);
+        const lead = leads.find(l => l.id === leadId);
+        if (!lead) return;
+
+        // Derive domain from website
+        if (!lead.website) {
+            showToast('Cannot enrich — no website or company domain available.');
+            return;
+        }
+
+        const domain = lead.website
+            .replace(/^https?:\/\//, '')
+            .replace(/^www\./, '')
+            .split('/')[0]
+            .trim();
+
+        if (!domain) {
+            showToast('Cannot enrich — no website or company domain available.');
+            return;
+        }
+
         setEnrichingLeads(prev => [...prev, leadId]);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const response = await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/lead-enrichment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lead_id: lead.id,
+                    domain,
+                    first_name: lead.first_name,
+                    last_name: lead.last_name
+                })
+            });
 
-        setEnrichingLeads(prev => prev.filter(id => id !== leadId));
-        alert('Enrichment simulation complete. Job title and social data would be updated here via API.');
+            if (!response.ok) throw new Error('Enrichment request failed');
+
+            const data = await response.json();
+
+            if (!data.email) {
+                showToast('No email found for this domain.');
+                return;
+            }
+
+            // Update lead in Supabase
+            const updates: any = {};
+            if (data.email) updates.email = data.email;
+            if (data.first_name) updates.first_name = data.first_name;
+            if (data.last_name) updates.last_name = data.last_name;
+
+            await supabase.from('leads').update(updates).eq('id', leadId);
+
+            // Update local state so drawer refreshes immediately
+            setLeads(prev => prev.map(l => l.id === leadId ? { ...l, ...updates } : l));
+            if (selectedLead && selectedLead.id === leadId) {
+                setSelectedLead({ ...selectedLead, ...updates });
+            }
+
+            showToast('Lead enriched successfully — email updated.');
+        } catch (error) {
+            console.error('Enrichment error:', error);
+            showToast('No email found for this domain.');
+        } finally {
+            setEnrichingLeads(prev => prev.filter(id => id !== leadId));
+        }
+    };
+
+    const handleInitiateCall = (lead: Lead) => {
+        if (!lead.phone) {
+            alert('This lead has no phone number. Add a phone number first.');
+            return;
+        }
+        if (callScripts.length === 0) {
+            alert('No call scripts found. Create a call script in the Call Agent page first.');
+            return;
+        }
+        setCallLeadTarget(lead);
+        setCallStatus('idle');
+        setShowCallModal(true);
+    };
+
+    const handleMakeCall = async () => {
+        if (!callLeadTarget || !selectedScriptId) return;
+
+        const script = callScripts.find(s => s.id === selectedScriptId);
+        if (!script) return;
+
+        setCallInProgress(true);
+        setCallStatus('calling');
+
+        try {
+            const apiKey = import.meta.env.VITE_VAPI_API_KEY;
+            const phoneNumberId = import.meta.env.VITE_VAPI_PHONE_NUMBER_ID;
+
+            if (!apiKey || !phoneNumberId) {
+                throw new Error('Vapi API key or phone number not configured');
+            }
+
+            let phoneNumber = callLeadTarget.phone.replace(/\s/g, '');
+            if (!phoneNumber.startsWith('+')) {
+                phoneNumber = '+' + phoneNumber;
+            }
+
+            const { data: { user } } = await supabase.auth.getUser();
+
+            const response = await fetch('https://api.vapi.ai/call/phone', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phoneNumberId: phoneNumberId,
+                    metadata: {
+                        user_id: user?.id || '',
+                        lead_id: callLeadTarget.id,
+                        call_script_id: selectedScriptId
+                    },
+                    customer: {
+                        number: phoneNumber,
+                        name: `${callLeadTarget.first_name || ''} ${callLeadTarget.last_name || ''}`.trim() || callLeadTarget.company
+                    },
+                    assistant: {
+                        name: 'Sarah',
+                        serverUrl: 'https://n8n.srv1377696.hstgr.cloud/webhook/2d5b4f99-77c8-48e7-a8b9-78b28c789ea2',
+                        firstMessage: `Hi there, is ${callLeadTarget.first_name || 'the manager'} available at all?`,
+                        firstMessageMode: 'assistant-waits-for-user',
+                        model: {
+                            provider: 'openai',
+                            model: 'gpt-4o-mini',
+                            temperature: 0.7,
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: script.system_prompt + `\n\nCALL CONTEXT:\n- You are calling: ${callLeadTarget.first_name || ''} ${callLeadTarget.last_name || ''}\n- Their company: ${callLeadTarget.company}\n- Their role: ${callLeadTarget.job_title || 'Unknown'}\n- Your name is Sarah. Always introduce yourself as Sarah calling on behalf of the company mentioned in your script\n- ALWAYS start by asking for ${callLeadTarget.first_name || 'the right person'} by name. Wait for confirmation before pitching anything.\n- After confirming you are speaking to the right person, say "Hey ${callLeadTarget.first_name || 'there'}, it is Sarah calling on behalf of" and then mention the company from your script. Then say "How are you doing today?" and WAIT for their response before continuing.\n\nCONVERSATION STYLE:\n- Sound like a real human being having a phone conversation, not a robot or AI\n- Use filler words occasionally like "um", "so", "right", "anyway" to sound natural\n- Keep responses SHORT. One sentence at a time. Real people do not give speeches on the phone\n- After saying something, STOP and wait for the other person to respond. Do not keep talking\n- React to what they say before moving on. Say things like "oh nice", "ah right okay", "yeah that makes sense"\n- Match the speed and tone of the person you are talking to\n- Laugh briefly if something is funny. Be personable\n- NEVER read out URLs, links, or email addresses. Say you will text or email them instead\n- NEVER say "as an AI" or "I am an artificial intelligence" unless directly asked\n- If asked if you are real, say "Ha, I get that a lot. I am actually an AI assistant calling on behalf of the team, but I can definitely help you out or get someone from the team to call you back"\n- Do not repeat yourself or circle back to things already discussed\n\nBOOKING A MEETING:\n- When the prospect agrees to a meeting, say: "Brilliant, let me get that booked in for you. What is the best email address to send the calendar invite to?"\n- Wait for them to give their email. Confirm it back by repeating it\n- Then say: "Perfect. And what is the best mobile number to ping the confirmation text to? Sometimes these get buried in email"\n- If they give the business number you called, say: "No problem. And is that a mobile? Just so the text comes through properly"\n- Once you have their mobile number, confirm it back to them\n- Then say: "Lovely, I will get that sent over to you now. You should have it in the next couple of minutes"\n- NEVER mention that you already have their email or any of their details. Let them provide everything naturally\n- NEVER read out a URL or booking link. Just say you will send the invite to their email and a text to their mobile\n- Store the email and mobile number they give you. These are critical for follow up\n- Keep the booking process feeling personal and human, like a real assistant would handle it`
+                                }
+                            ]
+                        },
+                        voice: {
+                            provider: '11labs',
+                            voiceId: 'cgSgspJ2msm6clMCkdW9',
+                            model: 'eleven_turbo_v2_5'
+                        },
+                        silenceTimeoutSeconds: 30,
+                        responseDelaySeconds: 0.5
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Vapi API error:', errorData);
+                throw new Error(errorData.message || 'Failed to initiate call');
+            }
+
+            const callData = await response.json();
+            console.log('Call initiated:', callData);
+            setCallStatus('connected');
+
+            await handleUpdateStatus(callLeadTarget.id, 'Contacted');
+
+            if (user) {
+                await supabase.from('call_logs').insert({
+                    user_id: user.id,
+                    lead_id: callLeadTarget.id,
+                    call_script_id: selectedScriptId,
+                    vapi_call_id: callData.id,
+                    status: 'initiated',
+                    phone_number: phoneNumber
+                });
+            }
+
+        } catch (error: any) {
+            console.error('Call error:', error);
+            setCallStatus('error');
+            alert(`Failed to initiate call: ${error.message}`);
+        } finally {
+            setCallInProgress(false);
+        }
     };
 
     const handleSaveLead = async (e: React.FormEvent) => {
@@ -310,6 +901,60 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
     return (
         <div className="flex flex-col gap-6 animate-in fade-in duration-700">
+            {campaignFilter && (
+                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                        <Tag className="text-[#4F46E5] w-4 h-4" />
+                        <span className="text-sm font-medium text-[#4F46E5]">
+                            Showing leads for campaign
+                        </span>
+                    </div>
+                    <button
+                        onClick={clearCampaignFilter}
+                        className="text-[#4F46E5] hover:text-blue-800 transition-colors p-1"
+                        title="Clear filter"
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
+            {/* Info Card */}
+            {showInfoCard && (
+                <div className="relative bg-indigo-50/70 border border-indigo-100 rounded-2xl p-5 flex gap-4 items-start">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-[#4F46E5] shrink-0 mt-0.5">
+                        <Info size={20} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-black text-[#111827] mb-1">Your Lead Database</h3>
+                        <p className="text-xs font-medium text-[#4B5563] leading-relaxed mb-3">
+                            This is where all your scraped leads land after a campaign runs. Use the filters to find your best prospects, check the local time indicator before calling, and take action directly from here — send emails, make AI-powered calls, or export to CSV. Leads marked as Qualified will automatically appear in your Deal Pipeline.
+                        </p>
+                        <div className="flex items-center gap-4 flex-wrap">
+                            <div className="flex items-center gap-1.5">
+                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10B981' }} />
+                                <span className="text-[10px] font-bold text-[#6B7280]">Business hours (Mon-Fri 9am-5pm)</span>
+                            </div>
+                            <span className="text-gray-300">|</span>
+                            <div className="flex items-center gap-1.5">
+                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F59E0B' }} />
+                                <span className="text-[10px] font-bold text-[#6B7280]">Borderline (8-9am or 5-6pm)</span>
+                            </div>
+                            <span className="text-gray-300">|</span>
+                            <div className="flex items-center gap-1.5">
+                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#EF4444' }} />
+                                <span className="text-[10px] font-bold text-[#6B7280]">Outside hours / Weekend</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setShowInfoCard(false)}
+                        className="p-1.5 hover:bg-indigo-100 rounded-lg text-[#9CA3AF] hover:text-[#6B7280] transition-all shrink-0"
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
+
             {/* Filters and Actions Bar */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-6">
@@ -381,17 +1026,24 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         <Plus size={16} />
                         Add Lead
                     </button>
-                    <button
-                        disabled={selectedLeads.length === 0}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all shadow-sm ${selectedLeads.length > 0
-                            ? 'bg-white border border-primary text-primary hover:bg-blue-50'
-                            : 'bg-gray-100 text-[#9CA3AF] cursor-not-allowed'
-                            }`}
-                        onClick={() => selectedLeads.length > 0 && alert(`Emailing ${selectedLeads.length} leads...`)}
-                    >
-                        <Mail size={16} />
-                        Email Selected
-                    </button>
+                    {selectedLeads.length > 0 && (
+                        <>
+                            <button
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all shadow-sm bg-white border border-primary text-primary hover:bg-blue-50 active:scale-95 animate-in zoom-in duration-300"
+                                onClick={() => { fetchSequences(); setShowEmailModal(true); }}
+                            >
+                                <Mail size={16} />
+                                Email Selected
+                            </button>
+                            <button
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all shadow-sm bg-white border border-emerald-500 text-emerald-600 hover:bg-emerald-50 active:scale-95 animate-in zoom-in duration-300"
+                                onClick={() => { fetchCallScripts(); setShowBatchCallModal(true); setBatchCallScriptId(callScripts[0]?.id || ''); }}
+                            >
+                                <Phone size={16} />
+                                Call Selected
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -427,6 +1079,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Email</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Phone</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Location</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Local Time</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Industry</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Status</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Website</th>
@@ -489,6 +1142,18 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
                                             {lead.location || 'N/A'}
                                         </td>
+                                        <td className="px-4 py-4">
+                                            {(() => {
+                                                if (!lead.location) return <span className="text-xs text-[#9CA3AF]">—</span>;
+                                                const lt = getLocalTime(lead.location);
+                                                return (
+                                                    <div className="flex items-center gap-1.5" title={lt.reason}>
+                                                        <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: timeStatusColors[lt.status] }} />
+                                                        <span className="text-xs font-bold" style={{ color: timeStatusColors[lt.status] }}>{lt.time}</span>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </td>
                                         <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
                                             {lead.industry || 'N/A'}
                                         </td>
@@ -521,6 +1186,13 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         </td>
                                         <td className="pr-6 pl-4 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleInitiateCall(lead)}
+                                                    className="p-2 rounded-lg transition-all hover:bg-green-50 text-[#9CA3AF] hover:text-green-600"
+                                                    title="Call Lead"
+                                                >
+                                                    <Phone size={16} />
+                                                </button>
                                                 <button
                                                     onClick={() => handleEnrichLead(lead.id)}
                                                     disabled={enrichingLeads.includes(lead.id)}
@@ -571,36 +1243,95 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             {/* Lead Details Drawer */}
             {selectedLead && (
                 <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-300">
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setSelectedLead(null)}></div>
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => { setSelectedLead(null); setIsEditingLead(false); }}></div>
                     <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
                         {/* Drawer Header */}
-                        <div className="p-8 border-b border-[#F3F4F6] flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
-                                    <Building size={24} />
+                        <div className="p-8 border-b border-[#F3F4F6]">
+                            {isEditingLead ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 shrink-0">
+                                                <Building size={24} />
+                                            </div>
+                                            <h2 className="text-xl font-black text-[#111827]">{selectedLead.company}</h2>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={handleSaveLeadEdit} disabled={isSavingLead} className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1">
+                                                {isSavingLead ? <Loader2 size={12} className="animate-spin" /> : 'Save'}
+                                            </button>
+                                            <button onClick={() => setIsEditingLead(false)} className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#6B7280] text-xs font-bold rounded-lg transition-colors">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 mt-2">
+                                        <div>
+                                            <label className="text-xs text-gray-400 mb-1 block">First Name</label>
+                                            <input className="border border-gray-200 rounded-md px-2 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-400" value={editLeadForm.first_name || ''} onChange={e => setEditLeadForm({ ...editLeadForm, first_name: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-gray-400 mb-1 block">Last Name</label>
+                                            <input className="border border-gray-200 rounded-md px-2 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-400" value={editLeadForm.last_name || ''} onChange={e => setEditLeadForm({ ...editLeadForm, last_name: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 mb-1 block">Job Title</label>
+                                        <input className="border border-gray-200 rounded-md px-2 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-400" value={editLeadForm.job_title || ''} onChange={e => setEditLeadForm({ ...editLeadForm, job_title: e.target.value })} />
+                                    </div>
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h2 className="text-xl font-black text-[#111827]">{selectedLead.company}</h2>
-                                        {selectedLead.job_title && (
-                                            <span className="px-2 py-0.5 bg-blue-50 text-[10px] font-black text-primary border border-blue-100 rounded-lg uppercase tracking-wider">
-                                                Enriched
-                                            </span>
-                                        )}
+                            ) : (
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 shrink-0">
+                                            <Building size={24} />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h2 className="text-xl font-black text-[#111827]">{selectedLead.company}</h2>
+                                                {selectedLead.job_title && (
+                                                    <span className="px-2 py-0.5 bg-blue-50 text-[10px] font-black text-primary border border-blue-100 rounded-lg uppercase tracking-wider">
+                                                        Enriched
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm text-primary font-bold">{selectedLead.job_title || 'No Job Title'}</p>
+                                                <span className="text-gray-300">•</span>
+                                                <p className="text-sm text-[#6B7280] font-medium">{selectedLead.first_name} {selectedLead.last_name}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm text-primary font-bold">{selectedLead.job_title || 'No Job Title'}</p>
-                                        <span className="text-gray-300">•</span>
-                                        <p className="text-sm text-[#6B7280] font-medium">{selectedLead.first_name} {selectedLead.last_name}</p>
+                                        <button
+                                            onClick={() => {
+                                                setEditLeadForm({
+                                                    first_name: selectedLead.first_name,
+                                                    last_name: selectedLead.last_name,
+                                                    job_title: selectedLead.job_title,
+                                                    email: selectedLead.email,
+                                                    phone: selectedLead.phone,
+                                                    website: selectedLead.website,
+                                                    location: selectedLead.location,
+                                                    industry: selectedLead.industry,
+                                                    linkedin_url: selectedLead.linkedin_url
+                                                });
+                                                setIsEditingLead(true);
+                                            }}
+                                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all"
+                                            title="Edit Lead"
+                                        >
+                                            <Pencil size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => { setSelectedLead(null); setIsEditingLead(false); }}
+                                            className="p-2 hover:bg-gray-50 rounded-xl text-[#9CA3AF] transition-all"
+                                        >
+                                            <X size={20} />
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                            <button
-                                onClick={() => setSelectedLead(null)}
-                                className="p-2 hover:bg-gray-50 rounded-xl text-[#9CA3AF] transition-all"
-                            >
-                                <X size={20} />
-                            </button>
+                            )}
                         </div>
 
                         {/* Drawer Content */}
@@ -632,19 +1363,38 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         <Mail size={14} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Email</span>
                                     </div>
-                                    <p className="text-sm font-bold text-[#111827] break-all">{selectedLead.email || 'N/A'}</p>
+                                    {isEditingLead ? (
+                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.email || ''} onChange={e => setEditLeadForm({ ...editLeadForm, email: e.target.value })} />
+                                    ) : (
+                                        <p className="text-sm font-bold text-[#111827] break-all">{selectedLead.email || 'N/A'}</p>
+                                    )}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
+                                        <Phone size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Phone</span>
+                                    </div>
+                                    {isEditingLead ? (
+                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.phone || ''} onChange={e => setEditLeadForm({ ...editLeadForm, phone: e.target.value })} />
+                                    ) : (
+                                        <p className="text-sm font-bold text-[#111827]">{selectedLead.phone || 'N/A'}</p>
+                                    )}
                                 </div>
                                 <div className="space-y-1.5">
                                     <div className="flex items-center gap-2 text-[#9CA3AF]">
                                         <Linkedin size={14} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">LinkedIn</span>
                                     </div>
-                                    {selectedLead.linkedin_url ? (
-                                        <a href={selectedLead.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5">
-                                            View Profile <ExternalLink size={12} />
-                                        </a>
+                                    {isEditingLead ? (
+                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.linkedin_url || ''} onChange={e => setEditLeadForm({ ...editLeadForm, linkedin_url: e.target.value })} />
                                     ) : (
-                                        <p className="text-sm font-bold text-[#111827]">N/A</p>
+                                        selectedLead.linkedin_url ? (
+                                            <a href={selectedLead.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5">
+                                                View Profile <ExternalLink size={12} />
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm font-bold text-[#111827]">N/A</p>
+                                        )
                                     )}
                                 </div>
                                 <div className="space-y-1.5">
@@ -652,12 +1402,16 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         <Globe size={14} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Website</span>
                                     </div>
-                                    {selectedLead.website ? (
-                                        <a href={selectedLead.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5">
-                                            Visit Site <ExternalLink size={12} />
-                                        </a>
+                                    {isEditingLead ? (
+                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.website || ''} onChange={e => setEditLeadForm({ ...editLeadForm, website: e.target.value })} />
                                     ) : (
-                                        <p className="text-sm font-bold text-[#111827]">N/A</p>
+                                        selectedLead.website ? (
+                                            <a href={selectedLead.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5">
+                                                Visit Site <ExternalLink size={12} />
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm font-bold text-[#111827]">N/A</p>
+                                        )
                                     )}
                                 </div>
                                 <div className="space-y-1.5">
@@ -665,14 +1419,22 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         <MapPin size={14} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Location</span>
                                     </div>
-                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.location || 'N/A'}</p>
+                                    {isEditingLead ? (
+                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.location || ''} onChange={e => setEditLeadForm({ ...editLeadForm, location: e.target.value })} />
+                                    ) : (
+                                        <p className="text-sm font-bold text-[#111827]">{selectedLead.location || 'N/A'}</p>
+                                    )}
                                 </div>
                                 <div className="space-y-1.5">
                                     <div className="flex items-center gap-2 text-[#9CA3AF]">
                                         <Tag size={14} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Industry</span>
                                     </div>
-                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.industry || 'N/A'}</p>
+                                    {isEditingLead ? (
+                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.industry || ''} onChange={e => setEditLeadForm({ ...editLeadForm, industry: e.target.value })} />
+                                    ) : (
+                                        <p className="text-sm font-bold text-[#111827]">{selectedLead.industry || 'N/A'}</p>
+                                    )}
                                 </div>
                                 <div className="space-y-1.5">
                                     <div className="flex items-center gap-2 text-[#9CA3AF]">
@@ -689,10 +1451,175 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                     <p className="text-sm font-bold text-[#111827]">{selectedLead.source || 'Direct'}</p>
                                 </div>
                             </div>
+
+                            {/* Activity Timeline */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 pl-1">
+                                    <Clock size={14} className="text-[#9CA3AF]" />
+                                    <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Activity</span>
+                                </div>
+
+                                {activityLoading ? (
+                                    <div className="space-y-4 pl-1">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="flex items-start gap-3 animate-pulse">
+                                                <div className="w-8 h-8 bg-gray-100 rounded-full shrink-0" />
+                                                <div className="flex-1 space-y-2 pt-1">
+                                                    <div className="h-3 bg-gray-100 rounded w-32" />
+                                                    <div className="h-2.5 bg-gray-50 rounded w-48" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="relative">
+                                        {/* Vertical timeline line */}
+                                        {activityItems.length > 1 && (
+                                            <div
+                                                className="absolute left-[15px] top-4 bottom-4 w-px bg-[#E5E7EB]"
+                                                style={{ zIndex: 0 }}
+                                            />
+                                        )}
+
+                                        <div className="space-y-0">
+                                            {activityItems.map((item, idx) => {
+                                                const iconConfig: Record<string, { bg: string; color: string; Icon: any }> = {
+                                                    phone: { bg: 'bg-indigo-50', color: 'text-[#4F46E5]', Icon: Phone },
+                                                    star: { bg: 'bg-amber-50', color: 'text-amber-500', Icon: Star },
+                                                    mail: { bg: 'bg-purple-50', color: 'text-purple-500', Icon: Mail },
+                                                    userplus: { bg: 'bg-gray-50', color: 'text-[#9CA3AF]', Icon: UserPlus }
+                                                };
+                                                const cfg = iconConfig[item.icon] || iconConfig.userplus;
+                                                const IconComponent = cfg.Icon;
+                                                const isExpanded = expandedTranscripts.has(item.id);
+
+                                                return (
+                                                    <div key={item.id + '-' + idx} className="flex items-start gap-3 relative py-2.5">
+                                                        <div className={`w-8 h-8 ${cfg.bg} rounded-full flex items-center justify-center shrink-0 relative z-10`}>
+                                                            <IconComponent size={14} className={cfg.color} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0 pt-0.5">
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <span className="text-xs font-black text-[#111827]">{item.label}</span>
+                                                                <span className="text-[10px] font-medium text-[#9CA3AF] shrink-0">{getRelativeTime(item.date)}</span>
+                                                            </div>
+                                                            <p className="text-[11px] font-medium text-[#6B7280] mt-0.5 truncate">{item.sublabel}</p>
+                                                            {item.type === 'call' && item.transcript && (
+                                                                <div className="mt-1.5">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setExpandedTranscripts(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (next.has(item.id)) next.delete(item.id);
+                                                                                else next.add(item.id);
+                                                                                return next;
+                                                                            });
+                                                                        }}
+                                                                        className="text-[10px] font-bold text-[#4F46E5] hover:underline"
+                                                                    >
+                                                                        {isExpanded ? 'Hide transcript' : 'View transcript'}
+                                                                    </button>
+                                                                    {isExpanded && (
+                                                                        <div className="mt-2 p-3 bg-gray-50 border border-[#E5E7EB] rounded-lg">
+                                                                            <p className="text-[11px] font-mono text-[#6B7280] leading-relaxed whitespace-pre-wrap">
+                                                                                {item.transcript.length > 300 ? item.transcript.slice(0, 300) + '...' : item.transcript}
+                                                                            </p>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                            {/* Custom Audio Player */}
+                                                            {item.type === 'call' && item.recording_url && (
+                                                                <div className="mt-2">
+                                                                    <div className="flex items-center gap-1 mb-1">
+                                                                        <Mic size={10} className="text-white/40" />
+                                                                        <span className="text-[10px] font-bold text-white/40">Call Recording</span>
+                                                                    </div>
+                                                                    <div className="w-full bg-[#1e1b4b] rounded-full px-4 py-2.5 ring-1 ring-white/10">
+                                                                        <audio
+                                                                            ref={el => { audioRefs.current[item.id] = el; }}
+                                                                            src={item.recording_url}
+                                                                            preload="metadata"
+                                                                            onLoadedMetadata={(e) => {
+                                                                                const audio = e.currentTarget;
+                                                                                setAudioStates(prev => ({ ...prev, [item.id]: { isPlaying: false, currentTime: 0, duration: audio.duration, isMuted: false } }));
+                                                                            }}
+                                                                            onTimeUpdate={(e) => {
+                                                                                const audio = e.currentTarget;
+                                                                                setAudioStates(prev => ({ ...prev, [item.id]: { ...prev[item.id], currentTime: audio.currentTime } }));
+                                                                            }}
+                                                                            onEnded={() => {
+                                                                                const audio = audioRefs.current[item.id];
+                                                                                if (audio) audio.currentTime = 0;
+                                                                                setAudioStates(prev => ({ ...prev, [item.id]: { ...prev[item.id], isPlaying: false, currentTime: 0 } }));
+                                                                            }}
+                                                                            className="hidden"
+                                                                        />
+                                                                        <div className="flex items-center gap-3">
+                                                                            {/* Play/Pause Button */}
+                                                                            <button
+                                                                                onClick={() => toggleAudioPlay(item.id)}
+                                                                                className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 flex items-center justify-center shrink-0 transition-transform active:scale-95 hover:shadow-lg hover:shadow-indigo-500/30"
+                                                                            >
+                                                                                {audioStates[item.id]?.isPlaying ? <Pause size={14} className="text-white" /> : <Play size={14} className="text-white ml-0.5" />}
+                                                                            </button>
+
+                                                                            {/* Time + Progress */}
+                                                                            <span className="text-xs font-bold text-cyan-400 w-8 text-right shrink-0 tabular-nums">
+                                                                                {formatAudioTime(audioStates[item.id]?.currentTime || 0)}
+                                                                            </span>
+                                                                            <div
+                                                                                ref={el => { progressBarRefs.current[item.id] = el; }}
+                                                                                className="flex-1 h-1 bg-white/20 rounded-full cursor-pointer relative group"
+                                                                                onClick={(e) => handleProgressClick(item.id, e)}
+                                                                            >
+                                                                                <div
+                                                                                    className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all"
+                                                                                    style={{ width: `${audioStates[item.id]?.duration ? (audioStates[item.id].currentTime / audioStates[item.id].duration) * 100 : 0}%` }}
+                                                                                />
+                                                                            </div>
+                                                                            <span className="text-xs font-medium text-white/40 w-8 shrink-0 tabular-nums">
+                                                                                {formatAudioTime(audioStates[item.id]?.duration || 0)}
+                                                                            </span>
+
+                                                                            {/* Volume Toggle */}
+                                                                            <button
+                                                                                onClick={() => toggleAudioMute(item.id)}
+                                                                                className="text-white/60 hover:text-white transition-colors shrink-0"
+                                                                            >
+                                                                                {audioStates[item.id]?.isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Empty state when only the synthetic 'Lead Added' event exists */}
+                                        {activityItems.length === 1 && activityItems[0].type === 'created' && (
+                                            <p className="text-xs font-medium text-[#9CA3AF] pl-11 -mt-1">No outreach activity yet</p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Drawer Footer */}
                         <div className="p-8 border-t border-[#F3F4F6] bg-gray-50/50 flex flex-col gap-4">
+                            {/* AI Call Button */}
+                            <button
+                                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-green-500/20 hover:from-green-600 hover:to-emerald-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                                onClick={() => handleInitiateCall(selectedLead)}
+                                disabled={!selectedLead.phone}
+                            >
+                                <PhoneCall size={18} />
+                                {selectedLead.phone ? 'AI CALL AGENT' : 'NO PHONE NUMBER'}
+                            </button>
+
                             <button
                                 className={`w-full py-4 rounded-2xl font-black text-sm shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${enrichingLeads.includes(selectedLead.id) ? 'bg-indigo-50 text-primary shadow-indigo-500/5' : 'bg-white border border-[#E5E7EB] text-primary hover:bg-indigo-50 shadow-indigo-500/10'}`}
                                 onClick={() => handleEnrichLead(selectedLead.id)}
@@ -724,6 +1651,127 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 )}
                                 DELETE LEAD
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Call Modal */}
+            {showCallModal && callLeadTarget && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-gray-100">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white">
+                                        <Phone size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-black text-[#111827]">AI Call Agent</h3>
+                                        <p className="text-xs text-[#6B7280]">Call {callLeadTarget.company}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => { setShowCallModal(false); setCallStatus('idle'); }}
+                                    className="p-2 hover:bg-gray-50 rounded-xl text-[#9CA3AF] transition-all"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-5">
+                            {/* Lead Info */}
+                            <div className="p-4 bg-[#F9FAFB] rounded-xl border border-[#F3F4F6]">
+                                <p className="text-sm font-bold text-[#111827]">{callLeadTarget.company}</p>
+                                <p className="text-xs text-[#6B7280] mt-1">{callLeadTarget.first_name} {callLeadTarget.last_name}</p>
+                                <p className="text-xs font-bold text-[#4F46E5] mt-1">{callLeadTarget.phone}</p>
+                            </div>
+
+                            {/* Local Time Banner */}
+                            {(() => {
+                                if (!callLeadTarget.location) {
+                                    return (
+                                        <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center gap-2">
+                                            <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', backgroundColor: '#9CA3AF' }} />
+                                            <p className="text-sm font-medium text-[#6B7280]">Unknown location — local time cannot be determined</p>
+                                        </div>
+                                    );
+                                }
+                                const lt = getLocalTime(callLeadTarget.location);
+                                const bgColors = { green: 'bg-green-50 border-green-200', amber: 'bg-amber-50 border-amber-200', red: 'bg-red-50 border-red-200' };
+                                const messages = {
+                                    green: `Good time to call — local time is ${lt.time} (${lt.reason})`,
+                                    amber: `Borderline — local time is ${lt.time} (${lt.reason})`,
+                                    red: `Not recommended — local time is ${lt.time} (${lt.reason})`
+                                };
+                                return (
+                                    <div className={`p-3 ${bgColors[lt.status]} border rounded-xl flex items-center gap-2`}>
+                                        <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', backgroundColor: timeStatusColors[lt.status], flexShrink: 0 }} />
+                                        <p className="text-sm font-bold" style={{ color: timeStatusColors[lt.status] }}>{messages[lt.status]}</p>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Script Selector */}
+                            <div>
+                                <label className="block text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Call Script</label>
+                                <div className="relative">
+                                    <select
+                                        value={selectedScriptId}
+                                        onChange={(e) => setSelectedScriptId(e.target.value)}
+                                        className="w-full appearance-none px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#374151] focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    >
+                                        {callScripts.map(s => (
+                                            <option key={s.id} value={s.id}>{s.name}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                                </div>
+                            </div>
+
+                            {/* Call Status */}
+                            {callStatus === 'calling' && (
+                                <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
+                                    <Loader2 size={18} className="animate-spin text-amber-600" />
+                                    <p className="text-sm font-bold text-amber-700">Initiating call...</p>
+                                </div>
+                            )}
+                            {callStatus === 'connected' && (
+                                <div className="p-4 bg-green-50 border border-green-100 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
+                                    <PhoneCall size={18} className="text-green-600" />
+                                    <p className="text-sm font-bold text-green-700">Call initiated successfully! The AI agent is now calling {callLeadTarget.company}.</p>
+                                </div>
+                            )}
+                            {callStatus === 'error' && (
+                                <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
+                                    <PhoneOff size={18} className="text-red-600" />
+                                    <p className="text-sm font-bold text-red-700">Call failed. Check the console for details.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6 border-t border-gray-100 flex gap-3">
+                            <button
+                                onClick={() => { setShowCallModal(false); setCallStatus('idle'); }}
+                                className="flex-1 py-3 border border-[#E5E7EB] bg-white text-[#374151] rounded-xl font-bold text-sm hover:bg-gray-50 transition-all"
+                            >
+                                {callStatus === 'connected' ? 'Close' : 'Cancel'}
+                            </button>
+                            {callStatus !== 'connected' && (
+                                <button
+                                    onClick={handleMakeCall}
+                                    disabled={callInProgress}
+                                    className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {callInProgress ? (
+                                        <Loader2 size={16} className="animate-spin" />
+                                    ) : (
+                                        <Phone size={16} />
+                                    )}
+                                    {callInProgress ? 'Calling...' : 'Start Call'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -895,6 +1943,207 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 SAVE LEAD
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Email Selected Modal */}
+            {showEmailModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-black text-[#111827]">Enrol {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} in email sequence</h3>
+                                <p className="text-xs font-medium text-gray-400 mt-1">Choose a sequence to start sending automated emails</p>
+                            </div>
+                            <button onClick={() => setShowEmailModal(false)} className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 transition-all">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-5">
+                            {sequences.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <div className="w-14 h-14 bg-indigo-50 text-[#4F46E5] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <Mail size={24} />
+                                    </div>
+                                    <p className="text-sm font-black text-[#111827] mb-1">No sequences yet</p>
+                                    <p className="text-xs text-gray-400 font-medium mb-4">Create your first email sequence to start enrolling leads.</p>
+                                    <button
+                                        onClick={() => { setShowEmailModal(false); window.location.hash = '#sequences'; }}
+                                        className="text-sm font-bold text-[#4F46E5] hover:underline"
+                                    >
+                                        Go to Sequence Builder →
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest pl-1">Select Sequence</label>
+                                        <select
+                                            className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
+                                            value={selectedSequenceId}
+                                            onChange={(e) => setSelectedSequenceId(e.target.value)}
+                                        >
+                                            {sequences.map(seq => (
+                                                <option key={seq.id} value={seq.id}>{seq.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="p-4 bg-indigo-50/60 border border-indigo-100 rounded-xl flex items-start gap-3">
+                                        <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                                        <p className="text-xs font-medium text-[#3730A3] leading-relaxed">
+                                            {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} will be enrolled and start receiving emails from step 1 of this sequence.
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        {sequences.length > 0 && (
+                            <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex gap-3">
+                                <button
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="flex-1 py-3 border border-[#E5E7EB] bg-white text-[#374151] rounded-xl font-black text-sm hover:bg-gray-50 transition-all active:scale-95"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleBatchEnroll}
+                                    disabled={isEnrolling || !selectedSequenceId}
+                                    className="flex-1 py-3 bg-[#4F46E5] text-white rounded-xl font-black text-sm shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {isEnrolling ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
+                                    {isEnrolling ? 'Enrolling...' : 'Start Sequence'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Call Selected Modal */}
+            {showBatchCallModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-black text-[#111827]">Queue AI calls for {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''}</h3>
+                                <p className="text-xs font-medium text-gray-400 mt-1">Select a call script and review availability</p>
+                            </div>
+                            <button onClick={() => setShowBatchCallModal(false)} className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 transition-all">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-5">
+                            {callScripts.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <Phone size={24} />
+                                    </div>
+                                    <p className="text-sm font-black text-[#111827] mb-1">No call scripts yet</p>
+                                    <p className="text-xs text-gray-400 font-medium mb-4">Create a call script in the Call Agent page first.</p>
+                                    <button
+                                        onClick={() => { setShowBatchCallModal(false); window.location.hash = '#call-agent'; }}
+                                        className="text-sm font-bold text-emerald-600 hover:underline"
+                                    >
+                                        Go to Call Agent →
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest pl-1">Select Call Script</label>
+                                        <select
+                                            className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
+                                            value={batchCallScriptId}
+                                            onChange={(e) => setBatchCallScriptId(e.target.value)}
+                                        >
+                                            {callScripts.map(s => (
+                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Business Hours Summary */}
+                                    {(() => {
+                                        const selectedLeadObjects = leads.filter(l => selectedLeads.includes(l.id));
+                                        const greenLeads = selectedLeadObjects.filter(l => l.location && getLocalTime(l.location).status === 'green');
+                                        const amberLeads = selectedLeadObjects.filter(l => l.location && getLocalTime(l.location).status === 'amber');
+                                        const redLeads = selectedLeadObjects.filter(l => l.location && getLocalTime(l.location).status === 'red');
+                                        const unknownLeads = selectedLeadObjects.filter(l => !l.location);
+                                        return (
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest pl-1">Lead Availability</label>
+                                                <div className="bg-gray-50 border border-[#E5E7EB] rounded-xl p-4 space-y-2.5">
+                                                    {greenLeads.length > 0 && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10B981' }} />
+                                                            <span className="text-xs font-bold text-[#059669]">{greenLeads.length} lead{greenLeads.length > 1 ? 's' : ''} ready to call (business hours)</span>
+                                                        </div>
+                                                    )}
+                                                    {amberLeads.length > 0 && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F59E0B' }} />
+                                                            <span className="text-xs font-bold text-[#D97706]">{amberLeads.length} lead{amberLeads.length > 1 ? 's' : ''} borderline</span>
+                                                        </div>
+                                                    )}
+                                                    {redLeads.length > 0 && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#EF4444' }} />
+                                                            <span className="text-xs font-bold text-[#DC2626]">{redLeads.length} lead{redLeads.length > 1 ? 's' : ''} outside business hours</span>
+                                                        </div>
+                                                    )}
+                                                    {unknownLeads.length > 0 && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#9CA3AF' }} />
+                                                            <span className="text-xs font-bold text-[#6B7280]">{unknownLeads.length} lead{unknownLeads.length > 1 ? 's' : ''} with unknown location</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    {/* Business Hours Checkbox */}
+                                    <label className="flex items-center gap-3 cursor-pointer select-none group">
+                                        <div
+                                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${businessHoursOnly ? 'bg-[#4F46E5] border-[#4F46E5]' : 'border-[#D1D5DB] group-hover:border-[#4F46E5]/40'}`}
+                                            onClick={() => setBusinessHoursOnly(!businessHoursOnly)}
+                                        >
+                                            {businessHoursOnly && <CheckCircle size={14} className="text-white" />}
+                                        </div>
+                                        <span className="text-sm font-bold text-[#374151]">Only call leads during business hours</span>
+                                    </label>
+                                </>
+                            )}
+                        </div>
+                        {callScripts.length > 0 && (
+                            <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex gap-3">
+                                <button
+                                    onClick={() => setShowBatchCallModal(false)}
+                                    className="flex-1 py-3 border border-[#E5E7EB] bg-white text-[#374151] rounded-xl font-black text-sm hover:bg-gray-50 transition-all active:scale-95"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleBatchQueueCalls}
+                                    disabled={isQueueing || !batchCallScriptId}
+                                    className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {isQueueing ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />}
+                                    {isQueueing ? 'Queueing...' : 'Queue Calls'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast.visible && (
+                <div className="fixed bottom-6 right-6 z-[60] animate-in slide-in-from-bottom-4 fade-in duration-300">
+                    <div className="flex items-center gap-3 px-5 py-3.5 bg-[#111827] text-white rounded-xl shadow-2xl">
+                        <CheckCircle size={18} className="text-emerald-400 shrink-0" />
+                        <span className="text-sm font-bold">{toast.message}</span>
                     </div>
                 </div>
             )}

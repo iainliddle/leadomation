@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, Rocket, Plus, ChevronRight, BarChart3, Users, Mail } from 'lucide-react';
+import { PlayCircle, Rocket, Plus, ChevronRight, BarChart3, Users, Mail, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Campaign {
@@ -33,8 +33,8 @@ const ScrapingBadge = ({ status }: { status: string }) => {
 
     return (
         <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
-            style={{ color: c.color, backgroundColor: c.bg }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border"
+            style={{ color: c.color, backgroundColor: c.bg, borderColor: `${c.color}30` }}
         >
             {c.animate && (
                 <span
@@ -240,7 +240,15 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                             <Users size={12} />
                                             <span className="text-[9px] font-black uppercase tracking-tight">Leads</span>
                                         </div>
-                                        <p className="text-lg font-black text-[#111827]">{campaign.leads_found || 0}</p>
+                                        <button
+                                            onClick={() => {
+                                                window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
+                                                onPageChange?.('Lead Database');
+                                            }}
+                                            className="text-lg font-black text-[#111827] hover:text-primary transition-colors hover:underline text-left block"
+                                        >
+                                            {campaign.leads_found || 0}
+                                        </button>
                                     </div>
                                     <div className="bg-[#F9FAFB] p-3 rounded-xl border border-gray-100">
                                         <div className="flex items-center gap-1.5 text-primary mb-1">
@@ -263,6 +271,19 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                         ></div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="px-6 pb-6">
+                                <button
+                                    onClick={() => {
+                                        window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
+                                        onPageChange?.('Lead Database');
+                                    }}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-50 text-[#4F46E5] border border-indigo-100 rounded-xl text-sm font-bold hover:bg-indigo-100 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(79,70,229,0.05)] active:scale-[0.98]"
+                                >
+                                    <Eye size={16} />
+                                    View Leads
+                                </button>
                             </div>
 
                             <button

@@ -4,9 +4,10 @@ import { Loader2 } from 'lucide-react';
 
 interface Campaign {
     name: string;
-    type: string;
-    replyRate: string;
-    progress: number;
+    track: string;
+    reply_rate: number;
+    leads_found: number;
+    emails_sent: number;
     status: string;
 }
 
@@ -21,9 +22,9 @@ const TopCampaigns: React.FC = () => {
 
             const { data, error } = await supabase
                 .from('campaigns')
-                .select('*')
+                .select('name, track, reply_rate, leads_found, emails_sent, status')
                 .eq('user_id', user.id)
-                .order('progress', { ascending: false })
+                .order('created_at', { ascending: false })
                 .limit(4);
 
             if (error) {
@@ -37,14 +38,29 @@ const TopCampaigns: React.FC = () => {
         fetchTopCampaigns();
     }, []);
 
-    const getStyles = (type: string) => {
+    const getStyles = (track: string) => {
         const styles: Record<string, any> = {
-            'Direct': { color: '#2563EB', bgColor: 'bg-blue-50', textColor: 'text-[#2563EB]' },
-            'Specifier': { color: '#7C3AED', bgColor: 'bg-purple-50', textColor: 'text-[#7C3AED]' },
-            'Warm': { color: '#D97706', bgColor: 'bg-amber-50', textColor: 'text-[#D97706]' },
+            'direct': { color: '#2563EB', bgColor: 'bg-blue-50', textColor: 'text-[#2563EB]' },
+            'specifier': { color: '#7C3AED', bgColor: 'bg-purple-50', textColor: 'text-[#7C3AED]' },
+            'warm': { color: '#D97706', bgColor: 'bg-amber-50', textColor: 'text-[#D97706]' },
             'default': { color: '#6B7280', bgColor: 'bg-gray-50', textColor: 'text-gray-600' }
         };
-        return styles[type] || styles['default'];
+        return styles[track] || styles['default'];
+    };
+
+    const getTrackLabel = (track: string) => {
+        const labels: Record<string, string> = {
+            'direct': 'Direct',
+            'specifier': 'Specifier',
+            'warm': 'Warm'
+        };
+        return labels[track] || track || 'General';
+    };
+
+    const getProgress = (campaign: Campaign) => {
+        if (!campaign.leads_found || campaign.leads_found === 0) return 0;
+        if (!campaign.emails_sent) return 10;
+        return Math.min(100, Math.round((campaign.emails_sent / campaign.leads_found) * 100));
     };
 
     return (
@@ -62,18 +78,19 @@ const TopCampaigns: React.FC = () => {
                     <p className="text-xs text-gray-400 text-center py-8 font-medium italic">No active campaigns yet.</p>
                 ) : (
                     campaigns.map((campaign, index) => {
-                        const style = getStyles(campaign.type);
+                        const style = getStyles(campaign.track);
+                        const progress = getProgress(campaign);
                         return (
                             <div key={index} className="group cursor-pointer">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="min-w-0 pr-4">
                                         <p className="text-sm font-bold text-[#111827] group-hover:text-primary transition-colors truncate">{campaign.name}</p>
                                         <span className={`inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${style.bgColor} ${style.textColor}`}>
-                                            {campaign.type}
+                                            {getTrackLabel(campaign.track)}
                                         </span>
                                     </div>
                                     <div className="text-right shrink-0">
-                                        <p className="text-sm font-bold text-[#111827]">{campaign.replyRate || '0%'}</p>
+                                        <p className="text-sm font-bold text-[#111827]">{campaign.reply_rate || 0}%</p>
                                         <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider">Reply Rate</p>
                                     </div>
                                 </div>
@@ -81,7 +98,7 @@ const TopCampaigns: React.FC = () => {
                                     <div
                                         className="h-full rounded-full transition-all duration-1000 ease-out"
                                         style={{
-                                            width: `${campaign.progress || 0}%`,
+                                            width: `${progress}%`,
                                             backgroundColor: style.color
                                         }}
                                     ></div>

@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# n8n-as-code AI helpers
+n8nac-skills
+n8nac-skills.cmd
+.vercel

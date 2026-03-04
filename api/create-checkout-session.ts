@@ -40,6 +40,7 @@ export default async function handler(req: any, res: any) {
                     userId: userId,
                 },
             },
+            payment_method_collection: 'always',
             customer_email: userEmail,
             success_url: 'https://leadomation.co.uk/dashboard?checkout=success',
             cancel_url: 'https://leadomation.co.uk/pricing?checkout=cancelled',

@@ -18,7 +18,9 @@ import Settings from './pages/Settings';
 import ActiveCampaigns from './pages/ActiveCampaigns';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
 import GlobalDemand from './pages/GlobalDemand';
+import CallScriptBuilder from './pages/CallScriptBuilder';
 import { supabase } from './lib/supabase';
 import { usePlan } from './hooks/usePlan';
 import TrialBanner from './components/TrialBanner';
@@ -54,7 +56,6 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
@@ -65,16 +66,13 @@ const App: React.FC = () => {
       setLoading(false);
     });
 
-    // Listen for auth changes - General session handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
 
-      // Auto-navigate to dashboard if logged in and on public pages
       if (session && (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register')) {
         setActivePage('Dashboard');
       }
-      // Auto-navigate to landing if logged out and on protected pages
-      else if (!session && activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Login') {
+      else if (!session && activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Refund' && activePage !== 'Login') {
         setActivePage('Landing');
       }
     });
@@ -82,7 +80,6 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, [activePage]);
 
-  // Dedicated handler for auth callback / welcome email
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session && window.location.pathname === '/auth/callback') {
@@ -121,6 +118,8 @@ const App: React.FC = () => {
         );
       case 'Sequence Builder':
         return <SequenceBuilder onPageChange={setActivePage} />;
+      case 'Call Agent':
+        return <CallScriptBuilder />;
       case 'Inbox':
         return (
           <FeatureGate feature="Unified Inbox" hasAccess={canAccess('inbox')} targetPlan="pro">
@@ -162,18 +161,20 @@ const App: React.FC = () => {
     );
   }
 
-  // Handle dedicated auth callback route
   if (window.location.pathname === '/auth/callback') {
     return <AuthCallback />;
   }
 
-  // Handle public pages
   if (activePage === 'Terms') {
-    return <TermsOfService onGoToLogin={() => setActivePage('Login')} />;
+    return <TermsOfService onBack={() => setActivePage('Login')} onNavigate={(page) => setActivePage(page)} />;
   }
 
   if (activePage === 'Privacy') {
     return <PrivacyPolicy onGoToLogin={() => setActivePage('Login')} />;
+  }
+
+  if (activePage === 'Refund') {
+    return <RefundPolicy onBack={() => setActivePage('Login')} />;
   }
 
   if (!session && activePage === 'Register') {
@@ -182,6 +183,7 @@ const App: React.FC = () => {
         onGoToLogin={() => setActivePage('Login')}
         onGoToTerms={() => setActivePage('Terms')}
         onGoToPrivacy={() => setActivePage('Privacy')}
+        onGoToRefund={() => setActivePage('Refund')}
       />
     );
   }
@@ -193,6 +195,7 @@ const App: React.FC = () => {
         onGoToRegister={() => setActivePage('Register')}
         onGoToTerms={() => setActivePage('Terms')}
         onGoToPrivacy={() => setActivePage('Privacy')}
+        onGoToRefund={() => setActivePage('Refund')}
       />
     );
   }

@@ -269,6 +269,134 @@ export default async function handler(req: any, res: any) {
                 break;
             }
 
+            case 'customer.subscription.trial_will_end': {
+                const subscription = event.data.object as Stripe.Subscription;
+                const customerId = subscription.customer as string;
+
+                try {
+                    const customer = await stripe.customers.retrieve(customerId);
+                    if (customer && !('deleted' in customer) && customer.email) {
+                        const firstName = (customer.name || 'there').split(' ')[0];
+                        const trialEnd = new Date(subscription.trial_end! * 1000);
+                        const chargeDate = trialEnd.toLocaleDateString('en-GB', {
+                            day: 'numeric', month: 'long', year: 'numeric'
+                        });
+                        const priceId = subscription.items.data[0]?.price?.id;
+                        const plan = PRICE_TO_PLAN[priceId || ''];
+                        const amount = plan === 'pro' ? '£149' : '£49';
+                        const planName = plan === 'pro' ? 'Pro' : 'Starter';
+
+                        const subject = `Your free trial ends in 2 days — here's what happens next`;
+                        const bodyContent = `
+                            <h1 style="margin:0 0 24px;font-size:24px;font-weight:800;color:#111827;">Your trial ends on ${chargeDate}</h1>
+                            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">Hi ${firstName},</p>
+                            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+                                Your 7-day free trial of Leadomation ${planName} ends on <strong>${chargeDate}</strong>. 
+                                Unless you cancel before then, your card will automatically be charged <strong>${amount}/month</strong> and your subscription will continue.
+                            </p>
+                            <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+                                <p style="margin:0;font-size:14px;color:#92400E;line-height:1.7;">
+                                    <strong>⚠️ Important:</strong> If you are charged and do not cancel before the billing date, 
+                                    please note that monthly subscription charges are non-refundable. 
+                                    You can cancel at any time after being charged and will retain access until the end of that billing period.
+                                </p>
+                            </div>
+                            <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.7;">
+                                If you want to cancel, you can do so from your account settings before <strong>${chargeDate}</strong>. 
+                                No hard feelings — we'll send you a confirmation straight away.
+                            </p>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="https://leadomation.co.uk" style="display:inline-block;background:linear-gradient(135deg,#4F46E5,#06B6D4);color:white;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:10px;">
+                                            Continue Using Leadomation →
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
+                                Iain<br>
+                                <span style="color:#6B7280;">Founder, Leadomation</span>
+                            </p>
+                        `;
+
+                        await resend.emails.send({
+                            from: 'Iain from Leadomation <iainliddle@leadomation.co.uk>',
+                            to: customer.email,
+                            replyTo: 'iainliddle@leadomation.co.uk',
+                            subject: subject,
+                            html: BASE_LAYOUT(subject, bodyContent),
+                        });
+                        console.log(`✅ Trial reminder email sent to ${customer.email}`);
+                    }
+                } catch (emailErr) {
+                    console.error('Failed to send trial reminder email:', emailErr);
+                }
+                break;
+            }
+
+            case 'invoice.payment_failed': {
+                const invoice = event.data.object as Stripe.Invoice;
+                const customerId = invoice.customer as string;
+
+                try {
+                    const customer = await stripe.customers.retrieve(customerId);
+                    if (customer && !('deleted' in customer) && customer.email) {
+                        const firstName = (customer.name || 'there').split(' ')[0];
+                        const subject = `Action required: Your Leadomation payment failed`;
+                        const bodyContent = `
+                            <h1 style="margin:0 0 24px;font-size:24px;font-weight:800;color:#111827;">Payment failed</h1>
+                            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">Hi ${firstName},</p>
+                            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+                                We were unable to process your payment for Leadomation. This can happen if your card has expired, 
+                                has insufficient funds, or your bank declined the transaction.
+                            </p>
+                            <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+                                <p style="margin:0;font-size:14px;color:#991B1B;line-height:1.7;">
+                                    <strong>⚠️ Your account access may be restricted</strong> until payment is resolved. 
+                                    Please update your payment method as soon as possible to avoid interruption.
+                                </p>
+                            </div>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="https://leadomation.co.uk" style="display:inline-block;background:linear-gradient(135deg,#4F46E5,#06B6D4);color:white;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:10px;">
+                                            Update Payment Method →
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+                                If you need help, reply to this email and I'll sort it out personally.
+                            </p>
+                            <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
+                                Iain<br>
+                                <span style="color:#6B7280;">Founder, Leadomation</span>
+                            </p>
+                        `;
+
+                        await resend.emails.send({
+                            from: 'Iain from Leadomation <iainliddle@leadomation.co.uk>',
+                            to: customer.email,
+                            replyTo: 'iainliddle@leadomation.co.uk',
+                            subject: subject,
+                            html: BASE_LAYOUT(subject, bodyContent),
+                        });
+
+                        // Update plan to reflect payment issue
+                        await supabase
+                            .from('profiles')
+                            .update({ plan: 'payment_failed' })
+                            .eq('stripe_customer_id', customerId);
+
+                        console.log(`✅ Payment failed email sent to ${customer.email}`);
+                    }
+                } catch (err) {
+                    console.error('Failed to handle payment_failed event:', err);
+                }
+                break;
+            }
+
             default:
                 console.log('Unhandled Stripe event type:', event.type);
         }

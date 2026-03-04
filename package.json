@@ -17,7 +17,9 @@
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.1",
     "react-simple-maps": "^3.0.0",
+    "recharts": "^3.7.0",
     "resend": "^6.9.2",
     "stripe": "^20.3.1"
   },

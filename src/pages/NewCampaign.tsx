@@ -7,8 +7,10 @@ import {
     Rocket,
     Check,
     ChevronDown,
+    ChevronUp,
     Loader2,
-    X
+    X,
+    Lock
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -99,6 +101,51 @@ const countryCodes: Record<string, string> = {
     'Finland': 'fi'
 };
 
+const intentFilterOptions = [
+    {
+        id: 'new_business',
+        icon: '🆕',
+        label: 'Newly Opened Businesses',
+        description: 'Businesses opened in the last 6 months — they need everything',
+        badge: 'HOT',
+        badgeColor: 'bg-red-50 text-red-600 border-red-100',
+        note: 'Availability depends on Google data — filter applied where opening date is present'
+    },
+    {
+        id: 'low_rating',
+        icon: '⭐',
+        label: 'Low Google Rating',
+        description: 'Under 4.0 stars — clear pain point, high motivation to improve',
+        badge: 'HIGH INTENT',
+        badgeColor: 'bg-amber-50 text-amber-600 border-amber-100',
+        hasSubOption: true
+    },
+    {
+        id: 'no_photos',
+        icon: '📸',
+        label: 'Missing or Few Photos',
+        description: 'Under 5 photos on their Google profile — easy upsell opportunity',
+        badge: null,
+        badgeColor: ''
+    },
+    {
+        id: 'no_recent_reviews',
+        icon: '💬',
+        label: 'No Recent Reviews',
+        description: 'Last review over 6 months ago — disengaged owner, needs help',
+        badge: null,
+        badgeColor: ''
+    },
+    {
+        id: 'incomplete_profile',
+        icon: '📋',
+        label: 'Incomplete Google Profile',
+        description: 'Missing website, phone, or hours — unprofessional, easy sell',
+        badge: null,
+        badgeColor: ''
+    }
+];
+
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl shadow-sm mb-8">
         <h3 className="text-lg font-bold text-[#111827] mb-6">{title}</h3>
@@ -128,6 +175,17 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
     const [upgradeMessage, setUpgradeMessage] = useState('');
     const [sequences, setSequences] = useState<any[]>([]);
     const [selectedSequenceId, setSelectedSequenceId] = useState<string>('');
+    const [userPlan, setUserPlan] = useState<string>('trial');
+    const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+    const [activeFilters, setActiveFilters] = useState({
+        new_business: false,
+        low_rating: false,
+        low_rating_max: '4.0',
+        no_photos: false,
+        no_recent_reviews: false,
+        incomplete_profile: false
+    });
 
     const [toggles, setToggles] = useState({
         maps: true,
@@ -152,6 +210,28 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
         };
         loadSequences();
     }, []);
+
+    useEffect(() => {
+        const loadUserPlan = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('plan')
+                .eq('id', user.id)
+                .single();
+            setUserPlan(profile?.plan || 'trial');
+        };
+        loadUserPlan();
+    }, []);
+
+    const toggleFilter = (filterId: string) => {
+        setActiveFilters(prev => ({ ...prev, [filterId]: !prev[filterId as keyof typeof prev] }));
+    };
+
+    const activeFilterCount = Object.entries(activeFilters).filter(([key, value]) => key !== 'low_rating_max' && value === true).length;
+
+    const isStarterPlan = userPlan === 'starter';
 
     const toggleTag = (tag: string) => {
         setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -204,7 +284,6 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
     };
 
     const saveCampaign = async (status: 'draft' | 'active') => {
-        // Validate required fields
         if (!campaignName?.trim()) {
             setError('Please enter a campaign name.');
             return;
@@ -227,7 +306,6 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                 }
             }
 
-            // Plan limit check for trial users
             if (status === 'active') {
                 const { data: profile } = await supabase
                     .from('profiles')
@@ -267,7 +345,6 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                 }
             }
 
-            // Build the target_location string from selected regions and city
             const locationParts = [];
             if (selectedCountries && selectedCountries.length > 0) {
                 locationParts.push(selectedCountries.join(', '));
@@ -297,59 +374,51 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                 sequence_id: selectedSequenceId || null
             };
 
-            console.log('Inserting:', JSON.stringify(insertData));
-
-            const { error: dbError } = await supabase
+            const { data: insertedCampaign, error: dbError } = await supabase
                 .from('campaigns')
-                .insert(insertData);
+                .insert(insertData)
+                .select('id')
+                .single();
 
             if (dbError) {
                 console.error('Error saving campaign:', dbError);
-                console.log('Full error:', JSON.stringify(dbError));
                 alert('Failed to save campaign. Please try again.');
                 return;
             }
 
-            console.log('Campaign saved successfully, status:', status);
+            // Save intent filters via RPC to bypass schema cache issue
+            const filtersToSave = isStarterPlan ? {} : activeFilters;
+            const { error: filterError } = await supabase.rpc('update_campaign_filters', {
+                campaign_id: insertedCampaign.id,
+                filters: filtersToSave
+            });
+
+            if (filterError) {
+                console.error('Error saving filters:', filterError);
+            }
 
             if (status === 'active') {
-                // Get the campaign ID we just created
-                const { data: newCampaign } = await supabase
-                    .from('campaigns')
-                    .select('id')
-                    .eq('user_id', user.id)
-                    .eq('name', campaignName.trim())
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                try {
+                    await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/d6c828df-d7a2-49f5-97a0-eb7b321ff86c', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            campaign_id: insertedCampaign.id,
+                            user_id: user.id,
+                            industry: selectedTags.length > 0 ? selectedTags.join(', ') : (customKeywords || ''),
+                            location: selectedCountries.join(', '),
+                            city: cityArea?.trim() || '',
+                            max_leads: leadCount,
+                            intent_filters: isStarterPlan ? {} : activeFilters
+                        })
+                    });
 
-                if (newCampaign) {
-                    // Trigger N8N webhook to start lead scraping
-                    try {
-                        console.log('About to call N8N webhook...');
-                        await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/d6c828df-d7a2-49f5-97a0-eb7b321ff86c', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                campaign_id: newCampaign.id,
-                                user_id: user.id,
-                                industry: selectedTags.length > 0 ? selectedTags.join(', ') : (customKeywords || ''),
-                                location: selectedCountries.join(', '),
-                                city: cityArea?.trim() || '',
-                                max_leads: leadCount
-                            })
-                        });
-                        console.log('Webhook called successfully');
-
-                        // Update campaign scraping_status to 'scraping'
-                        await supabase
-                            .from('campaigns')
-                            .update({ scraping_status: 'scraping' })
-                            .eq('id', newCampaign.id);
-                    } catch (webhookErr) {
-                        console.error('Webhook fetch error:', webhookErr);
-                        // Don't block the redirect - campaign is saved, scraping will retry
-                    }
+                    await supabase
+                        .from('campaigns')
+                        .update({ scraping_status: 'scraping' })
+                        .eq('id', insertedCampaign.id);
+                } catch (webhookErr) {
+                    console.error('Webhook fetch error:', webhookErr);
                 }
             }
 
@@ -359,7 +428,6 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
 
         } catch (err) {
             console.error('Save error:', err);
-            console.log('Full error:', JSON.stringify(err));
             alert('Something went wrong.');
         } finally {
             setSaving(false);
@@ -482,7 +550,6 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                 </div>
                             ))}
 
-                            {/* Add Region Dropdown */}
                             <div className="relative">
                                 <select
                                     onChange={(e) => {
@@ -555,6 +622,141 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                     </div>
                 </div>
             </Section>
+
+            {/* Section 3.5: Smart Intent Filters */}
+            <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm mb-8 overflow-hidden">
+                <button
+                    onClick={() => !isStarterPlan && setFiltersExpanded(!filtersExpanded)}
+                    className="w-full p-6 flex items-center justify-between text-left"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="text-xl">🎯</span>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-[#111827]">Smart Intent Filters</h3>
+                                <span className="px-2 py-0.5 bg-[#EEF2FF] text-[#4F46E5] text-[9px] font-black rounded-full border border-[#C7D2FE] uppercase tracking-tight">
+                                    Recommended
+                                </span>
+                                {activeFilterCount > 0 && (
+                                    <span className="px-2 py-0.5 bg-green-50 text-green-600 text-[9px] font-black rounded-full border border-green-100">
+                                        {activeFilterCount} active
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-xs text-[#6B7280] mt-0.5">Target businesses most likely to need your services right now</p>
+                        </div>
+                    </div>
+                    {isStarterPlan ? (
+                        <Lock size={18} className="text-[#9CA3AF]" />
+                    ) : (
+                        filtersExpanded ? <ChevronUp size={18} className="text-[#9CA3AF]" /> : <ChevronDown size={18} className="text-[#9CA3AF]" />
+                    )}
+                </button>
+
+                {isStarterPlan && (
+                    <div className="px-6 pb-6">
+                        <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
+                            <Lock size={24} className="mx-auto text-[#9CA3AF] mb-2" />
+                            <p className="text-sm font-bold text-[#374151] mb-1">Available on Trial & Pro plans</p>
+                            <p className="text-xs text-[#6B7280] mb-3">Smart Filters help you target warm leads that convert 3-5x higher than cold outreach.</p>
+                            <button
+                                onClick={() => {
+                                    setUpgradeMessage('Upgrade to Pro to unlock Smart Intent Filters and target warm leads with higher conversion rates.');
+                                    setShowUpgradeModal(true);
+                                }}
+                                className="px-6 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-[#4338CA] transition-all"
+                            >
+                                Upgrade to Pro
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {!isStarterPlan && filtersExpanded && (
+                    <div className="px-6 pb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div style={{
+                            background: 'linear-gradient(135deg, #EEF2FF 0%, #E0F2FE 100%)',
+                            border: '1px solid #C7D2FE',
+                            borderRadius: '12px',
+                            padding: '14px 18px',
+                            marginBottom: '20px',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '12px'
+                        }}>
+                            <span style={{ fontSize: '18px' }}>⚡</span>
+                            <p style={{ margin: 0, fontSize: '12px', color: '#4B5563', lineHeight: '1.6' }}>
+                                Smart filters help you find warm leads — businesses showing signs they need help. These leads convert at <strong style={{ color: '#4F46E5' }}>3-5x higher rates</strong> than cold outreach.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            {intentFilterOptions.map(filter => (
+                                <div
+                                    key={filter.id}
+                                    className={`p-4 rounded-xl border transition-all duration-200 ${activeFilters[filter.id as keyof typeof activeFilters]
+                                        ? 'border-[#4F46E5] bg-[#F5F3FF] shadow-sm'
+                                        : 'border-[#F3F4F6] bg-white hover:border-gray-200 hover:bg-[#F9FAFB]'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <span className="text-xl shrink-0">{filter.icon}</span>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <p className="text-sm font-bold text-[#374151]">{filter.label}</p>
+                                                    {filter.badge && (
+                                                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-black border ${filter.badgeColor}`}>
+                                                            {filter.badge}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-[11px] text-[#6B7280] mt-0.5">{filter.description}</p>
+                                                {filter.note && activeFilters[filter.id as keyof typeof activeFilters] && (
+                                                    <p className="text-[10px] text-[#9CA3AF] mt-1 italic">{filter.note}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => toggleFilter(filter.id)}
+                                            className={`relative w-10 h-5 rounded-full transition-colors duration-200 shrink-0 ml-4 ${activeFilters[filter.id as keyof typeof activeFilters] ? 'bg-[#4F46E5]' : 'bg-[#E5E7EB]'}`}
+                                        >
+                                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ${activeFilters[filter.id as keyof typeof activeFilters] ? 'translate-x-5' : ''}`} />
+                                        </button>
+                                    </div>
+
+                                    {filter.hasSubOption && activeFilters.low_rating && filter.id === 'low_rating' && (
+                                        <div className="mt-3 pt-3 border-t border-[#E5E7EB] flex items-center gap-3 animate-in fade-in duration-200">
+                                            <label className="text-xs font-bold text-[#6B7280]">Maximum rating:</label>
+                                            <div className="relative">
+                                                <select
+                                                    value={activeFilters.low_rating_max}
+                                                    onChange={(e) => setActiveFilters(prev => ({ ...prev, low_rating_max: e.target.value }))}
+                                                    className="appearance-none px-3 py-1.5 pr-8 bg-white border border-[#E5E7EB] rounded-lg text-xs font-bold text-[#374151] focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                >
+                                                    <option value="3.0">3.0 stars</option>
+                                                    <option value="3.5">3.5 stars</option>
+                                                    <option value="4.0">4.0 stars</option>
+                                                </select>
+                                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {activeFilterCount > 0 && (
+                            <div className="mt-4 p-3 bg-green-50 border border-green-100 rounded-xl flex items-center gap-2 animate-in fade-in duration-200">
+                                <span className="text-green-600 text-sm">✅</span>
+                                <p className="text-xs font-bold text-green-700">
+                                    {activeFilterCount} intent filter{activeFilterCount > 1 ? 's' : ''} active — targeting warm leads only
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
 
             {/* Section 4: Data Enrichment */}
             <Section title="Data Enrichment">

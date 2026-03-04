@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mail, MessageCircle, Linkedin, Loader2 } from 'lucide-react';
+import { Users, Mail, MessageCircle, Linkedin, Loader2, Phone, UserPlus, Star } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import CampaignPerformance from '../components/CampaignPerformance';
 import TopCampaigns from '../components/TopCampaigns';
@@ -23,6 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [recentLeads, setRecentLeads] = useState<any[]>([]);
+    const [activities, setActivities] = useState<any[]>([]);
     const [showOnboarding, setShowOnboarding] = useState(false);
 
     useEffect(() => {
@@ -44,17 +45,36 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                 { count: leadsWithEmails },
                 { count: leadsContacted },
                 { count: dealsCount },
-                { data: recentLeadsData }
+                { data: recentLeadsData },
+                { data: recentCallsData },
+                { data: recentNewLeads },
+                { data: qualifiedLeads }
             ] = await Promise.all([
                 supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-                supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).not('email', 'is', null),
-                supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'Contacted'),
+                supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).neq('email', '').not('email', 'is', null),
+                supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('status', ['Contacted', 'Qualified']),
                 supabase.from('deals').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
                 supabase.from('leads')
                     .select('*')
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false })
-                    .limit(5)
+                    .limit(5),
+                supabase.from('call_logs')
+                    .select('id, created_at, status, leads(company, first_name)')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5),
+                supabase.from('leads')
+                    .select('id, company, created_at')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5),
+                supabase.from('leads')
+                    .select('id, company, created_at')
+                    .eq('user_id', user.id)
+                    .eq('status', 'Qualified')
+                    .order('created_at', { ascending: false })
+                    .limit(3)
             ]);
 
             setStats({
@@ -64,6 +84,72 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                 dealsCount: dealsCount || 0
             });
             setRecentLeads(recentLeadsData || []);
+
+            // Build real activity feed
+            const activityItems: any[] = [];
+
+            // Add call activities
+            (recentCallsData || []).forEach((call: any) => {
+                const leadInfo = call.leads as any;
+                const companyName = leadInfo?.company || 'Unknown';
+                const statusLabel = call.status === 'completed' ? 'COMPLETED' : call.status === 'initiated' ? 'INITIATED' : (call.status || 'CALL').toUpperCase();
+                const statusClass = call.status === 'completed'
+                    ? 'bg-[#ECFDF5] text-[#059669]'
+                    : call.status === 'initiated'
+                        ? 'bg-[#FEF3C7] text-[#D97706]'
+                        : 'bg-[#F3F4F6] text-[#6B7280]';
+
+                activityItems.push({
+                    id: `call-${call.id}`,
+                    icon: Phone,
+                    bgColor: 'bg-green-50',
+                    iconColor: 'text-green-600',
+                    text: `AI call to ${companyName}`,
+                    time: call.created_at,
+                    sortDate: new Date(call.created_at).getTime(),
+                    status: statusLabel,
+                    statusClass
+                });
+            });
+
+            // Add new lead activities
+            (recentNewLeads || []).forEach((lead: any) => {
+                activityItems.push({
+                    id: `lead-${lead.id}`,
+                    icon: UserPlus,
+                    bgColor: 'bg-[#EFF6FF]',
+                    iconColor: 'text-[#2563EB]',
+                    text: `New lead: ${lead.company || 'Unknown'}`,
+                    time: lead.created_at,
+                    sortDate: new Date(lead.created_at).getTime(),
+                    status: 'NEW',
+                    statusClass: 'bg-[#EFF6FF] text-[#2563EB]'
+                });
+            });
+
+            // Add qualified lead activities
+            (qualifiedLeads || []).forEach((lead: any) => {
+                activityItems.push({
+                    id: `qualified-${lead.id}`,
+                    icon: Star,
+                    bgColor: 'bg-purple-50',
+                    iconColor: 'text-purple-600',
+                    text: `Lead qualified: ${lead.company || 'Unknown'}`,
+                    time: lead.created_at,
+                    sortDate: new Date(lead.created_at).getTime(),
+                    status: 'QUALIFIED',
+                    statusClass: 'bg-purple-50 text-purple-600'
+                });
+            });
+
+            // Sort by date, most recent first, and take top 8
+            activityItems.sort((a, b) => b.sortDate - a.sortDate);
+            const formattedActivities = activityItems.slice(0, 8).map(item => ({
+                ...item,
+                time: formatRelativeTime(item.time)
+            }));
+            setActivities(formattedActivities);
+
             setIsLoading(false);
 
             // Trigger onboarding if 0 leads and not seen before
@@ -233,7 +319,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             {/* Activity Row */}
             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                 <div className="lg:col-span-6">
-                    <RecentActivity />
+                    <RecentActivity activities={activities} />
                 </div>
                 <div className="lg:col-span-4 transition-all duration-300">
                     <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm h-full hover:shadow-md transition-all">

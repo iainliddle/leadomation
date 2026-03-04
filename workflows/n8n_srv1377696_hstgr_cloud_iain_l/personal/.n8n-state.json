@@ -1,0 +1,64 @@
+{
+  "workflows": {
+    "6BBj8FHMo7AGHE4r": {
+      "lastSyncedHash": "0a62520dbd406e4e37a31b867c2da2a78f8087a47c44459c5fa8e9f9169d5bcc",
+      "lastSyncedAt": "2026-03-02T13:05:31.772Z",
+      "filename": "Sequence Processor.workflow.ts"
+    },
+    "xrDMkL7RSEqk0zqt": {
+      "lastSyncedHash": "d7222a57cd1f3a1b2e8138a22f19dce5452a3bab2eb75dddaa92239b215b0aa3",
+      "lastSyncedAt": "2026-03-02T13:05:31.810Z",
+      "filename": "Email Outreach - Send.workflow.ts"
+    },
+    "Mlyd1OvYe0Vb1yJQ": {
+      "lastSyncedHash": "199a490363b3f7c30bddb89480e0f3c93196d626461f520872f83ee31fcc99fc",
+      "lastSyncedAt": "2026-03-02T13:05:31.840Z",
+      "filename": "Keyword Search Volume.workflow.ts"
+    },
+    "AaTe5f6334bWI8r5": {
+      "lastSyncedHash": "70235193b2e0545f2653232f8b6777fcfe7fee956786662b0180570a9b714559",
+      "lastSyncedAt": "2026-03-02T13:05:31.890Z",
+      "filename": "Lead Scraping - Google Maps.workflow.ts"
+    },
+    "lQkgDtZ8Mwf2k3J2": {
+      "lastSyncedHash": "9d1e662afb0f302684366f2a8edf1516cddb59c288d4eef85f8807f218a24298",
+      "lastSyncedAt": "2026-03-02T13:05:31.956Z",
+      "filename": "Email Finding - Hunter.io.workflow.ts"
+    },
+    "I13XKJMw2czBhMgE": {
+      "lastSyncedHash": "54201291e69204c6df2d424edd546105e9efd8c0c392e65b609ad3081d94f0f8",
+      "lastSyncedAt": "2026-03-02T13:05:31.985Z",
+      "filename": "Leadomation - Welcome Email.workflow.ts"
+    },
+    "cHgCfpixlzAh9KTk": {
+      "lastSyncedHash": "b006fb860c941cfb128cd62008ea153d77048fc3774ac533777f2b432198bca7",
+      "lastSyncedAt": "2026-03-02T13:05:32.020Z",
+      "filename": "Business Density Data.workflow.ts"
+    },
+    "rZYrevJWfKsvLTzB": {
+      "lastSyncedHash": "298baa58a137702b784734c7c7e20aad72e9d7e2435c641f931fe8e9b12f91a6",
+      "lastSyncedAt": "2026-03-02T13:05:32.050Z",
+      "filename": "Decision Maker Enrichment.workflow.ts"
+    },
+    "jykK3Dkyd0QNyrM3": {
+      "lastSyncedHash": "809e0546d9a7e7243d951aba97094af07210d0af16bfaeafc6f8ba4a59900b67",
+      "lastSyncedAt": "2026-03-02T13:05:32.086Z",
+      "filename": "LinkedIn Connection Requests.workflow.ts"
+    },
+    "eL9rIBIgMbVgQisG": {
+      "lastSyncedHash": "480a195fdff745cb3a2e15b9b800b2464bbb671f130e69b079150bcc17a3c9b6",
+      "lastSyncedAt": "2026-03-03T17:12:04.419Z",
+      "filename": "Vapi Post-Call Handler.workflow.ts"
+    },
+    "KA0nZTCUbrALkXRK": {
+      "lastSyncedHash": "f623dbfae26267b832f0e2625a46f45ea7cfd33df26cd3c32aeeb15192093317",
+      "lastSyncedAt": "2026-03-03T15:08:33.317Z",
+      "filename": "AI Script Enhancer.workflow.ts"
+    },
+    "LRCsI71DkWzH8NFN": {
+      "lastSyncedHash": "d3abfe18a9662890ddd96eddc9cba0c207a0c578c992033169892dc0e11239ee",
+      "lastSyncedAt": "2026-03-04T11:50:41.899Z",
+      "filename": "Lead Enrichment.workflow.ts"
+    }
+  }
+}

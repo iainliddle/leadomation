@@ -207,7 +207,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
 
   // FAQ data
   const faqs = [
-    { q: 'Is there a free trial?', a: 'Yes! Both Starter and Pro plans come with a free trial. No credit card required to get started.' },
+    { q: 'Is there a free trial?', a: 'Yes! Both Starter and Pro plans come with a free trial. Secure your trial with a card — cancel anytime before day 7.' },
     { q: 'Can I cancel anytime?', a: 'Absolutely. Cancel your subscription at any time from your account settings. No cancellation fees, no questions asked.' },
     { q: 'Do I need technical skills?', a: "Not at all. Leadomation is designed for business owners and sales teams. If you can use email, you can use Leadomation. Everything is point-and-click." },
     { q: 'How does the AI Voice Agent work?', a: 'The AI Voice Agent (Pro plan) makes real phone calls to your leads using natural-sounding AI. You configure the call script with your objectives, questions, and objection responses. The AI handles the conversation and books meetings directly into your Calendly.' },
@@ -272,7 +272,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-primary lp-btn-lg">Get Started Free →</button>
             <button onClick={() => scrollTo('how-it-works')} className="lp-btn lp-btn-outline lp-btn-lg">See How It Works</button>
           </div>
-          <p className="lp-hero-note">No credit card required · Free trial on all plans</p>
+          <p className="lp-hero-note">Secure your trial with a card — cancel anytime before day 7</p>
         </div>
       </section>
 
@@ -1177,7 +1177,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <h2>Ready to Automate Your Lead Generation?</h2>
             <p>Join hundreds of businesses using Leadomation to find, reach, and close B2B leads on autopilot.</p>
             <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-light lp-btn-lg">Get Started Free →</button>
-            <p className="lp-cta-note">No credit card required · Free trial on all plans</p>
+            <p className="lp-cta-note">Secure your trial with a card — cancel anytime before day 7</p>
           </div>
         </div>
       </section>

@@ -223,7 +223,7 @@ const Pricing: React.FC = () => {
                         <span className="text-xs font-bold text-[#6B7280]">Full Pro access, no restrictions on features.</span>
                     </div>
                     <p className="text-[11px] font-bold text-[#9CA3AF]">
-                        No credit card required to start • Export limits apply during trial
+                        Secure your trial with a card — cancel anytime before day 7 • Export limits apply during trial
                     </p>
                 </div>
             </div>
@@ -424,7 +424,7 @@ const Pricing: React.FC = () => {
                     <div className="mt-8 flex items-center justify-center gap-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                         <div className="flex items-center gap-2">
                             <ShieldCheck size={14} className="text-emerald-500" />
-                            No credit card required
+                            Card required to activate trial
                         </div>
                         <div className="flex items-center gap-2">
                             <CreditCard size={14} className="text-[#4F46E5]" />

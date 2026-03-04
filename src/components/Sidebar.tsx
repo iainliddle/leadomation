@@ -16,7 +16,8 @@ import {
     TrendingUp,
     Gem,
     LogOut,
-    User
+    User,
+    Phone
 } from 'lucide-react';
 import { signOut } from '../lib/auth';
 import logoFull from '../assets/logo-full.png';
@@ -154,7 +155,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                     transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
             >
-                {/* Inner content wrapper — overflow hidden here so toggle button is not clipped */}
                 <div
                     className="bg-white border-r border-[#E5E7EB] flex flex-col h-full"
                     style={{ overflow: 'hidden' }}
@@ -256,6 +256,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 onClick={() => { onPageChange('Sequence Builder'); setIsOpen?.(false); }}
                                 isCollapsed={isCollapsed}
                             />
+                            <NavItem
+                                icon={Phone}
+                                label="📞 Call Agent"
+                                active={activePage === 'Call Agent'}
+                                onClick={() => { onPageChange('Call Agent'); setIsOpen?.(false); }}
+                                isCollapsed={isCollapsed}
+                            />
                             <SidebarLock
                                 hasAccess={canAccess('inbox')}
                                 onClick={() => triggerUpgrade('Unified Inbox', 'pro')}
@@ -347,7 +354,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                 </div>
 
-                {/* Toggle Button — outside inner wrapper so it's never clipped */}
+                {/* Toggle Button */}
                 <button
                     onClick={() => setIsCollapsed?.(!isCollapsed)}
                     className="hidden lg:flex"

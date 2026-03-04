@@ -9,9 +9,10 @@ interface LoginProps {
     onGoToRegister: () => void;
     onGoToTerms: () => void;
     onGoToPrivacy: () => void;
+    onGoToRefund: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onGoToTerms, onGoToPrivacy }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onGoToTerms, onGoToPrivacy, onGoToRefund }) => {
     const [view, setView] = useState<'login' | 'forgot-password'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -136,6 +137,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onGoToTerms, onG
             <div className="login-footer-links">
                 <button onClick={onGoToTerms} className="login-footer-link">Terms of Service</button>
                 <button onClick={onGoToPrivacy} className="login-footer-link">Privacy Policy</button>
+                <button onClick={onGoToRefund} className="login-footer-link">Refund Policy</button>
             </div>
         </div>
     );
