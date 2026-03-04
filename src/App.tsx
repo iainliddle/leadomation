@@ -34,7 +34,7 @@ import { AlertTriangle } from 'lucide-react'; // Added for the TrialBanner
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState('Landing');
   const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const {
     plan,
@@ -57,7 +57,7 @@ const App: React.FC = () => {
     setActivePage('Pricing');
   };
 
-  const [planCheckDone, setPlanCheckDone] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   const checkTrialStatus = async (user: any) => {
     try {
@@ -73,20 +73,12 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setLoading(false);
-      setPlanCheckDone(true);
-    }, 5000);
-
-    setLoading(true);
-
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
 
       if (!session) {
         setLoading(false);
-        setPlanCheckDone(true);
-        clearTimeout(timeoutId);
+        setSessionChecked(true);
         return;
       }
 
@@ -96,8 +88,7 @@ const App: React.FC = () => {
       }
 
       setLoading(false);
-      setPlanCheckDone(true);
-      clearTimeout(timeoutId);
+      setSessionChecked(true);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -105,7 +96,6 @@ const App: React.FC = () => {
 
       if (event === 'SIGNED_OUT' || !session) {
         setLoading(false);
-        setPlanCheckDone(true);
         if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Refund' && activePage !== 'Login') {
           setActivePage('Landing');
         }
@@ -117,14 +107,10 @@ const App: React.FC = () => {
         const nextPage = await checkTrialStatus(session.user);
         setActivePage(nextPage);
         setLoading(false);
-        setPlanCheckDone(true);
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeoutId);
-    };
+    return () => subscription.unsubscribe();
   }, [activePage]);
 
   useEffect(() => {
@@ -209,8 +195,7 @@ const App: React.FC = () => {
     }
   };
 
-  // Wait until plan is loaded and our local check is done
-  if (loading || planLoading || !planCheckDone) {
+  if (!sessionChecked || loading || planLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
