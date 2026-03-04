@@ -146,10 +146,17 @@ export default async function handler(req: any, res: any) {
                 const customerId = session.customer as string;
                 const subscriptionId = session.subscription as string;
 
-                // Get the price ID from the subscription
-                const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-                const priceId = subscription.items.data[0]?.price?.id;
-                const plan = PRICE_TO_PLAN[priceId];
+                const expandedSession = await stripe.checkout.sessions.retrieve(session.id, {
+                    expand: ['line_items']
+                });
+                const priceId = expandedSession.line_items?.data[0]?.price?.id;
+
+                let plan: 'starter' | 'pro' | undefined;
+                if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY || priceId === process.env.STRIPE_PRICE_PRO_ANNUAL) {
+                    plan = 'pro';
+                } else if (priceId === process.env.STRIPE_PRICE_STARTER_MONTHLY || priceId === process.env.STRIPE_PRICE_STARTER_ANNUAL) {
+                    plan = 'starter';
+                }
 
                 if (!plan) {
                     console.error('Unrecognised price ID:', priceId);
@@ -199,14 +206,14 @@ export default async function handler(req: any, res: any) {
                     try {
                         const customer = await stripe.customers.retrieve(customerId);
                         if (customer && !('deleted' in customer) && customer.email) {
-                            const firstName = (customer.name || 'there').split(' ')[0];
+                            const first_name = customer.name?.split(' ')[0] || '';
 
                             await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     to: customer.email,
-                                    first_name: firstName
+                                    first_name: first_name
                                 })
                             });
                             console.log(`✅ Welcome email webhook triggered for ${customer.email}`);
