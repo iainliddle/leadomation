@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Loader2, Lock, Check } from 'lucide-react';
 import logo from '../assets/logo-full.png';
 import { supabase } from '../lib/supabase';
-import './Register.css'; // Reuse register styles for layout
+import './Register.css';
 
 interface TrialSetupProps {
     onSkip: () => void;
@@ -11,6 +11,8 @@ interface TrialSetupProps {
 const TrialSetup: React.FC<TrialSetupProps> = ({ onSkip }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('pro');
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
 
     const handleActivate = async () => {
         setIsLoading(true);
@@ -24,12 +26,21 @@ const TrialSetup: React.FC<TrialSetupProps> = ({ onSkip }) => {
                 return;
             }
 
-            // Using the Pro plan price ID for the trial setup
+            const priceId = selectedPlan === 'starter'
+                ? (billingCycle === 'monthly' ? import.meta.env.VITE_STRIPE_PRICE_STARTER_MONTHLY : import.meta.env.VITE_STRIPE_PRICE_STARTER_ANNUAL)
+                : (billingCycle === 'monthly' ? import.meta.env.VITE_STRIPE_PRICE_PRO_MONTHLY : import.meta.env.VITE_STRIPE_PRICE_PRO_ANNUAL);
+
+            if (!priceId) {
+                setError('Configuration error: Missing price ID for selected plan.');
+                setIsLoading(false);
+                return;
+            }
+
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    priceId: 'price_1T1nFP2LCoJYV9n6CyKYDjKE', // Pro Annual (gets trial via API config)
+                    priceId,
                     userId: session.user.id,
                     userEmail: session.user.email
                 })
@@ -49,13 +60,6 @@ const TrialSetup: React.FC<TrialSetupProps> = ({ onSkip }) => {
         }
     };
 
-    const features = [
-        "Automated lead generation",
-        "AI Voice Call Agent",
-        "Multi-channel email sequences",
-        "Deal Pipeline CRM"
-    ];
-
     return (
         <div className="register-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9FAFB' }}>
             <img src={logo} alt="Leadomation" className="register-logo" style={{ marginBottom: '2rem' }} />
@@ -68,18 +72,67 @@ const TrialSetup: React.FC<TrialSetupProps> = ({ onSkip }) => {
                     </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-5 mb-8 border border-gray-100">
-                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">You're unlocking:</h3>
-                    <ul className="space-y-3">
-                        {features.map((feature, idx) => (
-                            <li key={idx} className="flex items-start gap-3">
-                                <div className="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center bg-indigo-50 text-indigo-600">
-                                    <Check size={12} strokeWidth={3} />
-                                </div>
-                                <span className="text-sm font-semibold text-gray-700">{feature}</span>
-                            </li>
-                        ))}
-                    </ul>
+                <div className="flex justify-center mb-6">
+                    <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center gap-1">
+                        <button
+                            onClick={() => setBillingCycle('monthly')}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${billingCycle === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            Monthly
+                        </button>
+                        <button
+                            onClick={() => setBillingCycle('annual')}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${billingCycle === 'annual' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            Annual
+                            <span className="bg-emerald-100 text-emerald-700 text-[10px] uppercase px-1.5 py-0.5 rounded-md font-black">Save 2 months free</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                    {/* Starter */}
+                    <button
+                        onClick={() => setSelectedPlan('starter')}
+                        className={`text-left p-4 rounded-xl border-2 transition-all gap-2 flex flex-col items-start ${selectedPlan === 'starter' ? 'border-indigo-500 bg-indigo-50/30' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                        <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Starter</div>
+                        <div className="text-xl font-black text-gray-900 mb-3 block">
+                            £{billingCycle === 'monthly' ? '49' : '490'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                        </div>
+                        <ul className="space-y-2 mt-auto">
+                            {['50 keyword searches/mo', '3 campaigns', '500 leads/mo', 'Email sequences'].map((f, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                    <div className="mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600">
+                                        <Check size={10} strokeWidth={3} />
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-600 leading-tight">{f}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </button>
+
+                    {/* Pro */}
+                    <button
+                        onClick={() => setSelectedPlan('pro')}
+                        className={`text-left p-4 rounded-xl border-2 transition-all gap-2 flex flex-col items-start relative overflow-hidden ${selectedPlan === 'pro' ? 'border-indigo-500 bg-indigo-50/30' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                        <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg uppercase">Popular</div>
+                        <div className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Pro</div>
+                        <div className="text-xl font-black text-gray-900 mb-3 block">
+                            £{billingCycle === 'monthly' ? '149' : '1,490'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                        </div>
+                        <ul className="space-y-2 mt-auto">
+                            {['Unlimited keyword searches', 'Unlimited campaigns', '5,000+ leads/mo', 'AI Voice Call Agent', 'Multi-channel sequences'].map((f, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                    <div className="mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600">
+                                        <Check size={10} strokeWidth={3} />
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-600 leading-tight">{f}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </button>
                 </div>
 
                 {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-6 border border-red-100 text-center font-medium">{error}</div>}
