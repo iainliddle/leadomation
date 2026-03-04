@@ -26,21 +26,12 @@ const TrialSetup: React.FC<TrialSetupProps> = ({ onSkip }) => {
                 return;
             }
 
-            const priceId = selectedPlan === 'starter'
-                ? (billingCycle === 'monthly' ? import.meta.env.VITE_STRIPE_PRICE_STARTER_MONTHLY : import.meta.env.VITE_STRIPE_PRICE_STARTER_ANNUAL)
-                : (billingCycle === 'monthly' ? import.meta.env.VITE_STRIPE_PRICE_PRO_MONTHLY : import.meta.env.VITE_STRIPE_PRICE_PRO_ANNUAL);
-
-            if (!priceId) {
-                setError('Configuration error: Missing price ID for selected plan.');
-                setIsLoading(false);
-                return;
-            }
-
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    priceId,
+                    plan: selectedPlan,
+                    billingCycle,
                     userId: session.user.id,
                     userEmail: session.user.email
                 })

@@ -2,26 +2,29 @@ import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-const VALID_PRICE_IDS = [
-    'price_1T1nCe2LCoJYV9n6l20Wnd9Y', // Starter Monthly
-    'price_1T1nCe2LCoJYV9n6X6dU6Ybe', // Starter Annual
-    'price_1T1nFP2LCoJYV9n6iKcaO1ZY', // Pro Monthly
-    'price_1T1nFP2LCoJYV9n6CyKYDjKE', // Pro Annual
-];
+// We now construct price IDs dynamically using environment variables
 
 export default async function handler(req: any, res: any) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { priceId, userId, userEmail } = req.body;
+    const { plan, billingCycle, userId, userEmail } = req.body;
 
-    if (!priceId || !userId || !userEmail) {
-        return res.status(400).json({ error: 'Missing required fields: priceId, userId, userEmail' });
+    if (!plan || !billingCycle || !userId || !userEmail) {
+        return res.status(400).json({ error: 'Missing required fields: plan, billingCycle, userId, userEmail' });
     }
 
-    if (!VALID_PRICE_IDS.includes(priceId)) {
-        return res.status(400).json({ error: 'Invalid priceId' });
+    let priceId = '';
+
+    if (plan === 'starter') {
+        priceId = (billingCycle === 'monthly' ? process.env.STRIPE_PRICE_STARTER_MONTHLY : process.env.STRIPE_PRICE_STARTER_ANNUAL) as string;
+    } else if (plan === 'pro') {
+        priceId = (billingCycle === 'monthly' ? process.env.STRIPE_PRICE_PRO_MONTHLY : process.env.STRIPE_PRICE_PRO_ANNUAL) as string;
+    }
+
+    if (!priceId) {
+        return res.status(400).json({ error: 'Configuration error: Invalid plan or billing cycle, or missing environment variables.' });
     }
 
     try {
