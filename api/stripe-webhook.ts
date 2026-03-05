@@ -232,7 +232,7 @@ export default async function handler(req: any, res: any) {
                     try {
                         const customer = await stripe.customers.retrieve(customerId);
                         if (customer && !('deleted' in customer) && customer.email) {
-                            const first_name = customer.name?.split(' ')[0] || '';
+                            const first_name = customer.name?.split(' ')[0] || 'there';
 
                             await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/welcome-email', {
                                 method: 'POST',
