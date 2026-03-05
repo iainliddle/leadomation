@@ -1,5 +1,6 @@
-import React from 'react';
-import { X, Zap, Check, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Zap, Check, Lock, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface UpgradeModalProps {
     isOpen: boolean;
@@ -9,6 +10,9 @@ interface UpgradeModalProps {
 }
 
 const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, targetPlan = 'pro' }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
     if (!isOpen) return null;
 
     const proFeatures = [
@@ -43,11 +47,44 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, t
     const price = targetPlan === 'pro' ? '£149' : '£49';
     const planName = targetPlan === 'pro' ? 'Pro' : 'Starter';
 
-    const handleUpgrade = () => {
-        // Navigate to the in-app pricing page
-        // The pricing page already has the Stripe checkout buttons
-        window.location.hash = '#pricing';
-        onClose();
+    const handleUpgrade = async () => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                setError('You must be signed in to upgrade.');
+                setIsLoading(false);
+                return;
+            }
+
+            const response = await fetch('/api/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({
+                    plan: targetPlan,
+                    billingCycle: 'monthly',
+                    userId: session.user.id,
+                    userEmail: session.user.email
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error(data.error || 'Failed to create checkout session');
+            }
+        } catch (err: any) {
+            console.error('Checkout error:', err);
+            setError(err.message || 'An error occurred. Please try again.');
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -105,16 +142,28 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, t
                         ))}
                     </div>
 
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-100 text-center font-medium">
+                            {error}
+                        </div>
+                    )}
+
                     {/* CTA Buttons */}
                     <button
                         onClick={handleUpgrade}
-                        className="w-full py-3.5 bg-[#4F46E5] text-white rounded-xl text-sm font-black hover:bg-[#4338CA] transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+                        disabled={isLoading}
+                        className="w-full py-3.5 bg-[#4F46E5] text-white rounded-xl text-sm font-black hover:bg-[#4338CA] transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
                     >
-                        Upgrade to {planName} — {price}/month
+                        {isLoading ? (
+                            <><Loader2 size={16} className="animate-spin" /> Loading...</>
+                        ) : (
+                            `Upgrade to ${planName} — ${price}/month`
+                        )}
                     </button>
                     <button
                         onClick={onClose}
-                        className="w-full py-2.5 text-xs font-bold text-[#9CA3AF] hover:text-[#6B7280] transition-colors mt-2"
+                        disabled={isLoading}
+                        className="w-full py-2.5 text-xs font-bold text-[#9CA3AF] hover:text-[#6B7280] transition-colors mt-2 disabled:opacity-50"
                     >
                         Maybe later
                     </button>
@@ -125,3 +174,4 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, t
 };
 
 export default UpgradeModal;
+
