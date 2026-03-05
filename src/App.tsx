@@ -31,7 +31,10 @@ import AuthCallback from './pages/AuthCallback';
 import TrialSetup from './pages/TrialSetup';
 
 const App: React.FC = () => {
-  const [activePage, setActivePage] = useState('Landing');
+  const [activePage, setActivePage] = useState(() => {
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    return params.get('checkout') === 'success' ? 'CheckoutSuccess' : 'Landing';
+  });
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -117,13 +120,12 @@ const App: React.FC = () => {
   }, [activePage]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') === 'success') {
-      setActivePage('CheckoutSuccess');
+    if (activePage === 'CheckoutSuccess') {
       window.history.replaceState({}, '', window.location.pathname);
-      setTimeout(() => setActivePage('Dashboard'), 3000);
+      const timer = setTimeout(() => setActivePage('Dashboard'), 3000);
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [activePage]);
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -209,11 +211,11 @@ const App: React.FC = () => {
   if (activePage === 'CheckoutSuccess') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 animate-in fade-in duration-500 p-4 text-center">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 shadow-sm border border-green-200">
-          <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+        <div className="text-6xl mb-6 flex items-center justify-center animate-bounce">
+          🎉
         </div>
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-3">Trial Activated!</h1>
-        <p className="text-gray-600 font-medium">Your account is fully set up. Redirecting you to the dashboard...</p>
+        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-3">Trial activated!</h1>
+        <p className="text-gray-600 font-medium text-lg">Taking you to your dashboard...</p>
       </div>
     );
   }

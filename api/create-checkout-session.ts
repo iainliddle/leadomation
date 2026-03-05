@@ -46,8 +46,8 @@ export default async function handler(req: any, res: any) {
             },
             payment_method_collection: 'always',
             customer_email: userEmail,
-            success_url: 'https://leadomation.co.uk?checkout=success',
-            cancel_url: 'https://leadomation.co.uk/trial-setup',
+            success_url: 'https://www.leadomation.co.uk?checkout=success',
+            cancel_url: 'https://www.leadomation.co.uk/trial-setup',
             metadata: {
                 userId: userId,
                 plan: plan,
