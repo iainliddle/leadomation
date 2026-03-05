@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, ChevronDown, Download, Plus } from 'lucide-react';
+import { Bell, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface TopBarProps {
