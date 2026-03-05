@@ -14,13 +14,19 @@ const UpgradePrompt = ({ message, onClose }: UpgradePromptProps) => {
         setLoading(true);
         try {
             const { data: { session } } = await supabase.auth.getSession();
+            const user = session?.user;
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session?.access_token}`
                 },
-                body: JSON.stringify({ plan: 'pro', billingCycle: 'monthly' })
+                body: JSON.stringify({
+                    plan: 'pro',
+                    billingCycle: 'monthly',
+                    userId: user?.id,
+                    userEmail: user?.email
+                })
             });
             const data = await response.json();
             console.log('Checkout response:', data);
