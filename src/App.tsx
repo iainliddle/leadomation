@@ -29,6 +29,7 @@ import ExpiredOverlay from './components/ExpiredOverlay';
 import UpgradeModal from './components/UpgradeModal';
 import AuthCallback from './pages/AuthCallback';
 import TrialSetup from './pages/TrialSetup';
+import CancellationFeedback from './pages/CancellationFeedback';
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState(() => {
@@ -228,6 +229,10 @@ const App: React.FC = () => {
 
   if (window.location.pathname === '/auth/callback') {
     return <AuthCallback />;
+  }
+
+  if (window.location.pathname === '/cancellation-feedback') {
+    return <CancellationFeedback />;
   }
 
   if (activePage === 'Terms') {
