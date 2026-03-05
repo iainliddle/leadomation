@@ -1063,11 +1063,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {selectedLeads.length > 0 && (
-                        <span className="text-xs font-bold text-primary bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 animate-in zoom-in duration-300">
-                            {selectedLeads.length} selected
-                        </span>
-                    )}
                     <button
                         onClick={handleExport}
                         disabled={isExporting}
@@ -1099,11 +1094,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         <Plus size={16} />
                         Add Lead
                     </button>
-                    {selectedLeads.length > 0 && (
-                        <span className="text-xs font-bold text-primary bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 animate-in zoom-in duration-300">
-                            {selectedLeads.length} selected
-                        </span>
-                    )}
                 </div>
             </div>
 
