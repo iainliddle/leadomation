@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import logo from '../assets/logo-full.png';
 
 const CancellationFeedback: React.FC = () => {
-    const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const reason = params.get('reason');
         const userId = params.get('userId');
 
-        if (reason && userId && !submitted) {
-            fetch('/api/cancellation-reason', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, reason }),
-            })
-                .then(() => setSubmitted(true))
-                .catch((err) => console.error('Failed to submit reason:', err));
+        if (reason && userId && userId !== 'test') {
+            supabase
+                .from('cancellation_reasons')
+                .insert({ user_id: userId, reason: reason })
+                .then(({ error }) => {
+                    if (error) console.error('Failed to save cancellation reason:', error);
+                });
         }
     }, []);
 
