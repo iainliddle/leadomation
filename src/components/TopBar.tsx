@@ -32,21 +32,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign }) => {
             <h2 className="text-xl font-bold text-[#111827]">{activePage}</h2>
 
             <div className="flex items-center gap-4">
-                <div
-                    onClick={() => alert('Date range filtering coming soon!')}
-                    className="flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-2 text-sm text-[#374151] font-medium cursor-pointer hover:bg-gray-100 transition-colors"
-                >
-                    <span>Jan 1, 2024 - Feb 1, 2024</span>
-                    <ChevronDown size={16} className="text-[#9CA3AF]" />
-                </div>
-
-                <button
-                    onClick={() => alert('Exporting functionality coming soon!')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-lg font-bold text-sm text-[#374151] hover:bg-gray-50 transition-colors"
-                >
-                    <Download size={16} />
-                    Export
-                </button>
+                <div id="topbar-actions" className="flex items-center gap-4"></div>
 
                 <button
                     onClick={onNewCampaign}

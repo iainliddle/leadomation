@@ -60,10 +60,10 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                 days.push({ date: dateStr, label, 'AI Calls': 0, 'Emails': 0 });
             }
 
-            // Fetch call_logs + sequence_enrollments + funnel counts
-            const [callRes, enrollRes, totalRes, contactedRes, qualifiedRes, dealsRes] = await Promise.all([
+            // Fetch call_logs + contacted leads (for chart) + funnel counts
+            const [callRes, contactedLeadsRes, totalRes, contactedRes, qualifiedRes, dealsRes] = await Promise.all([
                 supabase.from('call_logs').select('created_at').eq('user_id', user.id).gte('created_at', sinceISO),
-                supabase.from('sequence_enrollments').select('enrolled_at').eq('user_id', user.id).gte('enrolled_at', sinceISO),
+                supabase.from('leads').select('created_at').eq('user_id', user.id).in('status', ['Contacted', 'Replied']).gte('created_at', sinceISO),
                 supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
                 supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('status', ['Contacted', 'Replied', 'Qualified']),
                 supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'Qualified'),
@@ -77,9 +77,9 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                 if (match) match['AI Calls']++;
             });
 
-            // Group emails by day
-            (enrollRes.data || []).forEach((row: any) => {
-                const dayKey = new Date(row.enrolled_at).toISOString().split('T')[0];
+            // Group contacted leads by day (for Emails chart line)
+            (contactedLeadsRes.data || []).forEach((row: any) => {
+                const dayKey = new Date(row.created_at).toISOString().split('T')[0];
                 const match = days.find(d => d.date === dayKey);
                 if (match) match['Emails']++;
             });

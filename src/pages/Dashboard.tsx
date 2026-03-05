@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Mail, MessageCircle, Linkedin, Loader2, Phone, UserPlus, Star, Download, Calendar, ChevronDown } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import StatCard from '../components/StatCard';
 import CampaignPerformance from '../components/CampaignPerformance';
 import TopCampaigns from '../components/TopCampaigns';
@@ -60,6 +61,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const [datePreset, setDatePreset] = useState<DatePreset>('30d');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+    useEffect(() => {
+        setPortalTarget(document.getElementById('topbar-actions'));
+    }, []);
 
     const fetchDashboardData = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -237,13 +243,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
-            {/* Dashboard Header with Date Range and Export */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-black text-[#111827] tracking-tight">Dashboard</h1>
-                    <p className="text-sm text-[#6B7280] font-medium mt-0.5">Overview of your outreach performance</p>
-                </div>
-                <div className="flex items-center gap-3">
+            {portalTarget && createPortal(
+                <>
                     <div className="relative">
                         <button
                             onClick={() => setShowDatePicker(!showDatePicker)}
@@ -274,13 +275,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     <button
                         onClick={handleExport}
                         disabled={isExporting}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[#4F46E5] text-white rounded-xl text-sm font-bold hover:bg-[#4338CA] transition-all shadow-sm disabled:opacity-60"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#374151] rounded-xl text-sm font-bold hover:bg-gray-50 transition-all shadow-sm disabled:opacity-60"
                     >
-                        {isExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        {isExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} className="text-[#9CA3AF]" />}
                         {isExporting ? 'Exporting...' : 'Export'}
                     </button>
-                </div>
-            </div>
+                </>,
+                portalTarget
+            )}
 
             {/* Usage Summary (Conditional) */}
             {plan === 'trial' && (
