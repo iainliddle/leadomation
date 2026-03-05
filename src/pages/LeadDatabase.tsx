@@ -48,6 +48,9 @@ interface Lead {
     job_title?: string;
     linkedin_url?: string;
     source?: string;
+    rating?: number;
+    photo_url?: string;
+    review_count?: number;
     created_at: string;
     user_id: string;
 }
@@ -146,6 +149,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
+    const [activeIntentFilters, setActiveIntentFilters] = useState<string[]>([]);
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [isExporting, setIsExporting] = useState(false);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -490,9 +494,75 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                     ? (lead.status === 'Lost' || lead.status === 'Not Interested')
                     : lead.status === statusFilter;
 
+            let matchesIntent = true;
+            if (activeIntentFilters.length > 0) {
+                // Determine if a lead is "New Business" (created in last 6 months)
+                // Note: assuming Lead's created_at is when we got them, but if source provides it, 
+                // we'll use created_at as a fallback proxy for "New".
+                const sixMonthsAgo = new Date();
+                sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+                if (activeIntentFilters.includes('new_business')) {
+                    const leadDate = new Date(lead.created_at);
+                    if (leadDate < sixMonthsAgo) matchesIntent = false;
+                }
+                if (activeIntentFilters.includes('low_rating')) {
+                    if (lead.rating !== undefined && lead.rating !== null && lead.rating >= 4.0) matchesIntent = false;
+                }
+                if (activeIntentFilters.includes('no_photos')) {
+                    if (lead.photo_url && lead.photo_url.trim() !== '') matchesIntent = false;
+                }
+                if (activeIntentFilters.includes('no_reviews')) {
+                    if (lead.review_count && lead.review_count > 0) matchesIntent = false;
+                }
+                if (activeIntentFilters.includes('incomplete')) {
+                    const hasWebsite = lead.website && lead.website.trim() !== '';
+                    const hasPhone = lead.phone && lead.phone.trim() !== '';
+                    const hasEmail = lead.email && lead.email.trim() !== '';
+                    if (hasWebsite && hasPhone && hasEmail) matchesIntent = false;
+                }
+            }
+
+            return matchesSearch && matchesStatus && matchesIntent;
+        });
+    }, [leads, searchQuery, statusFilter, activeIntentFilters]);
+
+    // Derived counts for the smart filters to show in the badges
+    const intentCounts = useMemo(() => {
+        const counts = { new_business: 0, low_rating: 0, no_photos: 0, no_reviews: 0, incomplete: 0 };
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // Count how many of the *currently search and status filtered* leads match each intent filter
+        const baseFilteredLeads = leads.filter(lead => {
+            const matchesSearch = lead.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.location?.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesStatus = statusFilter === 'All' ? true : statusFilter === 'Lost' ? (lead.status === 'Lost' || lead.status === 'Not Interested') : lead.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
+
+        baseFilteredLeads.forEach(lead => {
+            const leadDate = new Date(lead.created_at);
+            if (leadDate >= sixMonthsAgo) counts.new_business++;
+            if (lead.rating === undefined || lead.rating === null || lead.rating < 4.0) counts.low_rating++;
+            if (!lead.photo_url || lead.photo_url.trim() === '') counts.no_photos++;
+            if (!lead.review_count || lead.review_count === 0) counts.no_reviews++;
+
+            const hasWebsite = lead.website && lead.website.trim() !== '';
+            const hasPhone = lead.phone && lead.phone.trim() !== '';
+            const hasEmail = lead.email && lead.email.trim() !== '';
+            if (!hasWebsite || !hasPhone || !hasEmail) counts.incomplete++;
+        });
+
+        return counts;
     }, [leads, searchQuery, statusFilter]);
+
+    const toggleIntentFilter = (filter: string) => {
+        setActiveIntentFilters(prev =>
+            prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+        );
+    };
 
     const handleExport = async () => {
         if (canAccess && !canAccess('csvExport')) {
@@ -928,6 +998,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         <h3 className="text-sm font-black text-[#111827] mb-1">Your Lead Database</h3>
                         <p className="text-xs font-medium text-[#4B5563] leading-relaxed mb-3">
                             This is where all your scraped leads land after a campaign runs. Use the filters to find your best prospects, check the local time indicator before calling, and take action directly from here — send emails, make AI-powered calls, or export to CSV. Leads marked as Qualified will automatically appear in your Deal Pipeline.
+                            <br /><br />
+                            <strong className="text-[#111827]">Smart Intent Filters</strong> help you identify the warmest leads in your database — businesses that are most likely to need your help right now. A business with a low rating may be struggling with reputation management. A new business may need services to get established quickly. No photos or an incomplete listing suggests they haven't invested in their online presence yet — making them ideal outreach targets. Use multiple filters together to find your highest-priority prospects.
                         </p>
                         <div className="flex items-center gap-4 flex-wrap">
                             <div className="flex items-center gap-1.5">
@@ -1045,6 +1117,67 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         </>
                     )}
                 </div>
+            </div>
+
+            {/* Smart Intent Filters */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-1 hide-scrollbar">
+                <span className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF] mr-2 shrink-0">
+                    Smart Filters
+                </span>
+
+                <button
+                    onClick={() => toggleIntentFilter('new_business')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('new_business') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="new">🆕</span>
+                    New Business
+                    <span className="ml-1 opacity-70">({intentCounts.new_business})</span>
+                </button>
+
+                <button
+                    onClick={() => toggleIntentFilter('low_rating')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('low_rating') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="star">⭐</span>
+                    Low Rating
+                    <span className="ml-1 opacity-70">({intentCounts.low_rating})</span>
+                </button>
+
+                <button
+                    onClick={() => toggleIntentFilter('no_photos')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_photos') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="camera">📸</span>
+                    No Photos
+                    <span className="ml-1 opacity-70">({intentCounts.no_photos})</span>
+                </button>
+
+                <button
+                    onClick={() => toggleIntentFilter('no_reviews')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_reviews') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="speech balloon">💬</span>
+                    No Recent Reviews
+                    <span className="ml-1 opacity-70">({intentCounts.no_reviews})</span>
+                </button>
+
+                <button
+                    onClick={() => toggleIntentFilter('incomplete')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('incomplete') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="pin">📍</span>
+                    Incomplete Listing
+                    <span className="ml-1 opacity-70">({intentCounts.incomplete})</span>
+                </button>
+
+                {activeIntentFilters.length > 0 && (
+                    <button
+                        onClick={() => setActiveIntentFilters([])}
+                        className="text-xs font-bold text-[#6B7280] hover:text-[#4F46E5] transition-colors ml-2 shrink-0 underline decoration-dotted underline-offset-2"
+                    >
+                        Clear All
+                    </button>
+                )}
             </div>
 
             {/* Main Content: Data Table */}
