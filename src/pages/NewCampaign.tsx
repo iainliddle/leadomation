@@ -272,7 +272,9 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
 
         if (currentCount + leadCount > limit) {
             const msg = remaining === 0
-                ? `Monthly leads limit reached. Your ${plan} plan includes ${limit} leads/month. Upgrade to Pro for unlimited leads.`
+                ? plan === 'starter'
+                    ? "You've reached your Starter plan limit. Upgrade to Pro for unlimited access."
+                    : `Monthly leads limit reached. Your ${plan} plan includes ${limit} leads/month. Upgrade to Pro for unlimited leads.`
                 : `This campaign would exceed your monthly limit. You have ${remaining} leads remaining this month.`;
 
             setUpgradeMessage(msg);
@@ -338,7 +340,10 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                         .eq('status', 'active');
 
                     if ((count || 0) >= 3) {
-                        setError('Starter plan limit: maximum 3 active campaigns. Upgrade to Pro for unlimited.');
+                        const msg = "You've reached your Starter plan limit. Upgrade to Pro for unlimited access.";
+                        setUpgradeMessage(msg);
+                        setShowUpgradeModal(true);
+                        setError(msg);
                         setSaving(false);
                         return;
                     }

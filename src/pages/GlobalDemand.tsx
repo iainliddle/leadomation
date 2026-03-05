@@ -402,8 +402,9 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
 
         try {
             // Check plan limits
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
+            const { data: { session } } = await supabase.auth.getSession();
+            const user = session?.user;
+            if (!user || !session) {
                 setKeywordError('Please sign in to perform searches.');
                 setIsLoadingKeywords(false);
                 return;
@@ -428,7 +429,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     .gte('searched_at', startOfMonth.toISOString());
 
                 if ((count || 0) >= 50) {
-                    setKeywordError('Monthly limit reached: Starter plan includes 50 keyword searches/month. Upgrade to Pro for unlimited searches.');
+                    setKeywordError("You've reached your Starter plan limit. Upgrade to Pro for unlimited access.");
                     setIsLoadingKeywords(false);
                     return;
                 }
@@ -438,7 +439,10 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
 
             const response = await fetch('/api/keyword-search-volume', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
                 body: JSON.stringify({
                     keywords: keywordList,
                     location_code: locationCode,
@@ -915,7 +919,18 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                         </div>
 
                         {keywordError && (
-                            <p className="text-xs text-red-500 font-medium mt-2">{keywordError}</p>
+                            <div className="mt-3 p-4 bg-red-50 border border-red-100 rounded-xl">
+                                <p className="text-sm text-red-600 font-medium">{keywordError}</p>
+                                {keywordError.includes('Upgrade to Pro') && (
+                                    <button
+                                        onClick={() => onPageChange('Pricing')}
+                                        className="mt-3 px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-2"
+                                    >
+                                        Upgrade Now
+                                        <ArrowRight size={14} />
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
 

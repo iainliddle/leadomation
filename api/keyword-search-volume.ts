@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 export const config = {
     api: { bodyParser: true },
 };
@@ -11,6 +13,50 @@ export default async function handler(req: any, res: any) {
 
     if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
         return res.status(400).json({ error: 'Keywords array is required' });
+    }
+
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const supabase = createClient(
+        process.env.VITE_SUPABASE_URL || '',
+        process.env.VITE_SUPABASE_ANON_KEY || '',
+        {
+            global: {
+                headers: {
+                    Authorization: authHeader,
+                },
+            },
+        }
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single();
+
+    if (profile?.plan === 'starter') {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count } = await supabase
+            .from('demand_data')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .gte('searched_at', startOfMonth.toISOString());
+
+        if ((count || 0) >= 50) {
+            return res.status(403).json({ error: "You've reached your Starter plan limit. Upgrade to Pro for unlimited access." });
+        }
     }
 
     // DataForSEO Basic Auth

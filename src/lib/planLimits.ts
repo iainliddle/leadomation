@@ -122,7 +122,7 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
     },
     starter: {
         dashboard: true,
-        globalDemand: false,
+        globalDemand: true,
         newCampaign: true,
         activeCampaigns: true,
         leadDatabase: true,
