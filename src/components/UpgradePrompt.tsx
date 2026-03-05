@@ -22,8 +22,14 @@ const UpgradePrompt = ({ message, onClose }: UpgradePromptProps) => {
                 },
                 body: JSON.stringify({ plan: 'pro', billingCycle: 'monthly' })
             });
-            const { url } = await response.json();
-            window.location.href = url;
+            const data = await response.json();
+            console.log('Checkout response:', data);
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                console.error('No URL returned:', data);
+                setLoading(false);
+            }
         } catch (err) {
             console.error('Upgrade failed:', err);
             setLoading(false);

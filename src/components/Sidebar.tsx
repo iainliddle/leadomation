@@ -148,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <aside
-                className={`fixed left-0 top-0 h-screen z-40 overflow-x-hidden ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+                className={`fixed left-0 top-0 h-screen z-40 overflow-x-hidden max-w-full ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
                 style={{
                     width: isCollapsed ? '72px' : '260px',
                     minWidth: isCollapsed ? '72px' : '260px',
@@ -156,7 +156,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }}
             >
                 <div
-                    className="bg-white border-r border-[#E5E7EB] flex flex-col h-full"
+                    className="bg-white border-r border-[#E5E7EB] flex flex-col h-full overflow-x-hidden"
                     style={{ overflow: 'hidden' }}
                 >
                     <div className={`relative flex items-center justify-center pt-[20px] pb-[24px] ${isCollapsed ? 'px-0' : 'px-6'} overflow-hidden transition-all`}>
@@ -181,7 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </button>
                     </div>
 
-                    <nav className="flex-1 overflow-y-auto py-4 scrollbar-hide" style={{ whiteSpace: 'nowrap' }}>
+                    <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 scrollbar-hide" style={{ whiteSpace: 'nowrap' }}>
                         <NavSection title="MAIN" isCollapsed={isCollapsed} marginTop="mt-2">
                             <NavItem
                                 icon={LayoutGrid}
