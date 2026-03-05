@@ -323,13 +323,14 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             if (!user) throw new Error('Not authenticated');
 
             const selectedLeadObjects = leads.filter(l => selectedLeads.includes(l.id));
+            const withPhones = selectedLeadObjects.filter(l => l.phone && l.phone.trim() !== '');
             const eligibleLeads = businessHoursOnly
-                ? selectedLeadObjects.filter(l => {
+                ? withPhones.filter(l => {
                     if (!l.location) return true; // unknown location still included
                     const { status } = getLocalTime(l.location);
                     return status === 'green' || status === 'amber';
                 })
-                : selectedLeadObjects;
+                : withPhones;
 
             const rows = eligibleLeads.map(lead => ({
                 lead_id: lead.id,
@@ -340,7 +341,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             }));
 
             if (rows.length === 0) {
-                alert('No eligible leads to queue based on current filters.');
+                alert('No eligible leads to queue (requires a phone number and optionally business hours matching).');
                 setIsQueueing(false);
                 return;
             }
@@ -1099,22 +1100,9 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         Add Lead
                     </button>
                     {selectedLeads.length > 0 && (
-                        <>
-                            <button
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all shadow-sm bg-white border border-primary text-primary hover:bg-blue-50 active:scale-95 animate-in zoom-in duration-300"
-                                onClick={() => { fetchSequences(); setShowEmailModal(true); }}
-                            >
-                                <Mail size={16} />
-                                Email Selected
-                            </button>
-                            <button
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all shadow-sm bg-white border border-emerald-500 text-emerald-600 hover:bg-emerald-50 active:scale-95 animate-in zoom-in duration-300"
-                                onClick={() => { fetchCallScripts(); setShowBatchCallModal(true); setBatchCallScriptId(callScripts[0]?.id || ''); }}
-                            >
-                                <Phone size={16} />
-                                Call Selected
-                            </button>
-                        </>
+                        <span className="text-xs font-bold text-primary bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 animate-in zoom-in duration-300">
+                            {selectedLeads.length} selected
+                        </span>
                     )}
                 </div>
             </div>
@@ -2110,17 +2098,27 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 </div>
                             ) : (
                                 <>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 mb-4">
                                         <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest pl-1">Select Sequence</label>
-                                        <select
-                                            className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
-                                            value={selectedSequenceId}
-                                            onChange={(e) => setSelectedSequenceId(e.target.value)}
-                                        >
+                                        <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                                             {sequences.map(seq => (
-                                                <option key={seq.id} value={seq.id}>{seq.name}</option>
+                                                <div
+                                                    key={seq.id}
+                                                    onClick={() => setSelectedSequenceId(seq.id)}
+                                                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedSequenceId === seq.id ? 'border-[#4F46E5] bg-indigo-50/50' : 'border-[#E5E7EB] hover:border-indigo-200'}`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedSequenceId === seq.id ? 'bg-[#4F46E5] text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                            <Mail size={16} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-sm text-[#111827]">{seq.name}</p>
+                                                            <p className="text-xs font-medium text-gray-500">Email Sequence</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             ))}
-                                        </select>
+                                        </div>
                                     </div>
                                     <div className="p-4 bg-indigo-50/60 border border-indigo-100 rounded-xl flex items-start gap-3">
                                         <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
@@ -2183,22 +2181,49 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 </div>
                             ) : (
                                 <>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 mb-4">
                                         <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest pl-1">Select Call Script</label>
-                                        <select
-                                            className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
-                                            value={batchCallScriptId}
-                                            onChange={(e) => setBatchCallScriptId(e.target.value)}
-                                        >
+                                        <div className="grid grid-cols-1 gap-3 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
                                             {callScripts.map(s => (
-                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                                <div
+                                                    key={s.id}
+                                                    onClick={() => setBatchCallScriptId(s.id)}
+                                                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${batchCallScriptId === s.id ? 'border-emerald-500 bg-emerald-50/50' : 'border-[#E5E7EB] hover:border-emerald-200'}`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${batchCallScriptId === s.id ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                            <Phone size={16} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-sm text-[#111827]">{s.name}</p>
+                                                            <p className="text-xs font-medium text-gray-500">AI Call Agent</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             ))}
-                                        </select>
+                                        </div>
                                     </div>
+
+                                    {/* Phone Warning Check */}
+                                    {(() => {
+                                        const selectedLeadObjects = leads.filter(l => selectedLeads.includes(l.id));
+                                        const noPhoneCount = selectedLeadObjects.filter(l => !l.phone || l.phone.trim() === '').length;
+                                        if (noPhoneCount > 0) {
+                                            return (
+                                                <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2 mb-4">
+                                                    <Info size={16} className="text-red-600 mt-0.5 shrink-0" />
+                                                    <p className="text-xs font-bold text-red-800">
+                                                        {noPhoneCount} selected lead{noPhoneCount > 1 ? 's do' : ' does'} not have a phone number and will be skipped.
+                                                    </p>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
 
                                     {/* Business Hours Summary */}
                                     {(() => {
-                                        const selectedLeadObjects = leads.filter(l => selectedLeads.includes(l.id));
+                                        const selectedLeadObjects = leads.filter(l => selectedLeads.includes(l.id)).filter(l => l.phone && l.phone.trim() !== '');
                                         const greenLeads = selectedLeadObjects.filter(l => l.location && getLocalTime(l.location).status === 'green');
                                         const amberLeads = selectedLeadObjects.filter(l => l.location && getLocalTime(l.location).status === 'amber');
                                         const redLeads = selectedLeadObjects.filter(l => l.location && getLocalTime(l.location).status === 'red');
@@ -2271,9 +2296,41 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 </div>
             )}
 
+            {/* Floating Batch Action Bar */}
+            {selectedLeads.length > 0 && (
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] animate-in slide-in-from-bottom-8 duration-500 ease-out">
+                    <div className="bg-gray-900 rounded-2xl shadow-2xl p-2.5 flex items-center gap-6 border border-white/10">
+                        <div className="flex items-center gap-3 pl-3">
+                            <span className="text-sm font-bold text-white tracking-wide">{selectedLeads.length} leads selected</span>
+                            <button
+                                onClick={() => setSelectedLeads([])}
+                                className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                        <div className="w-px h-8 bg-white/10" />
+                        <div className="flex items-center gap-2 pr-1">
+                            <button
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-[#4F46E5] text-white hover:bg-[#4338CA] shadow-lg shadow-indigo-500/20 active:scale-95"
+                                onClick={() => { fetchSequences(); setShowEmailModal(true); }}
+                            >
+                                <span role="img" aria-label="email">📧</span> Start Email Sequence
+                            </button>
+                            <button
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-transparent border border-white/20 text-white hover:bg-white/10 active:scale-95"
+                                onClick={() => { fetchCallScripts(); setShowBatchCallModal(true); setBatchCallScriptId(callScripts[0]?.id || ''); }}
+                            >
+                                <span role="img" aria-label="phone">📞</span> Start AI Calling
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Toast Notification */}
             {toast.visible && (
-                <div className="fixed bottom-6 right-6 z-[60] animate-in slide-in-from-bottom-4 fade-in duration-300">
+                <div className="fixed bottom-32 right-6 z-[70] animate-in slide-in-from-bottom-4 fade-in duration-300">
                     <div className="flex items-center gap-3 px-5 py-3.5 bg-[#111827] text-white rounded-xl shadow-2xl">
                         <CheckCircle size={18} className="text-emerald-400 shrink-0" />
                         <span className="text-sm font-bold">{toast.message}</span>
