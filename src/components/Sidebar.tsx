@@ -148,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <aside
-                className={`fixed left-0 top-0 h-screen z-40 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+                className={`fixed left-0 top-0 h-screen z-40 overflow-x-hidden ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
                 style={{
                     width: isCollapsed ? '72px' : '260px',
                     minWidth: isCollapsed ? '72px' : '260px',
