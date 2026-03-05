@@ -20,8 +20,7 @@ const BASE_LAYOUT = (subject: string, bodyContent: string) => `
           <tr>
             <td style="background:linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
               <div style="display:inline-flex;align-items:center;gap:10px;">
-                <div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:8px;display:inline-block;line-height:36px;text-align:center;font-weight:900;color:white;font-size:18px;">L</div>
-                <span style="color:white;font-size:22px;font-weight:700;letter-spacing:-0.5px;">Leadomation</span>
+                <img src="https://www.leadomation.co.uk/leadomation-logo.png" alt="Leadomation" width="160" style="display:block;" />
               </div>
             </td>
           </tr>
@@ -57,10 +56,10 @@ const CANCELLATION_EMAIL_BODY = `
   I'd love to know why you cancelled — it only takes one click:
 </p>
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Too expensive" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">💰 It was too expensive</a></td></tr>
-  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Missing features" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">🔧 It was missing features I needed</a></td></tr>
-  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Too complicated" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">😕 It was too complicated to use</a></td></tr>
-  <tr><td style="padding:8px 0;"><a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: No longer needed" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">📦 I no longer need it</a></td></tr>
+  <tr><td style="padding:8px 0;"><a href="https://www.leadomation.co.uk/cancellation-feedback?reason=too_expensive&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">💰 It was too expensive</a></td></tr>
+  <tr><td style="padding:8px 0;"><a href="https://www.leadomation.co.uk/cancellation-feedback?reason=missing_features&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">🔧 It was missing features I needed</a></td></tr>
+  <tr><td style="padding:8px 0;"><a href="https://www.leadomation.co.uk/cancellation-feedback?reason=too_complicated&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">😕 It was too complicated to use</a></td></tr>
+  <tr><td style="padding:8px 0;"><a href="https://www.leadomation.co.uk/cancellation-feedback?reason=no_longer_needed&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">📦 I no longer need it</a></td></tr>
 </table>
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
   If price was the issue, reply to this email — I may be able to help.
@@ -302,8 +301,22 @@ export default async function handler(req: any, res: any) {
                         const customer = await stripe.customers.retrieve(customerId);
                         if (customer && !('deleted' in customer) && customer.email) {
                             const firstName = (customer.name || 'there').split(' ')[0];
+
+                            // Look up the Supabase user ID for the cancellation feedback links
+                            let userId = '';
+                            const { data: cancelProfile } = await supabase
+                                .from('profiles')
+                                .select('id')
+                                .eq('stripe_customer_id', customerId)
+                                .single();
+                            if (cancelProfile) {
+                                userId = cancelProfile.id;
+                            }
+
                             const subject = 'Sorry to see you go — can I ask why?';
-                            const body = CANCELLATION_EMAIL_BODY.replace(/{{first_name}}/g, firstName);
+                            const body = CANCELLATION_EMAIL_BODY
+                                .replace(/{{first_name}}/g, firstName)
+                                .replace(/{{user_id}}/g, userId);
                             const html = BASE_LAYOUT(subject, body);
 
                             await resend.emails.send({
