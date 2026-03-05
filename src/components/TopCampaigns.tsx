@@ -11,7 +11,7 @@ interface Campaign {
     status: string;
 }
 
-const TopCampaigns: React.FC = () => {
+const TopCampaigns: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -20,12 +20,18 @@ const TopCampaigns: React.FC = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data, error } = await supabase
+            let query = supabase
                 .from('campaigns')
                 .select('name, track, reply_rate, leads_found, emails_sent, status')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
                 .limit(4);
+
+            if (dateFrom) {
+                query = query.gte('created_at', dateFrom);
+            }
+
+            const { data, error } = await query;
 
             if (error) {
                 console.error('Error fetching top campaigns:', error);
@@ -36,7 +42,7 @@ const TopCampaigns: React.FC = () => {
         };
 
         fetchTopCampaigns();
-    }, []);
+    }, [dateFrom]);
 
     const getStyles = (track: string) => {
         const styles: Record<string, any> = {

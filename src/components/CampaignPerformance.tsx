@@ -33,7 +33,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
 };
 
-const CampaignPerformance: React.FC = () => {
+const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
     const [chartData, setChartData] = useState<ChartDay[]>([]);
     const [funnel, setFunnel] = useState<FunnelData>({ totalLeads: 0, contacted: 0, qualified: 0, deals: 0 });
     const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +48,7 @@ const CampaignPerformance: React.FC = () => {
             const fourteenDaysAgo = new Date(now);
             fourteenDaysAgo.setDate(now.getDate() - 13);
             fourteenDaysAgo.setHours(0, 0, 0, 0);
-            const sinceISO = fourteenDaysAgo.toISOString();
+            const sinceISO = dateFrom || fourteenDaysAgo.toISOString();
 
             // Build date labels
             const days: ChartDay[] = [];
@@ -97,7 +97,7 @@ const CampaignPerformance: React.FC = () => {
         };
 
         fetchData();
-    }, []);
+    }, [dateFrom]);
 
     if (isLoading) {
         return (
