@@ -22,6 +22,11 @@ const Compliance: React.FC = () => {
     const [b2bOnlyFilter, setB2bOnlyFilter] = useState(true);
     const [logConsent, setLogConsent] = useState(false);
     const [businessAddress, setBusinessAddress] = useState('');
+    const [autoBounceSuppression, setAutoBounceSuppression] = useState(true);
+    const [deleteEmail, setDeleteEmail] = useState('');
+    const [deleting, setDeleting] = useState(false);
+    const [suppressionList, setSuppressionList] = useState<string[]>([]);
+    const [showSuppressionModal, setShowSuppressionModal] = useState(false);
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -31,7 +36,7 @@ const Compliance: React.FC = () => {
 
                 const { data } = await supabase
                     .from('profiles')
-                    .select('include_unsubscribe, include_business_address, b2b_only_filter, log_consent, business_address')
+                    .select('include_unsubscribe, include_business_address, b2b_only_filter, log_consent, business_address, auto_bounce_suppression')
                     .eq('id', user.id)
                     .single();
 
@@ -41,6 +46,7 @@ const Compliance: React.FC = () => {
                     setB2bOnlyFilter(data.b2b_only_filter ?? true);
                     setLogConsent(data.log_consent ?? false);
                     setBusinessAddress(data.business_address || '');
+                    setAutoBounceSuppression(data.auto_bounce_suppression ?? true);
                 }
             } catch (err) {
                 console.error('Error loading compliance settings:', err);
@@ -73,6 +79,63 @@ const Compliance: React.FC = () => {
         }
     };
 
+    const handleExportAllLeads = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data, error } = await supabase.from('leads').select('*').eq('user_id', user.id);
+            if (error) throw error;
+            if (!data || data.length === 0) { alert('No leads to export.'); return; }
+            const headers = ['company', 'first_name', 'last_name', 'email', 'phone', 'website', 'location', 'industry', 'source', 'status'];
+            const csv = [
+                headers.join(','),
+                ...data.map(row => headers.map(h => {
+                    const val = String((row as any)[h] || '').replace(/"/g, '""');
+                    return val.includes(',') || val.includes('"') || val.includes('\n') ? `"${val}"` : val;
+                }).join(','))
+            ].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `leadomation-all-leads-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Export error:', err);
+            alert('Failed to export leads. Please try again.');
+        }
+    };
+
+    const handleDeleteLeadByEmail = async () => {
+        if (!deleteEmail.trim()) return;
+        if (!window.confirm(`Permanently delete all data for ${deleteEmail}? This cannot be undone.`)) return;
+        setDeleting(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { error } = await supabase.from('leads').delete().eq('user_id', user.id).eq('email', deleteEmail.trim().toLowerCase());
+            if (error) throw error;
+            alert(`Lead data for ${deleteEmail} has been permanently deleted.`);
+            setDeleteEmail('');
+        } catch (err) {
+            console.error('Delete error:', err);
+            alert('Failed to delete lead. Please try again.');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    const handleViewSuppressionList = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase.from('suppression_list').select('email').eq('user_id', user.id).order('created_at', { ascending: false });
+        setSuppressionList(data?.map((r: any) => r.email) || []);
+        setShowSuppressionModal(true);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
@@ -94,7 +157,8 @@ const Compliance: React.FC = () => {
                         include_business_address: includeBusinessAddress,
                         b2b_only_filter: b2bOnlyFilter,
                         log_consent: logConsent,
-                        business_address: businessAddress
+                        business_address: businessAddress,
+                        auto_bounce_suppression: autoBounceSuppression
                     })}
                     disabled={saving}
                     className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
@@ -224,9 +288,14 @@ const Compliance: React.FC = () => {
                                 <span className="text-[11px] text-[#9CA3AF] font-medium tracking-tight hidden sm:inline">(Prevents re-sending to bounced addresses)</span>
                             </div>
                             <div
-                                className="relative w-11 h-6 rounded-full transition-all duration-300 bg-primary"
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer ${autoBounceSuppression ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => {
+                                    const newVal = !autoBounceSuppression;
+                                    setAutoBounceSuppression(newVal);
+                                    saveSettings({ auto_bounce_suppression: newVal });
+                                }}
                             >
-                                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 translate-x-5" />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${autoBounceSuppression ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                     </div>
@@ -248,10 +317,27 @@ const Compliance: React.FC = () => {
                     </p>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <button className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
+                        <button onClick={handleViewSuppressionList} className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
                             <Eye size={14} /> View Full List
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
+                        <input
+                            id="suppression-import"
+                            type="file"
+                            accept=".csv,.txt"
+                            className="hidden"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const text = await file.text();
+                                const emails = text.split(/[\r\n,]+/).map(em => em.trim().toLowerCase()).filter(em => em.includes('@'));
+                                const { data: { user } } = await supabase.auth.getUser();
+                                if (!user || emails.length === 0) return;
+                                const rows = emails.map(email => ({ user_id: user.id, email }));
+                                await supabase.from('suppression_list').upsert(rows, { onConflict: 'user_id,email' });
+                                alert(`${emails.length} emails imported to suppression list.`);
+                            }}
+                        />
+                        <button onClick={() => document.getElementById('suppression-import')?.click()} className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
                             <Upload size={14} /> Import Suppression List
                         </button>
                     </div>
@@ -272,7 +358,7 @@ const Compliance: React.FC = () => {
                                 <span className="text-sm font-bold text-[#111827]">Full Lead Export</span>
                                 <span className="text-[11px] text-[#6B7280] font-medium">Download all leads as a comprehensive CSV</span>
                             </div>
-                            <button className="flex items-center gap-2 px-6 py-2.5 border border-[#E5E7EB] bg-white rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
+                            <button onClick={handleExportAllLeads} className="flex items-center gap-2 px-6 py-2.5 border border-[#E5E7EB] bg-white rounded-xl text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all shadow-sm">
                                 <Download size={16} /> Export All Lead Data
                             </button>
                         </div>
@@ -283,10 +369,16 @@ const Compliance: React.FC = () => {
                                 <input
                                     type="email"
                                     placeholder="e.g., hans@wellness-spa.de"
+                                    value={deleteEmail}
+                                    onChange={(e) => setDeleteEmail(e.target.value)}
                                     className="flex-1 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-400 transition-all"
                                 />
-                                <button className="flex items-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-xl text-sm font-black hover:bg-rose-700 transition-all shadow-md active:scale-95 group">
-                                    <Trash2 size={16} className="group-hover:rotate-12 transition-transform" />
+                                <button
+                                    onClick={handleDeleteLeadByEmail}
+                                    disabled={deleting || !deleteEmail.trim()}
+                                    className="flex items-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-xl text-sm font-black hover:bg-rose-700 transition-all shadow-md active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} className="group-hover:rotate-12 transition-transform" />}
                                     DELETE
                                 </button>
                             </div>
@@ -313,6 +405,26 @@ const Compliance: React.FC = () => {
                     </p>
                 </div>
             </div>
+
+            {showSuppressionModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-base font-bold text-[#111827]">Suppression List ({suppressionList.length})</h3>
+                            <button onClick={() => setShowSuppressionModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+                        </div>
+                        {suppressionList.length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-8">No suppressed emails yet.</p>
+                        ) : (
+                            <div className="max-h-80 overflow-y-auto space-y-1">
+                                {suppressionList.map(email => (
+                                    <div key={email} className="text-sm font-medium text-[#4B5563] px-3 py-2 bg-gray-50 rounded-lg">{email}</div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

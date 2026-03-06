@@ -24,6 +24,8 @@ const EmailConfig: React.FC = () => {
     const [replyToEmail, setReplyToEmail] = useState('');
     const [emailSignature, setEmailSignature] = useState('');
     const [showSignaturePreview, setShowSignaturePreview] = useState(false);
+    const [fullOutgoingSequence, setFullOutgoingSequence] = useState(true);
+    const [inboxRepliesOnly, setInboxRepliesOnly] = useState(true);
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -33,7 +35,7 @@ const EmailConfig: React.FC = () => {
 
                 const { data } = await supabase
                     .from('profiles')
-                    .select('daily_email_limit, email_send_delay, auto_detect_timezone, email_from_name, email_from_address, email_reply_to, email_signature')
+                    .select('daily_email_limit, email_send_delay, auto_detect_timezone, email_from_name, email_from_address, email_reply_to, email_signature, full_outgoing_sequence, inbox_replies_only')
                     .eq('id', user.id)
                     .single();
 
@@ -45,6 +47,8 @@ const EmailConfig: React.FC = () => {
                     setFromEmail(data.email_from_address || '');
                     setReplyToEmail(data.email_reply_to || '');
                     setEmailSignature(data.email_signature || '');
+                    setFullOutgoingSequence(data.full_outgoing_sequence ?? true);
+                    setInboxRepliesOnly(data.inbox_replies_only ?? true);
                 }
             } catch (err) {
                 console.error('Error loading email config:', err);
@@ -270,14 +274,28 @@ const EmailConfig: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <label className="flex items-center justify-between cursor-pointer group p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed hover:border-primary transition-all">
                             <span className="text-xs font-bold text-[#111827]">Full Outgoing Sequence</span>
-                            <div className="relative w-11 h-6 rounded-full transition-all duration-300 bg-primary">
-                                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 translate-x-5" />
+                            <div
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${fullOutgoingSequence ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => {
+                                    const newVal = !fullOutgoingSequence;
+                                    setFullOutgoingSequence(newVal);
+                                    saveSettings({ full_outgoing_sequence: newVal });
+                                }}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${fullOutgoingSequence ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                         <label className="flex items-center justify-between cursor-pointer group p-4 bg-gray-50/50 rounded-xl border border-gray-100 border-dashed hover:border-primary transition-all">
                             <span className="text-xs font-bold text-[#111827]">Inbox Replies Only</span>
-                            <div className="relative w-11 h-6 rounded-full transition-all duration-300 bg-primary">
-                                <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 translate-x-5" />
+                            <div
+                                className={`relative w-11 h-6 rounded-full transition-all duration-300 ${inboxRepliesOnly ? 'bg-primary' : 'bg-gray-200'}`}
+                                onClick={() => {
+                                    const newVal = !inboxRepliesOnly;
+                                    setInboxRepliesOnly(newVal);
+                                    saveSettings({ inbox_replies_only: newVal });
+                                }}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${inboxRepliesOnly ? 'translate-x-5' : ''}`} />
                             </div>
                         </label>
                     </div>
