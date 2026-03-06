@@ -405,7 +405,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
 
             if (status === 'active') {
                 try {
-                    await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/d6c828df-d7a2-49f5-97a0-eb7b321ff86c', {
+                    await fetch('https://n8n.srv1377696.hstgr.cloud/webhook/e1a8d0f0-f81f-4aff-bc0b-a50211f74519', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
