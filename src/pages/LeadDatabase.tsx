@@ -431,7 +431,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             setExpandedTranscripts(new Set());
             try {
                 const [callRes, dealRes, enrollRes] = await Promise.all([
-                    supabase.from('call_logs').select('id, created_at, duration, ended_reason, transcript, recording_url').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
+                    supabase.from('call_logs').select('id, created_at, duration_seconds, ended_reason, transcript, recording_url').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
                     supabase.from('deals').select('id, created_at, title, stage').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
                     supabase.from('sequence_enrollments').select('id, enrolled_at, sequence_id, status, sequences(name)').eq('lead_id', selectedLead.id).order('enrolled_at', { ascending: false })
                 ]);
@@ -439,9 +439,9 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 const items: any[] = [];
 
                 (callRes.data || []).forEach((c: any) => {
-                    const mins = Math.floor((c.duration || 0) / 60);
-                    const secs = (c.duration || 0) % 60;
-                    const durationStr = c.duration ? `${mins}m ${secs}s` : '';
+                    const mins = Math.floor((c.duration_seconds || 0) / 60);
+                    const secs = (c.duration_seconds || 0) % 60;
+                    const durationStr = c.duration_seconds ? `${mins}m ${secs}s` : '';
                     const sublabel = [durationStr, c.ended_reason].filter(Boolean).join(' · ');
                     items.push({ type: 'call', date: c.created_at, label: 'AI Call Made', sublabel: sublabel || 'No details', icon: 'phone', id: c.id, transcript: c.transcript, recording_url: c.recording_url });
                 });
