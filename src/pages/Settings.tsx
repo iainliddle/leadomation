@@ -140,6 +140,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
             });
 
             setProfileImageUrl(urlWithCacheBust);
+            window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { url: urlWithCacheBust } }));
         } catch (err: any) {
             console.error('Avatar upload failed:', err);
             // base64 fallback
@@ -166,6 +167,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
             console.error('Failed to remove avatar from storage:', err);
         }
         setProfileImageUrl(null);
+        window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { url: null } }));
     };
 
     const handleSaveProfile = async () => {
@@ -458,82 +460,100 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
         );
     };
 
-    const renderBilling = () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Current Plan */}
-            <div style={{
-                padding: '24px', borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(79,70,229,0.04), rgba(124,58,237,0.03))',
-                border: '1px solid rgba(79,70,229,0.12)',
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-                    <div>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#4F46E5', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Plan</div>
-                        <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>{currentPlan} Tier</div>
-                        <div style={{ fontSize: '13px', color: '#64748B', marginTop: '4px' }}>
-                            {currentPlan === 'Pro' ? 'Unlimited keyword searches' : '50 keyword searches/month'}
-                        </div>
-                    </div>
-                    <button onClick={() => onPageChange?.('Pricing')} style={primaryBtnStyle}>
-                        {currentPlan === 'Pro' ? 'Change Plan' : 'Upgrade Plan'}
-                    </button>
-                </div>
-            </div>
+    const renderBilling = () => {
+        const handleUpdatePayment = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+                const response = await fetch('/api/create-portal-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id })
+                });
+                const { url } = await response.json();
+                if (url) window.location.href = url;
+            } catch (err) {
+                alert('Unable to open billing portal. Please contact support.');
+            }
+        };
 
-            {/* Billing History */}
-            <div style={cardStyle}>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '16px' }}>Billing History</h3>
-                <div style={{ border: '1px solid #E2E4ED', borderRadius: '12px', overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                        <thead>
-                            <tr style={{ background: '#F8FAFC' }}>
-                                {['Date', 'Description', 'Amount', 'Status'].map(h => (
-                                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700, color: '#64748B', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center', color: '#94A3B8', fontStyle: 'italic' }}>
-                                    No billing history yet.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Payment Method */}
-            <div style={cardStyle}>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '16px' }}>Payment Method</h3>
-                <div style={{ padding: '20px', borderRadius: '12px', border: '1px solid #E2E4ED', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{
-                            width: '40px', height: '28px', borderRadius: '4px', background: '#1A1F36',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: 'white', fontSize: '10px', fontWeight: 700, flexShrink: 0,
-                        }}>
-                            VISA
-                        </div>
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Current Plan */}
+                <div style={{
+                    padding: '24px', borderRadius: '12px',
+                    background: 'linear-gradient(135deg, rgba(79,70,229,0.04), rgba(124,58,237,0.03))',
+                    border: '1px solid rgba(79,70,229,0.12)',
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                         <div>
-                            <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>•••• •••• •••• 4242</div>
-                            <div style={{ fontSize: '12px', color: '#94A3B8' }}>Expires 12/26</div>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#4F46E5', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Plan</div>
+                            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>{currentPlan} Tier</div>
+                            <div style={{ fontSize: '13px', color: '#64748B', marginTop: '4px' }}>
+                                {currentPlan === 'Pro' ? 'Unlimited keyword searches/month · All features included' : currentPlan === 'Starter' ? '50 keyword searches/month · Core features' : 'Trial — upgrade to unlock full access'}
+                            </div>
                         </div>
+                        <button onClick={() => onPageChange?.('Pricing')} style={primaryBtnStyle}>
+                            {currentPlan === 'Pro' ? 'Manage Plan' : 'Upgrade Plan'}
+                        </button>
                     </div>
-                    <button style={{
-                        padding: '8px 16px', borderRadius: '8px', background: 'transparent',
-                        color: '#4F46E5', border: '1px solid #E2E4ED', fontSize: '13px',
-                        fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                    }}>
-                        Update
-                    </button>
                 </div>
-                <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '8px' }}>
-                    Managed securely through Stripe. We never store your card details.
-                </p>
+
+                {/* Billing History */}
+                <div style={cardStyle}>
+                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '16px' }}>Billing History</h3>
+                    <div style={{ border: '1px solid #E2E4ED', borderRadius: '12px', overflow: 'hidden' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                            <thead>
+                                <tr style={{ background: '#F8FAFC' }}>
+                                    {['Date', 'Description', 'Amount', 'Status'].map(h => (
+                                        <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700, color: '#64748B', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center', color: '#94A3B8', fontStyle: 'italic' }}>
+                                        No billing history yet.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Payment Method */}
+                <div style={cardStyle}>
+                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '16px' }}>Payment Method</h3>
+                    <div style={{ padding: '20px', borderRadius: '12px', border: '1px solid #E2E4ED', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                                width: '40px', height: '28px', borderRadius: '4px', background: '#1A1F36',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: 'white', fontSize: '10px', fontWeight: 700, flexShrink: 0,
+                            }}>
+                                VISA
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>•••• •••• •••• 4242</div>
+                                <div style={{ fontSize: '12px', color: '#94A3B8' }}>Expires 12/26</div>
+                            </div>
+                        </div>
+                        <button onClick={handleUpdatePayment} style={{
+                            padding: '8px 16px', borderRadius: '8px', background: 'transparent',
+                            color: '#4F46E5', border: '1px solid #E2E4ED', fontSize: '13px',
+                            fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                        }}>
+                            Update
+                        </button>
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '8px' }}>
+                        Managed securely through Stripe. We never store your card details.
+                    </p>
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const contentMap: Record<string, () => React.ReactNode> = {
         profile: renderProfile,

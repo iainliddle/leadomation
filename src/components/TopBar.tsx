@@ -10,22 +10,54 @@ interface TopBarProps {
 const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign }) => {
     const [userName, setUserName] = useState('');
     const [userInitials, setUserInitials] = useState('');
+    const [headerAvatarUrl, setHeaderAvatarUrl] = useState<string | null>(null);
+    const [headerFirstName, setHeaderFirstName] = useState('');
+    const [headerLastName, setHeaderLastName] = useState('');
 
     useEffect(() => {
-        const getUser = async () => {
+        // Load initial avatar from profiles table
+        const loadAvatar = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const fullName = user.user_metadata?.full_name || user.email || '';
-                const parts = fullName.split(' ');
-                const first = parts[0] || '';
-                const lastInitial = parts[1] ? parts[1][0] + '.' : '';
-                setUserName(first + (lastInitial ? ' ' + lastInitial : ''));
-                const initials = (first[0] || '') + (parts[1] ? parts[1][0] : '');
-                setUserInitials(initials.toUpperCase() || '?');
+            if (!user) return;
+
+            // Set display name from user metadata as fallback
+            const fullName = user.user_metadata?.full_name || user.email || '';
+            const parts = fullName.split(' ');
+            const first = parts[0] || '';
+            const lastInitial = parts[1] ? parts[1][0] + '.' : '';
+            setUserName(first + (lastInitial ? ' ' + lastInitial : ''));
+            const initials = (first[0] || '') + (parts[1] ? parts[1][0] : '');
+            setUserInitials(initials.toUpperCase() || '?');
+
+            // Load profile data
+            const { data } = await supabase
+                .from('profiles')
+                .select('avatar_url, first_name, last_name')
+                .eq('id', user.id)
+                .single();
+
+            if (data?.avatar_url) setHeaderAvatarUrl(data.avatar_url);
+            if (data?.first_name) {
+                setHeaderFirstName(data.first_name);
+                const fn = data.first_name || '';
+                const ln = data.last_name || '';
+                const displayName = fn + (ln ? ' ' + ln[0] + '.' : '');
+                setUserName(displayName || userName);
+                const newInitials = (fn[0] || '') + (ln[0] || '');
+                setUserInitials(newInitials.toUpperCase() || '?');
             }
+            if (data?.last_name) setHeaderLastName(data.last_name);
         };
-        getUser();
+        loadAvatar();
+
+        // Listen for avatar updates from Settings page
+        const handler = (e: any) => setHeaderAvatarUrl(e.detail.url);
+        window.addEventListener('avatarUpdated', handler);
+        return () => window.removeEventListener('avatarUpdated', handler);
     }, []);
+
+    const displayInitials = userInitials ||
+        ((headerFirstName?.[0] || '') + (headerLastName?.[0] || '')).toUpperCase() || '?';
 
     return (
         <header className="sticky top-0 right-0 left-0 bg-white border-b border-[#E5E7EB] h-20 flex items-center justify-between px-8 z-10 shadow-sm">
@@ -57,8 +89,10 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign }) => {
                         <span className="text-sm font-bold text-[#111827]">{userName || 'User'}</span>
                         <span className="text-[10px] text-[#9CA3AF] font-bold uppercase tracking-tight">admin</span>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#2563EB] font-black border border-[#BFDBFE] shadow-sm transform group-hover:scale-105 transition-all cursor-pointer">
-                        {userInitials || '?'}
+                    <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-[#EFF6FF] text-[#2563EB] font-black border border-[#BFDBFE] shadow-sm transform group-hover:scale-105 transition-all cursor-pointer">
+                        {headerAvatarUrl
+                            ? <img src={headerAvatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : displayInitials}
                     </div>
                 </div>
             </div>
