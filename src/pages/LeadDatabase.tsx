@@ -433,7 +433,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 const [callRes, dealRes, enrollRes] = await Promise.all([
                     supabase.from('call_logs').select('id, created_at, duration, ended_reason, transcript, recording_url').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
                     supabase.from('deals').select('id, created_at, title, stage').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
-                    supabase.from('sequence_enrollments').select('id, enrolled_at, sequence_id, status').eq('lead_id', selectedLead.id).order('enrolled_at', { ascending: false })
+                    supabase.from('sequence_enrollments').select('id, enrolled_at, sequence_id, status, sequences(name)').eq('lead_id', selectedLead.id).order('enrolled_at', { ascending: false })
                 ]);
 
                 const items: any[] = [];
@@ -451,7 +451,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 });
 
                 (enrollRes.data || []).forEach((e: any) => {
-                    items.push({ type: 'email', date: e.enrolled_at, label: 'Enrolled in Sequence', sublabel: e.sequence_id, icon: 'mail', id: e.id });
+                    items.push({ type: 'email', date: e.enrolled_at, label: 'Enrolled in Sequence', sublabel: e.sequences?.name || 'Email Sequence', icon: 'mail', id: e.id });
                 });
 
                 // Synthetic lead-created event
