@@ -9,6 +9,7 @@ interface Campaign {
     status: 'active' | 'paused' | 'draft' | 'Active' | 'Paused' | 'Draft' | 'error';
     leadsCount: number;
     leads_found?: number;
+    leads_requested?: number;
     scraping_status?: string;
     repliesCount: number;
     replyRate: string;
@@ -267,11 +268,28 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                     </div>
                                     <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-primary rounded-full transition-all duration-1000"
-                                            style={{ width: `${campaign.progress || 0}%` }}
+                                            className="h-full rounded-full transition-all duration-1000"
+                                            style={{
+                                                width: `${campaign.progress || 0}%`,
+                                                background: campaign.progress === 100
+                                                    ? 'linear-gradient(90deg, #059669, #10B981)'
+                                                    : 'linear-gradient(90deg, #4F46E5, #7C3AED)',
+                                                boxShadow: campaign.progress > 0 && campaign.progress < 100
+                                                    ? '0 0 8px rgba(79,70,229,0.6)'
+                                                    : 'none'
+                                            }}
                                         ></div>
                                     </div>
                                 </div>
+
+                                {campaign.scraping_status === 'complete' && campaign.leads_found !== undefined && campaign.leads_requested !== undefined && campaign.leads_found < campaign.leads_requested && (
+                                    <div className="flex items-center gap-1.5 mt-2">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                                        <p className="text-[11px] font-bold text-amber-600">
+                                            {campaign.leads_found} of {campaign.leads_requested} leads found — limited results for this search area.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="px-6 pb-6">
