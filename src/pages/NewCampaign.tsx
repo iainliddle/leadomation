@@ -28,30 +28,30 @@ interface Track {
 const tracks: Track[] = [
     {
         id: 1,
-        name: "Direct to Venue",
-        description: "Target end-user businesses directly: gyms, spas, hotels, wellness centres",
+        name: "Local Businesses",
+        description: "Target local service businesses directly: restaurants, salons, clinics, retailers, tradespeople",
         icon: Building,
         color: "#4F46E5",
         bgColor: "bg-[#EEF2FF]",
-        tags: ["Gym", "CrossFit Box", "Wellness Centre", "Day Spa", "Luxury Hotel", "Physiotherapy Clinic", "Sports Recovery", "Yoga Studio", "Boutique Fitness", "Athletic Training"]
+        tags: ["Restaurant", "Cafe", "Hair Salon", "Beauty Clinic", "Dental Practice", "Law Firm", "Accountant", "Estate Agent", "Gym", "Retail Shop"]
     },
     {
         id: 2,
-        name: "Specifiers & Designers",
-        description: "Target businesses that influence purchasing: interior designers, architects, developers",
+        name: "B2B Services",
+        description: "Target businesses that sell to other businesses: agencies, consultants, software, suppliers",
         icon: PenTool,
         color: "#7C3AED",
         bgColor: "bg-purple-50",
-        tags: ["Interior Designer", "Architect", "Fit-Out Contractor", "Property Developer", "Hospitality Designer"]
+        tags: ["Marketing Agency", "IT Consultant", "Recruitment Agency", "Business Coach", "Accountancy Firm", "Legal Services", "PR Agency", "Web Design Agency"]
     },
     {
         id: 3,
-        name: "Warm Leads (Upgrade)",
-        description: "Target venues already offering cold therapy with basic equipment",
+        name: "Custom Search",
+        description: "Define your own target audience using custom keywords and business types",
         icon: TrendingUp,
-        color: "#D97706",
-        bgColor: "bg-amber-50",
-        tags: ["Ice Bath Provider", "Cold Plunge Studio", "Cryotherapy Centre"]
+        color: "#059669",
+        bgColor: "bg-emerald-50",
+        tags: ["Add Custom"]
     }
 ];
 
@@ -106,7 +106,7 @@ const intentFilterOptions = [
         id: 'new_business',
         icon: '🆕',
         label: 'Newly Opened Businesses',
-        description: 'Businesses opened in the last 6 months — they need everything',
+        description: 'Businesses opened in the last 6 months — they need everything and are open to new suppliers',
         badge: 'HOT',
         badgeColor: 'bg-red-50 text-red-600 border-red-100',
         note: 'Availability depends on Google data — filter applied where opening date is present'
@@ -115,7 +115,7 @@ const intentFilterOptions = [
         id: 'low_rating',
         icon: '⭐',
         label: 'Low Google Rating',
-        description: 'Under 4.0 stars — clear pain point, high motivation to improve',
+        description: 'Under 4.0 stars — clear pain point, high motivation to improve their reputation',
         badge: 'HIGH INTENT',
         badgeColor: 'bg-amber-50 text-amber-600 border-amber-100',
         hasSubOption: true
@@ -124,7 +124,7 @@ const intentFilterOptions = [
         id: 'no_photos',
         icon: '📸',
         label: 'Missing or Few Photos',
-        description: 'Under 5 photos on their Google profile — easy upsell opportunity',
+        description: 'Under 5 photos on their Google profile — weak online presence, easy win',
         badge: null,
         badgeColor: ''
     },
@@ -132,7 +132,7 @@ const intentFilterOptions = [
         id: 'no_recent_reviews',
         icon: '💬',
         label: 'No Recent Reviews',
-        description: 'Last review over 6 months ago — disengaged owner, needs help',
+        description: 'Last review over 6 months ago — disengaged owner, likely needs support',
         badge: null,
         badgeColor: ''
     },
@@ -140,7 +140,7 @@ const intentFilterOptions = [
         id: 'incomplete_profile',
         icon: '📋',
         label: 'Incomplete Google Profile',
-        description: 'Missing website, phone, or hours — unprofessional, easy sell',
+        description: 'Missing website, phone, or hours — unprofessional listing, easy conversation starter',
         badge: null,
         badgeColor: ''
     }
@@ -359,9 +359,9 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
             }
 
             const trackMap: Record<string, string> = {
-                'Direct to Venue': 'direct',
-                'Specifiers & Designers': 'specifier',
-                'Warm Leads (Upgrade)': 'warm'
+                'Local Businesses': 'direct',
+                'B2B Services': 'specifier',
+                'Custom Search': 'custom'
             };
 
             const insertData = {
@@ -373,6 +373,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                 target_location: locationParts.join(', '),
                 target_job_titles: [],
                 leads_found: 0,
+                leads_requested: leadCount,
                 emails_sent: 0,
                 replies: 0,
                 reply_rate: 0,
@@ -450,7 +451,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                             type="text"
                             value={campaignName}
                             onChange={(e) => setCampaignName(e.target.value)}
-                            placeholder="e.g., UK Luxury Hotels Q1"
+                            placeholder="e.g., Manchester Plumbers Q1"
                             className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                         />
                     </div>
@@ -518,7 +519,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                             type="text"
                             value={customKeywords}
                             onChange={(e) => setCustomKeywords(e.target.value)}
-                            placeholder="e.g., cold plunge, cryotherapy, recovery centre"
+                            placeholder="e.g., plumber, electrician, solicitor"
                             className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                         />
                     </div>
@@ -586,7 +587,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                 type="text"
                                 value={cityArea}
                                 onChange={(e) => setCityArea(e.target.value)}
-                                placeholder="e.g., London, Dubai Marina"
+                                placeholder="e.g., Manchester, Birmingham"
                                 className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
                             />
                         </div>
@@ -691,7 +692,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                         }}>
                             <span style={{ fontSize: '18px' }}>⚡</span>
                             <p style={{ margin: 0, fontSize: '12px', color: '#4B5563', lineHeight: '1.6' }}>
-                                Smart filters help you find warm leads — businesses showing signs they need help. These leads convert at <strong style={{ color: '#4F46E5' }}>3-5x higher rates</strong> than cold outreach.
+                                Smart filters identify businesses showing clear buying signals right now. Target leads that are actively struggling so your outreach arrives at exactly the right moment — these convert at <strong style={{ color: '#4F46E5' }}>3-5x higher rates</strong> than cold lists.
                             </p>
                         </div>
 
@@ -902,7 +903,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                         <p className="text-xs font-bold text-red-500">{error}</p>
                     ) : (
                         <p className="text-[11px] text-[#9CA3AF] font-medium max-w-[240px]">
-                            Campaign will begin processing leads within 24 hours of launch.
+                            Scraping typically takes 2–5 minutes. Leads will appear in your Lead Database automatically.
                         </p>
                     )}
                 </div>
