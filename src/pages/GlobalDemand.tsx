@@ -288,7 +288,7 @@ const MapChart = memo(({
 
 const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
     const [activeTab, setActiveTab] = useState<'density' | 'search'>('density');
-    const [selectedIndustry, setSelectedIndustry] = useState('Cold Water Therapy');
+    const [selectedIndustry, setSelectedIndustry] = useState('Restaurants & Cafes');
     const [searchQuery, setSearchQuery] = useState('');
     const [hoveredRegion, setHoveredRegion] = useState<RegionData | null>(null);
     const [selectedRegion, setSelectedRegion] = useState<RegionData | null>(null);
@@ -834,7 +834,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 <div className="flex-1 relative">
                                     <input
                                         type="text"
-                                        placeholder="e.g. ice bath, cold plunge pool, commercial ice bath, cold water therapy"
+                                        placeholder="e.g. plumber near me, emergency electrician, accountant london"
                                         value={keywordInput}
                                         onChange={(e) => setKeywordInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleKeywordSearch()}
