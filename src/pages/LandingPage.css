@@ -2388,6 +2388,11 @@
     margin: 0 auto;
 }
 
+.lp-pricing-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1100px;
+}
+
 .lp-price-card {
     background: var(--lp-white);
     border: 2px solid var(--lp-border);
@@ -2404,6 +2409,67 @@
 .lp-price-featured {
     border-color: var(--lp-indigo);
     box-shadow: 0 8px 32px rgba(79, 70, 229, 0.12);
+}
+
+/* Scale card — muted/frosted to signal coming soon */
+.lp-price-scale {
+    border: 2px dashed #C7D2FE;
+    background: #FAFBFF;
+    opacity: 0.92;
+    overflow: hidden;
+}
+
+.lp-price-scale:hover {
+    opacity: 1;
+    border-color: var(--lp-indigo-pale);
+}
+
+/* Coming Soon ribbon */
+.lp-price-coming-soon-ribbon {
+    position: absolute;
+    top: 18px;
+    right: -30px;
+    background: linear-gradient(135deg, #F59E0B, #FBBF24);
+    color: #78350F;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 5px 40px;
+    transform: rotate(35deg);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.lp-scale-icon {
+    font-size: 0.9rem;
+    color: var(--lp-indigo);
+    margin-left: 4px;
+}
+
+.lp-scale-new-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--lp-indigo), var(--lp-cyan));
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+    letter-spacing: 0.05em;
+}
+
+.lp-btn-scale-notify {
+    background: transparent;
+    color: var(--lp-indigo);
+    border: 2px solid var(--lp-indigo-pale);
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.lp-btn-scale-notify:hover {
+    background: var(--lp-indigo-light);
+    border-color: var(--lp-indigo);
 }
 
 .lp-price-badge {
@@ -2488,6 +2554,128 @@
     left: 0;
     color: var(--lp-indigo);
     font-weight: 700;
+}
+
+.lp-pricing-scale-note {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--lp-muted);
+    margin-top: 24px;
+}
+
+/* ===== WAITLIST MODAL ===== */
+.lp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.lp-modal {
+    background: var(--lp-white);
+    border-radius: 20px;
+    padding: 40px 36px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--lp-border);
+}
+
+.lp-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--lp-light);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--lp-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.lp-modal-close:hover {
+    background: var(--lp-border);
+    color: var(--lp-dark);
+}
+
+.lp-modal-icon {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--lp-indigo), var(--lp-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.lp-modal h3 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--lp-dark);
+    margin-bottom: 8px;
+}
+
+.lp-modal p {
+    font-size: 0.9rem;
+    color: var(--lp-body);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.lp-modal-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--lp-border);
+    border-radius: 10px;
+    font-family: var(--lp-font);
+    font-size: 0.95rem;
+    color: var(--lp-dark);
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.lp-modal-input:focus {
+    border-color: var(--lp-indigo);
+}
+
+/* Responsive — stack to 1 col on mobile */
+@media (max-width: 1024px) {
+    .lp-pricing-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 800px;
+    }
+
+    .lp-price-scale {
+        grid-column: 1 / -1;
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .lp-pricing-grid-3 {
+        grid-template-columns: 1fr;
+        max-width: 440px;
+    }
+
+    .lp-price-scale {
+        grid-column: auto;
+        max-width: 100%;
+    }
 }
 
 /* ===== TESTIMONIALS — Marquee ===== */

@@ -32,6 +32,9 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   const [isClicking, setIsClicking] = useState(false);
   const [activeNavItem, setActiveNavItem] = useState('dashboard');
   const [typingText, setTypingText] = useState('');
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
 
   // Refs for pixel-perfect cursor positioning
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -1092,7 +1095,9 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <span className="lp-section-tag">Pricing</span>
             <h2>Simple Pricing. No Hidden Fees.</h2>
           </div>
-          <div className="lp-pricing-grid lp-reveal">
+          <div className="lp-pricing-grid lp-pricing-grid-3 lp-reveal">
+
+            {/* STARTER */}
             <div className="lp-price-card">
               <div className="lp-price-header"><h3>Starter</h3>
                 <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">49</span><span className="lp-price-period">/month</span></div>
@@ -1107,11 +1112,13 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
               </ul>
               <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-outline lp-btn-full">Start Free Trial</button>
             </div>
+
+            {/* PRO */}
             <div className="lp-price-card lp-price-featured">
               <div className="lp-price-badge">Most Popular</div>
               <div className="lp-price-header"><h3>Pro</h3>
                 <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">149</span><span className="lp-price-period">/month</span></div>
-                <p className="lp-price-annual">or £1,430/year (save 20%)</p>
+                <p className="lp-price-annual">or £1,490/year (save 20%)</p>
               </div>
               <p className="lp-price-includes">Everything in Starter, plus:</p>
               <ul className="lp-price-features">
@@ -1124,8 +1131,71 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
               </ul>
               <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-primary lp-btn-full">Start Free Trial</button>
             </div>
+
+            {/* SCALE — COMING SOON */}
+            <div className="lp-price-card lp-price-scale">
+              <div className="lp-price-coming-soon-ribbon">Coming Soon</div>
+              <div className="lp-price-header">
+                <h3>Scale <span className="lp-scale-icon">✦</span></h3>
+                <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">349</span><span className="lp-price-period">/month</span></div>
+                <p className="lp-price-annual">or £3,490/year (save £698)</p>
+              </div>
+              <p className="lp-price-includes">Everything in Pro, plus:</p>
+              <ul className="lp-price-features">
+                <li><strong>🎥 AI Video Prospecting</strong> <span className="lp-scale-new-badge">NEW</span></li>
+                <li>30 AI-generated videos/month</li>
+                <li>💬 SMS Outreach (Twilio)</li>
+                <li>📱 WhatsApp Outreach</li>
+                <li>🎬 LinkedIn Video Messages</li>
+                <li>10,000+ leads per month</li>
+                <li>500 emails per day</li>
+                <li>Advanced Smart Intent Filters</li>
+                <li>API Access + CSV Export</li>
+                <li>Priority Support</li>
+              </ul>
+              <button onClick={() => setShowWaitlistModal(true)} className="lp-btn lp-btn-scale-notify lp-btn-full">
+                🔔 Notify Me When Available
+              </button>
+            </div>
+
           </div>
+          <p className="lp-pricing-scale-note lp-reveal">Scale tier launching soon — join the waitlist above to be first in line.</p>
         </div>
+
+        {/* WAITLIST MODAL */}
+        {showWaitlistModal && (
+          <div className="lp-modal-overlay" onClick={() => { setShowWaitlistModal(false); setWaitlistSubmitted(false); setWaitlistEmail(''); }}>
+            <div className="lp-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="lp-modal-close" onClick={() => { setShowWaitlistModal(false); setWaitlistSubmitted(false); setWaitlistEmail(''); }}>✕</button>
+              {!waitlistSubmitted ? (
+                <>
+                  <div className="lp-modal-icon">✦</div>
+                  <h3>Join the Scale Waitlist</h3>
+                  <p>Be the first to know when AI Video Prospecting, SMS &amp; WhatsApp outreach go live.</p>
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    className="lp-modal-input"
+                  />
+                  <button
+                    className="lp-btn lp-btn-primary lp-btn-full"
+                    onClick={() => { if (waitlistEmail) setWaitlistSubmitted(true); }}
+                  >
+                    Notify Me →
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="lp-modal-icon">🎉</div>
+                  <h3>You're on the list!</h3>
+                  <p>We'll notify you the moment Scale launches. Expect something special.</p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ===== TESTIMONIALS — Auto-scrolling carousel ===== */}
