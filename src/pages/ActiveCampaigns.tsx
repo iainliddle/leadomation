@@ -6,7 +6,7 @@ interface Campaign {
     id: string;
     name: string;
     type: string;
-    status: 'active' | 'paused' | 'draft' | 'Active' | 'Paused' | 'Draft';
+    status: 'active' | 'paused' | 'draft' | 'Active' | 'Paused' | 'Draft' | 'error';
     leadsCount: number;
     leads_found?: number;
     scraping_status?: string;
@@ -14,6 +14,7 @@ interface Campaign {
     replyRate: string;
     progress: number;
     user_id: string;
+    error_message?: string;
 }
 
 interface ActiveCampaignsProps {
@@ -274,16 +275,30 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                             </div>
 
                             <div className="px-6 pb-6">
-                                <button
-                                    onClick={() => {
-                                        window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
-                                        onPageChange?.('Lead Database');
-                                    }}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-50 text-[#4F46E5] border border-indigo-100 rounded-xl text-sm font-bold hover:bg-indigo-100 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(79,70,229,0.05)] active:scale-[0.98]"
-                                >
-                                    <Eye size={16} />
-                                    View Leads
-                                </button>
+                                {campaign.status === 'error' ? (
+                                    <button
+                                        onClick={async () => {
+                                            await supabase.from('campaigns').update({ status: 'active', scraping_status: 'idle', error_message: null }).eq('id', campaign.id);
+                                            fetchCampaigns();
+                                            alert('Campaign reset. Please re-launch from New Campaign to retry scraping.');
+                                        }}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold hover:bg-red-100 transition-all active:scale-[0.98]"
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-3.5" /></svg>
+                                        Dismiss Error
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
+                                            onPageChange?.('Lead Database');
+                                        }}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-50 text-[#4F46E5] border border-indigo-100 rounded-xl text-sm font-bold hover:bg-indigo-100 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(79,70,229,0.05)] active:scale-[0.98]"
+                                    >
+                                        <Eye size={16} />
+                                        View Leads
+                                    </button>
+                                )}
                             </div>
 
                             <button
