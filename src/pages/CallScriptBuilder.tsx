@@ -35,6 +35,7 @@ interface CallScript {
     additional_context: string;
     status: string;
     system_prompt?: string;
+    voicemail_script?: string;
 }
 
 const defaultScript: CallScript = {
@@ -49,7 +50,8 @@ const defaultScript: CallScript = {
     booking_url: '',
     tone: 'professional',
     additional_context: '',
-    status: 'active'
+    status: 'active',
+    voicemail_script: "Hi [first_name], this is Sarah calling on behalf of [company_name]. I was hoping to have a quick chat about something that might be relevant to your business. I'll try you again shortly — but if you'd like to speak sooner, you can book a time directly at [booking_link]. Speak soon!"
 };
 
 const objectives = [
@@ -105,6 +107,41 @@ const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
     const [enhancedPrompt, setEnhancedPrompt] = useState('');
     const [showEnhancedPreview, setShowEnhancedPreview] = useState(false);
 
+    const insertVariable = (variable: string) => {
+        const textarea = document.getElementById('voicemail_script') as HTMLTextAreaElement;
+
+        const currentText = script.voicemail_script || '';
+        if (!textarea) {
+            setScript(prev => ({ ...prev, voicemail_script: currentText + variable }));
+            return;
+        }
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        const newText = currentText.substring(0, start) + variable + currentText.substring(end);
+        setScript(prev => ({ ...prev, voicemail_script: newText }));
+
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + variable.length, start + variable.length);
+        }, 0);
+    };
+
+    const getWordCountStats = (text: string) => {
+        if (!text) return { words: 0, seconds: 0, colorClass: 'text-green-600' };
+        const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+        const seconds = Math.round(words / 3);
+
+        let colorClass = 'text-green-600';
+        if (words >= 75 && words <= 100) colorClass = 'text-amber-500';
+        if (words > 100) colorClass = 'text-red-500';
+
+        return { words, seconds, colorClass };
+    };
+
+    const vmStats = getWordCountStats(script.voicemail_script || '');
+
     useEffect(() => {
         loadScripts();
     }, []);
@@ -143,7 +180,8 @@ const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
                 tone: found.tone || 'professional',
                 additional_context: found.additional_context || '',
                 status: found.status || 'active',
-                system_prompt: found.system_prompt || ''
+                system_prompt: found.system_prompt || '',
+                voicemail_script: found.voicemail_script || ''
             });
             setSelectedScriptId(scriptId);
         }
@@ -260,7 +298,8 @@ IMPORTANT RULES:
                 tone: script.tone,
                 additional_context: script.additional_context,
                 system_prompt: systemPrompt,
-                status: 'active'
+                status: 'active',
+                voicemail_script: script.voicemail_script
             };
 
             if (script.id) {
@@ -577,8 +616,63 @@ IMPORTANT RULES:
                 </div>
             </Section>
 
-            {/* Step 7: Tone & Context */}
-            <Section title="Tone & Additional Context" icon={Volume2} step={7}>
+            {/* Step 7: Voicemail Message */}
+            <Section title="Voicemail Message" icon={Mic} step={7}>
+                <div className="space-y-4">
+                    <div className="p-4 bg-[#EEF2FF] border-l-4 border-[#4F46E5] rounded-r-xl rounded-l-sm mb-4">
+                        <div className="flex items-start gap-3">
+                            <span className="text-xl leading-none pt-0.5">📞</span>
+                            <div>
+                                <h4 className="text-sm font-bold text-[#111827] mb-1">How Voicemail Works</h4>
+                                <p className="text-xs text-[#4F46E5] leading-relaxed">
+                                    If your lead doesn't answer, Sarah will leave a voicemail automatically. Write a short, friendly message that mentions why you're calling and gives them a way to reach you. Keep it under 30 seconds — around 60–75 words is ideal.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="mb-2">
+                            <label className="block text-sm font-bold text-[#374151] uppercase tracking-tight">Voicemail Message</label>
+                            <p className="text-[10px] text-[#6B7280] mt-0.5">Left automatically if the lead doesn't answer.</p>
+                        </div>
+
+                        <div className="mb-3">
+                            <p className="text-[10px] text-[#9CA3AF] font-bold uppercase tracking-wider mb-2">Insert variable:</p>
+                            <div className="flex flex-wrap gap-2">
+                                <button onClick={() => insertVariable('[first_name]')} className="px-3 py-1 text-xs font-bold text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                                    + First Name
+                                </button>
+                                <button onClick={() => insertVariable('[company_name]')} className="px-3 py-1 text-xs font-bold text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                                    + Company Name
+                                </button>
+                                <button onClick={() => insertVariable('[booking_link]')} className="px-3 py-1 text-xs font-bold text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                                    + Booking Link
+                                </button>
+                            </div>
+                        </div>
+
+                        <textarea
+                            id="voicemail_script"
+                            value={script.voicemail_script || ''}
+                            onChange={(e) => setScript(prev => ({ ...prev, voicemail_script: e.target.value }))}
+                            placeholder="Type your voicemail message here..."
+                            rows={5}
+                            className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-y"
+                        />
+
+                        <div className="mt-2 flex items-center justify-between">
+                            <p className="text-[10px] text-[#9CA3AF] italic">Aim for 60–75 words for a natural 20–25 second voicemail.</p>
+                            <div className={`text-xs font-bold ${vmStats.colorClass}`}>
+                                {vmStats.words} words · ~{vmStats.seconds} seconds
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Section>
+
+            {/* Step 8: Tone & Context */}
+            <Section title="Tone & Additional Context" icon={Volume2} step={8}>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-bold text-[#374151] mb-3 uppercase tracking-tight">Agent Personality</label>
