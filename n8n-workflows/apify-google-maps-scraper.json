@@ -38,40 +38,42 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.apify.com/v2/acts/compass~crawler-google-places/runs",
-        "authentication": "none",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "token",
-              "value": "apify_api_XcY02kFIIUHoV0YoC58jhgL5qvFEYI0RD2yF"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ searchStringsArray: [$json.searchQuery], maxCrawledPlacesPerSearch: $json.maxLeads, language: \"en\" }) }}",
-        "options": {
-          "timeout": 30000
-        }
+        "jsCode": "// Bypass HTTP Request node entirely — use $http to POST JSON to Apify\nconst APIFY_TOKEN = 'apify_api_XcY02kFIIUHoV0YoC58jhgL5qvFEYI0RD2yF';\nconst searchQuery = $input.first().json.searchQuery;\nconst maxLeads = $input.first().json.maxLeads;\n\ntry {\n  const response = await $http.request({\n    method: 'POST',\n    url: `https://api.apify.com/v2/acts/compass~crawler-google-places/runs?token=${APIFY_TOKEN}`,\n    headers: {\n      'Content-Type': 'application/json',\n    },\n    body: {\n      searchStringsArray: [searchQuery],\n      maxCrawledPlacesPerSearch: maxLeads,\n      language: 'en',\n    },\n    json: true,\n  });\n\n  return [{\n    json: {\n      success: true,\n      data: response,\n    }\n  }];\n} catch (error) {\n  return [{\n    json: {\n      success: false,\n      error: {\n        message: error.message || 'Unknown error starting Apify run',\n        statusCode: error.statusCode || 500,\n      }\n    }\n  }];\n}"
       },
       "id": "fire-apify-run",
       "name": "Fire Apify Run",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [880, 300],
-      "onError": "continueErrorOutput"
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-fire-success",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-fire-success",
+      "name": "If Fire Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1100, 300]
     },
     {
       "parameters": {
@@ -84,7 +86,7 @@
           "value": {
             "progress": 10,
             "scraping_status": "running",
-            "apify_run_id": "={{ $json.data.id }}"
+            "apify_run_id": "={{ $json.data.data.id }}"
           }
         }
       },
@@ -92,7 +94,7 @@
       "name": "Update Campaign Running",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [1100, 200],
+      "position": [1320, 200],
       "credentials": {
         "supabaseApi": {
           "id": "supabase-creds",
@@ -119,7 +121,7 @@
       "name": "Update Campaign Fire Error",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [1100, 460],
+      "position": [1320, 460],
       "credentials": {
         "supabaseApi": {
           "id": "supabase-creds",
@@ -136,36 +138,14 @@
       "name": "Wait 30s",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [1320, 200]
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "={{ 'https://api.apify.com/v2/actor-runs/' + $('Fire Apify Run').item.json.data.id }}",
-        "authentication": "none",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "token",
-              "value": "apify_api_XcY02kFIIUHoV0YoC58jhgL5qvFEYI0RD2yF"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "poll-apify-status",
-      "name": "Poll Apify Status",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
       "position": [1540, 200]
     },
     {
       "parameters": {
-        "jsCode": "const status = $input.first().json.data.status;\nconst runId = $input.first().json.data.id;\nconst datasetId = $input.first().json.data.defaultDatasetId;\n\nlet progress = 30;\nif (status === 'RUNNING') progress = 40;\nif (status === 'SUCCEEDED') progress = 70;\nif (status === 'FAILED' || status === 'ABORTED') progress = 0;\n\nreturn [{\n  json: {\n    status,\n    runId,\n    datasetId,\n    progress,\n    isTerminal: ['SUCCEEDED', 'FAILED', 'ABORTED', 'TIMED-OUT'].includes(status)\n  }\n}];"
+        "jsCode": "// Poll Apify run status using $http — bypasses HTTP Request node\nconst APIFY_TOKEN = 'apify_api_XcY02kFIIUHoV0YoC58jhgL5qvFEYI0RD2yF';\nconst runId = $('Fire Apify Run').item.json.data.data.id;\n\nconst response = await $http.request({\n  method: 'GET',\n  url: `https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_TOKEN}`,\n  json: true,\n});\n\nconst status = response.data.status;\nconst datasetId = response.data.defaultDatasetId;\n\nlet progress = 30;\nif (status === 'RUNNING') progress = 40;\nif (status === 'SUCCEEDED') progress = 70;\nif (status === 'FAILED' || status === 'ABORTED') progress = 0;\n\nreturn [{\n  json: {\n    status,\n    runId,\n    datasetId,\n    progress,\n    isTerminal: ['SUCCEEDED', 'FAILED', 'ABORTED', 'TIMED-OUT'].includes(status),\n  }\n}];"
       },
-      "id": "check-run-status",
-      "name": "Check Run Status",
+      "id": "poll-apify-status",
+      "name": "Poll Apify Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1760, 200]
@@ -265,7 +245,7 @@
           "value": {
             "status": "error",
             "scraping_status": "failed",
-            "error_message": "={{ 'Apify run ' + $('Check Run Status').item.json.status + ': Run ID ' + $('Check Run Status').item.json.runId }}"
+            "error_message": "={{ 'Apify run ' + $('Poll Apify Status').item.json.status + ': Run ID ' + $('Poll Apify Status').item.json.runId }}"
           }
         }
       },
@@ -283,24 +263,12 @@
     },
     {
       "parameters": {
-        "method": "GET",
-        "url": "={{ 'https://api.apify.com/v2/datasets/' + $('Check Run Status').item.json.datasetId + '/items' }}",
-        "authentication": "none",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "token",
-              "value": "apify_api_XcY02kFIIUHoV0YoC58jhgL5qvFEYI0RD2yF"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "// Fetch Apify dataset results using $http — bypasses HTTP Request node\nconst APIFY_TOKEN = 'apify_api_XcY02kFIIUHoV0YoC58jhgL5qvFEYI0RD2yF';\nconst datasetId = $('Poll Apify Status').item.json.datasetId;\n\nconst response = await $http.request({\n  method: 'GET',\n  url: `https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_TOKEN}`,\n  json: true,\n});\n\n// response is an array of place objects\nconst items = Array.isArray(response) ? response : [response];\nreturn items.map(item => ({ json: item }));"
       },
       "id": "fetch-apify-results",
       "name": "Fetch Apify Results",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [2420, 100]
     },
     {
@@ -424,6 +392,17 @@
       "main": [
         [
           {
+            "node": "If Fire Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Fire Success": {
+      "main": [
+        [
+          {
             "node": "Update Campaign Running",
             "type": "main",
             "index": 0
@@ -461,17 +440,6 @@
       ]
     },
     "Poll Apify Status": {
-      "main": [
-        [
-          {
-            "node": "Check Run Status",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Run Status": {
       "main": [
         [
           {
