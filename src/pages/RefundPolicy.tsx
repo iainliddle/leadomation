@@ -33,13 +33,13 @@ const RefundPolicy: React.FC<RefundPolicyProps> = ({ onBack }) => {
                     <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">2. Free Trial</h3>
                     <p>While a card is required to start your 7-day free trial, you will not be charged during this period. We send a reminder email 2 days before the trial ends so you have ample time to evaluate the platform. If you cancel before the trial ends, you will not be charged.</p>
 
-                    <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">3. Monthly Subscriptions — No Refunds</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">3. Monthly Subscriptions: No Refunds</h3>
                     <p>Monthly subscriptions are strictly non-refundable once charged. We do not provide pro-rata refunds for unused days within a billing cycle. Upon cancellation, you will retain full access to your account until the end of your current billing period.</p>
 
                     <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">4. Annual Subscriptions</h3>
                     <p>For annual subscriptions, we offer a 14-day refund window from the date of initial purchase, provided that you have run fewer than 2 campaigns and made fewer than 10 AI voice calls. After 14 days, or if these usage limits are exceeded, the subscription becomes entirely non-refundable.</p>
 
-                    <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">5. Exceptions — When We Will Issue a Refund</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">5. Exceptions: When We Will Issue a Refund</h3>
                     <p>We will issue a refund or account credit in the following three scenarios:</p>
                     <ul>
                         <li><strong>Duplicate or Accidental Charge:</strong> If our system accidentally double-bills you.</li>

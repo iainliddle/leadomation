@@ -193,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             <SidebarLock
                                 hasAccess={canAccess('globalDemand')}
                                 onClick={() => triggerUpgrade('Global Demand Intelligence', 'pro')}
-                                tooltipText="Pro feature — Upgrade to unlock Global Demand"
+                                tooltipText="Pro feature. Upgrade to unlock Global Demand."
                             >
                                 <NavItem
                                     icon={Globe}
@@ -237,7 +237,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             <SidebarLock
                                 hasAccess={canAccess('dealPipeline')}
                                 onClick={() => triggerUpgrade('Deal Pipeline / Kanban CRM', 'pro')}
-                                tooltipText="Pro feature — Upgrade to unlock Deal Pipeline"
+                                tooltipText="Pro feature. Upgrade to unlock Deal Pipeline."
                             >
                                 <NavItem
                                     icon={TrendingUp}
@@ -268,7 +268,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             <SidebarLock
                                 hasAccess={canAccess('inbox')}
                                 onClick={() => triggerUpgrade('Unified Inbox', 'pro')}
-                                tooltipText="Pro feature — Upgrade to unlock Unified Inbox"
+                                tooltipText="Pro feature. Upgrade to unlock Unified Inbox."
                             >
                                 <NavItem
                                     icon={MessageSquare}

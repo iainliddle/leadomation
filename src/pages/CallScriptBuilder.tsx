@@ -51,7 +51,7 @@ const defaultScript: CallScript = {
     tone: 'professional',
     additional_context: '',
     status: 'active',
-    voicemail_script: "Hi [first_name], this is Sarah calling on behalf of [company_name]. I was hoping to have a quick chat about something that might be relevant to your business. I'll try you again shortly — but if you'd like to speak sooner, you can book a time directly at [booking_link]. Speak soon!"
+    voicemail_script: "Hi [first_name], this is Sarah calling on behalf of [company_name]. I was hoping to have a quick chat about something that might be relevant to your business. I'll try you again shortly, but if you'd like to speak sooner, you can book a time directly at [booking_link]. Speak soon!"
 };
 
 const objectives = [
@@ -222,7 +222,7 @@ GATEKEEPER HANDLING:
 - Be polite and patient if put on hold.
 
 IMPORTANT RULES:
-- Keep responses concise — 1-2 sentences at a time
+- Keep responses concise. One or two sentences at a time is best.
 - Listen carefully and respond to what the person actually says
 - Never interrupt the person
 - If they ask you to stop calling, confirm you'll remove them from the list and end politely
@@ -502,7 +502,7 @@ IMPORTANT RULES:
                         rows={3}
                         className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-none"
                     />
-                    <p className="text-[10px] text-[#9CA3AF] mt-1.5 italic">This is what the agent says first. Keep it short and natural — under 30 words works best.</p>
+                    <p className="text-[10px] text-[#9CA3AF] mt-1.5 italic">This is what the agent says first. Keep it short and natural; under 30 words works best.</p>
                 </div>
             </Section>
 
@@ -625,7 +625,7 @@ IMPORTANT RULES:
                             <div>
                                 <h4 className="text-sm font-bold text-[#111827] mb-1">How Voicemail Works</h4>
                                 <p className="text-xs text-[#4F46E5] leading-relaxed">
-                                    If your lead doesn't answer, Sarah will leave a voicemail automatically. Write a short, friendly message that mentions why you're calling and gives them a way to reach you. Keep it under 30 seconds — around 60–75 words is ideal.
+                                    If your lead doesn't answer, Sarah will leave a voicemail automatically. Write a short, friendly message that mentions why you're calling and gives them a way to reach you. Keep it under 30 seconds. Around 60 to 75 words is ideal.
                                 </p>
                             </div>
                         </div>

@@ -210,7 +210,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
 
   // FAQ data
   const faqs = [
-    { q: 'Is there a free trial?', a: 'Yes! Both Starter and Pro plans come with a free trial. Secure your trial with a card — cancel anytime before day 7.' },
+    { q: 'Is there a free trial?', a: 'Yes! Both Starter and Pro plans come with a free trial. Secure your trial with a card. Cancel anytime before day 7.' },
     { q: 'Can I cancel anytime?', a: 'Absolutely. Cancel your subscription at any time from your account settings. No cancellation fees, no questions asked.' },
     { q: 'Do I need technical skills?', a: "Not at all. Leadomation is designed for business owners and sales teams. If you can use email, you can use Leadomation. Everything is point-and-click." },
     { q: 'How does the AI Voice Agent work?', a: 'The AI Voice Agent (Pro plan) makes real phone calls to your leads using natural-sounding AI. You configure the call script with your objectives, questions, and objection responses. The AI handles the conversation and books meetings directly into your Calendly.' },
@@ -225,7 +225,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
     { text: "We went from manually researching leads to a full pipeline in under a week. The sequence builder with LinkedIn + email is exactly what we needed.", name: 'Marcus K.', role: 'Business Development, Consulting' },
     { text: "The Global Demand Map alone is worth the subscription. We found three untapped markets in our first week and doubled our outreach.", name: 'Lisa T.', role: 'CEO, Marketing Agency' },
     { text: "I was sceptical about AI cold calling but the Voice Agent is shockingly good. Two meetings booked in the first day without me lifting a finger.", name: 'David R.', role: 'Sales Manager, IT Services' },
-    { text: "Finally, one platform that does everything. Lead scraping, email sequences, LinkedIn, CRM pipeline — all in one place. Absolute no-brainer.", name: 'Priya M.', role: 'Co-Founder, B2B Consultancy' },
+    { text: "Finally, one platform that does everything. Lead scraping, email sequences, LinkedIn, and CRM pipeline, all in one place. Absolute no-brainer.", name: 'Priya M.', role: 'Co-Founder, B2B Consultancy' },
   ];
 
 
@@ -275,7 +275,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-primary lp-btn-lg">Get Started Free →</button>
             <button onClick={() => scrollTo('how-it-works')} className="lp-btn lp-btn-outline lp-btn-lg">See How It Works</button>
           </div>
-          <p className="lp-hero-note">Secure your trial with a card — cancel anytime before day 7</p>
+          <p className="lp-hero-note">Secure your trial with a card. Cancel anytime before day 7.</p>
         </div>
       </section>
 
@@ -577,7 +577,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <div>
                       <div style={{ fontSize: '7px', fontWeight: 700, color: '#6B7280', marginBottom: '3px' }}>Email Sequence</div>
-                      <div className="lp-demo-input" style={{ fontSize: '8px' }}>Direct — Gym/Wellness ▾</div>
+                      <div className="lp-demo-input" style={{ fontSize: '8px' }}>Direct: Gym/Wellness ▾</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '7px', fontWeight: 700, color: '#6B7280', marginBottom: '3px' }}>Follow-ups</div>
@@ -813,7 +813,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <div className="lp-flow-step">
               <div className="lp-flow-icon-wrap"><div className="lp-flow-icon">🤖</div><div className="lp-flow-number">3</div></div>
               <h3>AI Sends Outreach</h3>
-              <p>Personalised emails, LinkedIn messages &amp; AI voice calls — all on autopilot.</p>
+              <p>Personalised emails, LinkedIn messages, and AI voice calls, all on autopilot.</p>
               <div className="lp-mini-mockup">
                 <div className="lp-mock-seq-step lp-mock-seq-active"><span>📧</span> Email Sent <span className="lp-mock-status">✓ Delivered</span></div>
                 <div className="lp-mock-seq-arrow">↓</div>
@@ -886,7 +886,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                       <div className="lp-mockup"><div className="lp-mockup-header">AI Email Composer</div>
                         <div className="lp-email-field"><span>To:</span> j.mitchell@jmplumbing.co.uk</div>
                         <div className="lp-email-field"><span>Subject:</span> Quick question about JM Plumbing</div>
-                        <div className="lp-email-body"><p>Hi James,</p><p>I noticed JM Plumbing has a stellar 4.8★ rating in Manchester — that's impressive.</p><p className="lp-email-typing">I wanted to reach out because we help plumbing companies<span className="lp-cursor">|</span></p></div>
+                        <div className="lp-email-body"><p>Hi James,</p><p>I noticed JM Plumbing has a stellar 4.8★ rating in Manchester, which is impressive.</p><p className="lp-email-typing">I wanted to reach out because we help plumbing companies<span className="lp-cursor">|</span></p></div>
                         <div className="lp-email-ai-badge">✨ AI Generated · Personalised</div>
                       </div>
                     )}
@@ -897,9 +897,9 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                         <div className="lp-voice-company">CEO, TechFlow Solutions</div>
                         <div className="lp-voice-waves">{[...Array(7)].map((_, idx) => <span key={idx}></span>)}</div>
                         <div className="lp-voice-timer">02:34</div>
-                        <div className="lp-transcript-line lp-transcript-ai">"I'd love to schedule a demo — does Thursday at 2pm work?"</div>
+                        <div className="lp-transcript-line lp-transcript-ai">"I'd love to schedule a demo. Does Thursday at 2pm work?"</div>
                         <div className="lp-transcript-line lp-transcript-prospect">"That works perfectly. Send me a calendar invite."</div>
-                        <div className="lp-voice-booked">✅ Meeting Booked — Thu 2:00 PM</div>
+                        <div className="lp-voice-booked">✅ Meeting Booked: Thu 2:00 PM</div>
                       </div>
                     )}
                     {s.id === 'sequences' && (
@@ -929,7 +929,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                         <div className="lp-inbox-list">
                           <div className="lp-inbox-item lp-inbox-unread"><span>📧</span><div><strong>Sarah Mitchell</strong><small>That sounds great! Let's schedule...</small></div><span className="lp-inbox-time">2m</span></div>
                           <div className="lp-inbox-item lp-inbox-unread"><span>💼</span><div><strong>James Patterson</strong><small>Thanks for connecting! I'd be interested...</small></div><span className="lp-inbox-time">15m</span></div>
-                          <div className="lp-inbox-item"><span>📞</span><div><strong>Emma Williams</strong><small>AI Call — meeting booked Thu 3pm</small></div><span className="lp-inbox-time">1h</span></div>
+                          <div className="lp-inbox-item"><span>📞</span><div><strong>Emma Williams</strong><small>AI Call. Meeting booked Thu 3pm</small></div><span className="lp-inbox-time">1h</span></div>
                           <div className="lp-inbox-item"><span>📧</span><div><strong>David Chen</strong><small>Could you send more details about...</small></div><span className="lp-inbox-time">2h</span></div>
                         </div>
                       </div>
@@ -961,7 +961,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
           <div className="lp-section-header lp-reveal">
             <span className="lp-section-tag">The <img src={logoDark} alt="Leadomation" className="lp-inline-logo" style={{ height: '1em' }} /> Workflow</span>
             <h2>Your Entire Outbound Engine, Automated</h2>
-            <p>From market research to closed deal — every step handled.</p>
+            <p>From market research to closed deal, with every step handled.</p>
           </div>
           <div className="lp-wf-container lp-reveal">
             {/* ROW 1 */}
@@ -1082,7 +1082,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
           <div className="lp-video-wrapper" onClick={() => onNavigate('Register')}>
             <div className="lp-video-placeholder">
               <div className="lp-video-play">▶</div>
-              <div className="lp-video-text">Product Demo Coming Soon — Get Early Access</div>
+              <div className="lp-video-text">Product Demo Coming Soon: Get Early Access</div>
             </div>
           </div>
         </div>
@@ -1159,7 +1159,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             </div>
 
           </div>
-          <p className="lp-pricing-scale-note lp-reveal">Scale tier launching soon — join the waitlist above to be first in line.</p>
+          <p className="lp-pricing-scale-note lp-reveal">Scale tier launching soon. Join the waitlist above to be first in line.</p>
         </div>
 
         {/* WAITLIST MODAL */}
@@ -1247,7 +1247,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <h2>Ready to Automate Your Lead Generation?</h2>
             <p>Join hundreds of businesses using Leadomation to find, reach, and close B2B leads on autopilot.</p>
             <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-light lp-btn-lg">Get Started Free →</button>
-            <p className="lp-cta-note">Secure your trial with a card — cancel anytime before day 7</p>
+            <p className="lp-cta-note">Secure your trial with a card. Cancel anytime before day 7.</p>
           </div>
         </div>
       </section>

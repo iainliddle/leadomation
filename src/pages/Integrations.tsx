@@ -62,11 +62,11 @@ const Integrations: React.FC = () => {
     };
 
     const handleConnectLinkedIn = () => {
-        alert('LinkedIn OAuth coming soon — contact support@leadomation.co.uk to connect your account manually.');
+        alert('LinkedIn OAuth coming soon. Contact support@leadomation.co.uk to connect your account manually.');
     };
 
     const handleConnectEmail = () => {
-        alert('Email integration coming soon — contact support@leadomation.co.uk to get set up.');
+        alert('Email integration coming soon. Contact support@leadomation.co.uk to get set up.');
     };
 
     return (
@@ -209,7 +209,7 @@ const Integrations: React.FC = () => {
                 <div>
                     <h4 className="text-sm font-bold text-blue-900">Infrastructure Included</h4>
                     <p className="text-xs text-blue-700/80 font-medium mt-1.5 leading-relaxed">
-                        All lead scraping, email finding, and data enrichment tools are included in your plan — no additional API keys or subscriptions required. Leadomation handles the infrastructure so you can focus on outreach.
+                        All lead scraping, email finding, and data enrichment tools are included in your plan. No additional API keys or subscriptions required. Leadomation handles the infrastructure so you can focus on outreach.
                     </p>
                 </div>
             </div>

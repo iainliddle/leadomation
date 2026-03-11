@@ -348,7 +348,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                     cursor: saveStatus === 'saving' ? 'wait' : 'pointer',
                     minWidth: '140px',
                 }}>
-                    {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved!' : saveStatus === 'error' ? 'Failed — Retry' : 'Save Changes'}
+                    {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved!' : saveStatus === 'error' ? 'Failed. Please retry.' : 'Save Changes'}
                 </button>
             </div>
         </div>
@@ -490,7 +490,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                             <div style={{ fontSize: '12px', fontWeight: 700, color: '#4F46E5', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Plan</div>
                             <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>{currentPlan} Tier</div>
                             <div style={{ fontSize: '13px', color: '#64748B', marginTop: '4px' }}>
-                                {currentPlan === 'Pro' ? 'Unlimited keyword searches/month · All features included' : currentPlan === 'Starter' ? '50 keyword searches/month · Core features' : 'Trial — upgrade to unlock full access'}
+                                {currentPlan === 'Pro' ? 'Unlimited keyword searches every month. All features included.' : currentPlan === 'Starter' ? '50 keyword searches every month. Core features.' : 'Trial mode: upgrade to unlock full access.'}
                             </div>
                         </div>
                         <button onClick={() => onPageChange?.('Pricing')} style={primaryBtnStyle}>

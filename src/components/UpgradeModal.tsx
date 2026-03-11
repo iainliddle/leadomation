@@ -139,7 +139,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, t
                         disabled={loading}
                         className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
                     >
-                        {loading ? 'Loading...' : `Upgrade to ${planName} — ${price}/month`}
+                        {loading ? 'Loading...' : `Upgrade to ${planName} for ${price}/month`}
                     </button>
                     <button
                         onClick={onClose}

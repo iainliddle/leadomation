@@ -223,7 +223,7 @@ const Pricing: React.FC = () => {
                         <span className="text-xs font-bold text-[#6B7280]">Full Pro access, no restrictions on features.</span>
                     </div>
                     <p className="text-[11px] font-bold text-[#9CA3AF]">
-                        Secure your trial with a card — cancel anytime before day 7 • Export limits apply during trial
+                        Secure your trial with a card. Cancel anytime before day 7. Export limits apply during trial.
                     </p>
                 </div>
             </div>
@@ -368,10 +368,10 @@ const Pricing: React.FC = () => {
                             </ul>
                             <div className="flex flex-col justify-center">
                                 <p className="text-xs font-bold text-[#4B5563] leading-relaxed mb-1">
-                                    Full feature access otherwise. Leads generated during trial are retained — upgrade to access them.
+                                    Full feature access otherwise. Leads generated during trial are retained. Upgrade to access them.
                                 </p>
                                 <p className="text-xs font-black text-primary">
-                                    "Your leads stay safe — upgrade anytime to unlock everything you've built"
+                                    "Your leads stay safe. Upgrade anytime to unlock everything you've built."
                                 </p>
                             </div>
                         </div>

@@ -106,16 +106,16 @@ const intentFilterOptions = [
         id: 'new_business',
         icon: '🆕',
         label: 'Newly Opened Businesses',
-        description: 'Businesses opened in the last 6 months — they need everything and are open to new suppliers',
+        description: 'Businesses opened in the last 6 months. They need everything and are open to new suppliers.',
         badge: 'HOT',
         badgeColor: 'bg-red-50 text-red-600 border-red-100',
-        note: 'Availability depends on Google data — filter applied where opening date is present'
+        note: 'Availability depends on Google data. Filters are applied only where opening dates are present.'
     },
     {
         id: 'low_rating',
         icon: '⭐',
         label: 'Low Google Rating',
-        description: 'Under 4.0 stars — clear pain point, high motivation to improve their reputation',
+        description: 'Under 4.0 stars. These businesses have a clear pain point and high motivation to improve their reputation.',
         badge: 'HIGH INTENT',
         badgeColor: 'bg-amber-50 text-amber-600 border-amber-100',
         hasSubOption: true
@@ -124,7 +124,7 @@ const intentFilterOptions = [
         id: 'no_photos',
         icon: '📸',
         label: 'Missing or Few Photos',
-        description: 'Under 5 photos on their Google profile — weak online presence, easy win',
+        description: 'Under 5 photos on their Google profile. This indicates a weak online presence and represents an easy win.',
         badge: null,
         badgeColor: ''
     },
@@ -132,7 +132,7 @@ const intentFilterOptions = [
         id: 'no_recent_reviews',
         icon: '💬',
         label: 'No Recent Reviews',
-        description: 'Last review over 6 months ago — disengaged owner, likely needs support',
+        description: 'Last review over 6 months ago. This suggests a disengaged owner who likely needs support.',
         badge: null,
         badgeColor: ''
     },
@@ -140,7 +140,7 @@ const intentFilterOptions = [
         id: 'incomplete_profile',
         icon: '📋',
         label: 'Incomplete Google Profile',
-        description: 'Missing website, phone, or hours — unprofessional listing, easy conversation starter',
+        description: 'Missing website, phone, or hours. These are unprofessional listings and serve as easy conversation starters.',
         badge: null,
         badgeColor: ''
     }
@@ -692,7 +692,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                         }}>
                             <span style={{ fontSize: '18px' }}>⚡</span>
                             <p style={{ margin: 0, fontSize: '12px', color: '#4B5563', lineHeight: '1.6' }}>
-                                Smart filters identify businesses showing clear buying signals right now. Target leads that are actively struggling so your outreach arrives at exactly the right moment — these convert at <strong style={{ color: '#4F46E5' }}>3-5x higher rates</strong> than cold lists.
+                                Smart filters identify businesses showing clear buying signals right now. Target leads that are actively struggling so your outreach arrives at exactly the right moment. These convert at <strong style={{ color: '#4F46E5' }}>3-5x higher rates</strong> than cold lists.
                             </p>
                         </div>
 
@@ -756,7 +756,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                             <div className="mt-4 p-3 bg-green-50 border border-green-100 rounded-xl flex items-center gap-2 animate-in fade-in duration-200">
                                 <span className="text-green-600 text-sm">✅</span>
                                 <p className="text-xs font-bold text-green-700">
-                                    {activeFilterCount} intent filter{activeFilterCount > 1 ? 's' : ''} active — targeting warm leads only
+                                    {activeFilterCount} intent filter{activeFilterCount > 1 ? 's' : ''} active, targeting warm leads only
                                 </p>
                             </div>
                         )}
@@ -810,7 +810,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                 onChange={(e) => setSelectedSequenceId(e.target.value)}
                                 className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
                             >
-                                <option value="">Custom — Build from Scratch</option>
+                                <option value="">Custom: Build from Scratch</option>
                                 {sequences.map(seq => (
                                     <option key={seq.id} value={seq.id}>{seq.name}</option>
                                 ))}

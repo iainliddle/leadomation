@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, Rocket, Plus, ChevronRight, BarChart3, Users, Mail, Eye } from 'lucide-react';
+import { PlayCircle, Rocket, ChevronRight, BarChart3, Users, Mail, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Campaign {
     id: string;
     name: string;
     type: string;
-    status: 'active' | 'paused' | 'draft' | 'Active' | 'Paused' | 'Draft' | 'error';
+    status: 'active' | 'paused' | 'draft' | 'completed' | 'Active' | 'Paused' | 'Draft' | 'Completed' | 'error';
     leadsCount: number;
     leads_found?: number;
     leads_requested?: number;
@@ -52,58 +52,116 @@ const ScrapingBadge = ({ status }: { status: string }) => {
 const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const channelRef = React.useRef<any>(null);
 
     const fetchCampaigns = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data, error } = await supabase
+        const { data: campaignsData, error: campaignsError } = await supabase
             .from('campaigns')
             .select('*')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching campaigns:', error);
+        if (campaignsError) {
+            console.error('Error fetching campaigns:', campaignsError);
             setIsLoading(false);
             return;
         }
 
-        if (data) {
-            setCampaigns(data as Campaign[]);
+        if (campaignsData) {
+            const { data: leadsData, error: leadsError } = await supabase
+                .from('leads')
+                .select('campaign_id, id')
+                .eq('user_id', user.id);
+
+            if (leadsError) {
+                console.error('Error fetching leads:', leadsError);
+            }
+
+            const leadsCountByCampaign = (leadsData || []).reduce((acc: Record<string, number>, lead) => {
+                if (lead.campaign_id) {
+                    acc[lead.campaign_id] = (acc[lead.campaign_id] || 0) + 1;
+                }
+                return acc;
+            }, {});
+
+            const enrichedCampaigns = campaignsData.map(campaign => ({
+                ...campaign,
+                leads_found: leadsCountByCampaign[campaign.id] || 0
+            }));
+
+            setCampaigns(enrichedCampaigns as Campaign[]);
         }
         setIsLoading(false);
     };
 
     useEffect(() => {
         fetchCampaigns();
+        let cancelled = false;
 
         const setupRealtime = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+            if (!user || cancelled) return;
 
             const channel = supabase
-                .channel('campaigns-changes')
+                .channel(`campaigns-changes-${user.id}`)
                 .on('postgres_changes', {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'campaigns',
                     filter: `user_id=eq.${user.id}`
-                }, () => {
-                    fetchCampaigns(); // Re-fetch on any update
+                }, (payload) => {
+                    console.log('Realtime update received:', payload);
+                    fetchCampaigns();
                 })
-                .subscribe();
+                .subscribe((status) => {
+                    console.log('Realtime subscription status:', status);
+                });
 
-            return channel;
+            if (!cancelled) {
+                channelRef.current = channel;
+            } else {
+                supabase.removeChannel(channel);
+            }
         };
 
-        const channelPromise = setupRealtime();
+        setupRealtime();
 
         return () => {
-            channelPromise.then(channel => {
-                if (channel) supabase.removeChannel(channel);
-            });
+            cancelled = true;
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
         };
+    }, []);
+
+    // Polling fallback: every 3 seconds if there are active scraping campaigns
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data } = await supabase
+                .from('campaigns')
+                .select('scraping_status')
+                .eq('user_id', user.id);
+
+            const stillScraping = (data || []).some(c =>
+                c.scraping_status && ['scraping', 'idle'].includes(String(c.scraping_status).trim().toLowerCase())
+            );
+
+            if (stillScraping) {
+                fetchCampaigns();
+            } else {
+                fetchCampaigns();
+                clearInterval(interval);
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
     }, []);
 
     const deleteCampaign = async (id: string) => {
@@ -153,13 +211,6 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                     <h1 className="text-2xl font-black text-[#111827] mb-1">Active Campaigns</h1>
                     <p className="text-sm font-bold text-[#6B7280]">Monitor and manage your outreach campaigns in real-time</p>
                 </div>
-                <button
-                    onClick={() => onPageChange?.('New Campaign')}
-                    className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all shadow-[0_4px_12px_rgba(37,99,235,0.2)] active:scale-95"
-                >
-                    <Plus size={18} />
-                    NEW CAMPAIGN
-                </button>
             </div>
 
             {/* Info Banner */}
@@ -174,7 +225,8 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                 <p className="text-sm text-[#4B5563] leading-relaxed">
                     <span className="font-bold text-[#111827]">How it works: </span>
                     When you launch a campaign, Leadomation scrapes Google Maps for matching businesses, finds their contact details, and adds them to your Lead Database.
-                    <span className="font-semibold text-[#4F46E5]"> Scraping typically takes 2–5 minutes</span> — the status badge will update automatically when complete. If a campaign shows "Scraping…" it is actively running in the background.
+                    <span className="font-semibold text-[#4F46E5]"> Scraping typically takes 2–5 minutes.</span> The status badge will update automatically when complete. If a campaign shows "Scraping…" it is actively running in the background.
+                    Some leads may not display a local time. This can occur when a business listing does not include enough location detail for us to determine their timezone. This is a data availability limitation on certain listings rather than an issue with Leadomation.
                 </p>
             </div>
 
@@ -228,12 +280,26 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                 <h3 className="text-lg font-black text-[#111827] mb-1 group-hover:text-primary transition-colors">{campaign.name}</h3>
                                 <div className="flex items-center justify-between mb-6">
                                     <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-tight">{campaign.type}</p>
-                                    <div className="flex items-center gap-2">
-                                        <ScrapingBadge status={campaign.scraping_status || 'complete'} />
-                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${campaign.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                                            {campaign.status}
-                                        </span>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <div className="flex items-center gap-2">
+                                            {campaign.scraping_status &&
+                                                !['complete', 'completed'].includes(String(campaign.scraping_status).trim().toLowerCase()) && (
+                                                    <ScrapingBadge status={String(campaign.scraping_status).trim().toLowerCase()} />
+                                                )}
+                                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${campaign.status === 'active' || campaign.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                                                {campaign.status}
+                                            </span>
+                                        </div>
+                                        {campaign.scraping_status && ['scraping', 'idle'].includes(String(campaign.scraping_status).trim().toLowerCase()) && (
+                                            <button
+                                                onClick={() => fetchCampaigns()}
+                                                className="text-[9px] font-bold text-[#9CA3AF] hover:text-[#4F46E5] cursor-pointer underline decoration-dotted underline-offset-2 transition-colors"
+                                            >
+                                                Refresh to update
+                                            </button>
+                                        )}
                                     </div>
+
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
@@ -282,11 +348,11 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                     </div>
                                 </div>
 
-                                {campaign.scraping_status === 'complete' && campaign.leads_found !== undefined && campaign.leads_requested !== undefined && campaign.leads_found < campaign.leads_requested && (
+                                {campaign.scraping_status && ['complete', 'completed'].includes(campaign.scraping_status.toLowerCase()) && campaign.leads_found !== undefined && campaign.leads_requested !== undefined && campaign.leads_found < campaign.leads_requested && (
                                     <div className="flex items-center gap-1.5 mt-2">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                                         <p className="text-[11px] font-bold text-amber-600">
-                                            {campaign.leads_found} of {campaign.leads_requested} leads found — limited results for this search area.
+                                        {campaign.leads_found} of {campaign.leads_requested} leads found. These are limited results for this search area.
                                         </p>
                                     </div>
                                 )}

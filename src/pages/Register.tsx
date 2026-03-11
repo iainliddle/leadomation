@@ -72,7 +72,7 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin, onGoToTerms, onGoToPri
 
             <div className="register-card">
                 <div className="register-title">Start your 7-day free trial</div>
-                <div className="register-subtitle">Full Pro access. Secure your trial with a card — cancel anytime before day 7.</div>
+                <div className="register-subtitle">Full Pro access. Secure your trial with a card. Cancel anytime before day 7.</div>
 
                 {success ? (
                     <div className="register-success">
@@ -130,7 +130,7 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin, onGoToTerms, onGoToPri
                         <div className="register-trust-bar">
                             <div className="register-trust-item"><ShieldCheck size={14} className="text-emerald-500" /> Secure signup</div>
                             <div className="register-trust-item"><Zap size={14} className="text-amber-500" /> Pro access (inc. AI Voice Agent)</div>
-                            <div className="register-trust-item"><Lock size={14} className="text-gray-400" /> 🔒 Card required — you won't be charged for 7 days</div>
+                            <div className="register-trust-item"><Lock size={14} className="text-gray-400" /> 🔒 Card required. You won't be charged for 7 days.</div>
                         </div>
                         <div className="register-signin-link">
                             Already have an account? <button onClick={onGoToLogin}>Sign in</button>

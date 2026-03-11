@@ -24,7 +24,7 @@ const TermsOfService: React.FC<TermsOfServiceProps> = ({ onBack, onNavigate }) =
                         </div>
                     </div>
                     <h1 className="text-4xl font-black text-white tracking-tight mb-2 relative z-10">Terms of Service</h1>
-                    <p className="text-indigo-200 text-sm font-medium uppercase tracking-widest relative z-10">Leadomation — operated by Lumarr Ltd</p>
+                    <p className="text-indigo-200 text-sm font-medium uppercase tracking-widest relative z-10">Leadomation is operated by Lumarr Ltd</p>
                     <p className="text-indigo-200/60 text-xs mt-4 relative z-10">Last updated: March 2026</p>
                 </div>
 
@@ -54,7 +54,7 @@ const TermsOfService: React.FC<TermsOfServiceProps> = ({ onBack, onNavigate }) =
                     <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">7. Acceptable Use</h3>
                     <p>You agree not to use Leadomation for sending spam, making illegal or non-compliant calls, or targeting consumers where restricted by law. Impersonation of other businesses or individuals, and reselling of our services without prior authorization, are strictly prohibited.</p>
 
-                    <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">8. AI Voice Calling — Special Terms</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">8. AI Voice Calling Special Terms</h3>
                     <p>When using our AI Voice Calling feature, you are considered the "caller" and are entirely responsible for legal compliance. Compliance with TCPA, PECR, GDPR, and other local telemarketing laws is your sole responsibility. We strongly recommend disclosing the use of AI during calls. Call recording laws vary by jurisdiction; you must ensure compliance (e.g., obtaining consent where required). Use within the US is subject to A2P 10DLC restrictions and registration requirements.</p>
 
                     <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">9. Data Scraping and Lead Generation</h3>

@@ -45,7 +45,7 @@ const TrialBanner: React.FC<TrialBannerProps> = ({ daysRemaining, plan, onUpgrad
                     <span className="text-sm font-bold">
                         {isUrgent
                             ? `⚠️ Only ${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left on your trial!`
-                            : `You're on a 7-day Pro trial — ${daysRemaining} day${daysRemaining === 1 ? '' : 's'} remaining`
+                            : `You're on a 7-day Pro trial with ${daysRemaining} day${daysRemaining === 1 ? '' : 's'} remaining`
                         }
                     </span>
                 </div>

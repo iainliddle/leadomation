@@ -63,54 +63,76 @@ interface LeadDatabaseProps {
     triggerUpgrade?: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
 
-const getTimezoneOffset = (location: string): number => {
-    if (!location) return 0;
+const cityToTimezone: Record<string, string> = {
+    'london': 'Europe/London', 'manchester': 'Europe/London', 'birmingham': 'Europe/London',
+    'liverpool': 'Europe/London', 'leeds': 'Europe/London', 'bristol': 'Europe/London',
+    'edinburgh': 'Europe/London', 'glasgow': 'Europe/London', 'cardiff': 'Europe/London',
+    'belfast': 'Europe/London', 'newcastle': 'Europe/London', 'sheffield': 'Europe/London',
+    'nottingham': 'Europe/London', 'england': 'Europe/London', 'scotland': 'Europe/London',
+    'wales': 'Europe/London', 'uk': 'Europe/London', 'gb': 'Europe/London',
+    'united kingdom': 'Europe/London',
+    'dubai': 'Asia/Dubai', 'abu dhabi': 'Asia/Dubai', 'sharjah': 'Asia/Dubai',
+    'uae': 'Asia/Dubai', 'united arab emirates': 'Asia/Dubai', 'ae': 'Asia/Dubai',
+    'new york': 'America/New_York', 'boston': 'America/New_York', 'miami': 'America/New_York',
+    'atlanta': 'America/New_York', 'philadelphia': 'America/New_York', 'washington': 'America/New_York',
+    'chicago': 'America/Chicago', 'dallas': 'America/Chicago', 'houston': 'America/Chicago',
+    'austin': 'America/Chicago', 'denver': 'America/Denver', 'phoenix': 'America/Phoenix',
+    'los angeles': 'America/Los_Angeles', 'san francisco': 'America/Los_Angeles',
+    'seattle': 'America/Los_Angeles', 'las vegas': 'America/Los_Angeles',
+    'paris': 'Europe/Paris', 'berlin': 'Europe/Berlin', 'madrid': 'Europe/Madrid',
+    'rome': 'Europe/Rome', 'amsterdam': 'Europe/Amsterdam', 'brussels': 'Europe/Brussels',
+    'vienna': 'Europe/Vienna', 'zurich': 'Europe/Zurich', 'munich': 'Europe/Berlin',
+    'barcelona': 'Europe/Madrid', 'milan': 'Europe/Rome', 'dublin': 'Europe/Dublin',
+    'ireland': 'Europe/Dublin', 'france': 'Europe/Paris', 'germany': 'Europe/Berlin',
+    'spain': 'Europe/Madrid', 'italy': 'Europe/Rome', 'netherlands': 'Europe/Amsterdam',
+    'sydney': 'Australia/Sydney', 'melbourne': 'Australia/Melbourne',
+    'brisbane': 'Australia/Brisbane', 'perth': 'Australia/Perth',
+    'adelaide': 'Australia/Adelaide', 'australia': 'Australia/Sydney',
+    'au': 'Australia/Sydney', 'nsw': 'Australia/Sydney', 'victoria': 'Australia/Melbourne',
+    'new south wales': 'Australia/Sydney',
+    'singapore': 'Asia/Singapore', 'sg': 'Asia/Singapore',
+    'hong kong': 'Asia/Hong_Kong', 'tokyo': 'Asia/Tokyo', 'japan': 'Asia/Tokyo',
+    'beijing': 'Asia/Shanghai', 'shanghai': 'Asia/Shanghai', 'china': 'Asia/Shanghai',
+    'bangkok': 'Asia/Bangkok', 'thailand': 'Asia/Bangkok',
+    'jakarta': 'Asia/Jakarta', 'india': 'Asia/Kolkata', 'mumbai': 'Asia/Kolkata',
+    'delhi': 'Asia/Kolkata', 'bangalore': 'Asia/Kolkata',
+    'riyadh': 'Asia/Riyadh', 'jeddah': 'Asia/Riyadh', 'saudi': 'Asia/Riyadh',
+    'doha': 'Asia/Qatar', 'qatar': 'Asia/Qatar', 'kuwait': 'Asia/Kuwait',
+    'bahrain': 'Asia/Bahrain', 'muscat': 'Asia/Muscat', 'oman': 'Asia/Muscat',
+    'toronto': 'America/Toronto', 'montreal': 'America/Toronto', 'ottawa': 'America/Toronto',
+    'vancouver': 'America/Vancouver', 'calgary': 'America/Edmonton',
+    'auckland': 'Pacific/Auckland', 'new zealand': 'Pacific/Auckland', 'nz': 'Pacific/Auckland',
+    'johannesburg': 'Africa/Johannesburg', 'cape town': 'Africa/Johannesburg',
+    'south africa': 'Africa/Johannesburg',
+};
+
+const getTimezone = (location: string): string => {
+    if (!location) return 'UTC';
     const loc = location.toLowerCase().trim();
-
-    // UK
-    if (['london', 'manchester', 'birmingham', 'liverpool', 'leeds', 'bristol', 'edinburgh', 'glasgow', 'cardiff', 'belfast', 'newcastle', 'sheffield', 'nottingham', 'uk', 'united kingdom', 'england', 'scotland', 'wales'].some(c => loc.includes(c))) return 0;
-    // UAE
-    if (['dubai', 'abu dhabi', 'sharjah', 'uae', 'united arab emirates'].some(c => loc.includes(c))) return 4;
-    // US East
-    if (['new york', 'boston', 'miami', 'atlanta', 'philadelphia', 'washington', 'charlotte', 'orlando'].some(c => loc.includes(c))) return -5;
-    // US Central
-    if (['chicago', 'dallas', 'houston', 'austin', 'nashville', 'san antonio'].some(c => loc.includes(c))) return -6;
-    // US Mountain
-    if (['denver', 'phoenix', 'salt lake', 'albuquerque'].some(c => loc.includes(c))) return -7;
-    // US West
-    if (['los angeles', 'san francisco', 'seattle', 'portland', 'las vegas', 'san diego'].some(c => loc.includes(c))) return -8;
-    // Europe
-    if (['paris', 'berlin', 'madrid', 'rome', 'amsterdam', 'brussels', 'vienna', 'zurich', 'munich', 'barcelona', 'milan', 'france', 'germany', 'spain', 'italy', 'netherlands'].some(c => loc.includes(c))) return 1;
-    // Ireland
-    if (['dublin', 'cork', 'ireland'].some(c => loc.includes(c))) return 0;
-    // Australia East
-    if (['sydney', 'melbourne', 'brisbane', 'australia'].some(c => loc.includes(c))) return 10;
-    // Singapore
-    if (['singapore'].some(c => loc.includes(c))) return 8;
-    // Saudi Arabia / Qatar
-    if (['riyadh', 'jeddah', 'saudi', 'doha', 'qatar'].some(c => loc.includes(c))) return 3;
-    // Canada East
-    if (['toronto', 'montreal', 'ottawa'].some(c => loc.includes(c))) return -5;
-    // Canada West
-    if (['vancouver', 'calgary'].some(c => loc.includes(c))) return -8;
-
-    return 0; // Default to UTC
+    for (const [key, tz] of Object.entries(cityToTimezone)) {
+        if (loc.includes(key)) return tz;
+    }
+    return 'UTC';
 };
 
 const getLocalTime = (location: string): { time: string; hour: number; status: 'green' | 'amber' | 'red'; reason: string } => {
-    const offset = getTimezoneOffset(location);
+    const timezone = getTimezone(location);
     const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const localTime = new Date(utc + (offset * 3600000));
-    const hour = localTime.getHours();
-    const day = localTime.getDay(); // 0 = Sunday, 6 = Saturday
-    const time = localTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-
-    const isWeekend = day === 0 || day === 6;
-
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        weekday: 'short'
+    });
+    const parts = formatter.formatToParts(now);
+    const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0');
+    const minute = parts.find(p => p.type === 'minute')?.value || '00';
+    const weekday = parts.find(p => p.type === 'weekday')?.value || '';
+    const time = `${String(hour).padStart(2, '0')}:${minute}`;
+    const isWeekend = weekday === 'Sat' || weekday === 'Sun';
     let status: 'green' | 'amber' | 'red';
     let reason: string;
-
     if (isWeekend) {
         status = 'red';
         reason = 'Weekend';
@@ -124,7 +146,6 @@ const getLocalTime = (location: string): { time: string; hour: number; status: '
         status = 'red';
         reason = 'Outside hours';
     }
-
     return { time, hour, status, reason };
 };
 
@@ -659,7 +680,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             showToast('Lead updated successfully');
         } catch (error) {
             console.error('Error saving lead edit:', error);
-            showToast('Failed to save changes — please try again');
+            showToast('Failed to save changes. Please try again.');
         } finally {
             setIsSavingLead(false);
         }
@@ -748,7 +769,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
         // Derive domain from website
         if (!lead.website) {
-            showToast('Cannot enrich — no website or company domain available.');
+            showToast('Cannot enrich because no website or company domain is available.');
             return;
         }
 
@@ -759,7 +780,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             .trim();
 
         if (!domain) {
-            showToast('Cannot enrich — no website or company domain available.');
+            showToast('Cannot enrich because no website or company domain is available.');
             return;
         }
 
@@ -800,7 +821,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 setSelectedLead({ ...selectedLead, ...updates });
             }
 
-            showToast('Lead enriched successfully — email updated.');
+            showToast('Lead enriched successfully. Email updated.');
         } catch (error) {
             console.error('Enrichment error:', error);
             showToast('No email found for this domain.');
@@ -998,9 +1019,9 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                     <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-black text-[#111827] mb-1">Your Lead Database</h3>
                         <p className="text-xs font-medium text-[#4B5563] leading-relaxed mb-3">
-                            This is where all your scraped leads land after a campaign runs. Use the filters to find your best prospects, check the local time indicator before calling, and take action directly from here — send emails, make AI-powered calls, or export to CSV. Leads marked as Qualified will automatically appear in your Deal Pipeline.
+                            This is where all your scraped leads land after a campaign runs. Use the filters to find your best prospects, check the local time indicator before calling, and take action directly from here to send emails, make AI-powered calls, or export to CSV. Leads marked as Qualified will automatically appear in your Deal Pipeline.
                             <br /><br />
-                            <strong className="text-[#111827]">Smart Intent Filters</strong> help you identify the warmest leads in your database — businesses that are most likely to need your help right now. A business with a low rating may be struggling with reputation management. A new business may need services to get established quickly. No photos or an incomplete listing suggests they haven't invested in their online presence yet — making them ideal outreach targets. Use multiple filters together to find your highest-priority prospects.
+                            <strong className="text-[#111827]">Smart Intent Filters</strong> help you identify the warmest leads in your database. These are businesses that are most likely to need your help right now. A business with a low rating may be struggling with reputation management, and a new business may need services to get established quickly. No photos or an incomplete listing suggests they haven't invested in their online presence yet, making them ideal outreach targets. Use multiple filters together to find your highest-priority prospects.
                         </p>
                         <div className="flex items-center gap-4 flex-wrap">
                             <div className="flex items-center gap-1.5">
@@ -1805,16 +1826,16 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                     return (
                                         <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center gap-2">
                                             <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', backgroundColor: '#9CA3AF' }} />
-                                            <p className="text-sm font-medium text-[#6B7280]">Unknown location — local time cannot be determined</p>
+                                            <p className="text-sm font-medium text-[#6B7280]">Unknown location. Local time cannot be determined.</p>
                                         </div>
                                     );
                                 }
                                 const lt = getLocalTime(callLeadTarget.location);
                                 const bgColors = { green: 'bg-green-50 border-green-200', amber: 'bg-amber-50 border-amber-200', red: 'bg-red-50 border-red-200' };
                                 const messages = {
-                                    green: `Good time to call — local time is ${lt.time} (${lt.reason})`,
-                                    amber: `Borderline — local time is ${lt.time} (${lt.reason})`,
-                                    red: `Not recommended — local time is ${lt.time} (${lt.reason})`
+                                    green: `Good time to call. Local time is ${lt.time} (${lt.reason})`,
+                                    amber: `Borderline. Local time is ${lt.time} (${lt.reason})`,
+                                    red: `Not recommended. Local time is ${lt.time} (${lt.reason})`
                                 };
                                 return (
                                     <div className={`p-3 ${bgColors[lt.status]} border rounded-xl flex items-center gap-2`}>

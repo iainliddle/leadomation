@@ -60,7 +60,7 @@ export const WELCOME_EMAIL_BODY = `
 </p>
 
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-  I'm Iain, founder of Leadomation. I'm genuinely excited you've decided to try the platform — it's been built from the ground up to help businesses like yours find, contact, and close more leads on autopilot.
+  I'm Iain, founder of Leadomation. I'm genuinely excited you've decided to try the platform. It's been built from the ground up to help businesses like yours find, contact, and close more leads on autopilot.
 </p>
 
 <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.7;">
@@ -106,7 +106,7 @@ export const WELCOME_EMAIL_BODY = `
 </table>
 
 <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.7;">
-  If you have any questions at all, just reply to this email — I read every message personally.
+  If you have any questions at all, just reply to this email. I read every message personally.
 </p>
 
 <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
@@ -121,7 +121,7 @@ export const NUDGE_EMAIL_BODY = `
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">Hi {{first_name}},</p>
 
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-  You signed up 2 days ago — have you had a chance to launch your first campaign yet?
+  You signed up 2 days ago. Have you had a chance to launch your first campaign yet?
 </p>
 
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
@@ -253,7 +253,7 @@ export const CANCELLATION_EMAIL_BODY = `
 </p>
 
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-  I'd love to know why you cancelled — it only takes one click:
+  I'd love to know why you cancelled, and it only takes one click:
 </p>
 
 <!-- Reason buttons -->
@@ -281,7 +281,7 @@ export const CANCELLATION_EMAIL_BODY = `
 </table>
 
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-  If price was the issue, reply to this email — I may be able to help.
+  If price was the issue, please reply to this email. I may be able to help.
 </p>
 
 <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
@@ -296,17 +296,17 @@ export const WIN_BACK_EMAIL_BODY = `
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">Hi {{first_name}},</p>
 
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-  It's been a couple of weeks since you left. We've been listening to feedback and shipping improvements — I wanted to share what's new.
+  It's been a couple of weeks since you left. We've been listening to feedback and shipping improvements, so I wanted to share what's new.
 </p>
 
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
   <tr>
     <td style="padding:20px;background:#F8F9FF;border-radius:12px;border-left:4px solid #06B6D4;">
       <div style="font-size:14px;color:#374151;line-height:2;">
-        🤖 AI Voice Call Agent — now live<br>
-        📊 Global Demand Intelligence — keyword search volume data<br>
-        📥 Unified Inbox — all replies in one place<br>
-        🔗 LinkedIn automation — connect on autopilot
+        🤖 AI Voice Call Agent is now live<br>
+        📊 Global Demand Intelligence with keyword search volume data<br>
+        📥 Unified Inbox to manage all replies in one place<br>
+        🔗 LinkedIn automation to connect on autopilot
       </div>
     </td>
   </tr>

@@ -979,7 +979,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                             {/* Results Table */}
                             <div className="mt-6">
                                 <h3 className="text-sm font-bold text-[#111827] uppercase tracking-tight mb-4">
-                                    Search Volume Results — {selectedCountry.name}
+                                    Search Volume Results for {selectedCountry.name}
                                 </h3>
                                 <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm">
                                     <table className="w-full text-sm">
@@ -1010,7 +1010,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3 text-right text-[#374151] font-medium">
-                                                        {result.cpc > 0 ? `£${result.cpc.toFixed(2)}` : '—'}
+                                                        {result.cpc > 0 ? `£${result.cpc.toFixed(2)}` : '0.00'}
                                                     </td>
                                                     <td className="px-4 py-3 text-right">
                                                         {result.monthly_searches && result.monthly_searches.length > 0 ? (
@@ -1027,7 +1027,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                                                     );
                                                                 })}
                                                             </div>
-                                                        ) : '—'}
+                                                        ) : 'No data'}
                                                     </td>
                                                 </tr>
                                             ))}

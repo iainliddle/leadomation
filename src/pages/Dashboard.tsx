@@ -43,7 +43,7 @@ function formatDateLabel(preset: DatePreset): string {
     const fromDate = new Date(from);
     const toDate = new Date();
     const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    return `${fmt(fromDate)} — ${fmt(toDate)}`;
+    return `${fmt(fromDate)} to ${fmt(toDate)}`;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
