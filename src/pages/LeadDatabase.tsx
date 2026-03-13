@@ -318,7 +318,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 sequence_id: selectedSequenceId,
                 user_id: user.id,
                 status: 'active',
-                enrolled_at: new Date().toISOString()
+                enrolled_at: new Date().toISOString(),
+                next_action_at: new Date().toISOString()
             }));
 
             const { error } = await supabase.from('sequence_enrollments').insert(rows);
