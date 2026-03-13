@@ -1215,6 +1215,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Industry</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Status</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Website</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider text-center">LinkedIn</th>
                                     <th className="w-10 pr-6 pl-4"></th>
                                 </tr>
                             </thead>
@@ -1253,20 +1254,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                             </div>
                                         </td>
                                         <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
-                                            <div className="flex items-center gap-2">
-                                                {lead.email || 'N/A'}
-                                                {lead.linkedin_url && (
-                                                    <a
-                                                        href={lead.linkedin_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-primary hover:text-blue-700 transition-colors"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        <Linkedin size={14} />
-                                                    </a>
-                                                )}
-                                            </div>
+                                            {lead.email || 'N/A'}
                                         </td>
                                         <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
                                             {lead.phone || 'N/A'}
@@ -1314,6 +1302,21 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                                 </a>
                                             ) : (
                                                 <span className="text-[#9CA3AF] text-xs">N/A</span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-4 text-center">
+                                            {lead.linkedin_url ? (
+                                                <a
+                                                    href={lead.linkedin_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center text-primary hover:text-blue-700 transition-colors"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <Linkedin size={16} />
+                                                </a>
+                                            ) : (
+                                                <span className="text-[#9CA3AF] text-xs">—</span>
                                             )}
                                         </td>
                                         <td className="pr-6 pl-4 text-right" onClick={(e) => e.stopPropagation()}>
