@@ -108,12 +108,12 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
             const channel = supabase
                 .channel(`campaigns-changes-${user.id}`)
                 .on('postgres_changes', {
-                    event: 'UPDATE',
+                    event: '*',
                     schema: 'public',
                     table: 'campaigns',
                     filter: `user_id=eq.${user.id}`
                 }, (payload) => {
-                    console.log('Realtime update received:', payload);
+                    console.log('Realtime event received:', payload);
                     fetchCampaigns();
                 })
                 .subscribe((status) => {
@@ -136,32 +136,6 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                 channelRef.current = null;
             }
         };
-    }, []);
-
-    // Polling fallback: every 3 seconds if there are active scraping campaigns
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const { data } = await supabase
-                .from('campaigns')
-                .select('scraping_status')
-                .eq('user_id', user.id);
-
-            const stillScraping = (data || []).some(c =>
-                c.scraping_status && ['scraping', 'idle'].includes(String(c.scraping_status).trim().toLowerCase())
-            );
-
-            if (stillScraping) {
-                fetchCampaigns();
-            } else {
-                fetchCampaigns();
-                clearInterval(interval);
-            }
-        }, 3000);
-
-        return () => clearInterval(interval);
     }, []);
 
     const deleteCampaign = async (id: string) => {
@@ -283,14 +257,17 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                     <div className="flex flex-col items-end gap-1">
                                         <div className="flex items-center gap-2">
                                             {campaign.scraping_status &&
-                                                !['complete', 'completed'].includes(String(campaign.scraping_status).trim().toLowerCase()) && (
+                                                ['scraping', 'enriching', 'idle'].includes(String(campaign.scraping_status).trim().toLowerCase()) &&
+                                                String(campaign.status).toLowerCase() !== 'completed' && (
                                                     <ScrapingBadge status={String(campaign.scraping_status).trim().toLowerCase()} />
                                                 )}
                                             <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${campaign.status === 'active' || campaign.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                                                 {campaign.status}
                                             </span>
                                         </div>
-                                        {campaign.scraping_status && ['scraping', 'idle'].includes(String(campaign.scraping_status).trim().toLowerCase()) && (
+                                        {campaign.scraping_status &&
+                                            ['scraping', 'enriching', 'idle'].includes(String(campaign.scraping_status).trim().toLowerCase()) &&
+                                            String(campaign.status).toLowerCase() !== 'completed' && (
                                             <button
                                                 onClick={() => fetchCampaigns()}
                                                 className="text-[9px] font-bold text-[#9CA3AF] hover:text-[#4F46E5] cursor-pointer underline decoration-dotted underline-offset-2 transition-colors"

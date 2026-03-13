@@ -369,6 +369,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                 name: campaignName.trim(),
                 track: selectedTrack ? (trackMap[selectedTrack.name] || 'direct') : 'direct',
                 status: status,
+                scraping_status: 'idle',
                 target_industry: selectedTags.length > 0 ? selectedTags.join(', ') : (customKeywords || ''),
                 target_location: locationParts.join(', '),
                 target_job_titles: [],

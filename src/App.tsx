@@ -155,7 +155,7 @@ const App: React.FC = () => {
       case 'New Campaign':
         return <NewCampaign onPageChange={setActivePage} />;
       case 'Active Campaigns':
-        return <ActiveCampaigns onPageChange={setActivePage} />;
+        return <ActiveCampaigns key={activePage} onPageChange={setActivePage} />;
       case 'Lead Database':
         return <LeadDatabase canAccess={canAccess} triggerUpgrade={triggerUpgrade} />;
       case 'Deal Pipeline':
