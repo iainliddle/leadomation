@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, Rocket, ChevronRight, BarChart3, Users, Mail, Eye } from 'lucide-react';
+import { PlayCircle, Rocket, ChevronRight, BarChart3, Users, Mail, Eye, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Campaign {
@@ -232,8 +232,14 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                         <div key={campaign.id} className="card bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
                             <div className="p-6">
                                 <div className="flex justify-between items-start mb-6">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${campaign.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                                        <PlayCircle size={24} />
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                                        campaign.status === 'active'
+                                            ? 'bg-emerald-50 text-emerald-600'
+                                            : campaign.status === 'error'
+                                            ? 'bg-red-50 text-red-600'
+                                            : 'bg-amber-50 text-amber-600'
+                                    }`}>
+                                        {campaign.status === 'error' ? <AlertCircle size={24} /> : <PlayCircle size={24} />}
                                     </div>
                                     <div className="flex gap-2">
                                         <button
@@ -261,7 +267,13 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                                 !['completed', 'paused'].includes(String(campaign.status).toLowerCase()) && (
                                                     <ScrapingBadge status={String(campaign.scraping_status).trim().toLowerCase()} />
                                                 )}
-                                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${campaign.status === 'active' || campaign.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
+                                                campaign.status === 'active' || campaign.status === 'completed'
+                                                    ? 'bg-emerald-50 text-emerald-600'
+                                                    : campaign.status === 'error'
+                                                    ? 'bg-red-50 text-red-600'
+                                                    : 'bg-amber-50 text-amber-600'
+                                            }`}>
                                                 {campaign.status}
                                             </span>
                                         </div>
