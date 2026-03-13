@@ -318,6 +318,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 sequence_id: selectedSequenceId,
                 user_id: user.id,
                 status: 'active',
+                current_step: 0,
                 enrolled_at: new Date().toISOString(),
                 next_action_at: new Date().toISOString()
             }));
