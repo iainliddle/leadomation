@@ -184,7 +184,11 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
         low_rating_max: '4.0',
         no_photos: false,
         no_recent_reviews: false,
-        incomplete_profile: false
+        incomplete_profile: false,
+        no_website: false,
+        no_phone: false,
+        high_intent_only: false,
+        include_unscored: false
     });
 
     const [toggles, setToggles] = useState({
@@ -751,6 +755,115 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                     )}
                                 </div>
                             ))}
+                        </div>
+
+                        {/* Intent Score Filters Section */}
+                        <div className="mt-6 pt-6 border-t border-[#E5E7EB]">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="text-lg">🎯</span>
+                                <h4 className="text-sm font-bold text-[#374151]">Intent Score Filters</h4>
+                            </div>
+
+                            <div className="space-y-3">
+                                {/* No Website Toggle */}
+                                <div
+                                    className={`p-4 rounded-xl border transition-all duration-200 ${activeFilters.no_website
+                                        ? 'border-[#4F46E5] bg-[#F5F3FF] shadow-sm'
+                                        : 'border-[#F3F4F6] bg-white hover:border-gray-200 hover:bg-[#F9FAFB]'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <span className="text-xl shrink-0">🌐</span>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-bold text-[#374151]">No website</p>
+                                                <p className="text-[11px] text-[#6B7280] mt-0.5">Businesses with no website listed on their Google Maps profile. Strong digital gap signal.</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveFilters(prev => ({ ...prev, no_website: !prev.no_website }))}
+                                            className={`relative w-10 h-5 rounded-full transition-colors duration-200 shrink-0 ml-4 ${activeFilters.no_website ? 'bg-[#4F46E5]' : 'bg-[#E5E7EB]'}`}
+                                        >
+                                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ${activeFilters.no_website ? 'translate-x-5' : ''}`} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* No Phone Toggle */}
+                                <div
+                                    className={`p-4 rounded-xl border transition-all duration-200 ${activeFilters.no_phone
+                                        ? 'border-[#4F46E5] bg-[#F5F3FF] shadow-sm'
+                                        : 'border-[#F3F4F6] bg-white hover:border-gray-200 hover:bg-[#F9FAFB]'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <span className="text-xl shrink-0">📞</span>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-bold text-[#374151]">No phone number</p>
+                                                <p className="text-[11px] text-[#6B7280] mt-0.5">Businesses with no phone number on their listing. Incomplete profile, likely less established.</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveFilters(prev => ({ ...prev, no_phone: !prev.no_phone }))}
+                                            className={`relative w-10 h-5 rounded-full transition-colors duration-200 shrink-0 ml-4 ${activeFilters.no_phone ? 'bg-[#4F46E5]' : 'bg-[#E5E7EB]'}`}
+                                        >
+                                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ${activeFilters.no_phone ? 'translate-x-5' : ''}`} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* High Intent Score Only Toggle */}
+                                <div
+                                    className={`p-4 rounded-xl border transition-all duration-200 ${activeFilters.high_intent_only
+                                        ? 'border-[#4F46E5] bg-[#F5F3FF] shadow-sm'
+                                        : 'border-[#F3F4F6] bg-white hover:border-gray-200 hover:bg-[#F9FAFB]'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <span className="text-xl shrink-0">🔥</span>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-bold text-[#374151]">High intent score only</p>
+                                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black border bg-red-50 text-red-600 border-red-100">HOT</span>
+                                                </div>
+                                                <p className="text-[11px] text-[#6B7280] mt-0.5">Only include leads that have been scored 75 or above by the intent scoring engine.</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveFilters(prev => ({ ...prev, high_intent_only: !prev.high_intent_only }))}
+                                            className={`relative w-10 h-5 rounded-full transition-colors duration-200 shrink-0 ml-4 ${activeFilters.high_intent_only ? 'bg-[#4F46E5]' : 'bg-[#E5E7EB]'}`}
+                                        >
+                                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ${activeFilters.high_intent_only ? 'translate-x-5' : ''}`} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Include Unscored Toggle */}
+                                <div
+                                    className={`p-4 rounded-xl border transition-all duration-200 ${activeFilters.include_unscored
+                                        ? 'border-[#4F46E5] bg-[#F5F3FF] shadow-sm'
+                                        : 'border-[#F3F4F6] bg-white hover:border-gray-200 hover:bg-[#F9FAFB]'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <span className="text-xl shrink-0">❓</span>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-bold text-[#374151]">Include unscored leads</p>
+                                                <p className="text-[11px] text-[#6B7280] mt-0.5">Include leads that have not yet been processed by the intent scoring engine.</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveFilters(prev => ({ ...prev, include_unscored: !prev.include_unscored }))}
+                                            className={`relative w-10 h-5 rounded-full transition-colors duration-200 shrink-0 ml-4 ${activeFilters.include_unscored ? 'bg-[#4F46E5]' : 'bg-[#E5E7EB]'}`}
+                                        >
+                                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ${activeFilters.include_unscored ? 'translate-x-5' : ''}`} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {activeFilterCount > 0 && (

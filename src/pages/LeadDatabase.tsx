@@ -30,9 +30,18 @@ import {
     Volume2,
     VolumeX,
     Mic,
-    Pencil
+    Pencil,
+    TrendingUp,
+    Flame
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+interface IntentSignal {
+    signal: string;
+    label: string;
+    description: string;
+    weight: number;
+}
 
 interface Lead {
     id: string;
@@ -53,6 +62,8 @@ interface Lead {
     review_count?: number;
     created_at: string;
     user_id: string;
+    intent_score?: number | null;
+    intent_signals?: IntentSignal[] | null;
 }
 
 import { Lock } from 'lucide-react';
@@ -155,6 +166,66 @@ const timeStatusColors = {
     red: '#EF4444'
 };
 
+const getIntentScoreDisplay = (score: number | null | undefined): { label: string; color: string; bgColor: string; borderColor: string } => {
+    if (score === null || score === undefined) {
+        return { label: 'Unscored', color: '#6B7280', bgColor: '#F3F4F6', borderColor: '#E5E7EB' };
+    }
+    if (score >= 75) {
+        return { label: 'Hot', color: '#DC2626', bgColor: '#FEF2F2', borderColor: '#FECACA' };
+    }
+    if (score >= 50) {
+        return { label: 'Warm', color: '#D97706', bgColor: '#FFFBEB', borderColor: '#FDE68A' };
+    }
+    if (score >= 25) {
+        return { label: 'Cool', color: '#2563EB', bgColor: '#EFF6FF', borderColor: '#BFDBFE' };
+    }
+    return { label: 'Cold', color: '#6B7280', bgColor: '#F3F4F6', borderColor: '#E5E7EB' };
+};
+
+const IntentScoreBadge: React.FC<{ lead: Lead }> = ({ lead }) => {
+    const display = getIntentScoreDisplay(lead.intent_score);
+    const hasScore = lead.intent_score !== null && lead.intent_score !== undefined;
+    const signals = lead.intent_signals || [];
+
+    return (
+        <div className="flex items-center gap-1.5">
+            <span
+                className="px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap"
+                style={{ color: display.color, backgroundColor: display.bgColor, borderColor: display.borderColor }}
+            >
+                {hasScore ? `${display.label} · ${lead.intent_score}` : display.label}
+            </span>
+            {hasScore && (
+                <div className="relative group">
+                    <Info
+                        size={14}
+                        className="text-[#9CA3AF] cursor-help hover:text-[#6B7280] transition-colors"
+                    />
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-[#1F2937] text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                        <div className="font-bold mb-2 text-[11px] uppercase tracking-wide text-gray-300">Why this lead?</div>
+                        {signals.length > 0 ? (
+                            <ul className="space-y-1.5">
+                                {signals.map((sig, idx) => (
+                                    <li key={idx} className="flex items-start gap-1.5">
+                                        <span className="text-[#10B981] mt-0.5">•</span>
+                                        <span>
+                                            <span className="font-semibold">{sig.label}</span>
+                                            <span className="text-gray-400"> — {sig.description}</span>
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-400">No signals available yet. Run enrichment to score this lead.</p>
+                        )}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#1F2937]" />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }) => {
     const [campaignFilter, setCampaignFilter] = useState<string | null>(() => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -171,6 +242,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [activeIntentFilters, setActiveIntentFilters] = useState<string[]>([]);
+    const [intentScoreSort, setIntentScoreSort] = useState<'none' | 'desc' | 'asc'>('none');
+    const [intentScoreFilters, setIntentScoreFilters] = useState<string[]>([]);
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [isExporting, setIsExporting] = useState(false);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -259,7 +332,50 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 query = query.eq('campaign_id', campaignFilter);
             }
 
-            const { data, error } = await query.order('created_at', { ascending: false });
+            // Apply intent score filters at the query level
+            if (intentScoreFilters.length > 0) {
+                const conditions: string[] = [];
+                if (intentScoreFilters.includes('hot')) {
+                    conditions.push('intent_score.gte.75');
+                }
+                if (intentScoreFilters.includes('warm')) {
+                    conditions.push('and(intent_score.gte.50,intent_score.lt.75)');
+                }
+                if (intentScoreFilters.includes('cool')) {
+                    conditions.push('and(intent_score.gte.25,intent_score.lt.50)');
+                }
+                if (intentScoreFilters.includes('unscored')) {
+                    conditions.push('intent_score.is.null');
+                }
+
+                // Build OR query for multiple selections
+                if (conditions.length === 1) {
+                    if (intentScoreFilters.includes('hot')) {
+                        query = query.gte('intent_score', 75);
+                    } else if (intentScoreFilters.includes('warm')) {
+                        query = query.gte('intent_score', 50).lt('intent_score', 75);
+                    } else if (intentScoreFilters.includes('cool')) {
+                        query = query.gte('intent_score', 25).lt('intent_score', 50);
+                    } else if (intentScoreFilters.includes('unscored')) {
+                        query = query.is('intent_score', null);
+                    }
+                } else {
+                    // For multiple filters, we need to use OR logic
+                    // Supabase JS doesn't support complex OR directly, so we fetch all and filter client-side
+                    // This is handled in the filteredLeads useMemo below
+                }
+            }
+
+            // Apply intent score sorting
+            if (intentScoreSort === 'desc') {
+                query = query.order('intent_score', { ascending: false, nullsFirst: false });
+            } else if (intentScoreSort === 'asc') {
+                query = query.order('intent_score', { ascending: true, nullsFirst: false });
+            } else {
+                query = query.order('created_at', { ascending: false });
+            }
+
+            const { data, error } = await query;
 
             if (error) {
                 console.error('Error fetching leads:', error);
@@ -504,7 +620,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         fetchLeads();
         fetchCallScripts();
         fetchSequences();
-    }, [campaignFilter]);
+    }, [campaignFilter, intentScoreSort, intentScoreFilters]);
 
     const filteredLeads = useMemo(() => {
         return leads.filter(lead => {
@@ -520,9 +636,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
             let matchesIntent = true;
             if (activeIntentFilters.length > 0) {
-                // Determine if a lead is "New Business" (created in last 6 months)
-                // Note: assuming Lead's created_at is when we got them, but if source provides it, 
-                // we'll use created_at as a fallback proxy for "New".
                 const sixMonthsAgo = new Date();
                 sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -547,9 +660,26 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 }
             }
 
-            return matchesSearch && matchesStatus && matchesIntent;
+            // Intent score range filtering (client-side for multiple selections)
+            let matchesIntentScore = true;
+            if (intentScoreFilters.length > 0) {
+                const score = lead.intent_score;
+                const isHot = score !== null && score !== undefined && score >= 75;
+                const isWarm = score !== null && score !== undefined && score >= 50 && score < 75;
+                const isCool = score !== null && score !== undefined && score >= 25 && score < 50;
+                const isUnscored = score === null || score === undefined;
+
+                matchesIntentScore = (
+                    (intentScoreFilters.includes('hot') && isHot) ||
+                    (intentScoreFilters.includes('warm') && isWarm) ||
+                    (intentScoreFilters.includes('cool') && isCool) ||
+                    (intentScoreFilters.includes('unscored') && isUnscored)
+                );
+            }
+
+            return matchesSearch && matchesStatus && matchesIntent && matchesIntentScore;
         });
-    }, [leads, searchQuery, statusFilter, activeIntentFilters]);
+    }, [leads, searchQuery, statusFilter, activeIntentFilters, intentScoreFilters]);
 
     // Derived counts for the smart filters to show in the badges
     const intentCounts = useMemo(() => {
@@ -582,8 +712,36 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         return counts;
     }, [leads, searchQuery, statusFilter]);
 
+    // Intent score counts for filter badges
+    const intentScoreCounts = useMemo(() => {
+        const counts = { hot: 0, warm: 0, cool: 0, unscored: 0 };
+        const baseFilteredLeads = leads.filter(lead => {
+            const matchesSearch = lead.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.location?.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesStatus = statusFilter === 'All' ? true : statusFilter === 'Lost' ? (lead.status === 'Lost' || lead.status === 'Not Interested') : lead.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+
+        baseFilteredLeads.forEach(lead => {
+            const score = lead.intent_score;
+            if (score === null || score === undefined) counts.unscored++;
+            else if (score >= 75) counts.hot++;
+            else if (score >= 50) counts.warm++;
+            else if (score >= 25) counts.cool++;
+        });
+
+        return counts;
+    }, [leads, searchQuery, statusFilter]);
+
     const toggleIntentFilter = (filter: string) => {
         setActiveIntentFilters(prev =>
+            prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+        );
+    };
+
+    const toggleIntentScoreFilter = (filter: string) => {
+        setIntentScoreFilters(prev =>
             prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
         );
     };
@@ -1082,6 +1240,21 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                             </select>
                             <ChevronDown className="text-[#9CA3AF] -ml-6 pointer-events-none group-focus-within:text-primary transition-colors" size={14} />
                         </div>
+
+                        {/* Intent Score Sort Dropdown */}
+                        <div className="flex items-center bg-white border border-[#E5E7EB] rounded-full px-4 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all group h-[42px]">
+                            <TrendingUp className="text-[#9CA3AF] group-focus-within:text-primary transition-colors shrink-0" size={16} />
+                            <select
+                                className="pl-3 pr-8 py-2 bg-transparent border-none focus:outline-none text-sm font-bold text-[#374151] appearance-none cursor-pointer"
+                                value={intentScoreSort}
+                                onChange={(e) => setIntentScoreSort(e.target.value as 'none' | 'desc' | 'asc')}
+                            >
+                                <option value="none">Sort: Recent</option>
+                                <option value="desc">Highest Intent First</option>
+                                <option value="asc">Lowest Intent First</option>
+                            </select>
+                            <ChevronDown className="text-[#9CA3AF] -ml-6 pointer-events-none group-focus-within:text-primary transition-colors" size={14} />
+                        </div>
                     </div>
                 </div>
 
@@ -1181,6 +1354,58 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 )}
             </div>
 
+            {/* Intent Score Filters */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-1 hide-scrollbar">
+                <span className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF] mr-2 shrink-0">
+                    Intent Score
+                </span>
+
+                <button
+                    onClick={() => toggleIntentScoreFilter('hot')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('hot') ? 'bg-red-50 border-red-300 text-red-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <Flame size={12} />
+                    Hot (75+)
+                    <span className="ml-1 opacity-70">({intentScoreCounts.hot})</span>
+                </button>
+
+                <button
+                    onClick={() => toggleIntentScoreFilter('warm')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('warm') ? 'bg-amber-50 border-amber-300 text-amber-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="warm">🌡️</span>
+                    Warm (50-74)
+                    <span className="ml-1 opacity-70">({intentScoreCounts.warm})</span>
+                </button>
+
+                <button
+                    onClick={() => toggleIntentScoreFilter('cool')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('cool') ? 'bg-blue-50 border-blue-300 text-blue-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="cool">❄️</span>
+                    Cool (25-49)
+                    <span className="ml-1 opacity-70">({intentScoreCounts.cool})</span>
+                </button>
+
+                <button
+                    onClick={() => toggleIntentScoreFilter('unscored')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('unscored') ? 'bg-gray-100 border-gray-400 text-gray-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                >
+                    <span role="img" aria-label="unscored">❓</span>
+                    Unscored
+                    <span className="ml-1 opacity-70">({intentScoreCounts.unscored})</span>
+                </button>
+
+                {intentScoreFilters.length > 0 && (
+                    <button
+                        onClick={() => setIntentScoreFilters([])}
+                        className="text-xs font-bold text-[#6B7280] hover:text-[#4F46E5] transition-colors ml-2 shrink-0 underline decoration-dotted underline-offset-2"
+                    >
+                        Clear
+                    </button>
+                )}
+            </div>
+
             {/* Main Content: Data Table */}
             <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden flex flex-col">
                 {filteredLeads.length === 0 ? (
@@ -1216,6 +1441,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Local Time</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Industry</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Intent</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Website</th>
                                     <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider text-center">LinkedIn</th>
                                     <th className="w-10 pr-6 pl-4"></th>
@@ -1296,6 +1522,9 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                                     </span>
                                                 );
                                             })()}
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            <IntentScoreBadge lead={lead} />
                                         </td>
                                         <td className="px-4 py-4">
                                             {lead.website ? (
