@@ -77,15 +77,15 @@ const successActions = [
 ];
 
 const Section: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode; step?: number }> = ({ title, icon: Icon, children, step }) => (
-    <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl shadow-sm mb-6">
+    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 mb-6">
         <div className="flex items-center gap-3 mb-6">
             {step && (
-                <div className="w-7 h-7 rounded-full bg-[#EEF2FF] text-[#4F46E5] text-xs font-black flex items-center justify-center border border-[#C7D2FE]">
+                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-sm font-bold flex items-center justify-center">
                     {step}
                 </div>
             )}
-            <Icon size={18} className="text-[#4F46E5]" />
-            <h3 className="text-lg font-bold text-[#111827]">{title}</h3>
+            <Icon size={18} className="text-indigo-600" />
+            <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
         </div>
         {children}
     </div>

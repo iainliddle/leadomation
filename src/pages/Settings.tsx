@@ -246,21 +246,22 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
 
     // ────── Reusable styles ──────
     const cardStyle: React.CSSProperties = {
-        background: 'white', border: '1px solid #E2E4ED', borderRadius: '12px', padding: '28px',
+        background: 'white', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '32px',
+        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
     };
     const labelStyle: React.CSSProperties = {
-        display: 'block', fontSize: '12px', fontWeight: 600, color: '#64748B',
-        textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px',
+        display: 'block', fontSize: '12px', fontWeight: 500, color: '#64748B',
+        textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px',
     };
     const inputStyle: React.CSSProperties = {
-        width: '100%', padding: '10px 14px', border: '1px solid #E2E4ED', borderRadius: '8px',
-        fontSize: '14px', fontFamily: 'inherit', outline: 'none', transition: 'border-color 0.2s',
-        background: 'white', color: '#0F172A', boxSizing: 'border-box',
+        width: '100%', padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: '12px',
+        fontSize: '14px', fontFamily: 'inherit', outline: 'none', transition: 'all 0.2s',
+        background: '#F8FAFC', color: '#0F172A', boxSizing: 'border-box',
     };
     const primaryBtnStyle: React.CSSProperties = {
-        padding: '10px 24px', borderRadius: '8px', background: '#4F46E5', color: 'white',
-        border: 'none', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-        transition: 'all 0.2s',
+        padding: '10px 24px', borderRadius: '12px', background: '#4F46E5', color: 'white',
+        border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+        transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
     };
 
     // ────── TAB CONTENT ──────
@@ -563,30 +564,24 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
     };
 
     return (
-        <div>
-            <h1 className="text-2xl font-semibold text-[#111827] mb-6">Settings</h1>
+        <div className="animate-in fade-in duration-200">
+            <h1 className="text-2xl font-bold text-slate-900 mb-6">Settings</h1>
 
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+            <div className="flex gap-6 items-start">
                 {/* Tab Navigation */}
-                <div style={{
-                    width: '200px', flexShrink: 0, background: 'white', border: '1px solid #E2E4ED',
-                    borderRadius: '12px', padding: '8px', position: 'sticky', top: '100px',
-                }}>
+                <div className="w-52 shrink-0 bg-white border border-slate-100 rounded-2xl shadow-sm p-2 sticky top-24">
                     {tabs.map(tab => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.key;
                         return (
-                            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
-                                display: 'flex', alignItems: 'center', gap: '10px', width: '100%',
-                                padding: '10px 14px', borderRadius: '8px', border: 'none',
-                                background: isActive ? 'rgba(79, 70, 229, 0.08)' : 'transparent',
-                                color: isActive ? '#4F46E5' : '#64748B',
-                                fontSize: '13px', fontWeight: isActive ? 700 : 600, cursor: 'pointer',
-                                fontFamily: 'inherit', transition: 'all 0.15s', marginBottom: '2px',
-                                textAlign: 'left',
-                            }}
-                                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = '#F8FAFC'; }}
-                                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-xl text-sm transition-all mb-0.5 text-left ${
+                                    isActive
+                                        ? 'bg-indigo-50 text-indigo-600 font-semibold'
+                                        : 'text-slate-500 hover:bg-slate-50 font-medium'
+                                }`}
                             >
                                 <Icon size={16} />
                                 {tab.label}
@@ -596,7 +591,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 </div>
 
                 {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="flex-1 min-w-0">
                     {contentMap[activeTab]?.()}
                 </div>
             </div>

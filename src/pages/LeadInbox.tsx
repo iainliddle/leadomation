@@ -60,8 +60,8 @@ const AI_LABELS = ['Interested', 'Not Interested', 'Out of Office', 'Unsubscribe
 type AILabel = typeof AI_LABELS[number];
 
 const LABEL_STYLES: Record<AILabel, { bg: string; text: string; border: string }> = {
-    'Interested': { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
-    'Not Interested': { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200' },
+    'Interested': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+    'Not Interested': { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
     'Out of Office': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
     'Unsubscribe': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
     'Question': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
@@ -356,9 +356,9 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
 
     return (
         <div className="flex flex-col h-[calc(100vh-100px)]">
-            <div className="flex bg-white flex-1 rounded-2xl border border-[#E5E7EB] overflow-hidden animate-in fade-in duration-700">
+            <div className="flex bg-white flex-1 rounded-2xl border border-slate-200 overflow-hidden animate-in fade-in duration-200">
                 {/* Left Panel: Email List */}
-                <aside className="w-[400px] shrink-0 border-r border-[#E5E7EB] flex flex-col bg-gray-50/10">
+                <aside className="w-[400px] shrink-0 border-r border-slate-200 flex flex-col bg-white">
                     {/* Header & Search */}
                     <div className="p-4 border-b border-[#E5E7EB] bg-white">
                         <div className="flex items-center justify-between mb-4">
@@ -504,12 +504,12 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                                     <div
                                         key={email.id}
                                         onClick={() => handleSelectEmail(email)}
-                                        className={`p-4 border-b border-[#F3F4F6] cursor-pointer transition-all relative group ${
+                                        className={`p-4 border-b border-slate-100 cursor-pointer transition-colors duration-150 relative group ${
                                             isSelected
-                                                ? 'bg-[#EEF2FF] border-l-4 border-l-primary'
+                                                ? 'bg-indigo-50 border-l-4 border-l-indigo-500'
                                                 : email.is_read
-                                                    ? 'bg-white hover:bg-gray-50'
-                                                    : 'bg-blue-50/30 hover:bg-blue-50/50'
+                                                    ? 'bg-white hover:bg-slate-50'
+                                                    : 'bg-indigo-50 border-l-4 border-l-indigo-500'
                                         }`}
                                     >
                                         {/* Unread indicator */}
@@ -696,27 +696,27 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
 
                                     {/* Reply Composer */}
                                     {!selectedEmail.replied && (
-                                        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                                            <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Reply to {getSenderName(selectedEmail)}</span>
+                                        <div className="bg-white border border-slate-200 rounded-xl p-4 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
+                                            <div className="mb-3">
+                                                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Reply to {getSenderName(selectedEmail)}</span>
                                             </div>
                                             <textarea
                                                 value={replyText}
                                                 onChange={(e) => setReplyText(e.target.value)}
                                                 placeholder="Type your reply..."
-                                                className="w-full p-4 text-sm text-gray-700 placeholder-gray-400 resize-none focus:outline-none min-h-[150px]"
+                                                className="w-full p-0 text-sm text-slate-700 placeholder-slate-400 resize-none focus:outline-none min-h-[150px] border-0"
                                             />
-                                            <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex items-center justify-between">
-                                                <p className="text-[10px] text-gray-400">
+                                            <div className="pt-4 border-t border-slate-100 mt-4 flex items-center justify-between">
+                                                <p className="text-xs text-slate-400">
                                                     Replying from your configured sender email
                                                 </p>
                                                 <button
                                                     onClick={handleSendReply}
                                                     disabled={!replyText.trim() || isSendingReply}
-                                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                                                         replyText.trim() && !isSendingReply
-                                                            ? 'bg-primary text-white hover:bg-[#4338CA] shadow-sm'
-                                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm'
+                                                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                                     }`}
                                                 >
                                                     {isSendingReply ? (

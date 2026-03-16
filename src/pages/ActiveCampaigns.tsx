@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, Rocket, ChevronRight, BarChart3, Users, Mail, Eye, AlertCircle } from 'lucide-react';
+import { PlayCircle, Rocket, ChevronRight, BarChart3, Eye, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Campaign {
@@ -23,26 +23,20 @@ interface ActiveCampaignsProps {
 }
 
 const ScrapingBadge = ({ status }: { status: string }) => {
-    const config: Record<string, { label: string; color: string; bg: string; animate?: boolean }> = {
-        idle: { label: 'Queued', color: '#6B7280', bg: '#F3F4F6' },
-        scraping: { label: 'Scraping…', color: '#D97706', bg: '#FEF3C7', animate: true },
-        enriching: { label: 'Finding Emails…', color: '#7C3AED', bg: '#F3E8FF', animate: true },
-        complete: { label: 'Complete', color: '#059669', bg: '#D1FAE5' },
-        failed: { label: 'Failed', color: '#DC2626', bg: '#FEE2E2' },
+    const config: Record<string, { label: string; className: string; animate?: boolean }> = {
+        idle: { label: 'Queued', className: 'bg-slate-100 text-slate-600' },
+        scraping: { label: 'Scraping…', className: 'bg-blue-50 text-blue-700', animate: true },
+        enriching: { label: 'Finding Emails…', className: 'bg-blue-50 text-blue-700', animate: true },
+        complete: { label: 'Complete', className: 'bg-emerald-50 text-emerald-700' },
+        failed: { label: 'Failed', className: 'bg-red-50 text-red-700' },
     };
 
     const c = config[status] || config.idle;
 
     return (
-        <span
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border"
-            style={{ color: c.color, backgroundColor: c.bg, borderColor: `${c.color}30` }}
-        >
+        <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${c.className}`}>
             {c.animate && (
-                <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{ backgroundColor: c.color }}
-                />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
             )}
             {c.label}
         </span>
@@ -229,7 +223,9 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {campaigns.map((campaign) => (
-                        <div key={campaign.id} className="card bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                        <div key={campaign.id} className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 group">
+                            {/* Gradient header strip */}
+                            <div className="bg-gradient-to-r from-indigo-500 to-cyan-400 h-1 rounded-t-2xl"></div>
                             <div className="p-6">
                                 <div className="flex justify-between items-start mb-6">
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
@@ -257,7 +253,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                     </div>
                                 </div>
 
-                                <h3 className="text-lg font-black text-[#111827] mb-1 group-hover:text-primary transition-colors">{campaign.name}</h3>
+                                <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors">{campaign.name}</h3>
                                 <div className="flex items-center justify-between mb-6">
                                     <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-tight">{campaign.type}</p>
                                     <div className="flex flex-col items-end gap-1">
@@ -267,12 +263,14 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                                 !['completed', 'paused'].includes(String(campaign.status).toLowerCase()) && (
                                                     <ScrapingBadge status={String(campaign.scraping_status).trim().toLowerCase()} />
                                                 )}
-                                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
-                                                campaign.status === 'active' || campaign.status === 'completed'
-                                                    ? 'bg-emerald-50 text-emerald-600'
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                                campaign.status === 'completed' || campaign.status === 'Completed'
+                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                    : campaign.status === 'active' || campaign.status === 'Active'
+                                                    ? 'bg-blue-50 text-blue-700'
                                                     : campaign.status === 'error'
-                                                    ? 'bg-red-50 text-red-600'
-                                                    : 'bg-amber-50 text-amber-600'
+                                                    ? 'bg-red-50 text-red-700'
+                                                    : 'bg-slate-100 text-slate-600'
                                             }`}>
                                                 {campaign.status}
                                             </span>
@@ -292,47 +290,33 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
-                                    <div className="bg-[#F9FAFB] p-3 rounded-xl border border-gray-100">
-                                        <div className="flex items-center gap-1.5 text-[#9CA3AF] mb-1">
-                                            <Users size={12} />
-                                            <span className="text-[9px] font-black uppercase tracking-tight">Leads</span>
-                                        </div>
+                                    <div className="bg-slate-50 p-4 rounded-xl">
+                                        <p className="text-xs text-slate-500 mb-1">Leads Found</p>
                                         <button
                                             onClick={() => {
                                                 window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
                                                 onPageChange?.('Lead Database');
                                             }}
-                                            className="text-lg font-black text-[#111827] hover:text-primary transition-colors hover:underline text-left block"
+                                            className="text-2xl font-bold text-slate-900 hover:text-indigo-600 transition-colors hover:underline text-left block"
                                         >
                                             {campaign.leads_found || 0}
                                         </button>
                                     </div>
-                                    <div className="bg-[#F9FAFB] p-3 rounded-xl border border-gray-100">
-                                        <div className="flex items-center gap-1.5 text-primary mb-1">
-                                            <Mail size={12} />
-                                            <span className="text-[9px] font-black uppercase tracking-tight">Reply Rate</span>
-                                        </div>
-                                        <p className="text-lg font-black text-primary">{campaign.replyRate || '0.0%'}</p>
+                                    <div className="bg-slate-50 p-4 rounded-xl">
+                                        <p className="text-xs text-slate-500 mb-1">Reply Rate</p>
+                                        <p className="text-2xl font-bold text-slate-900">{campaign.replyRate || '0.0%'}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2 mb-6">
-                                    <div className="flex justify-between text-[10px] font-black uppercase tracking-tight">
-                                        <span className="text-[#9CA3AF]">Progress</span>
-                                        <span className="text-[#111827]">{campaign.progress || 0}%</span>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-500">Progress</span>
+                                        <span className="font-bold text-slate-900">{campaign.progress || 0}%</span>
                                     </div>
-                                    <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full rounded-full transition-all duration-1000"
-                                            style={{
-                                                width: `${campaign.progress || 0}%`,
-                                                background: campaign.progress === 100
-                                                    ? 'linear-gradient(90deg, #059669, #10B981)'
-                                                    : 'linear-gradient(90deg, #4F46E5, #7C3AED)',
-                                                boxShadow: campaign.progress > 0 && campaign.progress < 100
-                                                    ? '0 0 8px rgba(79,70,229,0.6)'
-                                                    : 'none'
-                                            }}
+                                            className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                                            style={{ width: `${campaign.progress || 0}%` }}
                                         ></div>
                                     </div>
                                 </div>

@@ -181,10 +181,10 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                     </div>
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-[#4338CA] transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
                     >
                         <Plus size={18} />
-                        ADD DEAL
+                        Add Deal
                     </button>
                 </div>
             </div>
@@ -201,24 +201,24 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                             const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
 
                             return (
-                                <div key={stage.id} className="w-[280px] flex flex-col h-full bg-[#F9FAFB] rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                                    <div className={`p-4 border-t-4 ${getStageColor(stage.color)} bg-white border-b border-gray-100`}>
+                                <div key={stage.id} className="w-[280px] flex flex-col h-full bg-slate-50 rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                                    <div className={`p-4 border-t-4 ${getStageColor(stage.color)} bg-white rounded-xl shadow-sm border border-slate-100 mb-4`}>
                                         <div className="flex items-center justify-between mb-1">
-                                            <h3 className="text-xs font-black text-[#111827] uppercase tracking-widest">{stage.label}</h3>
-                                            <span className="text-[10px] font-black text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded-full">{stageDeals.length}</span>
+                                            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">{stage.label}</h3>
+                                            <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{stageDeals.length}</span>
                                         </div>
-                                        <p className="text-[10px] font-bold text-[#6B7280]">£{stageValue.toLocaleString()}</p>
+                                        <p className="text-xs text-slate-500">£{stageValue.toLocaleString()}</p>
                                     </div>
                                     <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                                         {stageDeals.map(deal => (
-                                            <div key={deal.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
+                                            <div key={deal.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer group">
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="text-sm font-black text-[#111827] line-clamp-1">{deal.title}</h4>
-                                                    <button onClick={() => deleteDeal(deal.id)} className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all">
+                                                    <h4 className="text-sm font-semibold text-slate-700 line-clamp-1">{deal.title}</h4>
+                                                    <button onClick={() => deleteDeal(deal.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all">
                                                         <Trash2 size={12} />
                                                     </button>
                                                 </div>
-                                                <p className="text-lg font-black text-primary mb-2">£{Number(deal.value || 0).toLocaleString()}</p>
+                                                <p className="text-lg font-bold text-slate-900 mb-2">£{Number(deal.value || 0).toLocaleString()}</p>
                                                 {deal.notes && (
                                                     <p className="text-[10px] text-[#6B7280] font-medium line-clamp-2 mb-4 italic">"{deal.notes}"</p>
                                                 )}

@@ -44,12 +44,12 @@ const PricingCard: React.FC<PricingCardProps> = ({
     savingsBadge,
     onCheckout
 }) => (
-    <div className={`relative flex flex-col p-8 bg-white rounded-3xl border transition-all duration-300 ${isPopular
-        ? `border-primary shadow-[0_20px_50px_rgba(37,99,235,0.1)] scale-105 z-10`
-        : 'border-gray-100 shadow-sm hover:shadow-md'
+    <div className={`relative flex flex-col p-8 bg-white rounded-2xl transition-all duration-300 ${isPopular
+        ? `border-2 border-indigo-500 shadow-xl scale-105 z-10`
+        : 'border border-slate-200 shadow-sm hover:shadow-md'
         }`}>
         {isPopular && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-[10px] font-black px-4 py-1 rounded-full tracking-widest uppercase">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
                 MOST POPULAR
             </div>
         )}
@@ -66,16 +66,16 @@ const PricingCard: React.FC<PricingCardProps> = ({
 
         <div className="mb-8">
             <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-[#111827]">{isAnnual ? annualPrice : monthlyPrice}</span>
-                <span className="text-sm font-bold text-[#6B7280]">{isAnnual ? '/year' : '/month'}</span>
+                <span className="text-4xl font-bold text-slate-900">{isAnnual ? annualPrice : monthlyPrice}</span>
+                <span className="text-sm font-medium text-slate-500">{isAnnual ? '/year' : '/month'}</span>
                 {isAnnual && savingsBadge && (
-                    <span className="text-xs font-bold text-[#059669] bg-[#D1FAE5] px-2 py-0.5 rounded-full ml-2">
+                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full ml-2">
                         {savingsBadge}
                     </span>
                 )}
             </div>
             {isAnnual && (
-                <p className="text-xs font-bold text-[#9CA3AF] mt-1">({annualMonthlyRate}/mo)</p>
+                <p className="text-xs text-slate-400 mt-1">({annualMonthlyRate}/mo)</p>
             )}
         </div>
 
