@@ -136,10 +136,10 @@ const EmailTemplates: React.FC = () => {
                         setTemplateBody('');
                         setShowCreateModal(true);
                     }}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] transition-all active:scale-95 group"
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 transition-all active:scale-95 group"
                 >
                     <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
-                    CREATE TEMPLATE
+                    Create Template
                 </button>
             </div>
 
@@ -154,24 +154,32 @@ const EmailTemplates: React.FC = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
                     {templates.map(template => (
-                        <div key={template.id} className="card bg-white border border-[#E5E7EB] rounded-2xl p-6 flex flex-col h-full group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                            <h3 className="text-base font-bold text-[#111827] mb-1 group-hover:text-primary transition-colors">
+                        <div key={template.id} className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer p-6 flex flex-col h-full group">
+                            <div className="mb-3">
+                                <span className="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2 py-1 rounded-full">
+                                    Template
+                                </span>
+                            </div>
+                            <h3 className="text-sm font-semibold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
                                 {template.name}
                             </h3>
-                            <p className="text-xs text-[#6B7280] font-medium mb-4 line-clamp-1">
+                            <p className="text-xs text-slate-500 truncate mb-2">
                                 {template.subject}
                             </p>
+                            <p className="text-xs text-slate-400 line-clamp-2 mb-4">
+                                {template.body?.substring(0, 100) || 'No preview available'}
+                            </p>
 
-                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#9CA3AF] mb-6 mt-auto">
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-4 mt-auto">
                                 <span>Created {new Date(template.created_at).toLocaleDateString()}</span>
                             </div>
 
-                            <div className="flex gap-2 pt-4 border-t border-[#F3F4F6]">
+                            <div className="flex gap-2 pt-4 border-t border-slate-100">
                                 <button
                                     onClick={() => startEdit(template)}
-                                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#E5E7EB] rounded-lg text-xs font-bold text-[#4B5563] hover:bg-gray-50 transition-all font-black"
+                                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-indigo-300 transition-all"
                                 >
-                                    <Edit3 size={14} /> EDIT
+                                    <Edit3 size={14} /> Edit
                                 </button>
                                 <button
                                     onClick={() => deleteTemplate(template.id)}
@@ -231,20 +239,20 @@ const EmailTemplates: React.FC = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="p-6 bg-gray-50 flex gap-4">
+                        <div className="p-6 bg-slate-50 flex gap-4">
                             <button
                                 onClick={() => setShowCreateModal(false)}
-                                className="flex-1 px-6 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-white"
+                                className="flex-1 px-6 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-white transition-all"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={saveTemplate}
                                 disabled={saving}
-                                className="flex-1 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-[#4338CA] transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
+                                className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                                {saving ? 'Saving...' : (editingTemplate ? 'SAVE CHANGES' : 'CREATE TEMPLATE')}
+                                {saving ? 'Saving...' : (editingTemplate ? 'Save Changes' : 'Create Template')}
                             </button>
                         </div>
                     </div>

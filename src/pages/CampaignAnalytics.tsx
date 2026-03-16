@@ -259,26 +259,26 @@ const CampaignAnalytics: React.FC = () => {
         fetchCampaignData();
     }, [selectedCampaignId, activeTab, leads]);
 
-    const StatCard = ({ icon: Icon, label, value, subtext, color }: any) => (
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
+    const StatCard = ({ icon: Icon, label, value, subtext, color, borderColor }: any) => (
+        <div className={`bg-white rounded-2xl shadow-sm border border-slate-100 p-6 border-l-4 ${borderColor || 'border-l-indigo-500'}`}>
             <div className="flex items-center gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
                     <Icon size={20} />
                 </div>
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{label}</span>
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</span>
             </div>
-            <p className="text-2xl font-black text-gray-900">{value}</p>
-            {subtext && <p className="text-xs text-gray-500 mt-1">{subtext}</p>}
+            <p className="text-2xl font-bold text-slate-900">{value}</p>
+            {subtext && <p className="text-xs text-slate-500 mt-1">{subtext}</p>}
         </div>
     );
 
     const EmptyState = () => (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4">
-                <BarChart3 size={32} className="text-indigo-400" />
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+                <BarChart3 size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">No data yet</h3>
-            <p className="text-sm text-gray-500 max-w-md">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No data yet</h3>
+            <p className="text-sm text-slate-400 max-w-md">
                 Send your first email sequence to see analytics here. Once emails are sent, you'll see open rates, reply rates, and more.
             </p>
         </div>
@@ -311,14 +311,14 @@ const CampaignAnalytics: React.FC = () => {
                 <div className="relative">
                     <button
                         onClick={() => setShowDatePicker(!showDatePicker)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:border-indigo-300 transition-all"
                     >
                         <Calendar size={16} />
                         {dateRange === '7d' ? 'Last 7 days' : dateRange === '30d' ? 'Last 30 days' : 'Last 90 days'}
                         <ChevronDown size={16} />
                     </button>
                     {showDatePicker && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                        <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-10 overflow-hidden">
                             {[
                                 { value: '7d', label: 'Last 7 days' },
                                 { value: '30d', label: 'Last 30 days' },
@@ -330,7 +330,7 @@ const CampaignAnalytics: React.FC = () => {
                                         setDateRange(option.value as any);
                                         setShowDatePicker(false);
                                     }}
-                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${dateRange === option.value ? 'text-primary font-bold bg-indigo-50' : 'text-gray-700'
+                                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-all ${dateRange === option.value ? 'text-indigo-600 font-semibold bg-indigo-50' : 'text-slate-700'
                                         }`}
                                 >
                                     {option.label}
@@ -342,14 +342,14 @@ const CampaignAnalytics: React.FC = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-8 w-fit">
+            <div className="flex gap-6 mb-8 border-b border-slate-200">
                 {tabs.map(tab => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key as any)}
-                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === tab.key
-                            ? 'bg-white text-primary shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                        className={`px-1 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${activeTab === tab.key
+                            ? 'border-indigo-600 text-indigo-600 font-semibold'
+                            : 'border-transparent text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         {tab.label}
@@ -367,24 +367,28 @@ const CampaignAnalytics: React.FC = () => {
                             label="Total Sent"
                             value={stats.totalSent.toLocaleString()}
                             color="bg-indigo-50 text-indigo-600"
+                            borderColor="border-l-indigo-500"
                         />
                         <StatCard
                             icon={MousePointer}
                             label="Open Rate"
                             value={`${stats.openRate}%`}
-                            color="bg-green-50 text-green-600"
+                            color="bg-emerald-50 text-emerald-600"
+                            borderColor="border-l-emerald-500"
                         />
                         <StatCard
                             icon={TrendingUp}
                             label="Reply Rate"
                             value={`${stats.replyRate}%`}
                             color="bg-blue-50 text-blue-600"
+                            borderColor="border-l-blue-500"
                         />
                         <StatCard
                             icon={AlertTriangle}
                             label="Bounce Rate"
                             value={`${stats.bounceRate}%`}
                             color="bg-amber-50 text-amber-600"
+                            borderColor="border-l-amber-500"
                         />
                     </div>
 
@@ -393,8 +397,8 @@ const CampaignAnalytics: React.FC = () => {
                     ) : (
                         <>
                             {/* Emails Sent Per Day */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-6">
-                                <h3 className="text-sm font-black text-gray-900 mb-4">Emails Sent Per Day</h3>
+                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
+                                <h3 className="text-base font-semibold text-slate-900 mb-4">Emails Sent Per Day</h3>
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={dailySentData}>
@@ -431,8 +435,8 @@ const CampaignAnalytics: React.FC = () => {
                             </div>
 
                             {/* Open Rate by Campaign */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-6">
-                                <h3 className="text-sm font-black text-gray-900 mb-4">Open Rate by Campaign (Top 10)</h3>
+                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
+                                <h3 className="text-base font-semibold text-slate-900 mb-4">Open Rate by Campaign (Top 10)</h3>
                                 {campaignOpenRates.length === 0 ? (
                                     <p className="text-sm text-gray-500 text-center py-8">No campaign data available</p>
                                 ) : (
@@ -482,14 +486,14 @@ const CampaignAnalytics: React.FC = () => {
             {activeTab === 'campaign' && (
                 <div className="space-y-6">
                     {/* Campaign Selector */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
+                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
                             Select Campaign
                         </label>
                         <select
                             value={selectedCampaignId || ''}
                             onChange={(e) => setSelectedCampaignId(e.target.value || null)}
-                            className="w-full p-3 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                            className="w-full p-3 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
                         >
                             <option value="">Choose a campaign...</option>
                             {campaigns.map(campaign => (
@@ -507,9 +511,9 @@ const CampaignAnalytics: React.FC = () => {
                     ) : (
                         <>
                             {/* Lead Activity Table */}
-                            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-100">
-                                    <h3 className="text-sm font-black text-gray-900">Lead Activity</h3>
+                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+                                <div className="px-6 py-4 border-b border-slate-100">
+                                    <h3 className="text-base font-semibold text-slate-900">Lead Activity</h3>
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
@@ -568,8 +572,8 @@ const CampaignAnalytics: React.FC = () => {
                     ) : (
                         <>
                             {/* Reply Rate by Step */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-6">
-                                <h3 className="text-sm font-black text-gray-900 mb-4">Reply Rate by Step</h3>
+                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
+                                <h3 className="text-base font-semibold text-slate-900 mb-4">Reply Rate by Step</h3>
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={stepPerformance}>
@@ -606,9 +610,9 @@ const CampaignAnalytics: React.FC = () => {
                             </div>
 
                             {/* Best Performing Subject Lines */}
-                            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-100">
-                                    <h3 className="text-sm font-black text-gray-900">Best Performing Subject Lines</h3>
+                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+                                <div className="px-6 py-4 border-b border-slate-100">
+                                    <h3 className="text-base font-semibold text-slate-900">Best Performing Subject Lines</h3>
                                 </div>
                                 <div className="p-6">
                                     {topSubjects.length === 0 ? (

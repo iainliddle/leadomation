@@ -70,4 +70,135 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-[#E5E7EB] rounded-full hover:bg-[#D1D5DB] transition-colors;
   }
+
+  .custom-scrollbar-horizontal::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .custom-scrollbar-horizontal::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar-horizontal::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  }
+
+  /* Loading / disabled states */
+  .btn-loading {
+    @apply opacity-50 cursor-not-allowed pointer-events-none;
+  }
+
+  /* Sidebar active indicator with smooth slide */
+  .sidebar-item {
+    @apply relative transition-all duration-200;
+  }
+
+  .sidebar-item::before {
+    content: '';
+    @apply absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full;
+    @apply scale-y-0 transition-transform duration-200 origin-center;
+  }
+
+  .sidebar-item.active::before {
+    @apply scale-y-100;
+  }
+
+  .sidebar-item:hover {
+    @apply bg-indigo-50/50;
+  }
+
+  .sidebar-item.active {
+    @apply bg-indigo-50 text-primary font-semibold;
+  }
+}
+
+/* Page transition animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+  }
+
+  .fade-in {
+    animation-name: fadeIn;
+  }
+
+  .zoom-in-95 {
+    animation-name: zoomIn;
+  }
+
+  .slide-in-right {
+    animation-name: slideInRight;
+  }
+
+  .duration-200 {
+    animation-duration: 200ms;
+  }
+
+  .duration-300 {
+    animation-duration: 300ms;
+  }
+
+  .duration-500 {
+    animation-duration: 500ms;
+  }
+
+  .duration-700 {
+    animation-duration: 700ms;
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
 }

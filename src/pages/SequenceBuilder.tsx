@@ -273,10 +273,10 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                         </div>
                         <button
                             onClick={handleCreateNew}
-                            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all shadow-lg active:scale-95"
+                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
                         >
                             <Plus size={18} />
-                            NEW SEQUENCE
+                            New Sequence
                         </button>
                     </div>
 
@@ -289,7 +289,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                     ) : (
                         <div className="grid grid-cols-1 gap-4">
                             {sequences.map(seq => (
-                                <div key={seq.id} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 flex items-center justify-between hover:shadow-md transition-all group">
+                                <div key={seq.id} className="bg-white border border-slate-100 rounded-2xl p-6 flex items-center justify-between shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 group">
                                     <div className="flex items-center gap-6">
                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${seq.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'}`}>
                                             {seq.status === 'active' ? <Play size={20} /> : <Pause size={20} />}
@@ -335,7 +335,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                 <div className="flex flex-col lg:flex-row gap-8 animate-in slide-in-from-right duration-500 h-full w-full">
                     {/* Left Panel: Steps list */}
                     <aside className="w-full lg:w-[320px] shrink-0 flex flex-col gap-6 lg:h-[calc(100vh-140px)]">
-                        <div className="card bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-5 flex flex-col h-full overflow-hidden">
+                        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 flex flex-col h-full overflow-hidden">
                             <div className="flex items-center justify-between mb-6">
                                 <button onClick={() => setEditingSequence(null)} className="text-gray-400 hover:text-[#111827]">
                                     <X size={20} />
@@ -371,14 +371,14 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                             onDragStart={() => handleDragStart(index)}
                                             onDragOver={handleDragOver}
                                             onDrop={() => handleDrop(index)}
-                                            className={`group relative flex items-center gap-3 p-3 rounded-xl border transition-all cursor-grab active:cursor-grabbing z-10 ${activeStepIndex === index ? 'bg-blue-50 border-primary ring-1 ring-primary shadow-sm' : 'bg-white border-[#E5E7EB] hover:border-gray-300'}`}
+                                            className={`group relative flex items-center gap-3 p-4 rounded-xl border shadow-sm transition-all duration-200 cursor-grab active:cursor-grabbing z-10 ${activeStepIndex === index ? 'bg-white border-indigo-300 ring-1 ring-indigo-300 shadow-md' : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-md'}`}
                                             onClick={() => setActiveStepIndex(index)}
                                         >
                                             <div className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <GripVertical size={14} className="text-gray-300" />
+                                                <GripVertical size={14} className="text-slate-300" />
                                             </div>
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${activeStepIndex === index ? 'bg-primary text-white' : 'bg-gray-50 text-gray-400'}`}>
-                                                {step.channel === 'email' ? <Mail size={18} /> : step.channel === 'linkedin' ? <Linkedin size={18} /> : <Phone size={18} />}
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${activeStepIndex === index ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                                {index + 1}
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <p className={`text-[11px] font-black truncate uppercase ${activeStepIndex === index ? 'text-primary' : 'text-[#111827]'}`}>Step {index + 1}: {step.channel}</p>
@@ -433,7 +433,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 
                     {/* Right Panel: Editor Canvas */}
                     <main className="flex-1 flex flex-col gap-6">
-                        <div className="card bg-white border border-[#E5E7EB] rounded-2xl shadow-sm flex flex-col flex-1 overflow-hidden min-h-[700px]">
+                        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col flex-1 overflow-hidden min-h-[700px]">
                             {/* Editor Header */}
                             <div className="px-8 py-4 border-b border-gray-50 flex items-center justify-between">
                                 <div className="flex bg-gray-100 p-1 rounded-xl">
@@ -444,10 +444,10 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                     <button
                                         onClick={handleSave}
                                         disabled={isSaving}
-                                        className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all disabled:opacity-50"
+                                        className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                                        SAVE SEQUENCE
+                                        Save Sequence
                                     </button>
                                 </div>
                             </div>
@@ -490,7 +490,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                                 </div>
                                             ) : (
                                                 <textarea
-                                                    className="w-full min-h-[300px] p-6 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 text-sm font-medium leading-relaxed"
+                                                    className="w-full min-h-[300px] p-6 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 text-sm font-medium leading-relaxed transition-all"
                                                     value={editingSequence.steps[activeStepIndex].body}
                                                     onChange={(e) => updateStep(activeStepIndex, { body: e.target.value })}
                                                     placeholder={`Write your ${editingSequence.steps[activeStepIndex].channel} message here...`}
