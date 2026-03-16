@@ -616,8 +616,8 @@ IMPORTANT RULES:
                 </div>
             </Section>
 
-            {/* Step 7: Voicemail Message */}
-            <Section title="Voicemail Message" icon={Mic} step={7}>
+            {/* Step 7: Voicemail Script */}
+            <Section title="Voicemail Script" icon={Mic} step={7}>
                 <div className="space-y-4">
                     <div className="p-4 bg-[#EEF2FF] border-l-4 border-[#4F46E5] rounded-r-xl rounded-l-sm mb-4">
                         <div className="flex items-start gap-3">
@@ -633,8 +633,8 @@ IMPORTANT RULES:
 
                     <div>
                         <div className="mb-2">
-                            <label className="block text-sm font-bold text-[#374151] uppercase tracking-tight">Voicemail Message</label>
-                            <p className="text-[10px] text-[#6B7280] mt-0.5">Left automatically if the lead doesn't answer.</p>
+                            <label className="block text-sm font-bold text-[#374151] uppercase tracking-tight">Voicemail Script</label>
+                            <p className="text-[10px] text-[#6B7280] mt-0.5">Played when the call goes to voicemail. If left empty, the main script will be used as fallback.</p>
                         </div>
 
                         <div className="mb-3">
@@ -656,7 +656,7 @@ IMPORTANT RULES:
                             id="voicemail_script"
                             value={script.voicemail_script || ''}
                             onChange={(e) => setScript(prev => ({ ...prev, voicemail_script: e.target.value }))}
-                            placeholder="Type your voicemail message here..."
+                            placeholder="Leave a brief voicemail message introducing yourself and asking them to call back..."
                             rows={5}
                             className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-y"
                         />
