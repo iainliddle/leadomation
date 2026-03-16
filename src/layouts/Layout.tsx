@@ -17,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] flex font-sans">
+        <div className="min-h-screen bg-[#F8FAFC] flex font-sans">
             <Sidebar
                 activePage={activePage}
                 onPageChange={onPageChange}

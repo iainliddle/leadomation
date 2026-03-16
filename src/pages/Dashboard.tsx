@@ -369,35 +369,35 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     <RecentActivity activities={activities} />
                 </div>
                 <div className="lg:col-span-4 transition-all duration-300">
-                    <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm h-full hover:shadow-md transition-all">
+                    <div className="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm h-full">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-black text-[#111827] tracking-tight">Recent Leads</h3>
+                            <h3 className="text-lg font-semibold text-slate-900">Recent Leads</h3>
                             <button onClick={() => onPageChange('Lead Database')} className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">View All</button>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                             {recentLeads.length === 0 ? (
                                 <p className="text-sm font-medium text-gray-400 text-center py-10">No leads found.</p>
                             ) : (
                                 recentLeads.map((lead) => (
-                                    <div key={lead.id} className="flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-gray-100 hover:bg-gray-50/50 transition-all group cursor-pointer">
+                                    <div key={lead.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors duration-150 group cursor-pointer">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 font-black animate-in zoom-in duration-300 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                                            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[#4F46E5] font-bold animate-in zoom-in duration-300">
                                                 {lead.company ? lead.company.substring(0, 1).toUpperCase() : 'L'}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-[#111827] group-hover:text-primary transition-colors">{lead.company || 'N/A'}</p>
-                                                <p className="text-[11px] font-medium text-[#9CA3AF] tracking-tight">{lead.industry || 'Lead'}</p>
+                                                <p className="text-sm font-bold text-[#0F172A] group-hover:text-primary transition-colors">{lead.company || 'N/A'}</p>
+                                                <p className="text-[11px] font-medium text-slate-500">{lead.industry || 'Lead'}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[11px] font-bold text-[#6B7280]">{formatRelativeTime(lead.created_at)}</p>
+                                            <p className="text-[11px] font-bold text-slate-500">{formatRelativeTime(lead.created_at)}</p>
                                         </div>
                                     </div>
                                 ))
                             )}
                         </div>
                         <button onClick={() => window.location.reload()}
-                            className="w-full mt-6 py-3 border border-gray-100 rounded-xl text-xs font-black text-[#6B7280] hover:bg-gray-50 hover:text-primary transition-all uppercase tracking-widest pt-5 border-t">
+                            className="w-full mt-6 py-3 border border-slate-100 rounded-xl text-xs font-black text-slate-500 hover:bg-slate-50 hover:text-primary transition-all uppercase tracking-widest">
                             Refresh Dashboard
                         </button>
                     </div>

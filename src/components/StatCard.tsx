@@ -21,13 +21,13 @@ const StatCard: React.FC<StatCardProps> = ({
     iconColor = 'text-primary'
 }) => {
     return (
-        <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+        <div
+            className="relative p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border-l-4 border-l-[#4F46E5] border border-[#E2E8F0]"
+            style={{ background: 'linear-gradient(135deg, #ffffff 0%, #F8FAFC 100%)' }}
+        >
             <div className="flex justify-between items-start mb-6">
-                <div className={`w-10 h-10 flex items-center justify-center rounded-full ${iconColor === 'text-primary' ? 'bg-[#EFF6FF]' :
-                        iconColor === 'text-success' ? 'bg-[#ECFDF5]' :
-                            iconColor === 'text-accent' ? 'bg-[#F3E8FF]' : 'bg-gray-50'
-                    }`}>
-                    <Icon className={iconColor} size={20} />
+                <div className="bg-indigo-50 rounded-xl p-3">
+                    <Icon className={iconColor} size={22} />
                 </div>
                 <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${isPositive ? 'bg-[#ECFDF5] text-[#059669]' : 'bg-[#FEF2F2] text-[#DC2626]'
                     }`}>
@@ -37,9 +37,9 @@ const StatCard: React.FC<StatCardProps> = ({
             </div>
 
             <div>
-                <p className="text-sm font-medium text-[#9CA3AF] mb-1">{label}</p>
-                <h3 className="text-2xl font-bold text-[#111827]">{value}</h3>
-                <p className="text-xs text-[#9CA3AF] mt-1">{subtitle}</p>
+                <p className="text-sm font-medium text-slate-500 mb-1">{label}</p>
+                <h3 className="text-4xl font-bold text-[#0F172A]">{value}</h3>
+                <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
             </div>
         </div>
     );

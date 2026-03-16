@@ -147,8 +147,8 @@ const intentFilterOptions = [
 ];
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl shadow-sm mb-8">
-        <h3 className="text-lg font-bold text-[#111827] mb-6">{title}</h3>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 mb-8">
+        <h3 className="text-lg font-semibold text-slate-900 mb-6">{title}</h3>
         {children}
     </div>
 );
@@ -457,7 +457,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                             value={campaignName}
                             onChange={(e) => setCampaignName(e.target.value)}
                             placeholder="e.g., Manchester Plumbers Q1"
-                            className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                            className="w-full border border-slate-200 rounded-xl px-4 py-3 bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm font-medium"
                         />
                     </div>
 
@@ -468,9 +468,9 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                 <button
                                     key={track.id}
                                     onClick={() => { setSelectedTrack(track); setSelectedTags([]); }}
-                                    className={`p-4 border text-left rounded-xl transition-all duration-300 relative group ${selectedTrack?.id === track.id
-                                        ? 'border-[#4F46E5] bg-[#EEF2FF] shadow-sm'
-                                        : 'border-[#E5E7EB] bg-white hover:border-gray-300 hover:shadow-sm'
+                                    className={`p-4 text-left rounded-xl transition-all duration-150 relative group ${selectedTrack?.id === track.id
+                                        ? 'border-2 border-indigo-500 bg-indigo-50 shadow-sm'
+                                        : 'border border-slate-200 bg-white hover:border-indigo-300'
                                         }`}
                                 >
                                     {selectedTrack?.id === track.id && (
@@ -525,7 +525,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                             value={customKeywords}
                             onChange={(e) => setCustomKeywords(e.target.value)}
                             placeholder="e.g., plumber, electrician, solicitor"
-                            className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                            className="w-full border border-slate-200 rounded-xl px-4 py-3 bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm font-medium"
                         />
                     </div>
                 </div>
@@ -593,7 +593,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                 value={cityArea}
                                 onChange={(e) => setCityArea(e.target.value)}
                                 placeholder="e.g., Manchester, Birmingham"
-                                className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-3 bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm font-medium"
                             />
                         </div>
                         <div>
@@ -602,7 +602,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                 <select
                                     value={radius}
                                     onChange={(e) => setRadius(e.target.value)}
-                                    className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                                    className="w-full appearance-none border border-slate-200 rounded-xl px-4 py-3 bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm font-bold text-slate-700"
                                 >
                                     <option>10 miles</option>
                                     <option>25 miles</option>
@@ -621,7 +621,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                             <select
                                 value={minRating}
                                 onChange={(e) => setMinRating(e.target.value)}
-                                className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                                className="w-full appearance-none border border-slate-200 rounded-xl px-4 py-3 bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm font-bold text-slate-700"
                             >
                                 <option>Any</option>
                                 <option>3+ stars</option>
@@ -922,7 +922,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                             <select
                                 value={selectedSequenceId}
                                 onChange={(e) => setSelectedSequenceId(e.target.value)}
-                                className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                                className="w-full appearance-none border border-slate-200 rounded-xl px-4 py-3 bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm font-bold text-slate-700"
                             >
                                 <option value="">Custom: Build from Scratch</option>
                                 {sequences.map(seq => (
@@ -957,7 +957,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                                 <select
                                     value={sendingDelay}
                                     onChange={(e) => setSendingDelay(e.target.value)}
-                                    className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                                    className="w-full appearance-none border border-slate-200 rounded-xl px-4 py-3 bg-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm font-bold text-slate-700"
                                 >
                                     <option>2 days</option>
                                     <option>3 days</option>
@@ -1032,9 +1032,9 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onPageChange }) => {
                     <button
                         onClick={() => saveCampaign('active')}
                         disabled={saving}
-                        className={`px-8 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md transform active:scale-95 transition-all ${saving
+                        className={`px-8 py-4 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transform active:scale-95 transition-all duration-200 ${saving
                             ? 'bg-gray-400 cursor-not-allowed text-white'
-                            : 'bg-primary text-white hover:bg-[#4338CA]'
+                            : 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white'
                             }`}
                     >
                         {saving ? (

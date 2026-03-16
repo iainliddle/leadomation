@@ -168,7 +168,7 @@ const timeStatusColors = {
 
 const getIntentScoreDisplay = (score: number | null | undefined): { label: string; color: string; bgColor: string; borderColor: string } => {
     if (score === null || score === undefined) {
-        return { label: 'Unscored', color: '#6B7280', bgColor: '#F3F4F6', borderColor: '#E5E7EB' };
+        return { label: 'Unscored', color: '#64748B', bgColor: '#F1F5F9', borderColor: '#E2E8F0' };
     }
     if (score >= 75) {
         return { label: 'Hot', color: '#DC2626', bgColor: '#FEF2F2', borderColor: '#FECACA' };
@@ -1301,7 +1301,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
                 <button
                     onClick={() => toggleIntentFilter('new_business')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('new_business') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('new_business') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                 >
                     <span role="img" aria-label="new">🆕</span>
                     New Business
@@ -1310,7 +1310,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
                 <button
                     onClick={() => toggleIntentFilter('low_rating')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('low_rating') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('low_rating') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                 >
                     <span role="img" aria-label="star">⭐</span>
                     Low Rating
@@ -1319,7 +1319,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
                 <button
                     onClick={() => toggleIntentFilter('no_photos')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_photos') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_photos') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                 >
                     <span role="img" aria-label="camera">📸</span>
                     No Photos
@@ -1328,7 +1328,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
                 <button
                     onClick={() => toggleIntentFilter('no_reviews')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_reviews') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_reviews') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                 >
                     <span role="img" aria-label="speech balloon">💬</span>
                     No Recent Reviews
@@ -1337,7 +1337,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
                 <button
                     onClick={() => toggleIntentFilter('incomplete')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('incomplete') ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('incomplete') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                 >
                     <span role="img" aria-label="pin">📍</span>
                     Incomplete Listing
@@ -1420,7 +1420,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                                <tr className="bg-slate-50">
                                     <th className="w-10 px-6 py-4">
                                         <input
                                             type="checkbox"
@@ -1429,29 +1429,29 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                             onChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider cursor-pointer group">
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide cursor-pointer group">
                                         <div className="flex items-center gap-1.5">
                                             Company
                                             <ChevronDown size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
                                     </th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Email</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Phone</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Location</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Local Time</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Industry</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Status</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Intent</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Website</th>
-                                    <th className="px-4 py-4 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider text-center">LinkedIn</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Phone</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Location</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Local Time</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Industry</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Intent</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Website</th>
+                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide text-center">LinkedIn</th>
                                     <th className="w-10 pr-6 pl-4"></th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#F3F4F6]">
+                            <tbody>
                                 {filteredLeads.map((lead) => (
                                     <tr
                                         key={lead.id}
-                                        className={`group cursor-pointer transition-colors duration-150 ${selectedLeads.includes(lead.id) ? 'bg-[#F0F7FF]' : 'hover:bg-[#F0F7FF]'
+                                        className={`group cursor-pointer transition-colors duration-100 border-b border-slate-100 ${selectedLeads.includes(lead.id) ? 'bg-indigo-50' : 'hover:bg-slate-50'
                                             }`}
                                         onClick={() => setSelectedLead(lead)}
                                     >
@@ -1508,16 +1508,17 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         <td className="px-4 py-4">
                                             {(() => {
                                                 const status = lead.status?.toLowerCase() || 'new';
-                                                let classes = 'bg-gray-100 text-[#6B7280] border-gray-200';
+                                                let classes = 'bg-slate-100 text-slate-700';
 
-                                                if (status === 'new') classes = 'bg-blue-50 text-blue-600 border-blue-100';
-                                                else if (status === 'contacted') classes = 'bg-amber-50 text-amber-600 border-amber-100';
-                                                else if (status === 'replied') classes = 'bg-emerald-50 text-emerald-600 border-emerald-100';
-                                                else if (status === 'qualified') classes = 'bg-purple-50 text-purple-600 border-purple-100';
-                                                else if (status === 'lost' || status === 'not interested') classes = 'bg-rose-50 text-rose-600 border-rose-100';
+                                                if (status === 'new') classes = 'bg-slate-100 text-slate-700';
+                                                else if (status === 'contacted') classes = 'bg-amber-50 text-amber-700';
+                                                else if (status === 'replied') classes = 'bg-emerald-50 text-emerald-700';
+                                                else if (status === 'interested') classes = 'bg-emerald-50 text-emerald-700';
+                                                else if (status === 'qualified') classes = 'bg-purple-50 text-purple-700';
+                                                else if (status === 'lost' || status === 'not interested') classes = 'bg-rose-50 text-rose-700';
 
                                                 return (
-                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider border ${classes}`}>
+                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${classes}`}>
                                                         {status.toUpperCase()}
                                                     </span>
                                                 );
