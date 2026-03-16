@@ -38,13 +38,13 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, onClick, i
     <button
         onClick={onClick}
         title={isCollapsed ? label : ''}
-        className={`w-full flex items-center transition-all duration-200 group relative ${isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-4 py-2.5'
+        className={`w-full flex items-center transition-colors duration-150 group relative ${isCollapsed ? 'justify-center px-0 py-2.5 mx-2' : 'gap-3 px-4 py-2.5 mx-2'
             } ${active
-                ? 'bg-[#EEF2FF] text-[#4F46E5] font-bold border-l-[3px] border-[#4F46E5]'
-                : 'text-[#64748B] font-semibold text-[13px] hover:bg-gray-50 hover:text-[#374151]'
+                ? 'bg-indigo-50 text-[#4F46E5] font-semibold rounded-lg'
+                : 'text-slate-600 hover:bg-slate-50 rounded-lg'
             }`}
     >
-        <Icon size={isCollapsed ? 22 : 18} className="transition-colors duration-200" />
+        <Icon size={isCollapsed ? 22 : 18} className="transition-colors duration-150" />
         {!isCollapsed && (
             <div className="flex items-center justify-between flex-1 min-w-0">
                 <span className="text-[13px] truncate">{label}</span>
@@ -58,10 +58,10 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, onClick, i
     </button>
 );
 
-const NavSection: React.FC<{ title: string; children: React.ReactNode; isCollapsed?: boolean; marginTop?: string }> = ({ title, children, isCollapsed, marginTop = 'mt-5' }) => (
-    <div className={`mb-4 ${isCollapsed ? 'px-0' : 'px-0'}`}>
+const NavSection: React.FC<{ title: string; children: React.ReactNode; isCollapsed?: boolean; marginTop?: string }> = ({ title, children, isCollapsed }) => (
+    <div className={`mb-4`}>
         {!isCollapsed && (
-            <h3 className={`text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest ${marginTop} mb-2 px-4 animate-in fade-in duration-300`}>
+            <h3 className={`text-xs font-semibold text-slate-400 uppercase tracking-widest pt-6 pb-2 px-4 animate-in fade-in duration-300`}>
                 {title}
             </h3>
         )}
@@ -156,7 +156,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }}
             >
                 <div
-                    className="bg-white border-r border-[#E5E7EB] flex flex-col h-full"
+                    className="bg-white border-r border-slate-200 flex flex-col h-full"
                     style={{ overflow: 'hidden' }}
                 >
                     <div className={`relative flex items-center justify-center pt-[20px] pb-[24px] ${isCollapsed ? 'px-0' : 'px-6'} overflow-hidden transition-all`}>

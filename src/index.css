@@ -1,19 +1,24 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand Colors */
   --color-primary: #4F46E5;
+  --color-primary-light: #EEF2FF;
+  --color-cyan-accent: #22D3EE;
   --color-success: #059669;
   --color-warning: #D97706;
   --color-danger: #DC2626;
   --color-accent: #7C3AED;
 
-  --color-dark: #111827;
-  --color-body: #374151;
-  --color-muted: #9CA3AF;
+  /* Text Colors */
+  --color-dark: #0F172A;
+  --color-body: #64748B;
+  --color-muted: #94A3B8;
 
-  --color-page-bg: #F9FAFB;
+  /* Background Colors */
+  --color-page-bg: #F8FAFC;
   --color-card-bg: #FFFFFF;
-  --color-border-color: #E5E7EB;
+  --color-border-color: #E2E8F0;
 
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 
@@ -23,12 +28,21 @@
 
 @layer base {
   body {
-    @apply bg-page-bg text-body font-sans;
+    @apply bg-page-bg text-slate-700 font-sans;
   }
 
-  h1,
-  h2,
-  h3,
+  h1 {
+    @apply text-2xl font-bold text-slate-900;
+  }
+
+  h2 {
+    @apply text-xl font-bold text-slate-900;
+  }
+
+  h3 {
+    @apply text-lg font-semibold text-slate-800;
+  }
+
   h4,
   h5,
   h6 {
