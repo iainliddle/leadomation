@@ -17,10 +17,7 @@ export const BASE_LAYOUT = (subject: string, bodyContent: string) => `
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
-              <div style="display:inline-flex;align-items:center;gap:10px;">
-                <div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:8px;display:inline-block;line-height:36px;text-align:center;font-weight:900;color:white;font-size:18px;">L</div>
-                <span style="color:white;font-size:22px;font-weight:700;letter-spacing:-0.5px;">Leadomation</span>
-              </div>
+              <img src="https://leadomation.co.uk/logo.png" alt="Leadomation" width="140" style="display:block;width:140px;height:auto;margin:0 auto;" />
             </td>
           </tr>
           
