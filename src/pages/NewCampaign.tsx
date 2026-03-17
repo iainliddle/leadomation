@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Activity, ArrowLeft, Target, Bot, CheckCircle2, ChevronDown, Key, Clock, Settings, Database, Flame, Users, Building2, Briefcase, Hash, Rocket, Loader2
+    Activity, ArrowLeft, Target, CheckCircle2, ChevronDown, Key, Database, Flame, Users, Building2, Briefcase, Hash, Rocket, Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -348,46 +348,38 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                     </div>
 
                     {/* Data Enrichment */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                         <div
-                            className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between cursor-pointer group"
+                            className="flex items-center justify-between cursor-pointer mb-4"
                             onClick={() => setEnrichmentExpanded(!enrichmentExpanded)}
                         >
-                            <div className="flex items-center gap-3">
-                                <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm transition-colors ${selectedTrack ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-gray-100 text-gray-400'}`}>3</span>
-                                <div>
-                                    <h2 className={`text-lg font-semibold transition-colors ${selectedTrack ? 'text-gray-900' : 'text-gray-400'}`}>Data Enrichment</h2>
-                                    <p className="text-xs text-gray-500 font-medium">Configure what contact info to scrape and verify</p>
-                                </div>
-                            </div>
+                            <h2 className="text-base font-semibold text-gray-900">Data Enrichment</h2>
                             <ChevronDown className={`text-gray-400 transition-transform duration-300 ${enrichmentExpanded ? 'rotate-180' : ''}`} />
                         </div>
                         {enrichmentExpanded && (
-                            <div className="p-6 bg-white animate-in slide-in-from-top-2 duration-200 divide-y divide-gray-100">
+                            <div className="space-y-4">
                                 {[
                                     { state: findEmails, setState: setFindEmails, icon: Key, title: "Decision Maker Emails", desc: "Find personal & corporate email addresses for key contacts" },
                                     { state: findLinkedin, setState: setFindLinkedin, icon: Hash, title: "LinkedIn Profiles", desc: "Extract URLs for businesses and individual decision makers" },
                                     { state: verifyData, setState: setVerifyData, icon: CheckCircle2, title: "Real-time Verification", desc: "Verify emails via SMTP and validate social profiles automatically" },
                                     { state: enrichCompany, setState: setEnrichCompany, icon: Database, title: "Deep Company Data", desc: "Extract tech stack, structured descriptions, employee count, and revenue estimates" },
                                 ].map((item, idx) => (
-                                    <div key={idx} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between">
-                                        <div className="flex items-start gap-4">
-                                            <div className={`mt-1 bg-gray-50 p-2 rounded-lg border flex-shrink-0 ${item.state ? 'border-[#4F46E5] text-[#4F46E5]' : 'border-gray-200 text-gray-400'}`}>
-                                                <item.icon size={18} />
+                                    <div key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                                        <div className="flex items-start gap-3">
+                                            <div className={`mt-0.5 p-2 rounded-lg ${item.state ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-gray-100 text-gray-400'}`}>
+                                                <item.icon size={16} />
                                             </div>
                                             <div>
-                                                <p className={`font-semibold text-sm ${item.state ? 'text-gray-900' : 'text-gray-600'}`}>{item.title}</p>
-                                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
+                                                <p className="font-semibold text-sm text-gray-900">{item.title}</p>
+                                                <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
                                             </div>
                                         </div>
-                                        <div className="ml-4">
-                                            <button
-                                                onClick={() => item.setState(!item.state)}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
-                                            >
-                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out shadow-sm ${item.state ? 'translate-x-6' : 'translate-x-1'}`} />
-                                            </button>
-                                        </div>
+                                        <button
+                                            onClick={() => item.setState(!item.state)}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
+                                        >
+                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out shadow-sm ${item.state ? 'translate-x-6' : 'translate-x-1'}`} />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -395,69 +387,50 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                     </div>
 
                     {/* Outreach Config */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-12">
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
                         <div
-                            className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between cursor-pointer group"
+                            className="flex items-center justify-between cursor-pointer mb-4"
                             onClick={() => setSequenceExpanded(!sequenceExpanded)}
                         >
-                            <div className="flex items-center gap-3">
-                                <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm transition-colors ${selectedTrack ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-gray-100 text-gray-400'}`}>4</span>
-                                <div>
-                                    <h2 className={`text-lg font-semibold transition-colors ${selectedTrack ? 'text-gray-900' : 'text-gray-400'}`}>Outreach Configuration</h2>
-                                    <p className="text-xs text-gray-500 font-medium">Set limits and sequence automation</p>
-                                </div>
-                            </div>
+                            <h2 className="text-base font-semibold text-gray-900">Outreach Configuration</h2>
                             <ChevronDown className={`text-gray-400 transition-transform duration-300 ${sequenceExpanded ? 'rotate-180' : ''}`} />
                         </div>
                         {sequenceExpanded && (
-                            <div className="p-6 bg-white animate-in slide-in-from-top-2 duration-200 space-y-6">
+                            <div className="space-y-6">
+                                {/* Number of leads slider */}
                                 <div>
-                                    <h3 className="text-sm font-bold tracking-wide text-gray-800 uppercase flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
-                                        <Setting size={16} className="text-[#4F46E5]" /> Automation Limits
-                                    </h3>
-                                    <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div>
-                                                <label className="text-sm font-semibold text-gray-900">Maximum Leads to Scrape</label>
-                                                <p className="text-xs text-gray-500 mt-1">Campaign pauses automatically when limit is reached</p>
-                                            </div>
-                                            <span className="text-2xl font-bold tracking-tight text-[#4F46E5]">{maxLeadsTarget}</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="10"
-                                            max="1000"
-                                            step="10"
-                                            value={maxLeadsTarget}
-                                            onChange={(e) => setMaxLeadsTarget(parseInt(e.target.value))}
-                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4F46E5]"
-                                        />
-                                        <div className="flex justify-between text-[10px] font-semibold text-gray-400 uppercase tracking-widest mt-2 px-1">
-                                            <span>10</span>
-                                            <span>1k</span>
-                                        </div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <label className="text-sm font-medium text-gray-700">Number of Leads</label>
+                                        <span className="bg-[#EEF2FF] text-[#4F46E5] text-sm font-semibold px-3 py-1 rounded-full">{maxLeadsTarget}</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="10"
+                                        max="1000"
+                                        step="10"
+                                        value={maxLeadsTarget}
+                                        onChange={(e) => setMaxLeadsTarget(parseInt(e.target.value))}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4F46E5]"
+                                    />
+                                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                        <span>10</span>
+                                        <span>1,000</span>
                                     </div>
                                 </div>
 
+                                {/* Sequence selection */}
                                 <div>
-                                    <h3 className="text-sm font-bold tracking-wide text-gray-800 uppercase flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
-                                        <Bot size={16} className="text-[#4F46E5]" /> Sequence Assignment
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Auto-enroll into Sequence <span className="text-xs font-normal text-gray-400 ml-1">(Optional)</span></label>
-                                            <select
-                                                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] shadow-sm appearance-none"
-                                                value={selectedSequence}
-                                                onChange={(e) => setSelectedSequence(e.target.value)}
-                                            >
-                                                <option value="">No Automatic Sequence</option>
-                                                {availableSequences.map(seq => (
-                                                    <option key={seq.id} value={seq.id}>{seq.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Auto-enroll into Sequence</label>
+                                    <select
+                                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                        value={selectedSequence}
+                                        onChange={(e) => setSelectedSequence(e.target.value)}
+                                    >
+                                        <option value="">No Automatic Sequence</option>
+                                        {availableSequences.map(seq => (
+                                            <option key={seq.id} value={seq.id}>{seq.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                         )}
@@ -465,35 +438,32 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                 </div>
             </div>
 
-            {/* Launch Footer */}
-            <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
-                <div className="flex items-center gap-4">
-                    <p className="text-sm font-medium text-gray-600 hidden md:flex items-center gap-2">
-                        <Clock size={16} className="text-gray-400" />
-                        Scraping usually takes <strong className="text-gray-900">5-15 mins</strong> to generate initial leads
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
+            {/* Sticky Bottom Bar */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+                <span className="text-sm text-gray-500">
+                    Scraping typically takes 2-5 minutes
+                </span>
+                <div className="flex gap-3">
                     <button
-                        className="px-5 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
+                        className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                         onClick={() => handleCreateCampaign('draft')}
                         disabled={isSubmitting || !campaignName || !selectedTrack}
                     >
                         Save as Draft
                     </button>
                     <button
-                        className="flex items-center gap-2 px-6 py-2.5 bg-[#4F46E5] text-white text-sm font-bold rounded-lg shadow-sm hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-5 py-2 bg-[#4F46E5] text-white text-sm font-semibold rounded-lg hover:bg-[#4338CA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => handleCreateCampaign('active')}
                         disabled={isSubmitting || !campaignName || !selectedTrack}
                     >
                         {isSubmitting ? (
                             <>
-                                <Loader2 size={18} className="animate-spin" />
+                                <Loader2 size={16} className="animate-spin" />
                                 Processing...
                             </>
                         ) : (
                             <>
-                                <Rocket size={18} fill="currentColor" className="text-white" />
+                                <Rocket size={16} />
                                 Launch Campaign
                             </>
                         )}
@@ -516,6 +486,3 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
 };
 
 export default NewCampaign;
-
-// Helper icons
-const Setting = Settings;
