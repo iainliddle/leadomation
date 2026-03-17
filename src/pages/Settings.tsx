@@ -246,8 +246,8 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
 
     // ────── Reusable styles ──────
     const cardStyle: React.CSSProperties = {
-        background: 'white', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '32px',
-        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+        background: 'white', border: '1px solid #F1F5F9', borderRadius: '16px', padding: '32px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)'
     };
     const labelStyle: React.CSSProperties = {
         display: 'block', fontSize: '12px', fontWeight: 500, color: '#64748B',
@@ -256,12 +256,12 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
     const inputStyle: React.CSSProperties = {
         width: '100%', padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: '12px',
         fontSize: '14px', fontFamily: 'inherit', outline: 'none', transition: 'all 0.2s',
-        background: '#F8FAFC', color: '#0F172A', boxSizing: 'border-box',
+        background: 'white', color: '#0F172A', boxSizing: 'border-box',
     };
     const primaryBtnStyle: React.CSSProperties = {
-        padding: '10px 24px', borderRadius: '12px', background: '#4F46E5', color: 'white',
+        padding: '10px 20px', borderRadius: '12px', background: '#4F46E5', color: 'white',
         border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-        transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
+        transition: 'all 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)'
     };
 
     // ────── TAB CONTENT ──────
@@ -273,11 +273,12 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
             {/* Avatar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
                 <div style={{
-                    width: '80px', height: '80px', borderRadius: '50%',
+                    width: '64px', height: '64px', borderRadius: '16px',
                     background: profileImageUrl ? 'transparent' : 'linear-gradient(135deg, #4F46E5, #7C3AED)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'white', fontSize: '28px', fontWeight: 800,
+                    color: 'white', fontSize: '24px', fontWeight: 700,
                     overflow: 'hidden', flexShrink: 0,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)'
                 }}>
                     {profileImageUrl
                         ? <img src={profileImageUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -286,20 +287,22 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 <div>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
                         <label htmlFor="avatar-upload" style={{
-                            padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
-                            background: '#4F46E5', color: 'white',
+                            padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                            background: 'white', color: '#374155', border: '1px solid #E2E8F0',
                             cursor: uploadingAvatar ? 'wait' : 'pointer',
                             display: 'inline-flex', alignItems: 'center', gap: '6px',
                             opacity: uploadingAvatar ? 0.7 : 1,
+                            transition: 'all 0.2s'
                         }}>
                             <Upload size={14} /> {uploadingAvatar ? 'Uploading...' : 'Upload Photo'}
                         </label>
                         <input id="avatar-upload" type="file" accept="image/jpeg,image/png,image/gif,image/webp" style={{ display: 'none' }} onChange={handleAvatarUpload} />
                         {profileImageUrl && (
                             <button onClick={handleRemoveAvatar} style={{
-                                padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                                padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
                                 background: 'transparent', color: '#EF4444', cursor: 'pointer',
                                 border: '1px solid #FCA5A5', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                transition: 'all 0.2s'
                             }}>
                                 <Trash2 size={14} /> Remove
                             </button>
@@ -564,12 +567,12 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
     };
 
     return (
-        <div className="animate-in fade-in duration-200">
+        <div className="animate-in fade-in duration-200 bg-[#F8FAFC] min-h-full -m-6 p-6">
             <h1 className="text-2xl font-bold text-slate-900 mb-6">Settings</h1>
 
             <div className="flex gap-6 items-start">
                 {/* Tab Navigation */}
-                <div className="w-52 shrink-0 bg-white border border-slate-100 rounded-2xl shadow-sm p-2 sticky top-24">
+                <div className="w-52 shrink-0 bg-white border border-slate-100 rounded-2xl shadow-sm p-2 sticky top-24 hover:shadow-md transition-shadow duration-200">
                     {tabs.map(tab => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.key;
@@ -579,8 +582,8 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                                 onClick={() => setActiveTab(tab.key)}
                                 className={`flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-xl text-sm transition-all mb-0.5 text-left ${
                                     isActive
-                                        ? 'bg-indigo-50 text-indigo-600 font-semibold'
-                                        : 'text-slate-500 hover:bg-slate-50 font-medium'
+                                        ? 'bg-indigo-50 text-indigo-700 font-semibold border-l-4 border-l-indigo-500'
+                                        : 'text-slate-600 hover:bg-slate-50 font-medium'
                                 }`}
                             >
                                 <Icon size={16} />

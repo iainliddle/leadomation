@@ -243,37 +243,15 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
         <div className="max-w-[1600px] mx-auto w-full h-full">
             {!editingSequence ? (
                 /* Sequence List View */
-                <div className="animate-in fade-in duration-700">
-                    {/* Part 8: Info Card - Positioned at the very top */}
-                    <div style={{
-                        background: 'linear-gradient(135deg, #EEF2FF 0%, #E0F2FE 100%)',
-                        border: '1px solid #C7D2FE',
-                        borderRadius: '12px',
-                        padding: '16px 20px',
-                        marginBottom: '32px',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '12px'
-                    }}>
-                        <span style={{ fontSize: '20px' }}>⚡</span>
-                        <div>
-                            <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '600', color: '#4F46E5' }}>
-                                How Sequences Work
-                            </p>
-                            <p style={{ margin: 0, fontSize: '13px', color: '#6B7280', lineHeight: '1.6' }}>
-                                Build multi-step outreach flows that run automatically. Assign a sequence to a campaign and every lead found will be enrolled. Sequences pause automatically when a lead replies.
-                            </p>
-                        </div>
-                    </div>
-
+                <div className="animate-in fade-in duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h1 className="text-2xl font-black text-[#111827] mb-1">Outreach Sequences</h1>
-                            <p className="text-sm font-bold text-[#6B7280]">Manage your multi-channel automation flows</p>
+                            <h1 className="text-2xl font-bold text-slate-900 mb-1">Outreach Sequences</h1>
+                            <p className="text-sm text-slate-500">Manage your multi-channel automation flows</p>
                         </div>
                         <button
                             onClick={handleCreateNew}
-                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200"
                         >
                             <Plus size={18} />
                             New Sequence
@@ -281,46 +259,58 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                     </div>
 
                     {sequences.length === 0 ? (
-                        <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center shadow-sm">
-                            <Layers size={48} className="mx-auto text-blue-100 mb-4" />
-                            <h3 className="text-xl font-black text-[#111827] mb-2">No sequences yet</h3>
-                            <button onClick={handleCreateNew} className="text-primary font-bold hover:underline">Create your first one</button>
+                        <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm hover:shadow-md transition-shadow duration-200">
+                            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <Layers size={32} />
+                            </div>
+                            <h3 className="text-lg font-semibold text-slate-700 mb-2">No sequences yet</h3>
+                            <p className="text-sm text-slate-500 mb-6">Create your first outreach sequence to start automating</p>
+                            <button
+                                onClick={handleCreateNew}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200 inline-flex items-center gap-2"
+                            >
+                                <Plus size={16} />
+                                New Sequence
+                            </button>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-4">
                             {sequences.map(seq => (
-                                <div key={seq.id} className="bg-white border border-slate-100 rounded-2xl p-6 flex items-center justify-between shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 group">
+                                <div key={seq.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex items-center justify-between group">
                                     <div className="flex items-center gap-6">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${seq.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'}`}>
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${seq.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
                                             {seq.status === 'active' ? <Play size={20} /> : <Pause size={20} />}
                                         </div>
                                         <div>
-                                            <h3 className="text-base font-black text-[#111827] mb-0.5">{seq.name}</h3>
-                                            <div className="flex items-center gap-3 text-xs font-bold text-[#6B7280]">
-                                                <span>{seq.steps?.length || 0} Steps</span>
-                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                <span className="text-primary">{(seq as any).sequence_enrollments?.[0]?.count || 0} enrolled leads</span>
-                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                            <h3 className="text-base font-semibold text-slate-900 mb-1">{seq.name}</h3>
+                                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                <span>{seq.steps?.length || 0} steps</span>
+                                                <span className="text-slate-300">·</span>
+                                                <span>{(seq as any).sequence_enrollments?.[0]?.count || 0} enrolled</span>
+                                                <span className="text-slate-300">·</span>
                                                 <span>Created {new Date(seq.created_at).toLocaleDateString()}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${seq.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                                            {seq.status === 'active' ? 'ACTIVE' : 'PAUSED'}
+                                        </span>
                                         <button
                                             onClick={() => handleToggleStatus(seq)}
-                                            className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${seq.status === 'active' ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+                                            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${seq.status === 'active' ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}
                                         >
-                                            {seq.status === 'active' ? 'PAUSE' : 'ACTIVATE'}
+                                            {seq.status === 'active' ? 'Pause' : 'Activate'}
                                         </button>
                                         <button
                                             onClick={() => setEditingSequence(seq)}
-                                            className="p-2 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-all"
+                                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
                                         >
                                             <ChevronRight size={20} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(seq.id)}
-                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                         >
                                             <Trash2 size={18} />
                                         </button>
