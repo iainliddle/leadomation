@@ -360,13 +360,13 @@ IMPORTANT RULES:
     return (
         <div className="p-6 max-w-3xl mx-auto bg-[#F8F9FA] min-h-screen">
             {/* Hero Header Card */}
-            <div className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-xl p-6 mb-6 flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-6 mb-6 flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#4F46E5] rounded-xl flex items-center justify-center">
                     <Phone className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
-                    <h1 className="text-xl font-semibold text-white">AI Call Agent</h1>
-                    <p className="text-sm text-indigo-200 mt-0.5">Configure your AI voice agent for outbound calls</p>
+                    <h1 className="text-xl font-semibold text-[#111827]">AI Call Agent</h1>
+                    <p className="text-sm text-[#6B7280] mt-0.5">Configure your AI voice agent for outbound calls</p>
                 </div>
                 <div className="flex gap-3">
                     <div className="relative">
@@ -379,22 +379,22 @@ IMPORTANT RULES:
                                     loadScript(e.target.value);
                                 }
                             }}
-                            className="appearance-none bg-white/20 text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg hover:bg-white/30 transition-all cursor-pointer focus:outline-none"
+                            className="appearance-none bg-white border border-gray-200 text-[#111827] text-sm font-medium px-4 py-2 pr-8 rounded-lg hover:border-[#4F46E5] transition-all cursor-pointer focus:outline-none"
                         >
-                            <option value="" className="text-[#111827]">+ New Call Script</option>
+                            <option value="">+ New Call Script</option>
                             {savedScripts.map(s => (
-                                <option key={s.id} value={s.id} className="text-[#111827]">{s.name}</option>
+                                <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
                         </select>
-                        <ChevronDown size={16} className="absolute right-2 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
-                        {loadingScripts && <Loader2 size={14} className="absolute right-8 top-1/2 -translate-y-1/2 animate-spin text-white" />}
+                        <ChevronDown size={16} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        {loadingScripts && <Loader2 size={14} className="absolute right-8 top-1/2 -translate-y-1/2 animate-spin text-[#4F46E5]" />}
                     </div>
                     <button
                         onClick={() => {
                             setGeneratedPrompt(generateSystemPrompt());
                             setShowPromptPreview(true);
                         }}
-                        className="bg-white text-[#4F46E5] text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-50 transition-all"
+                        className="bg-[#4F46E5] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#4338CA] transition-all"
                     >
                         Preview AI Prompt
                     </button>
@@ -568,7 +568,7 @@ IMPORTANT RULES:
                     {script.objection_responses.map((obj, i) => (
                         <div key={i} className="p-4 bg-[#F8F9FA] rounded-xl border border-[#E5E7EB] space-y-3">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Objection {i + 1}</span>
+                                <span className="text-xs font-medium text-[#9CA3AF]">Objection {i + 1}</span>
                                 {script.objection_responses.length > 1 && (
                                     <button
                                         onClick={() => removeObjection(i)}

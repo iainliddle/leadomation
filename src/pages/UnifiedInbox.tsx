@@ -141,7 +141,7 @@ const UnifiedInbox: React.FC<UnifiedInboxProps> = ({ onPageChange }) => {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-100px)]">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen flex flex-col">
             <div className="flex bg-white flex-1 rounded-2xl border border-[#E5E7EB] overflow-hidden animate-in fade-in duration-700">
                 {/* Left Panel: Message List */}
                 <aside className="w-[380px] shrink-0 border-r border-[#E5E7EB] flex flex-col bg-gray-50/10">
@@ -151,10 +151,10 @@ const UnifiedInbox: React.FC<UnifiedInboxProps> = ({ onPageChange }) => {
                             {/* STEP 9 — Wire the COMPOSE button */}
                             <button
                                 onClick={handleComposeClick}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black hover:bg-[#4338CA] transition-all shadow-sm"
+                                className="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-xl text-xs font-semibold hover:bg-[#4338CA] transition-all shadow-sm"
                             >
                                 <Plus size={14} />
-                                COMPOSE
+                                Compose
                             </button>
                         </div>
                         <div className="relative mb-4">
@@ -168,7 +168,7 @@ const UnifiedInbox: React.FC<UnifiedInboxProps> = ({ onPageChange }) => {
                             />
                         </div>
                         {/* STEP 6 — Wire the tab buttons */}
-                        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1">
+                        <div className="flex items-center gap-6 border-b border-gray-200">
                             {[
                                 { id: 'all', label: 'All' },
                                 { id: 'sent', label: 'Sent' },
@@ -179,13 +179,13 @@ const UnifiedInbox: React.FC<UnifiedInboxProps> = ({ onPageChange }) => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`px-3 py-1.5 rounded-lg text-[11px] font-black whitespace-nowrap transition-all flex items-center gap-1.5 ${activeTab === tab.id
-                                        ? 'bg-[#EEF2FF] text-primary shadow-sm border border-indigo-100'
-                                        : 'text-[#6B7280] hover:bg-gray-50 hover:text-[#111827]'
+                                    className={`pb-2 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center gap-1.5 ${activeTab === tab.id
+                                        ? 'border-[#4F46E5] text-[#4F46E5]'
+                                        : 'border-transparent text-[#6B7280] hover:text-[#111827]'
                                         }`}
                                 >
                                     {tab.label}
-                                    <span className={`text-[9px] ${activeTab === tab.id ? 'text-primary/70' : 'text-gray-400'}`}>
+                                    <span className={`text-[9px] ${activeTab === tab.id ? 'text-[#4F46E5]/70' : 'text-gray-400'}`}>
                                         ({(emailCounts as any)[tab.id]})
                                     </span>
                                 </button>
@@ -254,15 +254,15 @@ const UnifiedInbox: React.FC<UnifiedInboxProps> = ({ onPageChange }) => {
                                     {/* Timestamps Card */}
                                     <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-wrap gap-8">
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sent</p>
+                                            <p className="text-xs font-medium text-[#9CA3AF]">Sent</p>
                                             <p className="text-xs font-bold text-[#111827]">{selectedEmail.created_at ? formatDate(selectedEmail.created_at) : 'N/A'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Opened</p>
+                                            <p className="text-xs font-medium text-[#9CA3AF]">Opened</p>
                                             <p className="text-xs font-bold text-[#111827]">{selectedEmail.opened_at ? formatDate(selectedEmail.opened_at) : 'Not opened yet'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Replied</p>
+                                            <p className="text-xs font-medium text-[#9CA3AF]">Replied</p>
                                             <p className="text-xs font-bold text-[#111827]">{selectedEmail.replied_at ? formatDate(selectedEmail.replied_at) : 'No reply yet'}</p>
                                         </div>
                                     </div>

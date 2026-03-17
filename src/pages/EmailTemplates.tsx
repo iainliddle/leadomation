@@ -126,11 +126,7 @@ const EmailTemplates: React.FC = () => {
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {/* Page Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Email Templates</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Manage and deploy high-performing outreach sequences</p>
-                </div>
+            <div className="flex items-center justify-end mb-6">
                 <button
                     onClick={openCreate}
                     className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150 shadow-sm"
@@ -254,7 +250,7 @@ const EmailTemplates: React.FC = () => {
                         </div>
                         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Template Name</label>
+                                <label className="block text-xs font-medium text-[#9CA3AF] mb-1.5">Template name</label>
                                 <input
                                     type="text"
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all"
@@ -264,7 +260,7 @@ const EmailTemplates: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Subject Line</label>
+                                <label className="block text-xs font-medium text-[#9CA3AF] mb-1.5">Subject line</label>
                                 <input
                                     type="text"
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all"
@@ -274,7 +270,7 @@ const EmailTemplates: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Email Body</label>
+                                <label className="block text-xs font-medium text-[#9CA3AF] mb-1.5">Email body</label>
                                 <textarea
                                     className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all min-h-[200px]"
                                     value={templateBody}

@@ -522,7 +522,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                             </div>
                         </div>
                     </div>
-                    <button className="w-full px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all">
+                    <button className="w-full px-4 py-2 bg-white border border-[#4F46E5] text-[#4F46E5] rounded-lg text-sm font-medium hover:bg-[#EEF2FF] transition-all">
                         Connect LinkedIn
                     </button>
                 </div>
@@ -541,7 +541,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                             </div>
                         </div>
                     </div>
-                    <button className="w-full px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all">
+                    <button className="w-full px-4 py-2 bg-white border border-[#4F46E5] text-[#4F46E5] rounded-lg text-sm font-medium hover:bg-[#EEF2FF] transition-all">
                         Connect Email
                     </button>
                 </div>
@@ -588,7 +588,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-xs font-semibold text-[#4F46E5] uppercase tracking-wide">Current Plan</p>
-                            <p className="text-2xl font-bold text-[#111827] mt-1">{currentPlan} Tier</p>
+                            <p className="text-2xl font-bold text-[#111827] mt-1">{currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)} Tier</p>
                             <p className="text-sm text-[#6B7280] mt-1">
                                 {currentPlan === 'Pro' ? 'Unlimited access. All features included.' : 'Upgrade to unlock full access.'}
                             </p>
