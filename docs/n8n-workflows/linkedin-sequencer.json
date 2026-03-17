@@ -1,0 +1,893 @@
+{
+  "name": "LinkedIn Relationship Sequencer",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/linkedin_enrollments?status=eq.active&next_action_at=lte.now()&select=*,leads(*)&limit=20",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-f6a7-5b6c-9d0e-1f2a3b4c5d6e",
+      "name": "Get Active Enrollments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-1",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-a7b8-6c7d-0e1f-2a3b4c5d6e7f",
+      "name": "IF Has Enrollments",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {},
+      "id": "d4e5f6a7-b8c9-7d8e-1f2a-3b4c5d6e7f8a",
+      "name": "No Enrollments",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {
+          "reset": true
+        }
+      },
+      "id": "e5f6a7b8-c9d0-8e9f-2a3b-4c5d6e7f8a9b",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// LinkedIn Relationship Sequencer - Action Determination Logic\n// Phase definitions with day ranges and actions\n\nconst enrollment = $input.item.json;\nconst lead = enrollment.leads || {};\n\n// Extract data\nconst currentPhase = enrollment.current_phase || 1;\nconst currentDay = enrollment.current_day || 1;\nconst connectionStatus = enrollment.connection_status || 'none';\nconst unipileAccountId = enrollment.unipile_account_id;\n\n// Extract LinkedIn provider ID from URL\nfunction extractLinkedInProviderId(linkedinUrl) {\n  if (!linkedinUrl) return null;\n\n  // Handle various LinkedIn URL formats\n  const patterns = [\n    /linkedin\\.com\\/in\\/([^\\/\\?]+)/i,\n    /\\/in\\/([^\\/\\?]+)/i\n  ];\n\n  for (const pattern of patterns) {\n    const match = linkedinUrl.match(pattern);\n    if (match && match[1]) {\n      return match[1].replace(/\\/$/, '');\n    }\n  }\n\n  return linkedinUrl;\n}\n\n// Get lead data with fallbacks\nconst firstName = lead.first_name || (lead.contact_name ? lead.contact_name.split(' ')[0] : 'there');\nconst company = lead.company || 'your company';\nconst city = lead.city || 'your area';\nconst industry = lead.category || lead.industry || 'your industry';\nconst linkedinUrl = lead.linkedin || enrollment.linkedin_url;\nconst linkedinProviderId = extractLinkedInProviderId(linkedinUrl);\n\n// Phase definitions\nconst phases = {\n  1: { name: 'Silent Awareness', startDay: 1, endDay: 10 },\n  2: { name: 'Connection', startDay: 12, endDay: 14 },\n  3: { name: 'Warm Thanks', startDay: 15, endDay: 16 },\n  4: { name: 'Advice Ask', startDay: 20, endDay: 22 },\n  5: { name: 'Follow Up', startDay: 25, endDay: 27 },\n  6: { name: 'Soft Offer', startDay: 30, endDay: 35 }\n};\n\n// Message templates\nconst messageTemplates = {\n  connect_request: `Hi ${firstName}, I came across ${company} while researching ${industry} businesses in ${city}. Would love to connect.`,\n  warm_thanks: `Hi ${firstName}, thanks for connecting! I noticed ${company} has been doing great work. No agenda — just good to be connected.`,\n  advice_ask: `Hi ${firstName}, hope things are going well at ${company}. Quick question — what's been your biggest challenge with ${industry} lately? Always trying to learn from people in the field.`,\n  follow_up: `Hi ${firstName}, following up on my last message. Totally understand if you're busy — just wanted to share that we've been helping businesses like ${company} with lead generation and automation. Happy to share more if useful.`,\n  soft_offer: `Hi ${firstName}, last message from me — I help businesses like ${company} generate leads and book more meetings automatically. If that's ever relevant, I'd love to show you what we do. Either way, great connecting with you.`\n};\n\n// Determine action based on current phase and day\nlet actionType = 'skip';\nlet messageText = '';\nlet actionDescription = '';\nlet nextPhase = currentPhase;\nlet nextDay = currentDay + 1;\nlet newStatus = 'active';\nlet requiresConnection = false;\n\n// Check if sequence is complete\nif (currentDay > 35) {\n  actionType = 'complete';\n  newStatus = 'completed';\n  actionDescription = 'Sequence completed';\n}\n// Phase 1: Silent Awareness (Days 1-10)\nelse if (currentPhase === 1 && currentDay >= 1 && currentDay <= 10) {\n  if (currentDay <= 3) {\n    actionType = 'view_profile';\n    actionDescription = 'View LinkedIn profile (building awareness)';\n  } else if (currentDay === 4 || currentDay === 7) {\n    actionType = 'like_post';\n    actionDescription = 'Like a recent LinkedIn post';\n  } else if (currentDay === 5 || currentDay === 8) {\n    actionType = 'view_profile';\n    actionDescription = 'View LinkedIn profile again';\n  } else {\n    actionType = 'skip';\n    actionDescription = 'Rest day - no action';\n  }\n  if (currentDay === 10) {\n    nextPhase = 2;\n  }\n}\n// Gap day 11\nelse if (currentDay === 11) {\n  actionType = 'skip';\n  actionDescription = 'Gap day before connection phase';\n  nextPhase = 2;\n}\n// Phase 2: Connection (Days 12-14)\nelse if (currentPhase === 2 && currentDay >= 12 && currentDay <= 14) {\n  if (connectionStatus === 'connected') {\n    actionType = 'skip';\n    actionDescription = 'Already connected - advancing to next phase';\n    if (currentDay === 14) nextPhase = 3;\n  } else if (connectionStatus === 'pending') {\n    actionType = 'skip';\n    actionDescription = 'Connection request pending - waiting for acceptance';\n    if (currentDay === 14) nextPhase = 3;\n  } else {\n    if (currentDay === 12) {\n      actionType = 'connect_request';\n      messageText = messageTemplates.connect_request;\n      actionDescription = 'Send personalized connection request';\n    } else {\n      actionType = 'skip';\n      actionDescription = 'Waiting for connection response';\n    }\n    if (currentDay === 14) nextPhase = 3;\n  }\n}\nelse if (currentPhase === 2 && currentDay > 14) {\n  nextPhase = 3;\n  actionType = 'skip';\n}\n// Phase 3: Warm Thanks (Days 15-16)\nelse if (currentPhase === 3 && currentDay >= 15 && currentDay <= 16) {\n  if (connectionStatus === 'connected') {\n    if (currentDay === 15) {\n      actionType = 'message';\n      messageText = messageTemplates.warm_thanks;\n      actionDescription = 'Send warm thanks message';\n      requiresConnection = true;\n    } else {\n      actionType = 'skip';\n      actionDescription = 'Rest day after thanks message';\n    }\n  } else {\n    actionType = 'skip';\n    actionDescription = 'Not connected yet - skipping message';\n  }\n  if (currentDay === 16) nextPhase = 4;\n}\n// Gap days 17-19\nelse if (currentDay >= 17 && currentDay <= 19) {\n  actionType = 'skip';\n  actionDescription = 'Gap day before advice ask phase';\n  if (currentDay === 19) nextPhase = 4;\n}\n// Phase 4: Advice Ask (Days 20-22)\nelse if (currentPhase === 4 && currentDay >= 20 && currentDay <= 22) {\n  if (connectionStatus === 'connected') {\n    if (currentDay === 20) {\n      actionType = 'message';\n      messageText = messageTemplates.advice_ask;\n      actionDescription = 'Send advice ask message';\n      requiresConnection = true;\n    } else {\n      actionType = 'skip';\n      actionDescription = 'Waiting for response to advice ask';\n    }\n  } else {\n    actionType = 'skip';\n    actionDescription = 'Not connected - skipping advice ask';\n  }\n  if (currentDay === 22) nextPhase = 5;\n}\n// Gap days 23-24\nelse if (currentDay >= 23 && currentDay <= 24) {\n  actionType = 'skip';\n  actionDescription = 'Gap day before follow up phase';\n  if (currentDay === 24) nextPhase = 5;\n}\n// Phase 5: Follow Up (Days 25-27)\nelse if (currentPhase === 5 && currentDay >= 25 && currentDay <= 27) {\n  if (connectionStatus === 'connected') {\n    if (currentDay === 25) {\n      actionType = 'message';\n      messageText = messageTemplates.follow_up;\n      actionDescription = 'Send follow up message';\n      requiresConnection = true;\n    } else {\n      actionType = 'skip';\n      actionDescription = 'Waiting after follow up';\n    }\n  } else {\n    actionType = 'skip';\n    actionDescription = 'Not connected - skipping follow up';\n  }\n  if (currentDay === 27) nextPhase = 6;\n}\n// Gap days 28-29\nelse if (currentDay >= 28 && currentDay <= 29) {\n  actionType = 'skip';\n  actionDescription = 'Gap day before soft offer phase';\n  if (currentDay === 29) nextPhase = 6;\n}\n// Phase 6: Soft Offer (Days 30-35)\nelse if (currentPhase === 6 && currentDay >= 30 && currentDay <= 35) {\n  if (connectionStatus === 'connected') {\n    if (currentDay === 30) {\n      actionType = 'message';\n      messageText = messageTemplates.soft_offer;\n      actionDescription = 'Send soft offer message';\n      requiresConnection = true;\n    } else {\n      actionType = 'skip';\n      actionDescription = 'Final days of sequence';\n    }\n  } else {\n    actionType = 'skip';\n    actionDescription = 'Not connected - skipping soft offer';\n  }\n  if (currentDay === 35) newStatus = 'completed';\n}\nelse {\n  actionType = 'skip';\n  actionDescription = 'No action scheduled for this day';\n}\n\n// Calculate next action time (24 hours from now)\nconst nextActionAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();\n\nreturn {\n  enrollment_id: enrollment.id,\n  user_id: enrollment.user_id,\n  lead_id: enrollment.lead_id,\n  sequence_id: enrollment.sequence_id,\n  lead: lead,\n  linkedin_url: linkedinUrl,\n  linkedin_provider_id: linkedinProviderId,\n  unipile_account_id: unipileAccountId,\n  current_phase: currentPhase,\n  current_day: currentDay,\n  connection_status: connectionStatus,\n  action_type: actionType,\n  action_description: actionDescription,\n  message_text: messageText,\n  requires_connection: requiresConnection,\n  next_phase: nextPhase,\n  next_day: nextDay,\n  next_action_at: nextActionAt,\n  new_status: newStatus,\n  phase_name: phases[currentPhase]?.name || 'Unknown'\n};"
+      },
+      "id": "f6a7b8c9-d0e1-9f0a-3b4c-5d6e7f8a9b0c",
+      "name": "Determine Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-action-skip",
+              "leftValue": "={{ $json.action_type }}",
+              "rightValue": "skip",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "condition-action-complete",
+              "leftValue": "={{ $json.action_type }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a7b8c9d0-e1f2-0a1b-4c5d-6e7f8a9b0c1d",
+      "name": "IF Action Required",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare update for skipped actions\nconst actionData = $input.item.json;\n\nreturn {\n  enrollment_update: {\n    id: actionData.enrollment_id,\n    current_phase: actionData.next_phase,\n    current_day: actionData.next_day,\n    next_action_at: actionData.next_action_at,\n    status: actionData.new_status,\n    last_action_at: new Date().toISOString(),\n    connection_status: actionData.connection_status\n  },\n  enrollment_id: actionData.enrollment_id\n};"
+      },
+      "id": "b8c9d0e1-f2a3-1b2c-5d6e-7f8a9b0c1d2e",
+      "name": "Prepare Skip Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 480]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "view_profile",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "view_profile"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "like_post",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "like_post"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "connect_request",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "connect_request"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "message",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "message"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "c9d0e1f2-a3b4-2c3d-6e7f-8a9b0c1d2e3f",
+      "name": "Switch Action Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api4.unipile.com:13458/api/v1/users/{{ $json.linkedin_provider_id }}?account_id={{ $json.unipile_account_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "vLurcq/9.sCRBpfP5sOzvEW/RFqTk+63rALEGbcYaut2LabBa5zc="
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false
+            }
+          }
+        }
+      },
+      "id": "d0e1f2a3-b4c5-3d4e-7f8a-9b0c1d2e3f4a",
+      "name": "View Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 100],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api4.unipile.com:13458/api/v1/posts?account_id={{ $json.unipile_account_id }}&author={{ $json.linkedin_provider_id }}&limit=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "vLurcq/9.sCRBpfP5sOzvEW/RFqTk+63rALEGbcYaut2LabBa5zc="
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e1f2a3b4-c5d6-4e5f-8a9b-0c1d2e3f4a5b",
+      "name": "Get Recent Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 240],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has-posts-condition",
+              "leftValue": "={{ $json.items?.length || 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f2a3b4c5-d6e7-5f6a-9b0c-1d2e3f4a5b6c",
+      "name": "IF Has Posts",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2020, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api4.unipile.com:13458/api/v1/posts/{{ $json.items[0].id }}/reactions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "vLurcq/9.sCRBpfP5sOzvEW/RFqTk+63rALEGbcYaut2LabBa5zc="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"account_id\": \"{{ $('Determine Action').item.json.unipile_account_id }}\",\n  \"reaction_type\": \"LIKE\"\n}",
+        "options": {}
+      },
+      "id": "a3b4c5d6-e7f8-6a7b-0c1d-2e3f4a5b6c7d",
+      "name": "Like Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2240, 180],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-action-result",
+              "name": "action_result",
+              "value": "no_posts_available",
+              "type": "string"
+            },
+            {
+              "id": "set-action-type",
+              "name": "action_type",
+              "value": "={{ $('Determine Action').item.json.action_type }}",
+              "type": "string"
+            },
+            {
+              "id": "set-enrollment-id",
+              "name": "enrollment_id",
+              "value": "={{ $('Determine Action').item.json.enrollment_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b4c5d6e7-f8a9-7b8c-1d2e-3f4a5b6c7d8e",
+      "name": "No Posts to Like",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2240, 340]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api4.unipile.com:13458/api/v1/users/invite",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "vLurcq/9.sCRBpfP5sOzvEW/RFqTk+63rALEGbcYaut2LabBa5zc="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"account_id\": \"{{ $json.unipile_account_id }}\",\n  \"provider_id\": \"{{ $json.linkedin_provider_id }}\",\n  \"message\": \"{{ $json.message_text }}\"\n}",
+        "options": {}
+      },
+      "id": "c5d6e7f8-a9b0-8c9d-2e3f-4a5b6c7d8e9f",
+      "name": "Send Connection Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 400],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api4.unipile.com:13458/api/v1/chats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "vLurcq/9.sCRBpfP5sOzvEW/RFqTk+63rALEGbcYaut2LabBa5zc="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"account_id\": \"{{ $json.unipile_account_id }}\",\n  \"attendees_ids\": [\"{{ $json.linkedin_provider_id }}\"],\n  \"text\": \"{{ $json.message_text }}\"\n}",
+        "options": {}
+      },
+      "id": "d6e7f8a9-b0c1-9d0e-3f4a-5b6c7d8e9f0a",
+      "name": "Send Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 540],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare the log entry for Supabase\nconst actionData = $('Determine Action').item.json;\nconst actionResult = $input.item.json;\n\n// Determine if the action was successful\nlet status = 'sent';\nlet errorMessage = null;\n\n// Check for error indicators in the response\nif (actionResult.error || actionResult.statusCode >= 400) {\n  status = 'failed';\n  errorMessage = actionResult.error?.message || actionResult.message || 'Unknown error';\n}\n\n// Handle case where no posts were available to like\nif (actionResult.action_result === 'no_posts_available') {\n  status = 'skipped';\n  errorMessage = 'No recent posts available to like';\n}\n\n// Build the log entry\nconst logEntry = {\n  enrollment_id: actionData.enrollment_id,\n  user_id: actionData.user_id,\n  lead_id: actionData.lead_id,\n  phase: actionData.current_phase,\n  phase_name: actionData.phase_name,\n  day: actionData.current_day,\n  action_type: actionData.action_type,\n  action_payload: {\n    message_text: actionData.message_text || null,\n    linkedin_url: actionData.linkedin_url,\n    linkedin_provider_id: actionData.linkedin_provider_id,\n    action_description: actionData.action_description\n  },\n  status: status,\n  error_message: errorMessage,\n  unipile_response: actionResult,\n  created_at: new Date().toISOString()\n};\n\n// Also pass through the enrollment update data\nreturn {\n  log_entry: logEntry,\n  enrollment_update: {\n    id: actionData.enrollment_id,\n    current_phase: actionData.next_phase,\n    current_day: actionData.next_day,\n    next_action_at: actionData.next_action_at,\n    status: actionData.new_status,\n    last_action_at: new Date().toISOString(),\n    connection_status: actionData.action_type === 'connect_request' ? 'pending' : actionData.connection_status\n  },\n  action_status: status,\n  enrollment_id: actionData.enrollment_id\n};"
+      },
+      "id": "e7f8a9b0-c1d2-0e1f-4a5b-6c7d8e9f0a1b",
+      "name": "Prepare Log Entry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2480, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/linkedin_action_log",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.log_entry) }}",
+        "options": {}
+      },
+      "id": "f8a9b0c1-d2e3-1f2a-5b6c-7d8e9f0a1b2c",
+      "name": "Log Action",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2700, 300],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/linkedin_enrollments?id=eq.{{ $json.enrollment_update?.id || $json.enrollment_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  current_phase: $json.enrollment_update.current_phase,\n  current_day: $json.enrollment_update.current_day,\n  next_action_at: $json.enrollment_update.next_action_at,\n  status: $json.enrollment_update.status,\n  last_action_at: $json.enrollment_update.last_action_at,\n  connection_status: $json.enrollment_update.connection_status\n}) }}",
+        "options": {}
+      },
+      "id": "a9b0c1d2-e3f4-2a3b-6c7d-8e9f0a1b2c3d",
+      "name": "Update Enrollment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2920, 300],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/linkedin_enrollments?id=eq.{{ $json.enrollment_update?.id || $json.enrollment_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  current_phase: $json.enrollment_update.current_phase,\n  current_day: $json.enrollment_update.current_day,\n  next_action_at: $json.enrollment_update.next_action_at,\n  status: $json.enrollment_update.status,\n  last_action_at: $json.enrollment_update.last_action_at,\n  connection_status: $json.enrollment_update.connection_status\n}) }}",
+        "options": {}
+      },
+      "id": "b0c1d2e3-f4a5-3b4c-7d8e-9f0a1b2c3d4e",
+      "name": "Update Enrollment Skip",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 480],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "c1d2e3f4-a5b6-4c5d-8e9f-0a1b2c3d4e5f",
+      "name": "Loop Complete",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [3140, 380]
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "seconds"
+      },
+      "id": "d2e3f4a5-b6c7-5d6e-9f0a-1b2c3d4e5f6a",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2000, 480],
+      "webhookId": "wait-webhook-id"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Active Enrollments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Enrollments": {
+      "main": [
+        [
+          {
+            "node": "IF Has Enrollments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Has Enrollments": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Enrollments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Determine Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Action": {
+      "main": [
+        [
+          {
+            "node": "IF Action Required",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Action Required": {
+      "main": [
+        [
+          {
+            "node": "Switch Action Type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Skip Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Skip Update": {
+      "main": [
+        [
+          {
+            "node": "Update Enrollment Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Enrollment Skip": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Action Type": {
+      "main": [
+        [
+          {
+            "node": "View Profile",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Recent Posts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Connection Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Skip Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "View Profile": {
+      "main": [
+        [
+          {
+            "node": "Prepare Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Posts": {
+      "main": [
+        [
+          {
+            "node": "IF Has Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Has Posts": {
+      "main": [
+        [
+          {
+            "node": "Like Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Posts to Like",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Like Post": {
+      "main": [
+        [
+          {
+            "node": "Prepare Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Posts to Like": {
+      "main": [
+        [
+          {
+            "node": "Prepare Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Connection Request": {
+      "main": [
+        [
+          {
+            "node": "Prepare Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Log Entry": {
+      "main": [
+        [
+          {
+            "node": "Log Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Action": {
+      "main": [
+        [
+          {
+            "node": "Update Enrollment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Enrollment": {
+      "main": [
+        [
+          {
+            "node": "Loop Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Complete": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1",
+  "active": false
+}
