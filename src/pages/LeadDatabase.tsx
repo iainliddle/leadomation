@@ -280,6 +280,13 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
     // Toast State
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+
+    // LinkedIn Enrollment State
+    const [showLinkedInModal, setShowLinkedInModal] = useState(false);
+    const [linkedInEnrollLead, setLinkedInEnrollLead] = useState<Lead | null>(null);
+    const [linkedInUrl, setLinkedInUrl] = useState('');
+    const [isEnrollingLinkedIn, setIsEnrollingLinkedIn] = useState(false);
+
     // Activity Timeline State
     const [activityItems, setActivityItems] = useState<any[]>([]);
     const [activityLoading, setActivityLoading] = useState(false);
@@ -293,6 +300,67 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const showToast = (message: string) => {
         setToast({ message, visible: true });
         setTimeout(() => setToast({ message: '', visible: false }), 4000);
+    };
+
+    // LinkedIn Enrollment Handler
+    const handleLinkedInEnroll = async (lead: Lead) => {
+        setLinkedInEnrollLead(lead);
+        setLinkedInUrl(lead.linkedin_url || '');
+        setShowLinkedInModal(true);
+    };
+
+    const submitLinkedInEnroll = async () => {
+        if (!linkedInEnrollLead || !linkedInUrl.trim()) {
+            showToast('Please enter a LinkedIn URL');
+            return;
+        }
+
+        setIsEnrollingLinkedIn(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                showToast('Please log in to enrol leads');
+                return;
+            }
+
+            const response = await fetch('/api/linkedin-enroll', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    lead_id: linkedInEnrollLead.id,
+                    linkedin_url: linkedInUrl.trim()
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.error === 'Pro plan required') {
+                    triggerUpgrade?.('LinkedIn Sequencer', 'pro');
+                    setShowLinkedInModal(false);
+                    return;
+                }
+                if (data.error === 'LinkedIn not connected') {
+                    showToast('Connect your LinkedIn account first in Integrations');
+                    setShowLinkedInModal(false);
+                    return;
+                }
+                throw new Error(data.error || 'Failed to enrol lead');
+            }
+
+            showToast('Lead enrolled in LinkedIn sequence');
+            setShowLinkedInModal(false);
+            setLinkedInEnrollLead(null);
+            setLinkedInUrl('');
+        } catch (err: any) {
+            console.error('LinkedIn enrol error:', err);
+            showToast(err.message || 'Failed to enrol lead');
+        } finally {
+            setIsEnrollingLinkedIn(false);
+        }
     };
 
     // Update time every minute for live local time indicators
@@ -1561,6 +1629,13 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                                     <Phone size={16} />
                                                 </button>
                                                 <button
+                                                    onClick={() => handleLinkedInEnroll(lead)}
+                                                    className="p-2 rounded-lg transition-all hover:bg-blue-50 text-[#9CA3AF] hover:text-blue-600"
+                                                    title="Enrol in LinkedIn Sequence"
+                                                >
+                                                    <UserPlus size={16} />
+                                                </button>
+                                                <button
                                                     onClick={() => handleEnrichLead(lead.id)}
                                                     disabled={enrichingLeads.includes(lead.id)}
                                                     className={`p-2 rounded-lg transition-all ${enrichingLeads.includes(lead.id) ? 'bg-blue-50 text-primary' : 'hover:bg-gray-100 text-[#9CA3AF] hover:text-primary'}`}
@@ -2569,6 +2644,76 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                             >
                                 <span role="img" aria-label="phone">📞</span> Start AI Calling
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* LinkedIn Enrollment Modal */}
+            {showLinkedInModal && linkedInEnrollLead && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLinkedInModal(false)}></div>
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                                    <Linkedin size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-[#111827]">Enrol in LinkedIn Sequence</h3>
+                                    <p className="text-xs text-[#6B7280] font-medium">{linkedInEnrollLead.company}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowLinkedInModal(false)}
+                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <X size={18} className="text-gray-400" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest block mb-2">
+                                    LinkedIn Profile URL
+                                </label>
+                                <input
+                                    type="url"
+                                    value={linkedInUrl}
+                                    onChange={(e) => setLinkedInUrl(e.target.value)}
+                                    placeholder="https://linkedin.com/in/username"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/10 focus:border-[#4F46E5] focus:bg-white transition-all"
+                                />
+                            </div>
+
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                                <p className="text-xs text-blue-800 font-medium leading-relaxed">
+                                    <strong>35-day relationship funnel:</strong> This sequence builds genuine connections through profile views, engagement, and warm outreach before making any business ask.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setShowLinkedInModal(false)}
+                                    className="flex-1 py-3 border border-[#E5E7EB] bg-white text-[#374151] rounded-xl font-black text-sm hover:bg-gray-50 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={submitLinkedInEnroll}
+                                    disabled={isEnrollingLinkedIn || !linkedInUrl.trim()}
+                                    className="flex-1 py-3 bg-[#4F46E5] text-white rounded-xl font-black text-sm shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {isEnrollingLinkedIn ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Enrolling...
+                                        </>
+                                    ) : (
+                                        'Start Sequence'
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
