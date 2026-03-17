@@ -1527,7 +1527,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                     <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Intent</th>
                                     <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Website</th>
                                     <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide text-center">LinkedIn</th>
-                                    <th className="w-10 pr-6 pl-4"></th>
+                                    <th className="min-w-[120px] pr-6 pl-4 sticky right-0 bg-slate-50"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1634,7 +1634,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                                 <span className="text-[#9CA3AF] text-xs">—</span>
                                             )}
                                         </td>
-                                        <td className="pr-6 pl-4 text-right" onClick={(e) => e.stopPropagation()}>
+                                        <td className={`min-w-[120px] pr-6 pl-4 text-right sticky right-0 ${selectedLeads.includes(lead.id) ? 'bg-indigo-50' : 'bg-white group-hover:bg-slate-50'}`} onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => handleInitiateCall(lead)}
