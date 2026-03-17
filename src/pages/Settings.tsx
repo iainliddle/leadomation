@@ -8,7 +8,7 @@ interface SettingsProps {
 
 const tabs = [
     { key: 'account', label: 'Account Settings', icon: User },
-    { key: 'store', label: 'Store Settings', icon: Lock },
+    { key: 'store', label: 'Security', icon: Lock },
     { key: 'notifications', label: 'Notifications', icon: Bell },
     { key: 'integrations', label: 'Integrations', icon: Zap },
     { key: 'billing', label: 'Billing', icon: CreditCard },
@@ -630,20 +630,20 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 <div>
                     <h3 className="text-base font-semibold text-[#111827] mb-4">Payment Method</h3>
                     <div className="border border-[#E5E7EB] rounded-xl p-5 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-7 bg-[#1A1F36] rounded flex items-center justify-center text-white text-[10px] font-bold">
-                                VISA
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-[#EEF2FF] rounded-lg flex items-center justify-center">
+                                <CreditCard size={20} className="text-[#4F46E5]" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-[#111827]">•••• •••• •••• 4242</p>
-                                <p className="text-xs text-[#6B7280]">Expires 12/26</p>
+                                <p className="text-sm font-medium text-[#111827]">No payment method on file</p>
+                                <p className="text-xs text-[#6B7280]">Add a card via the Stripe billing portal</p>
                             </div>
                         </div>
                         <button
                             onClick={handleUpdatePayment}
-                            className="px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#4F46E5] hover:bg-gray-50 transition-all"
+                            className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all"
                         >
-                            Update
+                            Add Payment Method
                         </button>
                     </div>
                     <p className="text-xs text-[#6B7280] mt-2">Managed securely through Stripe.</p>
@@ -663,8 +663,6 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-xl font-semibold text-[#111827] mb-6">Settings</h1>
-
                 {/* Horizontal Tabs */}
                 <div className="flex border-b border-[#E5E7EB] bg-white rounded-t-xl border-x border-t shadow-sm px-4">
                     {tabs.map(tab => {

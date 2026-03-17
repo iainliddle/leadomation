@@ -481,25 +481,16 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-700">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
+            <div className="space-y-6 animate-in fade-in duration-700">
 
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4F46E5] to-[#4338CA] flex items-center justify-center">
-                            <Globe size={16} className="text-white" />
-                        </div>
-                        <h1 className="text-2xl font-black text-[#111827] tracking-tight">Global Demand Map</h1>
-                    </div>
-                    <p className="text-sm text-[#6B7280] font-medium">Discover high-demand markets and launch targeted campaigns in seconds</p>
-                </div>
-
                 {/* Industry Selector */}
                 <div className="relative w-full md:w-[320px]">
                     <button
                         onClick={() => setShowIndustryDropdown(!showIndustryDropdown)}
-                        className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] hover:border-indigo-300 hover:shadow-sm transition-all"
+                        className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#111827] hover:border-indigo-300 hover:shadow-sm transition-all"
                     >
                         <div className="flex items-center gap-2">
                             <Filter size={14} className="text-[#4F46E5]" />
@@ -549,7 +540,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
             <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 w-fit">
                 <button
                     onClick={() => setActiveTab('density')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'density'
+                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'density'
                         ? 'bg-white text-[#111827] shadow-sm'
                         : 'text-[#6B7280] hover:text-[#111827]'
                         }`}
@@ -561,7 +552,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                 </button>
                 <button
                     onClick={() => setActiveTab('search')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'search'
+                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'search'
                         ? 'bg-white text-[#111827] shadow-sm'
                         : 'text-[#6B7280] hover:text-[#111827]'
                         }`}
@@ -580,7 +571,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
                             <div className="flex items-center gap-2 mb-2">
                                 <Building2 size={14} className="text-[#4F46E5]" />
-                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Total Businesses</span>
+                                <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Total Businesses</span>
                             </div>
                             <p className="text-2xl font-black text-[#111827]">{totalBusinesses.toLocaleString()}</p>
                             <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">across {regionData.length} regions</p>
@@ -588,7 +579,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
                             <div className="flex items-center gap-2 mb-2">
                                 <Zap size={14} className="text-amber-500" />
-                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Hottest Market</span>
+                                <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Hottest Market</span>
                             </div>
                             <p className="text-2xl font-black text-[#111827]">{topRegion.name}</p>
                             <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">{topRegion.businesses.toLocaleString()} businesses</p>
@@ -596,7 +587,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
                             <div className="flex items-center gap-2 mb-2">
                                 <Sparkles size={14} className="text-purple-500" />
-                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Industry</span>
+                                <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Industry</span>
                             </div>
                             <p className="text-2xl font-black text-[#111827] truncate">{selectedIndustry}</p>
                             <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">selected sector</p>
@@ -611,9 +602,9 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Globe size={16} className="text-[#4F46E5]" />
-                                    <h3 className="text-sm font-black text-[#111827] uppercase tracking-wide">Business Density Map</h3>
+                                    <h3 className="text-sm font-semibold text-[#111827] uppercase tracking-wide">Business Density Map</h3>
                                 </div>
-                                <div className="flex items-center gap-4 text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider">
+                                <div className="flex items-center gap-4 text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-2.5 h-2.5 rounded-full bg-[#6366F1]" />
                                         <span>Emerging</span>
@@ -688,16 +679,16 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 {/* Hover tooltip */}
                                 {hoveredRegion && !selectedRegion && (
                                     <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl p-4 shadow-lg z-10 min-w-[220px] animate-in fade-in zoom-in duration-200">
-                                        <p className="text-xs font-black text-[#111827] mb-1">{hoveredRegion.name}</p>
+                                        <p className="text-xs font-semibold text-[#111827] mb-1">{hoveredRegion.name}</p>
                                         <p className="text-[10px] text-[#9CA3AF] font-medium mb-2">{hoveredRegion.subregion}</p>
                                         <div className="flex items-center gap-4">
                                             <div>
                                                 <p className="text-lg font-black text-[#111827]">{hoveredRegion.businesses.toLocaleString()}</p>
-                                                <p className="text-[10px] text-[#9CA3AF] font-medium">businesses</p>
+                                                <p className="text-[10px] text-[#9CA3AF] font-normal">businesses</p>
                                             </div>
                                             <div>
                                                 <p className="text-lg font-black text-emerald-600">+{hoveredRegion.growth}%</p>
-                                                <p className="text-[10px] text-[#9CA3AF] font-medium">growth</p>
+                                                <p className="text-[10px] text-[#9CA3AF] font-normal">growth</p>
                                             </div>
                                         </div>
                                     </div>
@@ -710,7 +701,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                             <div className="px-5 py-4 border-b border-gray-100">
                                 <div className="flex items-center gap-2">
                                     <BarChart3 size={16} className="text-blue-500" />
-                                    <h3 className="text-sm font-black text-[#111827] uppercase tracking-wide">Top Markets</h3>
+                                    <h3 className="text-sm font-semibold text-[#111827] uppercase tracking-wide">Top Markets</h3>
                                 </div>
                             </div>
 
@@ -727,8 +718,8 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                         >
                                             <div className="flex items-center justify-between mb-1.5">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-black text-[#9CA3AF] w-5">{index + 1}.</span>
-                                                    <span className="text-xs font-bold text-[#111827]">{region.name}</span>
+                                                    <span className="text-[10px] font-medium text-[#9CA3AF] w-5">{index + 1}.</span>
+                                                    <span className="text-xs font-semibold text-[#111827]">{region.name}</span>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2 ml-7">
@@ -781,11 +772,11 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
 
                                     <div className="grid grid-cols-2 gap-6 mt-4">
                                         <div>
-                                            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Businesses Found</p>
+                                            <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest mb-1">Businesses Found</p>
                                             <p className="text-xl font-black text-[#111827]">{selectedRegion.businesses.toLocaleString()}</p>
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Top Cities</p>
+                                            <p className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest mb-1">Top Cities</p>
                                             <p className="text-sm font-bold text-[#374151]">{selectedRegion.topCities.join(', ')}</p>
                                         </div>
                                     </div>
@@ -824,7 +815,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm">
                         <div className="flex items-center gap-2 mb-3">
                             <Search size={16} className="text-[#4F46E5]" />
-                            <h3 className="text-sm font-black text-[#111827] uppercase tracking-wide">Keyword Search Volume</h3>
+                            <h3 className="text-sm font-semibold text-[#111827] uppercase tracking-wide">Keyword Search Volume</h3>
                         </div>
                         <p className="text-xs text-[#6B7280] font-medium mb-4">Enter up to 10 keywords separated by commas and select a target market to see real Google search volume data</p>
 
@@ -846,7 +837,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 <div className="relative w-[220px]">
                                     <button
                                         onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                                        className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] hover:border-indigo-300 transition-all"
+                                        className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#111827] hover:border-indigo-300 transition-all"
                                     >
                                         <div className="flex items-center gap-2">
                                             <span className="text-base">{selectedCountry.flag}</span>
@@ -942,7 +933,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <MapPin size={14} className="text-[#4F46E5]" />
-                                        <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Target Market</span>
+                                        <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Target Market</span>
                                     </div>
                                     <p className="text-2xl font-black text-[#111827]">{selectedCountry.flag} {selectedCountry.name}</p>
                                     <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">{keywordResults.length} keywords analysed</p>
@@ -950,7 +941,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <TrendingUp size={14} className="text-emerald-500" />
-                                        <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Total Monthly Searches</span>
+                                        <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Total Monthly Searches</span>
                                     </div>
                                     <p className="text-2xl font-black text-emerald-600">
                                         {keywordResults.reduce((sum: number, k: any) => sum + (k.search_volume || 0), 0).toLocaleString()}
@@ -959,7 +950,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <Zap size={14} className="text-amber-500" />
-                                        <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Top Keyword</span>
+                                        <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Top Keyword</span>
                                     </div>
                                     <p className="text-lg font-black text-[#111827] truncate">
                                         {keywordResults.reduce((max: any, k: any) => (k.search_volume || 0) > (max.search_volume || 0) ? k : max, keywordResults[0])?.keyword}
@@ -968,7 +959,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <BarChart3 size={14} className="text-purple-500" />
-                                        <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Avg CPC</span>
+                                        <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Avg CPC</span>
                                     </div>
                                     <p className="text-2xl font-black text-[#111827]">
                                         £{(keywordResults.reduce((sum: number, k: any) => sum + (k.cpc || 0), 0) / keywordResults.length).toFixed(2)}
@@ -978,7 +969,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
 
                             {/* Results Table */}
                             <div className="mt-6">
-                                <h3 className="text-sm font-bold text-[#111827] uppercase tracking-tight mb-4">
+                                <h3 className="text-sm font-semibold text-[#111827] tracking-tight mb-4">
                                     Search Volume Results for {selectedCountry.name}
                                 </h3>
                                 <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm">
@@ -1047,6 +1038,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     </div>
                 </>
             )}
+            </div>
         </div>
     );
 };
