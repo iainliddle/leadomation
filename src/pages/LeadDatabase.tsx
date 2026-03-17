@@ -637,11 +637,25 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             setActivityLoading(true);
             setExpandedTranscripts(new Set());
             try {
+                // Fetch activity data - sequence_enrollments without join to avoid 400 if FK not configured
                 const [callRes, dealRes, enrollRes] = await Promise.all([
                     supabase.from('call_logs').select('id, created_at, duration_seconds, ended_reason, transcript, recording_url').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
                     supabase.from('deals').select('id, created_at, title, stage').eq('lead_id', selectedLead.id).order('created_at', { ascending: false }),
-                    supabase.from('sequence_enrollments').select('id, enrolled_at, sequence_id, status, sequences(name)').eq('lead_id', selectedLead.id).order('enrolled_at', { ascending: false })
+                    supabase.from('sequence_enrollments').select('id, enrolled_at, sequence_id, status').eq('lead_id', selectedLead.id).order('enrolled_at', { ascending: false })
                 ]);
+
+                // Fetch sequence names separately if we have enrollments
+                const sequenceIds = (enrollRes.data || []).map((e: any) => e.sequence_id).filter(Boolean);
+                let sequenceMap: Record<string, string> = {};
+                if (sequenceIds.length > 0) {
+                    const { data: seqData } = await supabase
+                        .from('sequences')
+                        .select('id, name')
+                        .in('id', sequenceIds);
+                    if (seqData) {
+                        sequenceMap = Object.fromEntries(seqData.map((s: any) => [s.id, s.name]));
+                    }
+                }
 
                 const items: any[] = [];
 
@@ -658,7 +672,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 });
 
                 (enrollRes.data || []).forEach((e: any) => {
-                    items.push({ type: 'email', date: e.enrolled_at, label: 'Enrolled in Sequence', sublabel: e.sequences?.name || 'Email Sequence', icon: 'mail', id: e.id });
+                    const seqName = sequenceMap[e.sequence_id] || 'Email Sequence';
+                    items.push({ type: 'email', date: e.enrolled_at, label: 'Enrolled in Sequence', sublabel: seqName, icon: 'mail', id: e.id });
                 });
 
                 // Synthetic lead-created event
