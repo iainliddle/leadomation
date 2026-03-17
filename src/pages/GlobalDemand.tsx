@@ -537,12 +537,12 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
             </div>
 
             {/* Tab Switcher */}
-            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+            <div className="flex items-center gap-6 border-b border-gray-200">
                 <button
                     onClick={() => setActiveTab('density')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'density'
-                        ? 'bg-white text-[#111827] shadow-sm'
-                        : 'text-[#6B7280] hover:text-[#111827]'
+                    className={`pb-3 text-sm font-semibold border-b-2 transition-all ${activeTab === 'density'
+                        ? 'border-[#4F46E5] text-[#4F46E5]'
+                        : 'border-transparent text-[#6B7280] hover:text-[#111827]'
                         }`}
                 >
                     <span className="flex items-center gap-2">
@@ -552,9 +552,9 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                 </button>
                 <button
                     onClick={() => setActiveTab('search')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'search'
-                        ? 'bg-white text-[#111827] shadow-sm'
-                        : 'text-[#6B7280] hover:text-[#111827]'
+                    className={`pb-3 text-sm font-semibold border-b-2 transition-all ${activeTab === 'search'
+                        ? 'border-[#4F46E5] text-[#4F46E5]'
+                        : 'border-transparent text-[#6B7280] hover:text-[#111827]'
                         }`}
                 >
                     <span className="flex items-center gap-2">

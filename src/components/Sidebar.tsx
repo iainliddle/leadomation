@@ -19,8 +19,7 @@ import {
     Inbox,
     CreditCard,
     ChevronLeft,
-    ChevronRight,
-    ChevronDown
+    ChevronRight
 } from 'lucide-react';
 import { signOut } from '../lib/auth';
 import logoFull from '../assets/logo-full.png';
@@ -142,9 +141,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     const [leadCount, setLeadCount] = useState(0);
     const [dealCount, setDealCount] = useState(0);
     const [emailCount, setEmailCount] = useState(0);
-    const [userName, setUserName] = useState('');
-    const [userInitials, setUserInitials] = useState('U');
-    const [showUserMenu, setShowUserMenu] = useState(false);
 
     const handleSignOut = async () => {
         try {
@@ -163,28 +159,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                 const [
                     { count: leads },
                     { count: deals },
-                    { count: emails },
-                    { data: profile }
+                    { count: emails }
                 ] = await Promise.all([
                     supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
                     supabase.from('deals').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
                     supabase.from('emails').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-                    supabase.from('profiles').select('full_name').eq('id', user.id).single(),
                 ]);
 
                 setLeadCount(leads || 0);
                 setDealCount(deals || 0);
                 setEmailCount(emails || 0);
-
-                const fullName = profile?.full_name || user.user_metadata?.full_name || '';
-                if (fullName) {
-                    const parts = fullName.trim().split(' ');
-                    setUserName(parts[0] + (parts[1] ? ' ' + parts[1][0] + '.' : ''));
-                    setUserInitials(((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || 'U');
-                } else {
-                    setUserName(user.email?.split('@')[0] || 'User');
-                    setUserInitials('U');
-                }
             } catch (err) {
                 console.error('Error loading sidebar data:', err);
             }
@@ -436,82 +420,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                     {/* Divider */}
                     <div className="border-t border-gray-200" />
 
-                    {/* User profile footer */}
-                    <div className={`p-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
-                        {isCollapsed ? (
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowUserMenu(!showUserMenu)}
-                                    className="w-9 h-9 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-semibold text-sm flex items-center justify-center hover:ring-2 hover:ring-[#4F46E5]/20 transition-all"
-                                >
-                                    {userInitials}
-                                </button>
-                                {showUserMenu && (
-                                    <>
-                                        <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                                        <div className="absolute bottom-full left-0 mb-2 w-40 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-150">
-                                            <button
-                                                onClick={() => { onPageChange('Settings'); setShowUserMenu(false); }}
-                                                className="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                            >
-                                                <User size={14} className="text-gray-400" />
-                                                Profile
-                                            </button>
-                                            <button
-                                                onClick={handleSignOut}
-                                                className="w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                            >
-                                                <LogOut size={14} />
-                                                Sign Out
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="flex items-center justify-between gap-2 px-1">
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="w-9 h-9 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-semibold text-sm flex items-center justify-center shrink-0">
-                                        {userInitials}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 truncate">{userName || 'User'}</p>
-                                        <p className="text-[11px] text-gray-400">Admin</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <button
-                                        onClick={() => setShowUserMenu(!showUserMenu)}
-                                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all"
-                                    >
-                                        <ChevronDown size={14} className={`transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* User menu dropdown for expanded state */}
-                        {!isCollapsed && showUserMenu && (
-                            <>
-                                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                                <div className="absolute bottom-16 left-3 right-3 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                                    <button
-                                        onClick={() => { onPageChange('Settings'); setShowUserMenu(false); }}
-                                        className="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                    >
-                                        <User size={14} className="text-gray-400" />
-                                        Profile
-                                    </button>
-                                    <button
-                                        onClick={handleSignOut}
-                                        className="w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                    >
-                                        <LogOut size={14} />
-                                        Sign Out
-                                    </button>
-                                </div>
-                            </>
-                        )}
+                    {/* Sign Out Button */}
+                    <div className="p-2">
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center gap-2 px-3 py-2 mx-2 mb-2 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium w-full"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            <span className={isCollapsed ? 'hidden' : ''}>Sign Out</span>
+                        </button>
                     </div>
                 </div>
             </aside>

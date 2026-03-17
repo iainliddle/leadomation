@@ -143,6 +143,9 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
             .reduce((sum, d) => sum + (d.value || 0), 0);
     }, [deals]);
 
+    const wonDeals = useMemo(() => deals.filter(d => d.stage === 'won'), [deals]);
+    const wonValue = useMemo(() => wonDeals.reduce((sum, d) => sum + (d.value || 0), 0), [wonDeals]);
+
     const moveStage = (deal: Deal, direction: 'left' | 'right') => {
         const currentIndex = stages.findIndex(s => s.id === deal.stage);
         if (direction === 'left' && currentIndex > 0) {
@@ -166,25 +169,35 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
 
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
-            {/* Page Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-xl font-semibold text-[#111827]">Deal Pipeline</h1>
-                    <p className="text-sm text-[#6B7280] mt-0.5">Manage your revenue pipeline from reply to won</p>
+            {/* Stats Bar */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
+                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Total deals</p>
+                    <p className="text-2xl font-bold text-[#111827]">{deals.length}</p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <div className="text-right">
-                        <p className="text-xs text-gray-400">Total Pipeline Value</p>
-                        <p className="text-xl font-bold text-[#4F46E5]">£{totalPipelineValue.toLocaleString()}</p>
-                    </div>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-medium rounded-lg px-4 py-2 transition-all"
-                    >
-                        <Plus size={18} />
-                        Add Deal
-                    </button>
+                <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
+                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Total pipeline</p>
+                    <p className="text-2xl font-bold text-[#4F46E5]">£{totalPipelineValue.toLocaleString()}</p>
                 </div>
+                <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
+                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Won deals</p>
+                    <p className="text-2xl font-bold text-emerald-600">{wonDeals.length}</p>
+                </div>
+                <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
+                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Won value</p>
+                    <p className="text-2xl font-bold text-emerald-600">£{wonValue.toLocaleString()}</p>
+                </div>
+            </div>
+
+            {/* Page Actions */}
+            <div className="flex items-center justify-end mb-6">
+                <button
+                    onClick={() => setShowAddModal(true)}
+                    className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-medium rounded-lg px-4 py-2 transition-all"
+                >
+                    <Plus size={18} />
+                    Add Deal
+                </button>
             </div>
 
             {loading ? (
@@ -205,7 +218,7 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                                 {/* Column Header */}
                                 <div className="px-4 py-3 border-b border-gray-100">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide">
+                                        <span className="text-xs font-semibold text-[#111827]">
                                             {stage.label}
                                         </span>
                                         <span className="bg-gray-100 text-[#6B7280] text-xs font-bold px-2 py-0.5 rounded-full">

@@ -146,11 +146,7 @@ const Compliance: React.FC = () => {
 
     return (
         <div className="animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-                <div>
-                    <h1 className="text-2xl font-black text-[#111827] tracking-tight">Compliance</h1>
-                    <p className="text-sm text-[#6B7280] font-medium mt-1">Manage global regulatory compliance and data protection.</p>
-                </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4 mb-10">
                 <button
                     onClick={() => saveSettings({
                         include_unsubscribe: includeUnsubscribe,
@@ -183,7 +179,7 @@ const Compliance: React.FC = () => {
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-[#111827] flex items-center gap-2">
                                     Include unsubscribe link in every email
-                                    <span className="text-[9px] font-black bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded uppercase tracking-widest">Required</span>
+                                    <span className="text-[9px] font-semibold bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded">Required</span>
                                 </span>
                                 <span className="text-[11px] text-[#6B7280] font-medium mt-1">Automatically appends to your template footer</span>
                             </div>
@@ -273,7 +269,7 @@ const Compliance: React.FC = () => {
 
                     <div className="space-y-6">
                         <div>
-                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">PHYSICAL MAILING ADDRESS</label>
+                            <label className="text-xs font-medium text-[#9CA3AF] mb-3 block">Physical mailing address</label>
                             <textarea
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none h-24"
                                 placeholder="Business Address 123, Floor 4, Wellness District..."
@@ -364,7 +360,7 @@ const Compliance: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">DELETE LEAD BY EMAIL</label>
+                            <label className="text-xs font-medium text-[#9CA3AF] mb-3 block">Delete lead by email</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="email"

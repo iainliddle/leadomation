@@ -91,11 +91,6 @@ const EmailConfig: React.FC = () => {
 
     return (
         <div className="animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
-            <div className="mb-10">
-                <h1 className="text-2xl font-black text-[#111827] tracking-tight">Email Config</h1>
-                <p className="text-sm text-[#6B7280] font-medium mt-1">Manage your sending infrastructure and delivery rules.</p>
-            </div>
-
             <div className="space-y-8">
                 {/* Section 1: Sending Limits */}
                 <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
@@ -118,7 +113,7 @@ const EmailConfig: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">DAILY EMAIL LIMIT</label>
+                            <label className="text-xs font-medium text-[#9CA3AF] mb-3 block">Daily email limit</label>
                             <div className="flex gap-2">
                                 {[25, 50, 100, 200].map(limit => (
                                     <button
@@ -139,7 +134,7 @@ const EmailConfig: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-3 block">SEND DELAY (SECONDS)</label>
+                            <label className="text-xs font-medium text-[#9CA3AF] mb-3 block">Send delay (seconds)</label>
                             <input
                                 type="number"
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
@@ -190,7 +185,7 @@ const EmailConfig: React.FC = () => {
 
                     <div className="space-y-6">
                         <div>
-                            <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">FROM NAME</label>
+                            <label className="text-xs font-medium text-[#9CA3AF] mb-2 block">From name</label>
                             <input
                                 type="text"
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -201,7 +196,7 @@ const EmailConfig: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
-                                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">FROM EMAIL</label>
+                                <label className="text-xs font-medium text-[#9CA3AF] mb-2 block">From email</label>
                                 <input
                                     type="email"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -211,7 +206,7 @@ const EmailConfig: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2 block">REPLY-TO EMAIL</label>
+                                <label className="text-xs font-medium text-[#9CA3AF] mb-2 block">Reply-to email</label>
                                 <input
                                     type="email"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"

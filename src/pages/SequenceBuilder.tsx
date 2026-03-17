@@ -325,11 +325,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                 /* Sequence List View */
                 <div>
                     {/* Page Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-gray-900">Sequence Builder</h1>
-                            <p className="text-sm text-gray-500 mt-0.5">Build multi-step outreach automation flows</p>
-                        </div>
+                    <div className="flex items-center justify-end mb-6">
                         <button
                             onClick={handleCreateNew}
                             className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150 shadow-sm"
@@ -614,7 +610,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                         onDrop={() => handleDrop(index)}
                                         className={`group relative flex items-center gap-3 p-3 rounded-xl border shadow-sm transition-all duration-150 cursor-grab active:cursor-grabbing z-10 ${
                                             activeStepIndex === index
-                                                ? 'bg-white border-[#4F46E5] ring-1 ring-[#4F46E5] shadow-md'
+                                                ? 'bg-indigo-50 border-l-4 border-l-[#4F46E5] border-t border-r border-b border-gray-200 shadow-md'
                                                 : 'bg-white border-gray-200 hover:border-[#818CF8]'
                                         }`}
                                         onClick={() => setActiveStepIndex(index)}

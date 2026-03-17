@@ -170,7 +170,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
     const getAccentColor = (status: string) => {
         const s = String(status).toLowerCase();
-        if (s === 'completed') return 'bg-emerald-500';
+        if (s === 'completed') return 'bg-[#4F46E5]';
         if (s === 'error') return 'bg-red-500';
         if (s === 'active') return 'bg-[#4F46E5]';
         return 'bg-amber-400';
@@ -179,11 +179,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {/* Page Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Active Campaigns</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Manage your lead generation campaigns</p>
-                </div>
+            <div className="flex items-center justify-end mb-6">
                 <button
                     onClick={() => onPageChange?.('New Campaign')}
                     className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150 shadow-sm"
@@ -273,7 +269,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                 {/* Stats */}
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                     <div>
-                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Leads Found</p>
+                                        <p className="text-xs font-medium text-[#9CA3AF] mb-1">Leads found</p>
                                         <button
                                             onClick={() => {
                                                 window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
@@ -285,7 +281,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                         </button>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Reply Rate</p>
+                                        <p className="text-xs font-medium text-[#9CA3AF] mb-1">Reply rate</p>
                                         <p className="text-2xl font-bold text-gray-900">{campaign.replyRate || '0.0%'}</p>
                                     </div>
                                 </div>
