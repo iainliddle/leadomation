@@ -118,7 +118,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 );
 
 const Pricing: React.FC = () => {
-    const [isAnnual, setIsAnnual] = useState(true);
+    const [isAnnual, setIsAnnual] = useState(false);
     const [expandedTerms, setExpandedTerms] = useState(false);
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);

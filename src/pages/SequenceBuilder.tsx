@@ -13,7 +13,8 @@ import {
     Linkedin,
     Loader2,
     Users,
-    Calendar
+    Calendar,
+    Phone
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -646,10 +647,13 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 
                         <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10 space-y-2">
                             <button onClick={() => addStep('email')} className="w-full flex items-center justify-center gap-2 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 rounded-lg text-xs font-semibold transition-colors">
-                                <Mail size={14} /> Add Email
+                                <Mail size={14} /> Add email step
                             </button>
                             <button onClick={() => addStep('linkedin')} className="w-full flex items-center justify-center gap-2 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 rounded-lg text-xs font-semibold transition-colors">
-                                <Linkedin size={14} /> Add LinkedIn
+                                <Linkedin size={14} /> Add LinkedIn step
+                            </button>
+                            <button onClick={() => addStep('phone')} className="w-full flex items-center justify-center gap-2 py-2 border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-semibold transition-colors">
+                                <Phone size={14} /> Add AI call step
                             </button>
                         </div>
                     </div>

@@ -7,10 +7,9 @@ interface SettingsProps {
 }
 
 const tabs = [
-    { key: 'account', label: 'Account Settings', icon: User },
+    { key: 'account', label: 'Account', icon: User },
     { key: 'store', label: 'Security', icon: Lock },
     { key: 'notifications', label: 'Notifications', icon: Bell },
-    { key: 'integrations', label: 'Integrations', icon: Zap },
     { key: 'billing', label: 'Billing', icon: CreditCard },
 ];
 

@@ -231,10 +231,6 @@ const Integrations: React.FC = () => {
                 </div>
             )}
 
-            <div className="mb-10">
-                <h1 className="text-2xl font-black text-[#111827] tracking-tight">Integrations</h1>
-                <p className="text-sm text-[#6B7280] font-medium mt-1">Connect your accounts to power your outreach automation.</p>
-            </div>
 
             {/* Meeting Link Section */}
             <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden group">
@@ -262,9 +258,9 @@ const Integrations: React.FC = () => {
                         <button
                             onClick={() => saveField('meeting_link', meetingLink)}
                             disabled={saving === 'meeting_link' || loadingSettings}
-                            className="flex items-center gap-2 px-6 py-3 bg-[#4F46E5] text-white rounded-xl text-sm font-black shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] transition-all active:scale-95 disabled:opacity-50 shrink-0"
+                            className="flex items-center gap-2 px-6 py-3 bg-[#4F46E5] text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] transition-all active:scale-95 disabled:opacity-50 shrink-0"
                         >
-                            {saving === 'meeting_link' ? 'Saving...' : 'SAVE'}
+                            {saving === 'meeting_link' ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </div>
