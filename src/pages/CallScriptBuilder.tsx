@@ -77,15 +77,15 @@ const successActions = [
 ];
 
 const Section: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode; step?: number }> = ({ title, icon: Icon, children, step }) => (
-    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 mb-6">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7 mb-6 hover:shadow-md transition-shadow duration-200">
         <div className="flex items-center gap-3 mb-6">
             {step && (
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-sm font-bold flex items-center justify-center">
+                <div className="w-9 h-9 bg-indigo-600 text-white rounded-full font-bold text-sm flex items-center justify-center shadow-sm">
                     {step}
                 </div>
             )}
             <Icon size={18} className="text-indigo-600" />
-            <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
+            <h3 className="text-base font-semibold text-slate-900 ml-1">{title}</h3>
         </div>
         {children}
     </div>
@@ -374,16 +374,16 @@ IMPORTANT RULES:
     };
 
     return (
-        <div className="max-w-[800px] mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Page Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4F46E5] to-[#7C3AED] flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                        <Phone size={20} />
+        <div className="max-w-[800px] mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
+            {/* AI Call Agent Hero Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-6 mb-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <Phone size={24} className="text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-[#111827]">AI Call Agent</h1>
-                        <p className="text-sm text-[#6B7280] font-medium">Configure your AI voice agent to make outbound calls to leads</p>
+                        <h1 className="text-2xl font-bold text-white">AI Call Agent</h1>
+                        <p className="text-indigo-200 text-sm">Configure your AI voice agent to make outbound calls to leads</p>
                     </div>
                 </div>
             </div>
@@ -459,19 +459,19 @@ IMPORTANT RULES:
                             <button
                                 key={obj.id}
                                 onClick={() => setScript(prev => ({ ...prev, objective: obj.id }))}
-                                className={`p-4 border text-left rounded-xl transition-all duration-200 relative group ${script.objective === obj.id
-                                    ? 'border-[#4F46E5] bg-[#EEF2FF] shadow-sm'
-                                    : 'border-[#E5E7EB] bg-white hover:border-gray-300 hover:shadow-sm'
+                                className={`p-4 text-left rounded-xl transition-all duration-150 relative group ${script.objective === obj.id
+                                    ? 'border-2 border-indigo-500 bg-indigo-50 shadow-sm'
+                                    : 'border border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50'
                                     }`}
                             >
                                 {script.objective === obj.id && (
-                                    <div className="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center">
+                                    <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-600 text-white rounded-full flex items-center justify-center">
                                         <CheckCircle2 size={12} />
                                     </div>
                                 )}
                                 <span className="text-xl mb-2 block">{obj.icon}</span>
-                                <p className="text-sm font-bold text-[#374151]">{obj.label}</p>
-                                <p className="text-[11px] text-[#6B7280] mt-0.5">{obj.desc}</p>
+                                <p className="text-sm font-bold text-slate-900">{obj.label}</p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">{obj.desc}</p>
                             </button>
                         ))}
                     </div>
@@ -619,12 +619,14 @@ IMPORTANT RULES:
             {/* Step 7: Voicemail Script */}
             <Section title="Voicemail Script" icon={Mic} step={7}>
                 <div className="space-y-4">
-                    <div className="p-4 bg-[#EEF2FF] border-l-4 border-[#4F46E5] rounded-r-xl rounded-l-sm mb-4">
+                    <div className="bg-indigo-50 border-l-4 border-l-indigo-500 rounded-r-2xl p-4 mb-4">
                         <div className="flex items-start gap-3">
-                            <span className="text-xl leading-none pt-0.5">📞</span>
+                            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 shrink-0">
+                                <Phone size={16} />
+                            </div>
                             <div>
-                                <h4 className="text-sm font-bold text-[#111827] mb-1">How Voicemail Works</h4>
-                                <p className="text-xs text-[#4F46E5] leading-relaxed">
+                                <h4 className="text-sm font-semibold text-slate-900 mb-1">How Voicemail Works</h4>
+                                <p className="text-sm text-indigo-700 leading-relaxed">
                                     If your lead doesn't answer, Sarah will leave a voicemail automatically. Write a short, friendly message that mentions why you're calling and gives them a way to reach you. Keep it under 30 seconds. Around 60 to 75 words is ideal.
                                 </p>
                             </div>
@@ -662,8 +664,8 @@ IMPORTANT RULES:
                         />
 
                         <div className="mt-2 flex items-center justify-between">
-                            <p className="text-[10px] text-[#9CA3AF] italic">Aim for 60–75 words for a natural 20–25 second voicemail.</p>
-                            <div className={`text-xs font-bold ${vmStats.colorClass}`}>
+                            <p className="text-xs text-slate-400">Aim for 60–75 words for a natural 20–25 second voicemail.</p>
+                            <div className={`text-xs text-slate-400 text-right ${vmStats.colorClass}`}>
                                 {vmStats.words} words · ~{vmStats.seconds} seconds
                             </div>
                         </div>

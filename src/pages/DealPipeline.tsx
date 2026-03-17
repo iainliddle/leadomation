@@ -156,32 +156,32 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
 
     const getStageColor = (color: string) => {
         switch (color) {
-            case 'blue': return 'border-t-blue-500';
-            case 'purple': return 'border-t-purple-500';
-            case 'yellow': return 'border-t-yellow-500';
-            case 'orange': return 'border-t-orange-500';
-            case 'green': return 'border-t-green-500';
-            case 'red': return 'border-t-red-500';
-            default: return 'border-t-gray-500';
+            case 'blue': return 'border-t-4 border-t-blue-400';
+            case 'purple': return 'border-t-4 border-t-indigo-400';
+            case 'yellow': return 'border-t-4 border-t-amber-400';
+            case 'orange': return 'border-t-4 border-t-orange-400';
+            case 'green': return 'border-t-4 border-t-emerald-400';
+            case 'red': return 'border-t-4 border-t-red-400';
+            default: return 'border-t-4 border-t-slate-400';
         }
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-100px)] animate-in fade-in duration-700">
+        <div className="flex flex-col h-[calc(100vh-100px)] animate-in fade-in duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-2xl font-black text-[#111827] mb-1">Deal Pipeline</h1>
-                    <p className="text-sm font-bold text-[#6B7280]">Manage your revenue pipeline from reply to won</p>
+                    <h1 className="text-2xl font-bold text-slate-900 mb-1">Deal Pipeline</h1>
+                    <p className="text-sm text-slate-500">Manage your revenue pipeline from reply to won</p>
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="text-right">
-                        <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Total Pipeline Value</p>
-                        <p className="text-xl font-black text-primary">£{totalPipelineValue.toLocaleString()}</p>
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">Total Pipeline Value</p>
+                        <p className="text-2xl font-bold text-indigo-600">£{totalPipelineValue.toLocaleString()}</p>
                     </div>
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200"
                     >
                         <Plus size={18} />
                         Add Deal
@@ -201,11 +201,11 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                             const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
 
                             return (
-                                <div key={stage.id} className="w-[280px] flex flex-col h-full bg-slate-50 rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                                    <div className={`p-4 border-t-4 ${getStageColor(stage.color)} bg-white rounded-xl shadow-sm border border-slate-100 mb-4`}>
+                                <div key={stage.id} className={`w-[280px] flex flex-col h-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden ${getStageColor(stage.color)}`}>
+                                    <div className="bg-slate-50 rounded-t-2xl px-4 py-3 border-b border-slate-200">
                                         <div className="flex items-center justify-between mb-1">
                                             <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">{stage.label}</h3>
-                                            <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{stageDeals.length}</span>
+                                            <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full ml-2">{stageDeals.length}</span>
                                         </div>
                                         <p className="text-xs text-slate-500">£{stageValue.toLocaleString()}</p>
                                     </div>
@@ -220,21 +220,21 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                                                 </div>
                                                 <p className="text-lg font-bold text-slate-900 mb-2">£{Number(deal.value || 0).toLocaleString()}</p>
                                                 {deal.notes && (
-                                                    <p className="text-[10px] text-[#6B7280] font-medium line-clamp-2 mb-4 italic">"{deal.notes}"</p>
+                                                    <p className="text-[10px] text-slate-500 font-medium line-clamp-2 mb-4 italic">"{deal.notes}"</p>
                                                 )}
-                                                <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-2">
+                                                <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
                                                     <button
                                                         onClick={() => moveStage(deal, 'left')}
                                                         disabled={stages.findIndex(s => s.id === deal.stage) === 0}
-                                                        className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-primary transition-all disabled:opacity-0"
+                                                        className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all disabled:opacity-0"
                                                     >
                                                         <ChevronLeft size={16} />
                                                     </button>
-                                                    <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Move</span>
+                                                    <span className="text-[9px] font-semibold text-slate-300 uppercase tracking-wide">Move</span>
                                                     <button
                                                         onClick={() => moveStage(deal, 'right')}
                                                         disabled={stages.findIndex(s => s.id === deal.stage) === stages.length - 1}
-                                                        className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-primary transition-all disabled:opacity-0"
+                                                        className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all disabled:opacity-0"
                                                     >
                                                         <ChevronRight size={16} />
                                                     </button>
@@ -242,8 +242,9 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                                             </div>
                                         ))}
                                         {stageDeals.length === 0 && (
-                                            <div className="py-8 text-center px-4">
-                                                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest italic">No deals yet</p>
+                                            <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center">
+                                                <Plus size={20} className="mx-auto text-slate-300 mb-2" />
+                                                <p className="text-sm text-slate-400">No deals yet</p>
                                             </div>
                                         )}
                                     </div>
@@ -254,20 +255,6 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                 </div>
             )}
 
-            {/* Info Banner */}
-            <div className="mt-auto pt-6">
-                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
-                    <div className="bg-white p-2 rounded-xl text-[#4F46E5] shadow-sm">
-                        <Info size={20} />
-                    </div>
-                    <div>
-                        <h4 className="text-xs font-black text-[#111827] uppercase tracking-widest mb-1">Pipeline Management</h4>
-                        <p className="text-sm font-bold text-blue-800 leading-relaxed">
-                            Track your deals from first reply to closed won. Move deals between stages using the arrow buttons. The pipeline value shows the total of all active deals excluding lost opportunities.
-                        </p>
-                    </div>
-                </div>
-            </div>
 
             {/* Add Deal Modal */}
             {showAddModal && (

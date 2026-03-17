@@ -45,11 +45,11 @@ const PricingCard: React.FC<PricingCardProps> = ({
     onCheckout
 }) => (
     <div className={`relative flex flex-col p-8 bg-white rounded-2xl transition-all duration-300 ${isPopular
-        ? `border-2 border-indigo-500 shadow-xl scale-105 z-10`
+        ? `border-2 border-indigo-500 shadow-xl z-10`
         : 'border border-slate-200 shadow-sm hover:shadow-md'
         }`}>
         {isPopular && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs font-bold px-4 py-1.5 rounded-full">
                 MOST POPULAR
             </div>
         )}
@@ -59,39 +59,37 @@ const PricingCard: React.FC<PricingCardProps> = ({
                 {icon}
             </div>
             <div>
-                <h3 className="text-xl font-black text-[#111827]">{title}</h3>
-                <p className="text-xs text-[#6B7280] font-medium">{description}</p>
+                <h3 className="text-xl font-bold text-slate-900">{title}</h3>
+                <p className="text-xs text-slate-500">{description}</p>
             </div>
         </div>
 
         <div className="mb-8">
             <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-bold text-slate-900">{isAnnual ? annualPrice : monthlyPrice}</span>
-                <span className="text-sm font-medium text-slate-500">{isAnnual ? '/year' : '/month'}</span>
+                <span className="text-sm text-slate-500">{isAnnual ? '/year' : '/month'}</span>
                 {isAnnual && savingsBadge && (
-                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full ml-2">
+                    <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full ml-2">
                         {savingsBadge}
                     </span>
                 )}
             </div>
             {isAnnual && (
-                <p className="text-xs text-slate-400 mt-1">({annualMonthlyRate}/mo)</p>
+                <p className="text-sm text-slate-500 mt-1">({annualMonthlyRate}/mo)</p>
             )}
         </div>
 
-        <div className="w-full h-px bg-gray-50 mb-8" />
+        <div className="w-full h-px bg-slate-100 mb-8" />
 
         <div className="flex-1">
-            <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-4">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-4">
                 {isPopular ? 'Everything in Starter, plus:' : 'Features'}
             </p>
             <ul className="space-y-4 mb-8">
                 {features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                        <div className={`mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${isPopular ? 'bg-purple-50 text-purple-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                            <Check size={12} strokeWidth={3} />
-                        </div>
-                        <span className="text-xs font-semibold text-[#4B5563] leading-relaxed">{feature}</span>
+                        <Check size={16} strokeWidth={3} className="text-indigo-600 w-4 h-4 shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-600">{feature}</span>
                     </li>
                 ))}
             </ul>
@@ -99,9 +97,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
 
         <button
             onClick={() => onCheckout(title)}
-            className={`w-full py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-center gap-2 ${isPopular
-                ? 'bg-primary text-white shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] active:scale-95'
-                : 'bg-white border-2 border-gray-100 text-[#4B5563] hover:border-primary hover:text-primary active:scale-95'
+            className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${isPopular
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md'
+                : 'border border-indigo-200 text-indigo-600 hover:bg-indigo-50'
                 }`}>
             {buttonText}
             <ArrowRight size={16} />
@@ -182,29 +180,30 @@ const Pricing: React.FC = () => {
     ];
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-[1200px] mx-auto pb-24 pt-8 px-4">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-[1200px] mx-auto pb-24 pt-8 px-4 bg-gradient-to-b from-slate-50 to-white -m-6 p-6">
             <div className="text-center mb-16">
-                <h1 className="text-5xl font-black text-[#111827] tracking-tight mb-4">Choose Your Plan</h1>
-                <p className="text-lg text-[#6B7280] font-medium max-w-2xl mx-auto">
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-4">Choose Your Plan</h1>
+                <p className="text-lg text-slate-500 max-w-2xl mx-auto">
                     Scale your outreach with the right plan for your business
                 </p>
 
                 <div className="mt-12 flex flex-col items-center gap-4">
-                    <div className="flex items-center justify-center gap-4">
-                        <span className={`text-sm font-bold ${!isAnnual ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>Monthly</span>
+                    <div className="bg-slate-100 rounded-xl p-1 inline-flex items-center">
                         <button
-                            onClick={() => setIsAnnual(!isAnnual)}
-                            className="relative w-14 h-7 bg-gray-100 rounded-full p-1 transition-all"
+                            onClick={() => setIsAnnual(false)}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!isAnnual ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}
                         >
-                            <div className={`w-5 h-5 rounded-full shadow-md transition-all duration-300 transform ${isAnnual ? 'translate-x-7 bg-primary' : 'translate-x-0 bg-white'}`}
-                                style={{ backgroundColor: isAnnual ? '#2563EB' : 'white' }} />
+                            Monthly
                         </button>
-                        <div className="flex items-center gap-2">
-                            <span className={`text-sm font-bold ${isAnnual ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>Annual</span>
-                            <div className="bg-emerald-100 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                        <button
+                            onClick={() => setIsAnnual(true)}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${isAnnual ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}
+                        >
+                            Annual
+                            <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                                 Save 20%
-                            </div>
-                        </div>
+                            </span>
+                        </button>
                     </div>
                 </div>
 
@@ -215,14 +214,14 @@ const Pricing: React.FC = () => {
                 )}
             </div>
 
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-6 mb-16 max-w-4xl mx-auto shadow-sm">
-                <div className="flex flex-col items-center gap-2">
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-5 mb-16 max-w-4xl mx-auto">
+                <div className="flex flex-col items-center gap-2 text-white">
                     <div className="flex items-center gap-3">
-                        <Zap size={20} className="text-primary animate-pulse" />
-                        <span className="text-base font-black text-[#111827]">🚀 Start with a 7-day free trial</span>
-                        <span className="text-xs font-bold text-[#6B7280]">Full Pro access, no restrictions on features.</span>
+                        <Zap size={20} className="text-white" />
+                        <span className="text-base font-bold">Start with a 7-day free trial</span>
+                        <span className="text-sm text-indigo-200">Full Pro access, no restrictions on features.</span>
                     </div>
-                    <p className="text-[11px] font-bold text-[#9CA3AF]">
+                    <p className="text-xs text-indigo-200">
                         Secure your trial with a card. Cancel anytime before day 7. Export limits apply during trial.
                     </p>
                 </div>
@@ -290,23 +289,23 @@ const Pricing: React.FC = () => {
                 />
             </div>
 
-            <div className="max-w-4xl mx-auto mb-24 overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
-                <div className="p-8 border-b border-gray-50 flex items-center justify-between">
+            <div className="max-w-4xl mx-auto mb-24 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-black text-[#111827] tracking-tight">Feature Comparison</h2>
-                        <p className="text-xs font-bold text-[#6B7280] mt-1">Detailed breakdown of what's included in each plan</p>
+                        <h2 className="text-xl font-bold text-slate-900 tracking-tight">Feature Comparison</h2>
+                        <p className="text-sm text-slate-500 mt-1">Detailed breakdown of what's included in each plan</p>
                     </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50/50">
-                                <th className="px-8 py-4 text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest border-b border-gray-100">Feature</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest border-b border-gray-100 text-center">Starter</th>
-                                <th className="px-8 py-4 text-[10px] font-black text-primary uppercase tracking-widest border-b border-gray-100 text-center">Pro</th>
+                            <tr className="bg-slate-50">
+                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-100">Feature</th>
+                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-100 text-center">Starter</th>
+                                <th className="px-8 py-4 text-xs font-semibold text-indigo-600 uppercase tracking-wide border-b border-slate-100 text-center">Pro</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody>
                             {([
                                 { name: "Keyword searches", starter: "50/month", pro: "Unlimited" },
                                 { name: "Active campaigns", starter: "3", pro: "Unlimited" },
@@ -319,25 +318,25 @@ const Pricing: React.FC = () => {
                                 { name: "Global Demand", starter: false, pro: true },
                                 { name: "LinkedIn automation", starter: false, pro: true }
                             ] as { name: string; starter: string | boolean; pro: string | boolean; note?: string }[]).map((row, idx) => (
-                                <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
+                                <tr key={idx} className={`border-b border-slate-100 ${idx % 2 === 1 ? 'bg-slate-50/50' : ''}`}>
                                     <td className="px-8 py-4">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-[#111827]">{row.name}</span>
-                                            {row.note && <span className="text-[10px] font-medium text-[#9CA3AF]">{row.note}</span>}
+                                            <span className="text-sm font-semibold text-slate-900">{row.name}</span>
+                                            {row.note && <span className="text-xs text-slate-400">{row.note}</span>}
                                         </div>
                                     </td>
                                     <td className="px-8 py-4 text-center">
                                         {typeof row.starter === 'boolean' ? (
-                                            row.starter ? <Check size={16} className="text-emerald-500 mx-auto" strokeWidth={3} /> : <X size={16} className="text-gray-200 mx-auto" />
+                                            row.starter ? <Check size={16} className="text-indigo-600 mx-auto" strokeWidth={3} /> : <X size={16} className="text-slate-300 mx-auto" />
                                         ) : (
-                                            <span className="text-xs font-black text-[#6B7280]">{row.starter}</span>
+                                            <span className="text-sm text-slate-600">{row.starter}</span>
                                         )}
                                     </td>
                                     <td className="px-8 py-4 text-center">
                                         {typeof row.pro === 'boolean' ? (
-                                            row.pro ? <Check size={16} className="text-primary mx-auto" strokeWidth={3} /> : <X size={16} className="text-gray-200 mx-auto" />
+                                            row.pro ? <Check size={16} className="text-indigo-600 mx-auto" strokeWidth={3} /> : <X size={16} className="text-slate-300 mx-auto" />
                                         ) : (
-                                            <span className="text-xs font-black text-primary">{row.pro}</span>
+                                            <span className="text-sm font-semibold text-indigo-600">{row.pro}</span>
                                         )}
                                     </td>
                                 </tr>
@@ -380,23 +379,20 @@ const Pricing: React.FC = () => {
             </div>
 
             <div className="max-w-3xl mx-auto mb-24">
-                <h2 className="text-3xl font-black text-[#111827] text-center mb-12">Frequently Asked Questions</h2>
-                <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-slate-900 text-center mb-12">Frequently Asked Questions</h2>
+                <div className="divide-y divide-slate-100">
                     {faqs.map((faq, idx) => (
-                        <div
-                            key={idx}
-                            className="bg-white border border-gray-100 rounded-2xl overflow-hidden transition-all hover:border-gray-200"
-                        >
+                        <div key={idx} className="border-b border-slate-100">
                             <button
                                 onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                                className="w-full flex items-center justify-between p-6 text-left focus:outline-none"
+                                className="w-full flex items-center justify-between py-5 text-left focus:outline-none"
                             >
-                                <span className="text-sm font-black text-[#111827]">{faq.q}</span>
-                                {activeFaq === idx ? <ChevronUp size={18} className="text-[#9CA3AF]" /> : <ChevronDown size={18} className="text-[#9CA3AF]" />}
+                                <span className="text-base font-semibold text-slate-900">{faq.q}</span>
+                                {activeFaq === idx ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
                             </button>
                             {activeFaq === idx && (
-                                <div className="px-6 pb-6 animate-in fade-in slide-in-from-top-1 duration-300">
-                                    <p className="text-xs text-[#6B7280] font-medium leading-relaxed">
+                                <div className="pt-3 pb-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                                    <p className="text-sm text-slate-600 leading-relaxed">
                                         {faq.a}
                                     </p>
                                 </div>
@@ -406,28 +402,27 @@ const Pricing: React.FC = () => {
                 </div>
             </div>
 
-            <div className="text-center bg-gray-900 rounded-[40px] p-16 text-white overflow-hidden relative group">
-                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all duration-700" />
+            <div className="text-center bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-12 text-white overflow-hidden relative">
                 <div className="relative z-10">
-                    <h2 className="text-4xl font-black tracking-tight mb-4">Still not sure?</h2>
-                    <p className="text-lg text-gray-400 font-medium mb-10 max-w-xl mx-auto">
+                    <h2 className="text-3xl font-bold tracking-tight mb-4">Still not sure?</h2>
+                    <p className="text-lg text-indigo-100 mb-8 max-w-xl mx-auto">
                         Start your free trial and see the results for yourself.
                     </p>
                     <button
                         onClick={() => handleCheckout('Pro')}
                         disabled={isLoading}
-                        className="px-12 py-5 bg-primary text-white text-lg font-black rounded-3xl hover:bg-[#4338CA] transition-all shadow-2xl shadow-indigo-500/40 active:scale-95 flex items-center gap-2 mx-auto"
+                        className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-indigo-50 transition-all shadow-lg flex items-center gap-2 mx-auto"
                     >
-                        {isLoading && <Loader2 size={24} className="animate-spin" />}
+                        {isLoading && <Loader2 size={20} className="animate-spin" />}
                         Start 7-Day Free Trial
                     </button>
-                    <div className="mt-8 flex items-center justify-center gap-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                    <div className="mt-8 flex items-center justify-center gap-6 text-xs text-indigo-200">
                         <div className="flex items-center gap-2">
-                            <ShieldCheck size={14} className="text-emerald-500" />
+                            <ShieldCheck size={14} />
                             Card required to activate trial
                         </div>
                         <div className="flex items-center gap-2">
-                            <CreditCard size={14} className="text-[#4F46E5]" />
+                            <CreditCard size={14} />
                             Secure processing via Stripe
                         </div>
                     </div>

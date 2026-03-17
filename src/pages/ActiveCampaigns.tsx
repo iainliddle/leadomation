@@ -24,17 +24,17 @@ interface ActiveCampaignsProps {
 
 const ScrapingBadge = ({ status }: { status: string }) => {
     const config: Record<string, { label: string; className: string; animate?: boolean }> = {
-        idle: { label: 'Queued', className: 'bg-slate-100 text-slate-600' },
-        scraping: { label: 'Scraping…', className: 'bg-blue-50 text-blue-700', animate: true },
-        enriching: { label: 'Finding Emails…', className: 'bg-blue-50 text-blue-700', animate: true },
-        complete: { label: 'Complete', className: 'bg-emerald-50 text-emerald-700' },
-        failed: { label: 'Failed', className: 'bg-red-50 text-red-700' },
+        idle: { label: 'Queued', className: 'bg-amber-50 text-amber-700 border border-amber-200' },
+        scraping: { label: 'Scraping…', className: 'bg-blue-50 text-blue-700 border border-blue-200', animate: true },
+        enriching: { label: 'Finding Emails…', className: 'bg-blue-50 text-blue-700 border border-blue-200', animate: true },
+        complete: { label: 'Complete', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+        failed: { label: 'Failed', className: 'bg-red-50 text-red-700 border border-red-200' },
     };
 
     const c = config[status] || config.idle;
 
     return (
-        <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${c.className}`}>
+        <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${c.className}`}>
             {c.animate && (
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
             )}
@@ -173,29 +173,12 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
     };
 
     return (
-        <div className="flex flex-col gap-8 animate-in fade-in duration-700">
+        <div className="flex flex-col gap-8 animate-in fade-in duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-[#111827] mb-1">Active Campaigns</h1>
-                    <p className="text-sm font-bold text-[#6B7280]">Monitor and manage your outreach campaigns in real-time</p>
+                    <h1 className="text-2xl font-bold text-slate-900 mb-1">Active Campaigns</h1>
+                    <p className="text-sm text-slate-500">Monitor and manage your outreach campaigns in real-time</p>
                 </div>
-            </div>
-
-            {/* Info Banner */}
-            <div className="flex items-start gap-3 bg-[#F8FAFF] border border-[#E0E7FF] rounded-xl px-5 py-4 mb-6">
-                <div className="mt-0.5 text-[#4F46E5] shrink-0">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                </div>
-                <p className="text-sm text-[#4B5563] leading-relaxed">
-                    <span className="font-bold text-[#111827]">How it works: </span>
-                    When you launch a campaign, Leadomation scrapes Google Maps for matching businesses, finds their contact details, and adds them to your Lead Database.
-                    <span className="font-semibold text-[#4F46E5]"> Scraping typically takes 2–5 minutes.</span> The status badge will update automatically when complete. If a campaign shows "Scraping…" it is actively running in the background.
-                    Some leads may not display a local time. This can occur when a business listing does not include enough location detail for us to determine their timezone. This is a data availability limitation on certain listings rather than an issue with Leadomation.
-                </p>
             </div>
 
             {isLoading ? (
@@ -205,17 +188,17 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                     ))}
                 </div>
             ) : campaigns.length === 0 ? (
-                <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center shadow-sm">
-                    <div className="w-16 h-16 bg-blue-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                         <Rocket size={32} />
                     </div>
-                    <h3 className="text-xl font-black text-[#111827] mb-2">No campaigns yet</h3>
-                    <p className="text-[#6B7280] font-medium mb-8 max-w-sm mx-auto">
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">No campaigns yet</h3>
+                    <p className="text-sm text-slate-500 mb-8 max-w-sm mx-auto">
                         Create your first campaign to start generating leads and closing deals automatically.
                     </p>
                     <button
                         onClick={() => onPageChange?.('New Campaign')}
-                        className="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-all"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200"
                     >
                         Create Your First Campaign
                     </button>
@@ -223,9 +206,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {campaigns.map((campaign) => (
-                        <div key={campaign.id} className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 group">
-                            {/* Gradient header strip */}
-                            <div className="bg-gradient-to-r from-indigo-500 to-cyan-400 h-1 rounded-t-2xl"></div>
+                        <div key={campaign.id} className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 group border-l-4 border-l-indigo-500">
                             <div className="p-6">
                                 <div className="flex justify-between items-start mb-6">
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
@@ -253,7 +234,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                     </div>
                                 </div>
 
-                                <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors">{campaign.name}</h3>
+                                <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors">{campaign.name}</h3>
                                 <div className="flex items-center justify-between mb-6">
                                     <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-tight">{campaign.type}</p>
                                     <div className="flex flex-col items-end gap-1">
@@ -263,14 +244,14 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                                 !['completed', 'paused'].includes(String(campaign.status).toLowerCase()) && (
                                                     <ScrapingBadge status={String(campaign.scraping_status).trim().toLowerCase()} />
                                                 )}
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
                                                 campaign.status === 'completed' || campaign.status === 'Completed'
-                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                                     : campaign.status === 'active' || campaign.status === 'Active'
-                                                    ? 'bg-blue-50 text-blue-700'
+                                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
                                                     : campaign.status === 'error'
-                                                    ? 'bg-red-50 text-red-700'
-                                                    : 'bg-slate-100 text-slate-600'
+                                                    ? 'bg-red-50 text-red-700 border-red-200'
+                                                    : 'bg-amber-50 text-amber-700 border-amber-200'
                                             }`}>
                                                 {campaign.status}
                                             </span>
@@ -291,7 +272,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <div className="bg-slate-50 p-4 rounded-xl">
-                                        <p className="text-xs text-slate-500 mb-1">Leads Found</p>
+                                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Leads Found</p>
                                         <button
                                             onClick={() => {
                                                 window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
@@ -303,7 +284,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                         </button>
                                     </div>
                                     <div className="bg-slate-50 p-4 rounded-xl">
-                                        <p className="text-xs text-slate-500 mb-1">Reply Rate</p>
+                                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Reply Rate</p>
                                         <p className="text-2xl font-bold text-slate-900">{campaign.replyRate || '0.0%'}</p>
                                     </div>
                                 </div>
@@ -313,9 +294,9 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                         <span className="text-slate-500">Progress</span>
                                         <span className="font-bold text-slate-900">{campaign.progress || 0}%</span>
                                     </div>
-                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                                            className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-1000"
                                             style={{ width: `${campaign.progress || 0}%` }}
                                         ></div>
                                     </div>
@@ -350,7 +331,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                             window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
                                             onPageChange?.('Lead Database');
                                         }}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-50 text-[#4F46E5] border border-indigo-100 rounded-xl text-sm font-bold hover:bg-indigo-100 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(79,70,229,0.05)] active:scale-[0.98]"
+                                        className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 font-medium rounded-xl transition-all duration-200"
                                     >
                                         <Eye size={16} />
                                         View Leads
@@ -360,7 +341,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
                             <button
                                 onClick={() => alert('Campaign analytics coming soon!')}
-                                className="w-full py-4 bg-gray-50 border-t border-[#E5E7EB] text-xs font-black text-[#6B7280] hover:bg-blue-50 hover:text-primary transition-all flex items-center justify-center gap-2 group/btn uppercase tracking-widest"
+                                className="w-full py-3 border-t border-slate-100 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 group/btn"
                             >
                                 <BarChart3 size={14} />
                                 View Full Analytics
