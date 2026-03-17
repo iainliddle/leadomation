@@ -14,6 +14,7 @@ import {
     Globe,
     Trash2,
     Plus,
+    Download,
     Wand2,
     Linkedin,
     Save,
@@ -66,7 +67,6 @@ interface Lead {
     intent_signals?: IntentSignal[] | null;
 }
 
-import { Lock } from 'lucide-react';
 import type { FeatureAccess } from '../lib/planLimits';
 
 interface LeadDatabaseProps {
@@ -1234,9 +1234,9 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     }
 
     return (
-        <div className="flex flex-col gap-6 animate-in fade-in duration-700">
+        <div className="flex flex-col h-full bg-[#F8F9FA] animate-in fade-in duration-700">
             {campaignFilter && (
-                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 p-3 mx-6 mt-6 rounded-lg">
                     <div className="flex items-center gap-2">
                         <Tag className="text-[#4F46E5] w-4 h-4" />
                         <span className="text-sm font-medium text-[#4F46E5]">
@@ -1253,25 +1253,54 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 </div>
             )}
             
-            {/* Filters and Actions Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center w-[400px] bg-white border border-[#E5E7EB] rounded-full px-4 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all group">
-                        <Search className="text-[#9CA3AF] group-focus-within:text-primary transition-colors shrink-0" size={18} />
+            {/* Header & Actions Bar */}
+            <div className={`px-6 pt-6 pb-4 bg-white border-b border-gray-200 ${campaignFilter ? 'mt-0 pt-4' : ''}`}>
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Lead Database</h1>
+                        <p className="text-sm text-gray-500 mt-1">Manage and filter all your scraped leads</p>
+                    </div>
+
+                    <div className="flex items-center gap-3 border-t sm:border-t-0 pt-4 sm:pt-0 border-gray-100 w-full sm:w-auto mt-2 sm:mt-0">
+                        <button
+                            onClick={handleExport}
+                            disabled={isExporting}
+                            className={`flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm disabled:opacity-50 flex-1 sm:flex-auto ${canAccess && !canAccess('csvExport') ? 'opacity-70' : ''}`}
+                        >
+                            {isExporting ? <Loader2 size={16} className="animate-spin text-gray-400" /> : <Download size={16} className="text-gray-400" />}
+                            {isExporting ? 'Exporting...' : 'Export CSV'}
+                            {canAccess && !canAccess('csvExport') && (
+                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-1 font-bold">PRO</span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-semibold hover:bg-[#4338CA] transition-colors shadow-sm flex-1 sm:flex-auto"
+                        >
+                            <Plus size={16} />
+                            Add Lead
+                        </button>
+                    </div>
+                </div>
+
+                {/* Search & Basic Filters row */}
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex-1 min-w-[280px] relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
                             type="text"
-                            placeholder="Search leads by name, email, city..."
-                            className="w-full pl-3 pr-2 py-2.5 bg-transparent border-none focus:outline-none text-sm font-medium placeholder:text-[#9CA3AF]"
+                            placeholder="Search leads by name, email, company..."
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all shadow-sm"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center bg-white border border-[#E5E7EB] rounded-full px-4 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all group h-[42px]">
-                            <Tag className="text-[#9CA3AF] group-focus-within:text-primary transition-colors shrink-0" size={16} />
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                             <select
-                                className="pl-3 pr-8 py-2 bg-transparent border-none focus:outline-none text-sm font-bold text-[#374151] appearance-none cursor-pointer"
+                                className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all shadow-sm appearance-none min-w-[140px]"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
@@ -1282,14 +1311,13 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 <option value="Qualified">Qualified</option>
                                 <option value="Lost">Lost / Not Interested</option>
                             </select>
-                            <ChevronDown className="text-[#9CA3AF] -ml-6 pointer-events-none group-focus-within:text-primary transition-colors" size={14} />
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
                         </div>
 
-                        {/* Intent Score Sort Dropdown */}
-                        <div className="flex items-center bg-white border border-[#E5E7EB] rounded-full px-4 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all group h-[42px]">
-                            <TrendingUp className="text-[#9CA3AF] group-focus-within:text-primary transition-colors shrink-0" size={16} />
+                        <div className="relative">
+                            <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                             <select
-                                className="pl-3 pr-8 py-2 bg-transparent border-none focus:outline-none text-sm font-bold text-[#374151] appearance-none cursor-pointer"
+                                className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all shadow-sm appearance-none min-w-[160px]"
                                 value={intentScoreSort}
                                 onChange={(e) => setIntentScoreSort(e.target.value as 'none' | 'desc' | 'asc')}
                             >
@@ -1297,315 +1325,215 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 <option value="desc">Highest Intent First</option>
                                 <option value="asc">Lowest Intent First</option>
                             </select>
-                            <ChevronDown className="text-[#9CA3AF] -ml-6 pointer-events-none group-focus-within:text-primary transition-colors" size={14} />
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleExport}
-                        disabled={isExporting}
-                        className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${canAccess && !canAccess('csvExport')
-                            ? 'border-[#E5E7EB] text-gray-400 bg-white'
-                            : 'border-[#4F46E5] text-[#4F46E5] bg-white hover:bg-[#EEF2FF]'
-                            }`}
-                    >
-                        {isExporting ? (
-                            <Loader2 size={15} className="animate-spin" />
-                        ) : canAccess && !canAccess('csvExport') ? (
-                            <Lock size={15} className="text-gray-400" />
-                        ) : (
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 -2v-4" />
-                                <polyline points="7 10 12 15 17 10" />
-                                <line x1="12" y1="15" x2="12" y2="3" />
-                            </svg>
+                {/* Smart & Intent Pill Filters */}
+                <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4">
+                    {/* Smart Filters */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">Smart</span>
+                        {['new_business', 'low_rating', 'no_photos', 'no_reviews', 'incomplete'].map((filter) => {
+                            const isAct = activeIntentFilters.includes(filter);
+                            const icons: Record<string, string> = { new_business: '⚡', low_rating: '⭐', no_photos: '📸', no_reviews: '💬', incomplete: '📍' };
+                            const labels: Record<string, string> = { new_business: 'New Business', low_rating: 'Low Rating', no_photos: 'No Photos', no_reviews: 'No Reviews', incomplete: 'Incomplete' };
+                            return (
+                                <button
+                                    key={filter}
+                                    onClick={() => toggleIntentFilter(filter)}
+                                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${isAct ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    <span>{icons[filter]}</span>
+                                    {labels[filter]}
+                                    <span className="opacity-60 ml-0.5">({intentCounts[filter as keyof typeof intentCounts] || 0})</span>
+                                </button>
+                            );
+                        })}
+                        {activeIntentFilters.length > 0 && (
+                            <button onClick={() => setActiveIntentFilters([])} className="text-xs text-gray-400 hover:text-gray-600 underline ml-1">Clear</button>
                         )}
-                        <span>{isExporting ? 'Exporting...' : 'Export CSV'}</span>
-                        {canAccess && !canAccess('csvExport') && (
-                            <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-1 font-black">PRO</span>
+                    </div>
+
+                    <div className="w-px bg-gray-200 hidden md:block"></div>
+
+                    {/* Intent Filters */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">Intent</span>
+                        
+                        <button onClick={() => toggleIntentScoreFilter('hot')} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${intentScoreFilters.includes('hot') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                            <Flame size={12} className={intentScoreFilters.includes('hot') ? 'text-red-500' : 'text-gray-400'} /> Hot <span className="opacity-60">({intentScoreCounts.hot})</span>
+                        </button>
+                        <button onClick={() => toggleIntentScoreFilter('warm')} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${intentScoreFilters.includes('warm') ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                            <span className="text-[10px]">🌡️</span> Warm <span className="opacity-60">({intentScoreCounts.warm})</span>
+                        </button>
+                        <button onClick={() => toggleIntentScoreFilter('cool')} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${intentScoreFilters.includes('cool') ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                            <span className="text-[10px]">❄️</span> Cool <span className="opacity-60">({intentScoreCounts.cool})</span>
+                        </button>
+                        <button onClick={() => toggleIntentScoreFilter('unscored')} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${intentScoreFilters.includes('unscored') ? 'bg-gray-100 border-gray-300 text-gray-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                            <span className="text-[10px]">❓</span> Unscored <span className="opacity-60">({intentScoreCounts.unscored})</span>
+                        </button>
+
+                        {intentScoreFilters.length > 0 && (
+                            <button onClick={() => setIntentScoreFilters([])} className="text-xs text-gray-400 hover:text-gray-600 underline ml-1">Clear</button>
                         )}
-                    </button>
-                    <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all shadow-sm active:transform active:scale-95"
-                    >
-                        <Plus size={16} />
-                        Add Lead
-                    </button>
+                    </div>
                 </div>
-            </div>
-
-            {/* Smart Intent Filters */}
-            <div className="flex items-center gap-3 overflow-x-auto pb-1 hide-scrollbar">
-                <span className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF] mr-2 shrink-0">
-                    Smart Filters
-                </span>
-
-                <button
-                    onClick={() => toggleIntentFilter('new_business')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('new_business') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                    <span role="img" aria-label="new">🆕</span>
-                    New Business
-                    <span className="ml-1 opacity-70">({intentCounts.new_business})</span>
-                </button>
-
-                <button
-                    onClick={() => toggleIntentFilter('low_rating')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('low_rating') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                    <span role="img" aria-label="star">⭐</span>
-                    Low Rating
-                    <span className="ml-1 opacity-70">({intentCounts.low_rating})</span>
-                </button>
-
-                <button
-                    onClick={() => toggleIntentFilter('no_photos')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_photos') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                    <span role="img" aria-label="camera">📸</span>
-                    No Photos
-                    <span className="ml-1 opacity-70">({intentCounts.no_photos})</span>
-                </button>
-
-                <button
-                    onClick={() => toggleIntentFilter('no_reviews')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('no_reviews') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                    <span role="img" aria-label="speech balloon">💬</span>
-                    No Recent Reviews
-                    <span className="ml-1 opacity-70">({intentCounts.no_reviews})</span>
-                </button>
-
-                <button
-                    onClick={() => toggleIntentFilter('incomplete')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${activeIntentFilters.includes('incomplete') ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                    <span role="img" aria-label="pin">📍</span>
-                    Incomplete Listing
-                    <span className="ml-1 opacity-70">({intentCounts.incomplete})</span>
-                </button>
-
-                {activeIntentFilters.length > 0 && (
-                    <button
-                        onClick={() => setActiveIntentFilters([])}
-                        className="text-xs font-bold text-[#6B7280] hover:text-[#4F46E5] transition-colors ml-2 shrink-0 underline decoration-dotted underline-offset-2"
-                    >
-                        Clear All
-                    </button>
-                )}
-            </div>
-
-            {/* Intent Score Filters */}
-            <div className="flex items-center gap-3 overflow-x-auto pb-1 hide-scrollbar">
-                <span className="text-[10px] uppercase font-black tracking-widest text-[#9CA3AF] mr-2 shrink-0">
-                    Intent Score
-                </span>
-
-                <button
-                    onClick={() => toggleIntentScoreFilter('hot')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('hot') ? 'bg-red-50 border-red-300 text-red-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
-                >
-                    <Flame size={12} />
-                    Hot (75+)
-                    <span className="ml-1 opacity-70">({intentScoreCounts.hot})</span>
-                </button>
-
-                <button
-                    onClick={() => toggleIntentScoreFilter('warm')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('warm') ? 'bg-amber-50 border-amber-300 text-amber-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
-                >
-                    <span role="img" aria-label="warm">🌡️</span>
-                    Warm (50-74)
-                    <span className="ml-1 opacity-70">({intentScoreCounts.warm})</span>
-                </button>
-
-                <button
-                    onClick={() => toggleIntentScoreFilter('cool')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('cool') ? 'bg-blue-50 border-blue-300 text-blue-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
-                >
-                    <span role="img" aria-label="cool">❄️</span>
-                    Cool (25-49)
-                    <span className="ml-1 opacity-70">({intentScoreCounts.cool})</span>
-                </button>
-
-                <button
-                    onClick={() => toggleIntentScoreFilter('unscored')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 ${intentScoreFilters.includes('unscored') ? 'bg-gray-100 border-gray-400 text-gray-600' : 'bg-white border-[#E5E7EB] text-[#6B7280] hover:bg-gray-50'}`}
-                >
-                    <span role="img" aria-label="unscored">❓</span>
-                    Unscored
-                    <span className="ml-1 opacity-70">({intentScoreCounts.unscored})</span>
-                </button>
-
-                {intentScoreFilters.length > 0 && (
-                    <button
-                        onClick={() => setIntentScoreFilters([])}
-                        className="text-xs font-bold text-[#6B7280] hover:text-[#4F46E5] transition-colors ml-2 shrink-0 underline decoration-dotted underline-offset-2"
-                    >
-                        Clear
-                    </button>
-                )}
             </div>
 
             {/* Main Content: Data Table */}
-            <div className="card bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col relative min-h-[400px]">
                 {filteredLeads.length === 0 ? (
-                    <div className="p-20 text-center">
-                        <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                        <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mb-4">
                             <Building size={32} />
                         </div>
-                        <h3 className="text-lg font-black text-[#111827] mb-1">No leads found</h3>
-                        <p className="text-sm font-medium text-[#6B7280]">Try adjusting your search or filters, or launch a campaign to generate more.</p>
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">No leads found</h3>
+                        <p className="text-sm font-medium text-gray-500">Try adjusting your search or filters, or launch a campaign to generate more.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto w-full">
+                    <div className="flex-1 overflow-auto w-full relative">
                         <table className="w-full min-w-[1400px] text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50">
-                                    <th className="w-10 px-6 py-4">
+                            <thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 shadow-sm">
+                                <tr>
+                                    <th className="w-12 px-6 py-3">
                                         <input
                                             type="checkbox"
-                                            className="w-4 h-4 rounded border-[#D1D5DB] text-primary focus:ring-primary/20"
+                                            className="w-4 h-4 rounded border-gray-300 text-[#4F46E5] focus:ring-[#4F46E5]"
                                             checked={selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
                                             onChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide cursor-pointer group">
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest cursor-pointer group whitespace-nowrap">
                                         <div className="flex items-center gap-1.5">
                                             Company
                                             <ChevronDown size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
                                     </th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Phone</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Location</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Local Time</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Industry</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Intent</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide">Website</th>
-                                    <th className="px-4 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wide text-center">LinkedIn</th>
-                                    <th className="min-w-[120px] pr-6 pl-4 sticky right-0 bg-slate-50"></th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Email</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Phone</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Location</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Local Time</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Industry</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Status</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Intent</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Website</th>
+                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap text-center">In</th>
+                                    <th className="min-w-[140px] px-6 py-3 sticky right-0 bg-gray-50 border-l border-gray-200 z-10 shadow-[-4px_0_6px_-1px_rgb(0,0,0,0.02)]"></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100 bg-white">
                                 {filteredLeads.map((lead) => (
                                     <tr
                                         key={lead.id}
-                                        className={`group cursor-pointer transition-colors duration-100 border-b border-slate-100 ${selectedLeads.includes(lead.id) ? 'bg-indigo-50' : 'bg-white hover:bg-slate-50'}`}
+                                        className={`group cursor-pointer transition-colors duration-150 ${selectedLeads.includes(lead.id) ? 'bg-[#EEF2FF]' : 'hover:bg-gray-50'}`}
                                         onClick={() => setSelectedLead(lead)}
                                     >
                                         <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                             <input
                                                 type="checkbox"
-                                                className="w-4 h-4 rounded border-[#D1D5DB] text-primary focus:ring-primary/20"
+                                                className="w-4 h-4 rounded border-gray-300 text-[#4F46E5] focus:ring-[#4F46E5]"
                                                 checked={selectedLeads.includes(lead.id)}
                                                 onChange={() => toggleSelectLead(lead.id)}
                                             />
                                         </td>
-                                        <td className="px-4 py-4">
+                                        <td className="px-4 py-4 min-w-[200px] max-w-[280px]">
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-black text-[#111827]">{lead.company || 'N/A'}</span>
+                                                    <span className="text-sm font-bold text-gray-900 truncate">{lead.company || 'N/A'}</span>
                                                     {lead.job_title && (
-                                                        <span className="px-1.5 py-0.5 bg-blue-50 text-[9px] font-black text-primary border border-blue-100 rounded uppercase tracking-tighter">
+                                                        <span className="px-1.5 py-0.5 bg-blue-50 text-[9px] font-bold text-[#4F46E5] rounded uppercase tracking-wider shrink-0">
                                                             Enriched
                                                         </span>
                                                     )}
                                                 </div>
                                                 {lead.job_title && (
-                                                    <span className="text-[11px] text-primary font-bold leading-none">{lead.job_title}</span>
+                                                    <span className="text-xs text-[#4F46E5] font-medium leading-tight truncate">{lead.job_title}</span>
                                                 )}
-                                                <span className="text-[11px] text-[#9CA3AF] font-medium leading-none">
-                                                    {(lead.first_name || lead.last_name) ? `${lead.first_name} ${lead.last_name}` : 'Unknown Contact'}
+                                                <span className="text-xs text-gray-500 leading-tight truncate">
+                                                    {(lead.first_name || lead.last_name) ? `${lead.first_name || ''} ${lead.last_name || ''}`.trim() : 'Unknown Contact'}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                        <td className="px-4 py-4 text-sm font-medium text-gray-700 truncate max-w-[200px]">
                                             {lead.email || 'N/A'}
                                         </td>
-                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                        <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                                             {lead.phone || 'N/A'}
                                         </td>
-                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                        <td className="px-4 py-4 text-sm font-medium text-gray-700 truncate max-w-[150px]">
                                             {lead.location || 'N/A'}
                                         </td>
-                                        <td className="px-4 py-4">
+                                        <td className="px-4 py-4 whitespace-nowrap">
                                             {(() => {
-                                                if (!lead.location) return <span className="text-xs text-[#9CA3AF]">—</span>;
+                                                if (!lead.location) return <span className="text-xs text-gray-400">—</span>;
                                                 const lt = getLocalTime(lead.location);
                                                 return (
-                                                    <div className="flex items-center gap-1.5" title={lt.reason}>
-                                                        <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: timeStatusColors[lt.status] }} />
-                                                        <span className="text-xs font-bold" style={{ color: timeStatusColors[lt.status] }}>{lt.time}</span>
+                                                    <div className="flex items-center gap-2" title={lt.reason}>
+                                                        <span className="shrink-0 w-2 h-2 rounded-full" style={{ backgroundColor: timeStatusColors[lt.status] }} />
+                                                        <span className="text-xs font-semibold" style={{ color: timeStatusColors[lt.status] }}>{lt.time}</span>
                                                     </div>
                                                 );
                                             })()}
                                         </td>
-                                        <td className="px-4 py-4 text-sm font-medium text-[#4B5563]">
+                                        <td className="px-4 py-4 text-sm font-medium text-gray-700 truncate max-w-[150px]">
                                             {lead.industry || 'N/A'}
                                         </td>
-                                        <td className="px-4 py-4">
+                                        <td className="px-4 py-4 whitespace-nowrap">
                                             {(() => {
                                                 const status = lead.status?.toLowerCase() || 'new';
-                                                let classes = 'bg-slate-100 text-slate-700';
-
-                                                if (status === 'new') classes = 'bg-slate-100 text-slate-700';
-                                                else if (status === 'contacted') classes = 'bg-amber-50 text-amber-700';
-                                                else if (status === 'replied') classes = 'bg-emerald-50 text-emerald-700';
-                                                else if (status === 'interested') classes = 'bg-emerald-50 text-emerald-700';
-                                                else if (status === 'qualified') classes = 'bg-purple-50 text-purple-700';
-                                                else if (status === 'lost' || status === 'not interested') classes = 'bg-rose-50 text-rose-700';
-
+                                                let classes = 'bg-gray-100 text-gray-600 border-gray-200';
+                                                if (status === 'contacted') classes = 'bg-amber-50 text-amber-700 border-amber-200';
+                                                else if (status === 'replied' || status === 'interested') classes = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                                                else if (status === 'qualified') classes = 'bg-purple-50 text-purple-700 border-purple-200';
+                                                else if (status === 'lost' || status === 'not interested') classes = 'bg-rose-50 text-rose-700 border-rose-200';
                                                 return (
-                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${classes}`}>
+                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${classes}`}>
                                                         {status.toUpperCase()}
                                                     </span>
                                                 );
                                             })()}
                                         </td>
-                                        <td className="px-4 py-4">
+                                        <td className="px-4 py-4 whitespace-nowrap">
                                             <IntentScoreBadge lead={lead} />
                                         </td>
-                                        <td className="px-4 py-4">
+                                        <td className="px-4 py-4 whitespace-nowrap">
                                             {lead.website ? (
-                                                <a href={lead.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs font-bold" onClick={(e) => e.stopPropagation()}>
-                                                    Link
+                                                <a href={lead.website} target="_blank" rel="noopener noreferrer" className="text-[#4F46E5] hover:text-[#4338CA] hover:underline text-sm font-semibold inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                                    Link <ExternalLink size={12} />
                                                 </a>
                                             ) : (
-                                                <span className="text-[#9CA3AF] text-xs">N/A</span>
+                                                <span className="text-gray-400 text-xs font-medium">N/A</span>
                                             )}
                                         </td>
-                                        <td className="px-4 py-4 text-center">
+                                        <td className="px-4 py-4 text-center whitespace-nowrap">
                                             {lead.linkedin_url ? (
                                                 <a
                                                     href={lead.linkedin_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center justify-center text-primary hover:text-blue-700 transition-colors"
+                                                    className="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-[#0077b5] hover:bg-blue-50 rounded-md transition-colors"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
-                                                    <Linkedin size={16} />
+                                                    <Linkedin size={18} />
                                                 </a>
                                             ) : (
-                                                <span className="text-[#9CA3AF] text-xs">—</span>
+                                                <span className="text-gray-400 text-xs font-medium">—</span>
                                             )}
                                         </td>
-                                        <td className={`min-w-[120px] pr-6 pl-4 text-right sticky right-0 ${selectedLeads.includes(lead.id) ? 'bg-indigo-50' : 'bg-white group-hover:bg-slate-50'}`} onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex items-center justify-end gap-2">
+                                        <td className={`px-6 py-4 sticky right-0 bg-white border-l border-gray-100 group-hover:bg-gray-50 transition-colors ${selectedLeads.includes(lead.id) ? '!bg-[#EEF2FF]' : ''}`} onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-end gap-1">
                                                 <button
                                                     onClick={() => handleInitiateCall(lead)}
-                                                    className="p-2 rounded-lg transition-all hover:bg-green-50 text-[#9CA3AF] hover:text-green-600"
+                                                    className="p-1.5 rounded-md transition-all hover:bg-gray-100 text-gray-400 hover:text-gray-600"
                                                     title="Call Lead"
                                                 >
                                                     <Phone size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleLinkedInEnroll(lead)}
-                                                    className="p-2 rounded-lg transition-all hover:bg-blue-50 text-[#9CA3AF] hover:text-blue-600"
+                                                    className="p-1.5 rounded-md transition-all hover:bg-gray-100 text-gray-400 hover:text-gray-600"
                                                     title="Enrol in LinkedIn Sequence"
                                                 >
                                                     <UserPlus size={16} />
@@ -1613,13 +1541,13 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                                 <button
                                                     onClick={() => handleEnrichLead(lead.id)}
                                                     disabled={enrichingLeads.includes(lead.id)}
-                                                    className={`p-2 rounded-lg transition-all ${enrichingLeads.includes(lead.id) ? 'bg-blue-50 text-primary' : 'hover:bg-gray-100 text-[#9CA3AF] hover:text-primary'}`}
+                                                    className={`p-1.5 rounded-md transition-all ${enrichingLeads.includes(lead.id) ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
                                                     title="Enrich Lead"
                                                 >
                                                     {enrichingLeads.includes(lead.id) ? <Loader2 size={16} className="animate-spin" /> : <Wand2 size={16} />}
                                                 </button>
-                                                <button className="p-1 hover:bg-gray-100 rounded text-[#9CA3AF] transition-colors">
-                                                    <MoreHorizontal size={18} />
+                                                <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-400 hover:text-gray-600 transition-colors">
+                                                    <MoreHorizontal size={16} />
                                                 </button>
                                             </div>
                                         </td>
@@ -1631,26 +1559,26 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 )}
 
                 {/* Bottom Section: Pagination */}
-                <div className="px-6 py-4 flex items-center justify-between border-t border-[#E5E7EB] bg-[#F9FAFB]">
-                    <span className="text-xs font-bold text-[#9CA3AF]">
+                <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200 bg-white z-20">
+                    <span className="text-xs font-medium text-gray-500">
                         Showing {filteredLeads.length} of {leads.length} leads
                     </span>
                     <div className="flex items-center gap-2">
-                        <button className="px-3 py-1.5 border border-[#E5E7EB] bg-white rounded-lg text-xs font-bold text-[#374151] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                        <button className="px-3 py-1.5 border border-gray-200 bg-white rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm">
                             Previous
                         </button>
                         <div className="flex items-center gap-1">
                             {[1].map(page => (
                                 <button
                                     key={page}
-                                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === 1 ? 'bg-primary text-white' : 'hover:bg-gray-200 text-[#6B7280]'
+                                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${page === 1 ? 'bg-[#4F46E5] text-white shadow-sm' : 'hover:bg-gray-100 text-gray-600'
                                         }`}
                                 >
                                     {page}
                                 </button>
                             ))}
                         </div>
-                        <button className="px-3 py-1.5 border border-[#E5E7EB] bg-white rounded-lg text-xs font-bold text-[#374151] hover:bg-gray-50 transition-all">
+                        <button className="px-3 py-1.5 border border-gray-200 bg-white rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
                             Next
                         </button>
                     </div>
@@ -1660,66 +1588,71 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             {/* Lead Details Drawer */}
             {selectedLead && (
                 <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-300">
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => { setSelectedLead(null); setIsEditingLead(false); }}></div>
-                    <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
+                    <div className="absolute inset-0 bg-gray-900/20 backdrop-blur-sm" onClick={() => { setSelectedLead(null); setIsEditingLead(false); }}></div>
+                    <div className="relative w-full max-w-[380px] bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500 border-l border-gray-200">
                         {/* Drawer Header */}
-                        <div className="p-8 border-b border-[#F3F4F6]">
+                        <div className="p-6 border-b border-gray-100 bg-white">
                             {isEditingLead ? (
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 shrink-0">
-                                                <Building size={24} />
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-[#F8F9FA] rounded-xl flex items-center justify-center text-gray-400 shrink-0 border border-gray-100">
+                                                    <Building size={20} />
+                                                </div>
+                                                <h2 className="text-lg font-bold text-gray-900 truncate pr-2">{selectedLead.company}</h2>
                                             </div>
-                                            <h2 className="text-xl font-black text-[#111827]">{selectedLead.company}</h2>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <button onClick={handleSaveLeadEdit} disabled={isSavingLead} className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1">
-                                                {isSavingLead ? <Loader2 size={12} className="animate-spin" /> : 'Save'}
-                                            </button>
-                                            <button onClick={() => setIsEditingLead(false)} className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#6B7280] text-xs font-bold rounded-lg transition-colors">
-                                                Cancel
-                                            </button>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <button onClick={handleSaveLeadEdit} disabled={isSavingLead} className="px-3 py-1.5 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 shadow-sm">
+                                                    {isSavingLead ? <Loader2 size={12} className="animate-spin" /> : 'Save'}
+                                                </button>
+                                                <button onClick={() => setIsEditingLead(false)} className="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors shadow-sm">
+                                                    Cancel
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4 mt-2">
+                                    <div className="grid grid-cols-2 gap-3 mt-2">
                                         <div>
-                                            <label className="text-xs text-gray-400 mb-1 block">First Name</label>
-                                            <input className="border border-gray-200 rounded-md px-2 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-400" value={editLeadForm.first_name || ''} onChange={e => setEditLeadForm({ ...editLeadForm, first_name: e.target.value })} />
+                                            <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">First Name</label>
+                                            <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all" value={editLeadForm.first_name || ''} onChange={e => setEditLeadForm({ ...editLeadForm, first_name: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="text-xs text-gray-400 mb-1 block">Last Name</label>
-                                            <input className="border border-gray-200 rounded-md px-2 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-400" value={editLeadForm.last_name || ''} onChange={e => setEditLeadForm({ ...editLeadForm, last_name: e.target.value })} />
+                                            <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Last Name</label>
+                                            <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all" value={editLeadForm.last_name || ''} onChange={e => setEditLeadForm({ ...editLeadForm, last_name: e.target.value })} />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 mb-1 block">Job Title</label>
-                                        <input className="border border-gray-200 rounded-md px-2 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-400" value={editLeadForm.job_title || ''} onChange={e => setEditLeadForm({ ...editLeadForm, job_title: e.target.value })} />
+                                        <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Job Title</label>
+                                        <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all" value={editLeadForm.job_title || ''} onChange={e => setEditLeadForm({ ...editLeadForm, job_title: e.target.value })} />
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 shrink-0">
-                                            <Building size={24} />
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 bg-[#F8F9FA] rounded-xl flex items-center justify-center text-gray-400 shrink-0 border border-gray-100 mt-0.5">
+                                            <Building size={20} />
                                         </div>
                                         <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h2 className="text-xl font-black text-[#111827]">{selectedLead.company}</h2>
+                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <h2 className="text-lg font-bold text-gray-900 leading-tight">{selectedLead.company}</h2>
                                                 {selectedLead.job_title && (
-                                                    <span className="px-2 py-0.5 bg-blue-50 text-[10px] font-black text-primary border border-blue-100 rounded-lg uppercase tracking-wider">
+                                                    <span className="px-1.5 py-0.5 bg-blue-50 text-[9px] font-bold text-[#4F46E5] border border-blue-100 rounded uppercase tracking-wider">
                                                         Enriched
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-sm text-primary font-bold">{selectedLead.job_title || 'No Job Title'}</p>
-                                                <span className="text-gray-300">•</span>
-                                                <p className="text-sm text-[#6B7280] font-medium">{selectedLead.first_name} {selectedLead.last_name}</p>
+                                            <div className="flex flex-col gap-0.5">
+                                                {selectedLead.job_title && (
+                                                    <p className="text-xs text-[#4F46E5] font-semibold">{selectedLead.job_title}</p>
+                                                )}
+                                                <p className="text-xs text-gray-500 font-medium">
+                                                    {(selectedLead.first_name || selectedLead.last_name) ? `${selectedLead.first_name || ''} ${selectedLead.last_name || ''}`.trim() : 'Unknown Contact'}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1 shrink-0 ml-2">
                                         <button
                                             onClick={() => {
                                                 setEditLeadForm({
@@ -1735,16 +1668,16 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                                 });
                                                 setIsEditingLead(true);
                                             }}
-                                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all"
+                                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
                                             title="Edit Lead"
                                         >
-                                            <Pencil size={16} />
+                                            <Pencil size={14} />
                                         </button>
                                         <button
                                             onClick={() => { setSelectedLead(null); setIsEditingLead(false); }}
-                                            className="p-2 hover:bg-gray-50 rounded-xl text-[#9CA3AF] transition-all"
+                                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
                                         >
-                                            <X size={20} />
+                                            <X size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -1752,13 +1685,13 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         </div>
 
                         {/* Drawer Content */}
-                        <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
                             {/* Status Section */}
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest block pl-1">Lead Status</label>
-                                <div className="flex items-center gap-3">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block pl-1">Lead Status</label>
+                                <div className="relative">
                                     <select
-                                        className="flex-1 px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary focus:bg-white transition-all appearance-none cursor-pointer"
+                                        className="w-full pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all appearance-none cursor-pointer shadow-sm"
                                         value={selectedLead.status}
                                         onChange={(e) => handleUpdateStatus(selectedLead.id, e.target.value)}
                                         disabled={isUpdatingStatus}
@@ -1769,103 +1702,105 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         <option value="Qualified">Qualified</option>
                                         <option value="Not Interested">Not Interested</option>
                                     </select>
-                                    {isUpdatingStatus && <Loader2 size={18} className="animate-spin text-primary" />}
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                        {isUpdatingStatus ? <Loader2 size={14} className="animate-spin text-[#4F46E5]" /> : <ChevronDown size={14} />}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Details Grid */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <Mail size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Email</span>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-5">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Mail size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Email</span>
                                     </div>
                                     {isEditingLead ? (
-                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.email || ''} onChange={e => setEditLeadForm({ ...editLeadForm, email: e.target.value })} />
+                                        <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] w-full transition-all" value={editLeadForm.email || ''} onChange={e => setEditLeadForm({ ...editLeadForm, email: e.target.value })} />
                                     ) : (
-                                        <p className="text-sm font-bold text-[#111827] break-all">{selectedLead.email || 'N/A'}</p>
+                                        <p className="text-sm font-semibold text-gray-900 break-all">{selectedLead.email || 'N/A'}</p>
                                     )}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <Phone size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Phone</span>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Phone size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Phone</span>
                                     </div>
                                     {isEditingLead ? (
-                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.phone || ''} onChange={e => setEditLeadForm({ ...editLeadForm, phone: e.target.value })} />
+                                        <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] w-full transition-all" value={editLeadForm.phone || ''} onChange={e => setEditLeadForm({ ...editLeadForm, phone: e.target.value })} />
                                     ) : (
-                                        <p className="text-sm font-bold text-[#111827]">{selectedLead.phone || 'N/A'}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{selectedLead.phone || 'N/A'}</p>
                                     )}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <Linkedin size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">LinkedIn</span>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Linkedin size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">LinkedIn</span>
                                     </div>
                                     {isEditingLead ? (
-                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.linkedin_url || ''} onChange={e => setEditLeadForm({ ...editLeadForm, linkedin_url: e.target.value })} />
+                                        <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] w-full transition-all" value={editLeadForm.linkedin_url || ''} onChange={e => setEditLeadForm({ ...editLeadForm, linkedin_url: e.target.value })} />
                                     ) : (
                                         selectedLead.linkedin_url ? (
-                                            <a href={selectedLead.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5">
-                                                View Profile <ExternalLink size={12} />
+                                            <a href={selectedLead.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#4F46E5] hover:underline flex items-center gap-1">
+                                                Profile <ExternalLink size={12} className="opacity-70" />
                                             </a>
                                         ) : (
-                                            <p className="text-sm font-bold text-[#111827]">N/A</p>
+                                            <p className="text-sm font-medium text-gray-400">N/A</p>
                                         )
                                     )}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <Globe size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Website</span>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Globe size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Website</span>
                                     </div>
                                     {isEditingLead ? (
-                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.website || ''} onChange={e => setEditLeadForm({ ...editLeadForm, website: e.target.value })} />
+                                        <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] w-full transition-all" value={editLeadForm.website || ''} onChange={e => setEditLeadForm({ ...editLeadForm, website: e.target.value })} />
                                     ) : (
                                         selectedLead.website ? (
-                                            <a href={selectedLead.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5">
-                                                Visit Site <ExternalLink size={12} />
+                                            <a href={selectedLead.website} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#4F46E5] hover:underline flex items-center gap-1">
+                                                Visit <ExternalLink size={12} className="opacity-70" />
                                             </a>
                                         ) : (
-                                            <p className="text-sm font-bold text-[#111827]">N/A</p>
+                                            <p className="text-sm font-medium text-gray-400">N/A</p>
                                         )
                                     )}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <MapPin size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Location</span>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <MapPin size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Location</span>
                                     </div>
                                     {isEditingLead ? (
-                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.location || ''} onChange={e => setEditLeadForm({ ...editLeadForm, location: e.target.value })} />
+                                        <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] w-full transition-all" value={editLeadForm.location || ''} onChange={e => setEditLeadForm({ ...editLeadForm, location: e.target.value })} />
                                     ) : (
-                                        <p className="text-sm font-bold text-[#111827]">{selectedLead.location || 'N/A'}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{selectedLead.location || 'N/A'}</p>
                                     )}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <Tag size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Industry</span>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Tag size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Industry</span>
                                     </div>
                                     {isEditingLead ? (
-                                        <input className="border border-gray-200 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full" value={editLeadForm.industry || ''} onChange={e => setEditLeadForm({ ...editLeadForm, industry: e.target.value })} />
+                                        <input className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] w-full transition-all" value={editLeadForm.industry || ''} onChange={e => setEditLeadForm({ ...editLeadForm, industry: e.target.value })} />
                                     ) : (
-                                        <p className="text-sm font-bold text-[#111827]">{selectedLead.industry || 'N/A'}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{selectedLead.industry || 'N/A'}</p>
                                     )}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <Calendar size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Created</span>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Calendar size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Created</span>
                                     </div>
-                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.created_at ? new Date(selectedLead.created_at).toLocaleDateString() : 'N/A'}</p>
+                                    <p className="text-sm font-semibold text-gray-900">{selectedLead.created_at ? new Date(selectedLead.created_at).toLocaleDateString() : 'N/A'}</p>
                                 </div>
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center gap-2 text-[#9CA3AF]">
-                                        <Search size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Source</span>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Search size={12} />
+                                        <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Source</span>
                                     </div>
-                                    <p className="text-sm font-bold text-[#111827]">{selectedLead.source || 'Direct'}</p>
+                                    <p className="text-sm font-semibold text-gray-900">{selectedLead.source || 'Direct'}</p>
                                 </div>
                             </div>
 

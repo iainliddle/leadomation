@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, Rocket, ChevronRight, BarChart3, Eye, AlertCircle } from 'lucide-react';
+import { Rocket, ChevronRight, Eye, AlertCircle, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Campaign {
@@ -30,15 +30,25 @@ const ScrapingBadge = ({ status }: { status: string }) => {
         complete: { label: 'Complete', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
         failed: { label: 'Failed', className: 'bg-red-50 text-red-700 border border-red-200' },
     };
-
     const c = config[status] || config.idle;
-
     return (
-        <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${c.className}`}>
-            {c.animate && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
-            )}
+        <span className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${c.className}`}>
+            {c.animate && <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />}
             {c.label}
+        </span>
+    );
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+    const s = String(status).toLowerCase();
+    const classes =
+        s === 'completed' ? 'bg-green-50 text-green-700 border border-green-200' :
+        s === 'active'    ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+        s === 'error'     ? 'bg-red-50 text-red-700 border border-red-200' :
+        'bg-amber-50 text-amber-700 border border-amber-200';
+    return (
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${classes}`}>
+            {status}
         </span>
     );
 };
@@ -134,16 +144,9 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
     const deleteCampaign = async (id: string) => {
         if (!confirm('Are you sure you want to delete this campaign? This cannot be undone.')) return;
-
         try {
-            const { error } = await supabase
-                .from('campaigns')
-                .delete()
-                .eq('id', id);
-
+            const { error } = await supabase.from('campaigns').delete().eq('id', id);
             if (error) throw error;
-
-            // Refresh the campaigns list by removing it from state
             setCampaigns((prev: any[]) => prev.filter((c: any) => c.id !== id));
         } catch (err) {
             console.error('Error deleting campaign:', err);
@@ -153,16 +156,9 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
     const toggleCampaignStatus = async (id: string, currentStatus: string) => {
         const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-
         try {
-            const { error } = await supabase
-                .from('campaigns')
-                .update({ status: newStatus })
-                .eq('id', id);
-
+            const { error } = await supabase.from('campaigns').update({ status: newStatus }).eq('id', id);
             if (error) throw error;
-
-            // Update local state
             setCampaigns((prev: any[]) => prev.map((c: any) =>
                 c.id === id ? { ...c, status: newStatus as any } : c
             ));
@@ -172,147 +168,154 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
         }
     };
 
+    const getAccentColor = (status: string) => {
+        const s = String(status).toLowerCase();
+        if (s === 'completed') return 'bg-emerald-500';
+        if (s === 'error') return 'bg-red-500';
+        if (s === 'active') return 'bg-[#4F46E5]';
+        return 'bg-amber-400';
+    };
+
     return (
-        <div className="flex flex-col gap-8 animate-in fade-in duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
-            <div className="flex items-center justify-between">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
+            {/* Page Header */}
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 mb-1">Active Campaigns</h1>
-                    <p className="text-sm text-slate-500">Monitor and manage your outreach campaigns in real-time</p>
+                    <h1 className="text-2xl font-semibold text-gray-900">Active Campaigns</h1>
+                    <p className="text-sm text-gray-500 mt-0.5">Manage your lead generation campaigns</p>
                 </div>
+                <button
+                    onClick={() => onPageChange?.('New Campaign')}
+                    className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150 shadow-sm"
+                >
+                    <Plus size={16} />
+                    New Campaign
+                </button>
             </div>
 
             {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-64 bg-gray-100 rounded-2xl animate-pulse"></div>
+                        <div key={i} className="h-64 bg-white rounded-xl border border-gray-200 animate-pulse" />
                     ))}
                 </div>
             ) : campaigns.length === 0 ? (
-                <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <Rocket size={32} />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-16 text-center">
+                    <div className="w-16 h-16 bg-[#EEF2FF] rounded-2xl flex items-center justify-center mx-auto mb-5">
+                        <Rocket size={28} className="text-[#4F46E5]" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">No campaigns yet</h3>
-                    <p className="text-sm text-slate-500 mb-8 max-w-sm mx-auto">
-                        Create your first campaign to start generating leads and closing deals automatically.
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No campaigns yet</h3>
+                    <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
+                        Create your first campaign to start generating leads automatically.
                     </p>
                     <button
                         onClick={() => onPageChange?.('New Campaign')}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200"
+                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-lg px-5 py-2.5 shadow-sm transition-all duration-150"
                     >
                         Create Your First Campaign
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {campaigns.map((campaign) => (
-                        <div key={campaign.id} className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 group border-l-4 border-l-indigo-500">
-                            <div className="p-6">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                        campaign.status === 'active'
-                                            ? 'bg-emerald-50 text-emerald-600'
-                                            : campaign.status === 'error'
-                                            ? 'bg-red-50 text-red-600'
-                                            : 'bg-amber-50 text-amber-600'
-                                    }`}>
-                                        {campaign.status === 'error' ? <AlertCircle size={24} /> : <PlayCircle size={24} />}
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => toggleCampaignStatus(campaign.id, campaign.status)}
-                                            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-[#6B7280] rounded-full text-[10px] font-black uppercase tracking-widest transition-colors"
-                                        >
-                                            {campaign.status === 'active' ? 'PAUSE' : 'RESUME'}
-                                        </button>
-                                        <button
-                                            onClick={() => deleteCampaign(campaign.id)}
-                                            className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
+                        <div
+                            key={campaign.id}
+                            className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+                        >
+                            {/* Top accent bar */}
+                            <div className={`h-1 w-full ${getAccentColor(campaign.status)}`} />
 
-                                <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-indigo-600 transition-colors">{campaign.name}</h3>
-                                <div className="flex items-center justify-between mb-6">
-                                    <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-tight">{campaign.type}</p>
-                                    <div className="flex flex-col items-end gap-1">
-                                        <div className="flex items-center gap-2">
-                                            {campaign.scraping_status &&
-                                                ['scraping', 'enriching', 'idle'].includes(String(campaign.scraping_status).trim().toLowerCase()) &&
-                                                !['completed', 'paused'].includes(String(campaign.status).toLowerCase()) && (
-                                                    <ScrapingBadge status={String(campaign.scraping_status).trim().toLowerCase()} />
-                                                )}
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                                                campaign.status === 'completed' || campaign.status === 'Completed'
-                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                    : campaign.status === 'active' || campaign.status === 'Active'
-                                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                                    : campaign.status === 'error'
-                                                    ? 'bg-red-50 text-red-700 border-red-200'
-                                                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                                            }`}>
-                                                {campaign.status}
-                                            </span>
-                                        </div>
+                            {/* Card body */}
+                            <div className="p-5">
+                                {/* Name + badges */}
+                                <div className="flex items-start justify-between mb-2">
+                                    <h3 className="text-base font-semibold text-gray-900 leading-tight pr-2">{campaign.name}</h3>
+                                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                                         {campaign.scraping_status &&
                                             ['scraping', 'enriching', 'idle'].includes(String(campaign.scraping_status).trim().toLowerCase()) &&
                                             !['completed', 'paused'].includes(String(campaign.status).toLowerCase()) && (
-                                            <button
-                                                onClick={() => fetchCampaigns()}
-                                                className="text-[9px] font-bold text-[#9CA3AF] hover:text-[#4F46E5] cursor-pointer underline decoration-dotted underline-offset-2 transition-colors"
-                                            >
-                                                Refresh to update
-                                            </button>
-                                        )}
+                                                <ScrapingBadge status={String(campaign.scraping_status).trim().toLowerCase()} />
+                                            )}
+                                        <StatusBadge status={campaign.status} />
                                     </div>
-
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 mb-6">
-                                    <div className="bg-slate-50 p-4 rounded-xl">
-                                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Leads Found</p>
+                                {/* Text actions */}
+                                <div className="flex items-center gap-3 mb-5">
+                                    <button
+                                        onClick={() => toggleCampaignStatus(campaign.id, campaign.status)}
+                                        className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        {campaign.status === 'active' ? 'Pause' : 'Resume'}
+                                    </button>
+                                    <span className="text-gray-200 text-xs">·</span>
+                                    <button
+                                        onClick={() => deleteCampaign(campaign.id)}
+                                        className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                                    >
+                                        Delete
+                                    </button>
+                                    {campaign.scraping_status &&
+                                        ['scraping', 'enriching', 'idle'].includes(String(campaign.scraping_status).trim().toLowerCase()) &&
+                                        !['completed', 'paused'].includes(String(campaign.status).toLowerCase()) && (
+                                        <>
+                                            <span className="text-gray-200 text-xs">·</span>
+                                            <button
+                                                onClick={() => fetchCampaigns()}
+                                                className="text-xs text-gray-400 hover:text-[#4F46E5] transition-colors"
+                                            >
+                                                Refresh
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Stats */}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Leads Found</p>
                                         <button
                                             onClick={() => {
                                                 window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
                                                 onPageChange?.('Lead Database');
                                             }}
-                                            className="text-2xl font-bold text-slate-900 hover:text-indigo-600 transition-colors hover:underline text-left block"
+                                            className="text-2xl font-bold text-gray-900 hover:text-[#4F46E5] transition-colors text-left block"
                                         >
                                             {campaign.leads_found || 0}
                                         </button>
                                     </div>
-                                    <div className="bg-slate-50 p-4 rounded-xl">
-                                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Reply Rate</p>
-                                        <p className="text-2xl font-bold text-slate-900">{campaign.replyRate || '0.0%'}</p>
+                                    <div>
+                                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Reply Rate</p>
+                                        <p className="text-2xl font-bold text-gray-900">{campaign.replyRate || '0.0%'}</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 mb-6">
-                                    <div className="flex justify-between text-xs">
-                                        <span className="text-slate-500">Progress</span>
-                                        <span className="font-bold text-slate-900">{campaign.progress || 0}%</span>
-                                    </div>
-                                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-1000"
-                                            style={{ width: `${campaign.progress || 0}%` }}
-                                        ></div>
-                                    </div>
+                                {/* Progress bar */}
+                                <div className="bg-gray-100 rounded-full h-1.5 mt-4">
+                                    <div
+                                        className="bg-[#4F46E5] h-1.5 rounded-full transition-all duration-700"
+                                        style={{ width: `${campaign.progress || 0}%` }}
+                                    />
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>Progress</span>
+                                    <span>{campaign.progress || 0}%</span>
                                 </div>
 
-                                {campaign.scraping_status && ['complete', 'completed'].includes(campaign.scraping_status.toLowerCase()) && campaign.leads_found !== undefined && campaign.leads_requested !== undefined && campaign.leads_found < campaign.leads_requested && (
-                                    <div className="flex items-center gap-1.5 mt-2">
+                                {campaign.scraping_status && ['complete', 'completed'].includes(campaign.scraping_status.toLowerCase()) &&
+                                    campaign.leads_found !== undefined && campaign.leads_requested !== undefined &&
+                                    campaign.leads_found < campaign.leads_requested && (
+                                    <div className="flex items-center gap-1.5 mt-3">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                                        <p className="text-[11px] font-bold text-amber-600">
-                                        {campaign.leads_found} of {campaign.leads_requested} leads found. These are limited results for this search area.
+                                        <p className="text-[11px] font-medium text-amber-600">
+                                            {campaign.leads_found} of {campaign.leads_requested} leads found. Limited results for this search area.
                                         </p>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="px-6 pb-6">
+                            {/* Card footer */}
+                            <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
                                 {campaign.status === 'error' ? (
                                     <button
                                         onClick={async () => {
@@ -320,9 +323,9 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                             fetchCampaigns();
                                             alert('Campaign reset. Please re-launch from New Campaign to retry scraping.');
                                         }}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold hover:bg-red-100 transition-all active:scale-[0.98]"
+                                        className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
                                     >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-3.5" /></svg>
+                                        <AlertCircle size={14} />
                                         Dismiss Error
                                     </button>
                                 ) : (
@@ -331,22 +334,19 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                             window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
                                             onPageChange?.('Lead Database');
                                         }}
-                                        className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 font-medium rounded-xl transition-all duration-200"
+                                        className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-all"
                                     >
-                                        <Eye size={16} />
+                                        <Eye size={14} />
                                         View Leads
                                     </button>
                                 )}
+                                <button
+                                    onClick={() => alert('Campaign analytics coming soon!')}
+                                    className="flex items-center gap-1 text-xs text-[#4F46E5] hover:text-[#4338CA] transition-colors font-medium"
+                                >
+                                    View Full Analytics <ChevronRight size={12} />
+                                </button>
                             </div>
-
-                            <button
-                                onClick={() => alert('Campaign analytics coming soon!')}
-                                className="w-full py-3 border-t border-slate-100 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 group/btn"
-                            >
-                                <BarChart3 size={14} />
-                                View Full Analytics
-                                <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-                            </button>
                         </div>
                     ))}
                 </div>

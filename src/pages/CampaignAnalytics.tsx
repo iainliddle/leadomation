@@ -7,7 +7,8 @@ import {
     AlertTriangle,
     Calendar,
     ChevronDown,
-    Loader2
+    Loader2,
+    Download
 } from 'lucide-react';
 import {
     LineChart,
@@ -50,11 +51,9 @@ const CampaignAnalytics: React.FC = () => {
     const [_emailEvents, setEmailEvents] = useState<EmailEvent[]>([]);
     const [leads, setLeads] = useState<Record<string, Lead>>({});
 
-    // Date range state
     const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('30d');
     const [showDatePicker, setShowDatePicker] = useState(false);
 
-    // Stats
     const [stats, setStats] = useState({
         totalSent: 0,
         openRate: 0,
@@ -62,7 +61,6 @@ const CampaignAnalytics: React.FC = () => {
         bounceRate: 0
     });
 
-    // Chart data
     const [dailySentData, setDailySentData] = useState<any[]>([]);
     const [campaignOpenRates, setCampaignOpenRates] = useState<any[]>([]);
     const [stepPerformance, setStepPerformance] = useState<any[]>([]);
@@ -86,7 +84,6 @@ const CampaignAnalytics: React.FC = () => {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
 
-                // Fetch campaigns
                 const { data: campaignsData } = await supabase
                     .from('campaigns')
                     .select('id, name')
@@ -95,7 +92,6 @@ const CampaignAnalytics: React.FC = () => {
 
                 setCampaigns(campaignsData || []);
 
-                // Fetch email events
                 const startDate = getDateRangeStart().toISOString();
                 const { data: eventsData } = await supabase
                     .from('email_events')
@@ -106,7 +102,6 @@ const CampaignAnalytics: React.FC = () => {
 
                 setEmailEvents(eventsData || []);
 
-                // Fetch leads for activity table
                 const { data: leadsData } = await supabase
                     .from('leads')
                     .select('id, business_name, email')
@@ -118,7 +113,6 @@ const CampaignAnalytics: React.FC = () => {
                 });
                 setLeads(leadsMap);
 
-                // Calculate stats
                 const events = eventsData || [];
                 const sent = events.filter(e => e.event_type === 'sent').length;
                 const opened = events.filter(e => e.event_type === 'opened').length;
@@ -132,7 +126,6 @@ const CampaignAnalytics: React.FC = () => {
                     bounceRate: sent > 0 ? Math.round((bounced / sent) * 100) : 0
                 });
 
-                // Process daily sent data
                 const dailyMap: Record<string, number> = {};
                 const rangeStart = getDateRangeStart();
                 for (let d = new Date(rangeStart); d <= new Date(); d.setDate(d.getDate() + 1)) {
@@ -149,7 +142,6 @@ const CampaignAnalytics: React.FC = () => {
                     emails: count
                 })));
 
-                // Process campaign open rates
                 const campaignStats: Record<string, { sent: number; opened: number; name: string }> = {};
                 events.forEach(e => {
                     if (!e.campaign_id) return;
@@ -169,7 +161,6 @@ const CampaignAnalytics: React.FC = () => {
                     .slice(0, 10);
                 setCampaignOpenRates(campaignRates);
 
-                // Process step performance
                 const stepStats: Record<number, { sent: number; replied: number }> = {};
                 events.forEach(e => {
                     const step = e.step_index ?? 0;
@@ -195,7 +186,6 @@ const CampaignAnalytics: React.FC = () => {
         fetchData();
     }, [dateRange]);
 
-    // Fetch campaign-specific data when campaign is selected
     useEffect(() => {
         if (!selectedCampaignId || activeTab !== 'campaign') return;
 
@@ -212,25 +202,6 @@ const CampaignAnalytics: React.FC = () => {
                 .gte('occurred_at', startDate)
                 .order('occurred_at', { ascending: true });
 
-            // Process daily open rate for selected campaign
-            const dailyStats: Record<string, { sent: number; opened: number }> = {};
-            (events || []).forEach(e => {
-                const date = e.occurred_at.split('T')[0];
-                if (!dailyStats[date]) dailyStats[date] = { sent: 0, opened: 0 };
-                if (e.event_type === 'sent') dailyStats[date].sent++;
-                if (e.event_type === 'opened') dailyStats[date].opened++;
-            });
-
-            // Process step performance for selected campaign
-            const stepStats: Record<number, { sent: number; opened: number }> = {};
-            (events || []).forEach(e => {
-                const step = e.step_index ?? 0;
-                if (!stepStats[step]) stepStats[step] = { sent: 0, opened: 0 };
-                if (e.event_type === 'sent') stepStats[step].sent++;
-                if (e.event_type === 'opened') stepStats[step].opened++;
-            });
-
-            // Process lead activity
             const leadActivityMap: Record<string, { lastOpened: string; stepReached: number; status: string }> = {};
             (events || []).forEach(e => {
                 if (!e.lead_id) return;
@@ -259,97 +230,99 @@ const CampaignAnalytics: React.FC = () => {
         fetchCampaignData();
     }, [selectedCampaignId, activeTab, leads]);
 
-    const StatCard = ({ icon: Icon, label, value, subtext, color, borderColor }: any) => (
-        <div className={`bg-white rounded-2xl shadow-sm border border-slate-100 p-6 border-l-4 ${borderColor || 'border-l-indigo-500'}`}>
+    const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: string | number; color: string }) => (
+        <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5">
             <div className="flex items-center gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
                     <Icon size={20} />
                 </div>
-                <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</span>
+                <span className="text-xs font-medium text-[#6B7280] uppercase tracking-wide">{label}</span>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{value}</p>
-            {subtext && <p className="text-xs text-slate-500 mt-1">{subtext}</p>}
+            <p className="text-2xl font-bold text-[#111827]">{value}</p>
         </div>
     );
 
     const EmptyState = () => (
-        <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                <BarChart3 size={32} className="text-slate-300" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">No data yet</h3>
-            <p className="text-sm text-slate-400 max-w-md">
-                Send your first email sequence to see analytics here. Once emails are sent, you'll see open rates, reply rates, and more.
+        <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-12 text-center">
+            <BarChart3 size={32} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-[#111827] mb-2">No data yet</h3>
+            <p className="text-sm text-[#6B7280] max-w-md mx-auto">
+                Send your first email sequence to see analytics here.
             </p>
         </div>
     );
 
     const tabs = [
-        { key: 'overview', label: 'Overview' },
-        { key: 'campaign', label: 'Campaign Detail' },
-        { key: 'step', label: 'Step Performance' }
+        { key: 'overview', label: 'Sales / Overview' },
+        { key: 'campaign', label: 'Campaigns' },
+        { key: 'step', label: 'Steps' }
     ];
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="p-6 bg-[#F8F9FA] min-h-screen flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-[#4F46E5] animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="animate-in fade-in duration-500">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
+            {/* Page Header */}
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900 mb-1">Analytics</h1>
-                    <p className="text-sm font-medium text-gray-500">Track your email campaign performance</p>
+                    <h1 className="text-xl font-semibold text-[#111827]">Analytics</h1>
+                    <p className="text-sm text-[#6B7280] mt-0.5">Track performance across your campaigns</p>
                 </div>
-
-                {/* Date Range Picker */}
-                <div className="relative">
-                    <button
-                        onClick={() => setShowDatePicker(!showDatePicker)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:border-indigo-300 transition-all"
-                    >
-                        <Calendar size={16} />
-                        {dateRange === '7d' ? 'Last 7 days' : dateRange === '30d' ? 'Last 30 days' : 'Last 90 days'}
-                        <ChevronDown size={16} />
+                <div className="flex items-center gap-3">
+                    {/* Date Range Picker */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowDatePicker(!showDatePicker)}
+                            className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#111827] hover:border-[#4F46E5] transition-all"
+                        >
+                            <Calendar size={16} className="text-[#6B7280]" />
+                            {dateRange === '7d' ? 'Last 7 days' : dateRange === '30d' ? 'Last 30 days' : 'Last 90 days'}
+                            <ChevronDown size={16} className="text-[#6B7280]" />
+                        </button>
+                        {showDatePicker && (
+                            <div className="absolute right-0 mt-2 w-40 bg-white border border-[#E5E7EB] rounded-lg shadow-lg z-10 overflow-hidden">
+                                {[
+                                    { value: '7d', label: 'Last 7 days' },
+                                    { value: '30d', label: 'Last 30 days' },
+                                    { value: '90d', label: 'Last 90 days' }
+                                ].map(option => (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => {
+                                            setDateRange(option.value as any);
+                                            setShowDatePicker(false);
+                                        }}
+                                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-all ${dateRange === option.value ? 'text-[#4F46E5] font-medium bg-[#EEF2FF]' : 'text-[#111827]'
+                                            }`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#111827] hover:border-[#4F46E5] transition-all">
+                        <Download size={16} className="text-[#6B7280]" />
+                        Export CSV
                     </button>
-                    {showDatePicker && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-10 overflow-hidden">
-                            {[
-                                { value: '7d', label: 'Last 7 days' },
-                                { value: '30d', label: 'Last 30 days' },
-                                { value: '90d', label: 'Last 90 days' }
-                            ].map(option => (
-                                <button
-                                    key={option.value}
-                                    onClick={() => {
-                                        setDateRange(option.value as any);
-                                        setShowDatePicker(false);
-                                    }}
-                                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-all ${dateRange === option.value ? 'text-indigo-600 font-semibold bg-indigo-50' : 'text-slate-700'
-                                        }`}
-                                >
-                                    {option.label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-6 mb-8 border-b border-slate-200">
+            <div className="flex gap-1 mb-6 bg-white rounded-lg border border-[#E5E7EB] p-1 w-fit">
                 {tabs.map(tab => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key as any)}
-                        className={`px-1 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${activeTab === tab.key
-                            ? 'border-indigo-600 text-indigo-600 font-semibold'
-                            : 'border-transparent text-slate-500 hover:text-slate-700'
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === tab.key
+                            ? 'bg-[#4F46E5] text-white'
+                            : 'text-[#6B7280] hover:text-[#111827] hover:bg-gray-50'
                             }`}
                     >
                         {tab.label}
@@ -359,36 +332,32 @@ const CampaignAnalytics: React.FC = () => {
 
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-                <div className="space-y-8">
+                <div className="space-y-6">
                     {/* Stat Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <StatCard
                             icon={Mail}
                             label="Total Sent"
                             value={stats.totalSent.toLocaleString()}
-                            color="bg-indigo-50 text-indigo-600"
-                            borderColor="border-l-indigo-500"
+                            color="bg-[#EEF2FF] text-[#4F46E5]"
                         />
                         <StatCard
                             icon={MousePointer}
-                            label="Open Rate"
-                            value={`${stats.openRate}%`}
+                            label="Delivered"
+                            value={`${100 - stats.bounceRate}%`}
                             color="bg-emerald-50 text-emerald-600"
-                            borderColor="border-l-emerald-500"
                         />
                         <StatCard
                             icon={TrendingUp}
-                            label="Reply Rate"
-                            value={`${stats.replyRate}%`}
+                            label="Opened"
+                            value={`${stats.openRate}%`}
                             color="bg-blue-50 text-blue-600"
-                            borderColor="border-l-blue-500"
                         />
                         <StatCard
                             icon={AlertTriangle}
-                            label="Bounce Rate"
-                            value={`${stats.bounceRate}%`}
+                            label="Replied"
+                            value={`${stats.replyRate}%`}
                             color="bg-amber-50 text-amber-600"
-                            borderColor="border-l-amber-500"
                         />
                     </div>
 
@@ -396,9 +365,11 @@ const CampaignAnalytics: React.FC = () => {
                         <EmptyState />
                     ) : (
                         <>
-                            {/* Emails Sent Per Day */}
-                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
-                                <h3 className="text-base font-semibold text-slate-900 mb-4">Emails Sent Per Day</h3>
+                            {/* Emails Sent Per Day Chart */}
+                            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-base font-semibold text-[#111827]">Emails Sent Per Day</h3>
+                                </div>
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={dailySentData}>
@@ -434,11 +405,13 @@ const CampaignAnalytics: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Open Rate by Campaign */}
-                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
-                                <h3 className="text-base font-semibold text-slate-900 mb-4">Open Rate by Campaign (Top 10)</h3>
+                            {/* Open Rate by Campaign Chart */}
+                            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-base font-semibold text-[#111827]">Open Rate by Campaign (Top 10)</h3>
+                                </div>
                                 {campaignOpenRates.length === 0 ? (
-                                    <p className="text-sm text-gray-500 text-center py-8">No campaign data available</p>
+                                    <p className="text-sm text-[#6B7280] text-center py-8">No campaign data available</p>
                                 ) : (
                                     <div className="h-[300px]">
                                         <ResponsiveContainer width="100%" height="100%">
@@ -486,14 +459,14 @@ const CampaignAnalytics: React.FC = () => {
             {activeTab === 'campaign' && (
                 <div className="space-y-6">
                     {/* Campaign Selector */}
-                    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
-                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+                    <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5">
+                        <label className="block text-sm font-medium text-[#111827] mb-2">
                             Select Campaign
                         </label>
                         <select
                             value={selectedCampaignId || ''}
                             onChange={(e) => setSelectedCampaignId(e.target.value || null)}
-                            className="w-full p-3 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                            className="w-full px-4 py-2.5 border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
                         >
                             <option value="">Choose a campaign...</option>
                             {campaigns.map(campaign => (
@@ -503,63 +476,60 @@ const CampaignAnalytics: React.FC = () => {
                     </div>
 
                     {!selectedCampaignId ? (
-                        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-                            <p className="text-sm text-gray-500">Select a campaign above to view detailed analytics</p>
+                        <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-12 text-center">
+                            <p className="text-sm text-[#6B7280]">Select a campaign above to view detailed analytics</p>
                         </div>
                     ) : leadActivity.length === 0 ? (
                         <EmptyState />
                     ) : (
-                        <>
-                            {/* Lead Activity Table */}
-                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-                                <div className="px-6 py-4 border-b border-slate-100">
-                                    <h3 className="text-base font-semibold text-slate-900">Lead Activity</h3>
-                                </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="bg-gray-50">
-                                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Lead</th>
-                                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Email</th>
-                                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Step Reached</th>
-                                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Last Opened</th>
-                                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {leadActivity.slice(0, 20).map((activity, i) => (
-                                                <tr key={i} className="hover:bg-gray-50">
-                                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                                                        {activity.lead?.business_name || 'Unknown'}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-500">
-                                                        {activity.lead?.email || '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-900">
-                                                        Step {activity.stepReached + 1}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-500">
-                                                        {activity.lastOpened
-                                                            ? new Date(activity.lastOpened).toLocaleDateString()
-                                                            : '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${activity.status === 'replied'
-                                                            ? 'bg-green-100 text-green-700'
-                                                            : activity.status === 'opened'
-                                                                ? 'bg-blue-100 text-blue-700'
-                                                                : 'bg-gray-100 text-gray-600'
-                                                            }`}>
-                                                            {activity.status}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                            <div className="px-5 py-4 border-b border-[#E5E7EB]">
+                                <h3 className="text-base font-semibold text-[#111827]">Lead Activity</h3>
                             </div>
-                        </>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gray-50">
+                                            <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Lead</th>
+                                            <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Email</th>
+                                            <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Step Reached</th>
+                                            <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Last Opened</th>
+                                            <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {leadActivity.slice(0, 20).map((activity, i) => (
+                                            <tr key={i} className="hover:bg-gray-50">
+                                                <td className="px-5 py-4 text-sm font-medium text-[#111827]">
+                                                    {activity.lead?.business_name || 'Unknown'}
+                                                </td>
+                                                <td className="px-5 py-4 text-sm text-[#6B7280]">
+                                                    {activity.lead?.email || '-'}
+                                                </td>
+                                                <td className="px-5 py-4 text-sm text-[#111827]">
+                                                    Step {activity.stepReached + 1}
+                                                </td>
+                                                <td className="px-5 py-4 text-sm text-[#6B7280]">
+                                                    {activity.lastOpened
+                                                        ? new Date(activity.lastOpened).toLocaleDateString()
+                                                        : '-'}
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    <span className={`px-2 py-1 rounded text-xs font-medium ${activity.status === 'replied'
+                                                        ? 'bg-green-50 text-green-700'
+                                                        : activity.status === 'opened'
+                                                            ? 'bg-blue-50 text-blue-700'
+                                                            : 'bg-gray-100 text-gray-600'
+                                                        }`}>
+                                                        {activity.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     )}
                 </div>
             )}
@@ -571,9 +541,11 @@ const CampaignAnalytics: React.FC = () => {
                         <EmptyState />
                     ) : (
                         <>
-                            {/* Reply Rate by Step */}
-                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
-                                <h3 className="text-base font-semibold text-slate-900 mb-4">Reply Rate by Step</h3>
+                            {/* Reply Rate by Step Chart */}
+                            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-base font-semibold text-[#111827]">Reply Rate by Step</h3>
+                                </div>
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={stepPerformance}>
@@ -610,21 +582,21 @@ const CampaignAnalytics: React.FC = () => {
                             </div>
 
                             {/* Best Performing Subject Lines */}
-                            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-                                <div className="px-6 py-4 border-b border-slate-100">
-                                    <h3 className="text-base font-semibold text-slate-900">Best Performing Subject Lines</h3>
+                            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+                                <div className="px-5 py-4 border-b border-[#E5E7EB]">
+                                    <h3 className="text-base font-semibold text-[#111827]">Best Performing Subject Lines</h3>
                                 </div>
-                                <div className="p-6">
+                                <div className="p-5">
                                     {topSubjects.length === 0 ? (
-                                        <p className="text-sm text-gray-500 text-center py-4">
+                                        <p className="text-sm text-[#6B7280] text-center py-4">
                                             Subject line performance data will appear here once you have sent emails.
                                         </p>
                                     ) : (
                                         <div className="space-y-3">
                                             {topSubjects.map((subject, i) => (
                                                 <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                    <span className="text-sm font-medium text-gray-900">{subject.subject}</span>
-                                                    <span className="text-sm font-bold text-indigo-600">{subject.openRate}% open rate</span>
+                                                    <span className="text-sm font-medium text-[#111827]">{subject.subject}</span>
+                                                    <span className="text-sm font-semibold text-[#4F46E5]">{subject.openRate}% open rate</span>
                                                 </div>
                                             ))}
                                         </div>

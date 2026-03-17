@@ -242,7 +242,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
+        <div className="min-h-screen bg-[#F8F9FA] p-6 space-y-6 animate-in fade-in duration-700">
             {portalTarget && createPortal(
                 <>
                     <div className="relative">
@@ -329,28 +329,68 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             )}
 
             {/* Metrics Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard label="Total Leads" value={stats.totalLeads.toLocaleString()} change="+0%" isPositive={true}
-                    subtitle={datePreset === 'all' ? 'from total database' : `in ${DATE_PRESETS.find(p => p.key === datePreset)?.label?.toLowerCase()}`}
-                    icon={Users} iconColor="text-primary" />
-                <StatCard label="Leads with Emails" value={stats.leadsWithEmails.toLocaleString()} change="+0%" isPositive={true}
-                    subtitle="verified emails found" icon={Mail} iconColor="text-primary" />
-                <StatCard label="Leads Contacted" value={stats.leadsContacted.toLocaleString()} change="+0%" isPositive={true}
-                    subtitle="outreach initiated" icon={MessageCircle} iconColor="text-success" />
-                <div className="flex flex-col gap-1">
-                    <StatCard label="Total Deals" value={stats.dealsCount.toLocaleString()} change="+0%" isPositive={true}
-                        subtitle="current pipeline" icon={Linkedin} iconColor="text-accent" />
-                    <div className="bg-gradient-to-br from-[#EEF2FF] to-white border border-[#C7D2FE] rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
-                        <div className="absolute top-0 right-0 -mr-4 -mt-4 w-12 h-12 bg-[#4F46E5]/5 rounded-full blur-xl"></div>
-                        <div className="text-2xl mb-1 relative z-10">{plan === 'pro' ? '⭐' : plan === 'trial' ? '⚡' : '🛡️'}</div>
-                        <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest relative z-10">Current Plan</div>
-                        <div className="text-lg font-black text-[#4F46E5] relative z-10 leading-none mt-1">{plan === 'trial' ? 'PRO TRIAL' : plan.toUpperCase()}</div>
-                        {plan === 'trial' && (<div className="text-[10px] font-bold text-[#6B7280] mt-1 relative z-10">{trialDaysRemaining} days left</div>)}
-                        {(plan === 'expired' || plan === 'cancelled') && (
-                            <button onClick={() => onPageChange('Pricing')} className="mt-2 text-[10px] font-black text-primary hover:underline uppercase tracking-widest relative z-10">Upgrade</button>
-                        )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
+                <StatCard 
+                    label="Total Leads" 
+                    value={stats.totalLeads.toLocaleString()} 
+                    change="+0%" 
+                    isPositive={true}
+                    subtitle={datePreset === 'all' ? 'total database' : `in ${DATE_PRESETS.find(p => p.key === datePreset)?.label?.toLowerCase()}`}
+                    icon={Users} 
+                    iconColor="text-[#4F46E5]" 
+                />
+                <StatCard 
+                    label="Leads with Emails" 
+                    value={stats.leadsWithEmails.toLocaleString()} 
+                    change="+0%" 
+                    isPositive={true}
+                    subtitle="verified emails" 
+                    icon={Mail} 
+                    iconColor="text-emerald-600" 
+                />
+                <StatCard 
+                    label="Leads Contacted" 
+                    value={stats.leadsContacted.toLocaleString()} 
+                    change="+0%" 
+                    isPositive={true}
+                    subtitle="outreach initiated" 
+                    icon={MessageCircle} 
+                    iconColor="text-blue-500" 
+                />
+                <StatCard 
+                    label="Total Deals" 
+                    value={stats.dealsCount.toLocaleString()} 
+                    change="+0%" 
+                    isPositive={true}
+                    subtitle="current pipeline" 
+                    icon={Linkedin} 
+                    iconColor="text-purple-500" 
+                />
+            </div>
+
+            {/* Current Plan Card (Moved Out of Stats Grid) */}
+            <div className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-xl p-5 sm:p-6 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                        <Star size={24} className="text-white" />
+                    </div>
+                    <div>
+                        <div className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1">
+                            Current Plan: {plan === 'trial' ? 'Pro Trial' : plan}
+                        </div>
+                        <h3 className="text-xl font-bold">
+                            {plan === 'trial' ? `${trialDaysRemaining} days remaining` : 'Unlock more limits'}
+                        </h3>
                     </div>
                 </div>
+                {(plan === 'trial' || plan === 'starter' || plan === 'expired' || plan === 'cancelled') && (
+                    <button 
+                        onClick={() => onPageChange('Pricing')} 
+                        className="px-6 py-2.5 bg-white text-[#4F46E5] text-sm font-bold rounded-lg hover:bg-indigo-50 transition-colors shadow-sm whitespace-nowrap"
+                    >
+                        Upgrade Plan
+                    </button>
+                )}
             </div>
 
             {/* Charts Row */}
