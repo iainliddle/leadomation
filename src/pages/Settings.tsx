@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Bell, CreditCard, Upload, Trash2 } from 'lucide-react';
+import { User, Lock, Bell, CreditCard, Upload, Trash2, Calendar, Mail, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface SettingsProps {
@@ -7,16 +7,16 @@ interface SettingsProps {
 }
 
 const tabs = [
-    { key: 'profile', label: 'Profile', icon: User },
-    { key: 'account', label: 'Account', icon: Lock },
+    { key: 'account', label: 'Account Settings', icon: User },
+    { key: 'store', label: 'Store Settings', icon: Lock },
     { key: 'notifications', label: 'Notifications', icon: Bell },
+    { key: 'integrations', label: 'Integrations', icon: Zap },
     { key: 'billing', label: 'Billing', icon: CreditCard },
 ];
 
 const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
-    const [activeTab, setActiveTab] = useState('profile');
+    const [activeTab, setActiveTab] = useState('account');
 
-    // Profile state
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [userEmail, setUserEmail] = useState('');
@@ -28,13 +28,11 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-    // Account state
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
-    // Notifications state
     const [notifications, setNotifications] = useState({
         emailNewLead: true,
         emailCampaignComplete: true,
@@ -44,10 +42,9 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
         browserNotifications: false,
     });
 
-    // Billing
     const [currentPlan, setCurrentPlan] = useState('Trial');
+    const [meetingLink, setMeetingLink] = useState('');
 
-    // ────── Load profile on mount ──────
     useEffect(() => {
         const loadProfile = async () => {
             const { data: { user } } = await supabase.auth.getUser();
@@ -62,7 +59,6 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 .single();
 
             if (error && error.code === 'PGRST116') {
-                // No profile row — create one
                 await supabase.from('profiles').insert({
                     id: user.id,
                     first_name: user.user_metadata?.first_name || user.email?.split('@')[0] || '',
@@ -81,7 +77,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 setJobTitle(data.job_title || '');
                 setProfileImageUrl(data.avatar_url || null);
                 setCurrentPlan(data.plan || 'Trial');
-                // Load notification preferences if stored
+                setMeetingLink(data.meeting_link || '');
                 if (data.notification_new_lead !== undefined) {
                     setNotifications({
                         emailNewLead: data.notification_new_lead ?? true,
@@ -99,8 +95,6 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
 
     const userInitials = `${(firstName?.[0] || userEmail?.[0] || 'U').toUpperCase()}${(lastName?.[0] || '').toUpperCase()}`;
 
-    // ────── Handlers ──────
-
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !userId) return;
@@ -116,7 +110,6 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 .upload(filePath, file, { upsert: true });
 
             if (uploadError) {
-                // Fallback to base64 if storage bucket isn't set up
                 console.warn('Storage upload failed, using base64 fallback:', uploadError.message);
                 const reader = new FileReader();
                 reader.onloadend = () => {
@@ -143,7 +136,6 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
             window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { url: urlWithCacheBust } }));
         } catch (err: any) {
             console.error('Avatar upload failed:', err);
-            // base64 fallback
             const reader = new FileReader();
             reader.onloadend = () => setProfileImageUrl(reader.result as string);
             reader.readAsDataURL(file);
@@ -194,6 +186,22 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
         }
     };
 
+    const handleSaveMeetingLink = async () => {
+        if (!userId) return;
+        try {
+            const { error } = await supabase.from('profiles').upsert({
+                id: userId,
+                meeting_link: meetingLink,
+                updated_at: new Date().toISOString(),
+            });
+            if (error) throw error;
+            alert('Meeting link saved!');
+        } catch (err) {
+            console.error('Failed to save meeting link:', err);
+            alert('Failed to save meeting link.');
+        }
+    };
+
     const handleChangePassword = async () => {
         if (newPassword !== confirmPassword) { alert('Passwords do not match'); return; }
         if (newPassword.length < 8) { alert('Password must be at least 8 characters'); return; }
@@ -240,177 +248,189 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
             });
         } catch (err) {
             console.error('Failed to save notification preference:', err);
-            setNotifications(notifications); // revert on failure
+            setNotifications(notifications);
         }
     };
 
-    // ────── Reusable styles ──────
-    const cardStyle: React.CSSProperties = {
-        background: 'white', border: '1px solid #F1F5F9', borderRadius: '16px', padding: '32px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)'
-    };
-    const labelStyle: React.CSSProperties = {
-        display: 'block', fontSize: '12px', fontWeight: 500, color: '#64748B',
-        textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px',
-    };
-    const inputStyle: React.CSSProperties = {
-        width: '100%', padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: '12px',
-        fontSize: '14px', fontFamily: 'inherit', outline: 'none', transition: 'all 0.2s',
-        background: 'white', color: '#0F172A', boxSizing: 'border-box',
-    };
-    const primaryBtnStyle: React.CSSProperties = {
-        padding: '10px 20px', borderRadius: '12px', background: '#4F46E5', color: 'white',
-        border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-        transition: 'all 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)'
-    };
+    const renderAccountSettings = () => (
+        <div className="bg-white rounded-b-xl border-x border-b border-[#E5E7EB] shadow-sm p-6">
+            <h3 className="text-base font-semibold text-[#111827] mb-6">Profile Information</h3>
 
-    // ────── TAB CONTENT ──────
-
-    const renderProfile = () => (
-        <div style={cardStyle}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '24px' }}>Profile Information</h3>
-
-            {/* Avatar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
-                <div style={{
-                    width: '64px', height: '64px', borderRadius: '16px',
-                    background: profileImageUrl ? 'transparent' : 'linear-gradient(135deg, #4F46E5, #7C3AED)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'white', fontSize: '24px', fontWeight: 700,
-                    overflow: 'hidden', flexShrink: 0,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)'
-                }}>
-                    {profileImageUrl
-                        ? <img src={profileImageUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <span>{userInitials}</span>}
+            {/* Avatar Section */}
+            <div className="flex items-center gap-5 mb-8">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#4F46E5] to-[#6366F1] flex items-center justify-center text-white text-xl font-bold overflow-hidden flex-shrink-0">
+                    {profileImageUrl ? (
+                        <img src={profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                        <span>{userInitials}</span>
+                    )}
                 </div>
-                <div>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <label htmlFor="avatar-upload" style={{
-                            padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
-                            background: 'white', color: '#374155', border: '1px solid #E2E8F0',
-                            cursor: uploadingAvatar ? 'wait' : 'pointer',
-                            display: 'inline-flex', alignItems: 'center', gap: '6px',
-                            opacity: uploadingAvatar ? 0.7 : 1,
-                            transition: 'all 0.2s'
-                        }}>
-                            <Upload size={14} /> {uploadingAvatar ? 'Uploading...' : 'Upload Photo'}
-                        </label>
-                        <input id="avatar-upload" type="file" accept="image/jpeg,image/png,image/gif,image/webp" style={{ display: 'none' }} onChange={handleAvatarUpload} />
-                        {profileImageUrl && (
-                            <button onClick={handleRemoveAvatar} style={{
-                                padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
-                                background: 'transparent', color: '#EF4444', cursor: 'pointer',
-                                border: '1px solid #FCA5A5', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                transition: 'all 0.2s'
-                            }}>
-                                <Trash2 size={14} /> Remove
-                            </button>
-                        )}
-                    </div>
-                    <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '8px' }}>JPG, PNG or GIF. Max 2MB.</p>
+                <div className="flex gap-3">
+                    <label className="px-4 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#111827] cursor-pointer hover:bg-gray-50 transition-all flex items-center gap-2">
+                        <Upload size={14} />
+                        {uploadingAvatar ? 'Uploading...' : 'Upload Photo'}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                    </label>
+                    {profileImageUrl && (
+                        <button
+                            onClick={handleRemoveAvatar}
+                            className="px-4 py-2 bg-white border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-all flex items-center gap-2"
+                        >
+                            <Trash2 size={14} />
+                            Remove
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {/* Form Fields */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            {/* Form Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                    <label style={labelStyle}>First Name</label>
-                    <input style={inputStyle} type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Iain"
-                        onFocus={(e) => e.currentTarget.style.borderColor = '#4F46E5'} onBlur={(e) => e.currentTarget.style.borderColor = '#E2E4ED'} />
+                    <label className="block text-sm font-medium text-[#111827] mb-1.5">First Name</label>
+                    <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                    />
                 </div>
                 <div>
-                    <label style={labelStyle}>Last Name</label>
-                    <input style={inputStyle} type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="L"
-                        onFocus={(e) => e.currentTarget.style.borderColor = '#4F46E5'} onBlur={(e) => e.currentTarget.style.borderColor = '#E2E4ED'} />
+                    <label className="block text-sm font-medium text-[#111827] mb-1.5">Last Name</label>
+                    <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                    />
                 </div>
                 <div>
-                    <label style={labelStyle}>Email Address</label>
-                    <input style={{ ...inputStyle, background: '#F8FAFC', color: '#94A3B8', cursor: 'not-allowed' }} type="email" value={userEmail} readOnly />
+                    <label className="block text-sm font-medium text-[#111827] mb-1.5">Email Address</label>
+                    <input
+                        type="email"
+                        value={userEmail}
+                        readOnly
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-[#E5E7EB] rounded-lg text-sm text-gray-400 cursor-not-allowed"
+                    />
                 </div>
                 <div>
-                    <label style={labelStyle}>Phone Number</label>
-                    <input style={inputStyle} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+44 7XXX XXX XXX"
-                        onFocus={(e) => e.currentTarget.style.borderColor = '#4F46E5'} onBlur={(e) => e.currentTarget.style.borderColor = '#E2E4ED'} />
+                    <label className="block text-sm font-medium text-[#111827] mb-1.5">Phone Number</label>
+                    <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+44 7XXX XXX XXX"
+                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                    />
                 </div>
                 <div>
-                    <label style={labelStyle}>Company Name</label>
-                    <input style={inputStyle} type="text" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Your company"
-                        onFocus={(e) => e.currentTarget.style.borderColor = '#4F46E5'} onBlur={(e) => e.currentTarget.style.borderColor = '#E2E4ED'} />
+                    <label className="block text-sm font-medium text-[#111827] mb-1.5">Company Name</label>
+                    <input
+                        type="text"
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                    />
                 </div>
                 <div>
-                    <label style={labelStyle}>Job Title</label>
-                    <input style={inputStyle} type="text" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder="e.g. Head of Sales"
-                        onFocus={(e) => e.currentTarget.style.borderColor = '#4F46E5'} onBlur={(e) => e.currentTarget.style.borderColor = '#E2E4ED'} />
+                    <label className="block text-sm font-medium text-[#111827] mb-1.5">Job Title</label>
+                    <input
+                        type="text"
+                        value={jobTitle}
+                        onChange={(e) => setJobTitle(e.target.value)}
+                        placeholder="e.g. Head of Sales"
+                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                    />
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
-                <button onClick={handleSaveProfile} disabled={saveStatus === 'saving'} style={{
-                    ...primaryBtnStyle,
-                    background: saveStatus === 'saved' ? '#059669' : saveStatus === 'error' ? '#DC2626' : '#4F46E5',
-                    cursor: saveStatus === 'saving' ? 'wait' : 'pointer',
-                    minWidth: '140px',
-                }}>
-                    {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved!' : saveStatus === 'error' ? 'Failed. Please retry.' : 'Save Changes'}
+            <div className="flex justify-end">
+                <button
+                    onClick={handleSaveProfile}
+                    disabled={saveStatus === 'saving'}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${saveStatus === 'saved'
+                        ? 'bg-green-600 text-white'
+                        : saveStatus === 'error'
+                            ? 'bg-red-600 text-white'
+                            : 'bg-[#4F46E5] text-white hover:bg-[#4338CA]'
+                        }`}
+                >
+                    {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved!' : 'Save Changes'}
                 </button>
             </div>
         </div>
     );
 
-    const renderAccount = () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    const renderStoreSettings = () => (
+        <div className="bg-white rounded-b-xl border-x border-b border-[#E5E7EB] shadow-sm p-6 space-y-6">
             {/* Change Password */}
-            <div style={cardStyle}>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '8px' }}>Change Password</h3>
-                <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '20px' }}>Update your password to keep your account secure.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
+            <div>
+                <h3 className="text-base font-semibold text-[#111827] mb-2">Change Password</h3>
+                <p className="text-sm text-[#6B7280] mb-4">Update your password to keep your account secure.</p>
+                <div className="max-w-md space-y-4">
                     <div>
-                        <label style={labelStyle}>New Password</label>
-                        <input style={inputStyle} type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password"
-                            onFocus={(e) => e.currentTarget.style.borderColor = '#4F46E5'} onBlur={(e) => e.currentTarget.style.borderColor = '#E2E4ED'} />
+                        <label className="block text-sm font-medium text-[#111827] mb-1.5">New Password</label>
+                        <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            placeholder="Enter new password"
+                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                        />
                     </div>
                     <div>
-                        <label style={labelStyle}>Confirm New Password</label>
-                        <input style={inputStyle} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password"
-                            onFocus={(e) => e.currentTarget.style.borderColor = '#4F46E5'} onBlur={(e) => e.currentTarget.style.borderColor = '#E2E4ED'} />
+                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Confirm Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Confirm new password"
+                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                        />
                     </div>
-                    <button onClick={handleChangePassword} style={{ ...primaryBtnStyle, alignSelf: 'flex-start' }}>Update Password</button>
+                    <button
+                        onClick={handleChangePassword}
+                        className="px-6 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all"
+                    >
+                        Update Password
+                    </button>
                 </div>
             </div>
 
             {/* Danger Zone */}
-            <div style={{ padding: '24px', borderRadius: '12px', border: '1px solid #FCA5A5', background: '#FEF2F2' }}>
-                <h3 style={{ color: '#DC2626', fontSize: '15px', fontWeight: 700, marginBottom: '8px' }}>Danger Zone</h3>
-                <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '16px' }}>
-                    Once you delete your account, there is no going back. All your data, campaigns, leads, and sequences will be permanently removed.
+            <div className="p-5 rounded-xl border border-red-200 bg-red-50">
+                <h3 className="text-base font-semibold text-red-700 mb-2">Danger Zone</h3>
+                <p className="text-sm text-[#6B7280] mb-4">
+                    Once you delete your account, there is no going back. All your data will be permanently removed.
                 </p>
                 {!showDeleteConfirm ? (
-                    <button onClick={() => setShowDeleteConfirm(true)} style={{
-                        padding: '10px 20px', borderRadius: '8px', background: '#DC2626', color: 'white',
-                        border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                    }}>
+                    <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-all"
+                    >
                         Delete Account
                     </button>
                 ) : (
-                    <div style={{ marginTop: '4px', padding: '16px', background: 'white', borderRadius: '8px', border: '1px solid #FCA5A5' }}>
-                        <p style={{ fontSize: '13px', color: '#0F172A', marginBottom: '12px', fontWeight: 600 }}>Type "DELETE" to confirm:</p>
-                        <input type="text" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} placeholder="Type DELETE"
-                            style={{ ...inputStyle, marginBottom: '12px', borderColor: '#FCA5A5' }}
-                            onFocus={(e) => e.currentTarget.style.borderColor = '#DC2626'} onBlur={(e) => e.currentTarget.style.borderColor = '#FCA5A5'} />
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE'} style={{
-                                padding: '8px 16px', borderRadius: '8px',
-                                background: deleteConfirmText === 'DELETE' ? '#DC2626' : '#E5E7EB',
-                                color: deleteConfirmText === 'DELETE' ? 'white' : '#94A3B8',
-                                border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                            }}>
+                    <div className="p-4 bg-white rounded-lg border border-red-200">
+                        <p className="text-sm text-[#111827] font-medium mb-3">Type "DELETE" to confirm:</p>
+                        <input
+                            type="text"
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value)}
+                            placeholder="Type DELETE"
+                            className="w-full px-4 py-2.5 bg-white border border-red-200 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400"
+                        />
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleDeleteAccount}
+                                disabled={deleteConfirmText !== 'DELETE'}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                                 Permanently Delete
                             </button>
-                            <button onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }} style={{
-                                padding: '8px 16px', borderRadius: '8px', background: 'transparent',
-                                color: '#64748B', border: '1px solid #E2E4ED', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                            }}>
+                            <button
+                                onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
+                                className="px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#6B7280] hover:bg-gray-50"
+                            >
                                 Cancel
                             </button>
                         </div>
@@ -422,47 +442,127 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
 
     const renderNotifications = () => {
         const toggles = [
-            { key: 'emailNewLead', label: 'New lead scraped', desc: 'Get notified when new leads are added to your database' },
+            { key: 'emailNewLead', label: 'New lead scraped', desc: 'Get notified when new leads are added' },
             { key: 'emailCampaignComplete', label: 'Campaign completed', desc: 'Notification when a scraping campaign finishes' },
-            { key: 'emailWeeklyReport', label: 'Weekly performance report', desc: 'Receive a summary of your outreach performance every Monday' },
-            { key: 'emailSequenceReply', label: 'Sequence reply received', desc: 'Get notified when a lead replies to your outreach' },
-            { key: 'emailDealUpdate', label: 'Deal pipeline updates', desc: 'Notifications when deals move stages or are updated' },
-            { key: 'browserNotifications', label: 'Browser notifications', desc: 'Show desktop notifications for real-time events' },
+            { key: 'emailWeeklyReport', label: 'Weekly performance report', desc: 'Receive a summary every Monday' },
+            { key: 'emailSequenceReply', label: 'Sequence reply received', desc: 'Get notified when a lead replies' },
+            { key: 'emailDealUpdate', label: 'Deal pipeline updates', desc: 'Notifications when deals move stages' },
+            { key: 'browserNotifications', label: 'Browser notifications', desc: 'Show desktop notifications' },
         ];
 
         return (
-            <div style={cardStyle}>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '4px' }}>Notification Preferences</h3>
-                <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '20px' }}>Choose how you want to be notified about activity in your account.</p>
-                {toggles.map((t, i) => (
-                    <div key={t.key} style={{
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        padding: '16px 0', borderBottom: i < toggles.length - 1 ? '1px solid #F1F5F9' : 'none',
-                    }}>
-                        <div style={{ marginRight: '16px' }}>
-                            <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>{t.label}</div>
-                            <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>{t.desc}</div>
+            <div className="bg-white rounded-b-xl border-x border-b border-[#E5E7EB] shadow-sm p-6">
+                <h3 className="text-base font-semibold text-[#111827] mb-2">Notification Preferences</h3>
+                <p className="text-sm text-[#6B7280] mb-6">Choose how you want to be notified about activity.</p>
+                <div className="divide-y divide-gray-100">
+                    {toggles.map((t) => (
+                        <div key={t.key} className="py-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-[#111827]">{t.label}</p>
+                                <p className="text-xs text-[#6B7280] mt-0.5">{t.desc}</p>
+                            </div>
+                            <button
+                                onClick={() => handleToggleNotification(t.key)}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${notifications[t.key as keyof typeof notifications] ? 'bg-[#4F46E5]' : 'bg-gray-200'
+                                    }`}
+                            >
+                                <div
+                                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${notifications[t.key as keyof typeof notifications] ? 'translate-x-6' : 'translate-x-1'
+                                        }`}
+                                />
+                            </button>
                         </div>
-                        <div
-                            onClick={() => handleToggleNotification(t.key)}
-                            style={{
-                                width: '44px', height: '24px', borderRadius: '12px', cursor: 'pointer',
-                                background: notifications[t.key as keyof typeof notifications] ? '#4F46E5' : '#E2E4ED',
-                                position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-                            }}
-                        >
-                            <div style={{
-                                width: '20px', height: '20px', borderRadius: '50%', background: 'white',
-                                position: 'absolute', top: '2px',
-                                left: notifications[t.key as keyof typeof notifications] ? '22px' : '2px',
-                                transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                            }} />
-                        </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         );
     };
+
+    const renderIntegrations = () => (
+        <div className="bg-white rounded-b-xl border-x border-b border-[#E5E7EB] shadow-sm p-6 space-y-4">
+            {/* Meeting Link */}
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5 flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#EEF2FF] rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Calendar size={24} className="text-[#4F46E5]" />
+                </div>
+                <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-[#111827]">Meeting Link</h4>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Your Calendly or booking link for calls</p>
+                </div>
+                <div className="flex items-center gap-2 flex-1">
+                    <input
+                        type="url"
+                        value={meetingLink}
+                        onChange={(e) => setMeetingLink(e.target.value)}
+                        placeholder="https://calendly.com/you/meeting"
+                        className="flex-1 px-4 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                    />
+                    <button
+                        onClick={handleSaveMeetingLink}
+                        className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all"
+                    >
+                        Save
+                    </button>
+                </div>
+            </div>
+
+            {/* LinkedIn & Email Side by Side */}
+            <div className="grid grid-cols-2 gap-4">
+                {/* LinkedIn */}
+                <div className="border-2 border-dashed border-gray-300 bg-gray-50 rounded-xl p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <span className="text-blue-600 font-bold text-sm">in</span>
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-semibold text-[#111827]">LinkedIn</h4>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                                <span className="text-xs text-[#6B7280]">Not Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button className="w-full px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all">
+                        Connect LinkedIn
+                    </button>
+                </div>
+
+                {/* Email */}
+                <div className="border-2 border-dashed border-gray-300 bg-gray-50 rounded-xl p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <Mail size={20} className="text-amber-600" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-semibold text-[#111827]">Email Account</h4>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                                <span className="text-xs text-[#6B7280]">Not Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button className="w-full px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all">
+                        Connect Email
+                    </button>
+                </div>
+            </div>
+
+            {/* Infrastructure Card */}
+            <div className="bg-gradient-to-r from-[#EEF2FF] to-[#E0F2FE] border border-[#C7D2FE] rounded-xl p-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/80 rounded-lg flex items-center justify-center">
+                        <Zap size={20} className="text-[#4F46E5]" />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-semibold text-[#111827]">Email Infrastructure</h4>
+                        <p className="text-xs text-[#6B7280] mt-0.5">
+                            Set up your sending domain and warm-up settings for optimal deliverability
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
     const renderBilling = () => {
         const handleUpdatePayment = async () => {
@@ -482,42 +582,42 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
         };
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="bg-white rounded-b-xl border-x border-b border-[#E5E7EB] shadow-sm p-6 space-y-6">
                 {/* Current Plan */}
-                <div style={{
-                    padding: '24px', borderRadius: '12px',
-                    background: 'linear-gradient(135deg, rgba(79,70,229,0.04), rgba(124,58,237,0.03))',
-                    border: '1px solid rgba(79,70,229,0.12)',
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div className="bg-gradient-to-r from-[#EEF2FF] to-[#F5F3FF] border border-[#C7D2FE] rounded-xl p-5">
+                    <div className="flex items-center justify-between">
                         <div>
-                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#4F46E5', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Plan</div>
-                            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>{currentPlan} Tier</div>
-                            <div style={{ fontSize: '13px', color: '#64748B', marginTop: '4px' }}>
-                                {currentPlan === 'Pro' ? 'Unlimited keyword searches every month. All features included.' : currentPlan === 'Starter' ? '50 keyword searches every month. Core features.' : 'Trial mode: upgrade to unlock full access.'}
-                            </div>
+                            <p className="text-xs font-semibold text-[#4F46E5] uppercase tracking-wide">Current Plan</p>
+                            <p className="text-2xl font-bold text-[#111827] mt-1">{currentPlan} Tier</p>
+                            <p className="text-sm text-[#6B7280] mt-1">
+                                {currentPlan === 'Pro' ? 'Unlimited access. All features included.' : 'Upgrade to unlock full access.'}
+                            </p>
                         </div>
-                        <button onClick={() => onPageChange?.('Pricing')} style={primaryBtnStyle}>
+                        <button
+                            onClick={() => onPageChange?.('Pricing')}
+                            className="px-6 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all"
+                        >
                             {currentPlan === 'Pro' ? 'Manage Plan' : 'Upgrade Plan'}
                         </button>
                     </div>
                 </div>
 
                 {/* Billing History */}
-                <div style={cardStyle}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '16px' }}>Billing History</h3>
-                    <div style={{ border: '1px solid #E2E4ED', borderRadius: '12px', overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <div>
+                    <h3 className="text-base font-semibold text-[#111827] mb-4">Billing History</h3>
+                    <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+                        <table className="w-full text-sm">
                             <thead>
-                                <tr style={{ background: '#F8FAFC' }}>
-                                    {['Date', 'Description', 'Amount', 'Status'].map(h => (
-                                        <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700, color: '#64748B', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
-                                    ))}
+                                <tr className="bg-gray-50">
+                                    <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Date</th>
+                                    <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Description</th>
+                                    <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Amount</th>
+                                    <th className="px-5 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center', color: '#94A3B8', fontStyle: 'italic' }}>
+                                    <td colSpan={4} className="px-5 py-8 text-center text-[#6B7280]">
                                         No billing history yet.
                                     </td>
                                 </tr>
@@ -527,64 +627,56 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 </div>
 
                 {/* Payment Method */}
-                <div style={cardStyle}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '16px' }}>Payment Method</h3>
-                    <div style={{ padding: '20px', borderRadius: '12px', border: '1px solid #E2E4ED', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{
-                                width: '40px', height: '28px', borderRadius: '4px', background: '#1A1F36',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'white', fontSize: '10px', fontWeight: 700, flexShrink: 0,
-                            }}>
+                <div>
+                    <h3 className="text-base font-semibold text-[#111827] mb-4">Payment Method</h3>
+                    <div className="border border-[#E5E7EB] rounded-xl p-5 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-7 bg-[#1A1F36] rounded flex items-center justify-center text-white text-[10px] font-bold">
                                 VISA
                             </div>
                             <div>
-                                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>•••• •••• •••• 4242</div>
-                                <div style={{ fontSize: '12px', color: '#94A3B8' }}>Expires 12/26</div>
+                                <p className="text-sm font-medium text-[#111827]">•••• •••• •••• 4242</p>
+                                <p className="text-xs text-[#6B7280]">Expires 12/26</p>
                             </div>
                         </div>
-                        <button onClick={handleUpdatePayment} style={{
-                            padding: '8px 16px', borderRadius: '8px', background: 'transparent',
-                            color: '#4F46E5', border: '1px solid #E2E4ED', fontSize: '13px',
-                            fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                        }}>
+                        <button
+                            onClick={handleUpdatePayment}
+                            className="px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#4F46E5] hover:bg-gray-50 transition-all"
+                        >
                             Update
                         </button>
                     </div>
-                    <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '8px' }}>
-                        Managed securely through Stripe. We never store your card details.
-                    </p>
+                    <p className="text-xs text-[#6B7280] mt-2">Managed securely through Stripe.</p>
                 </div>
             </div>
         );
     };
 
     const contentMap: Record<string, () => React.ReactNode> = {
-        profile: renderProfile,
-        account: renderAccount,
+        account: renderAccountSettings,
+        store: renderStoreSettings,
         notifications: renderNotifications,
+        integrations: renderIntegrations,
         billing: renderBilling,
     };
 
     return (
-        <div className="animate-in fade-in duration-200 bg-[#F8FAFC] min-h-full -m-6 p-6">
-            <h1 className="text-2xl font-bold text-slate-900 mb-6">Settings</h1>
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
+            <div className="max-w-4xl mx-auto">
+                <h1 className="text-xl font-semibold text-[#111827] mb-6">Settings</h1>
 
-            <div className="flex gap-6 items-start">
-                {/* Tab Navigation */}
-                <div className="w-52 shrink-0 bg-white border border-slate-100 rounded-2xl shadow-sm p-2 sticky top-24 hover:shadow-md transition-shadow duration-200">
+                {/* Horizontal Tabs */}
+                <div className="flex border-b border-[#E5E7EB] bg-white rounded-t-xl border-x border-t shadow-sm px-4">
                     {tabs.map(tab => {
                         const Icon = tab.icon;
-                        const isActive = activeTab === tab.key;
                         return (
                             <button
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key)}
-                                className={`flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-xl text-sm transition-all mb-0.5 text-left ${
-                                    isActive
-                                        ? 'bg-indigo-50 text-indigo-700 font-semibold border-l-4 border-l-indigo-500'
-                                        : 'text-slate-600 hover:bg-slate-50 font-medium'
-                                }`}
+                                className={`px-4 py-3 text-sm font-medium flex items-center gap-2 border-b-2 -mb-px transition-all ${activeTab === tab.key
+                                    ? 'text-[#4F46E5] border-[#4F46E5]'
+                                    : 'text-[#6B7280] border-transparent hover:text-[#111827]'
+                                    }`}
                             >
                                 <Icon size={16} />
                                 {tab.label}
@@ -594,9 +686,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0">
-                    {contentMap[activeTab]?.()}
-                </div>
+                {contentMap[activeTab]?.()}
             </div>
         </div>
     );
