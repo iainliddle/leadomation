@@ -90,6 +90,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
 const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const { plan, usage, limits, trialDaysRemaining } = usePlan();
+    const [firstName, setFirstName] = useState<string>('');
     const [stats, setStats] = useState({
         totalLeads: 0,
         leadsWithEmails: 0,
@@ -112,6 +113,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const fetchDashboardData = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+
+        // Fetch profile for first name
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name')
+            .eq('id', user.id)
+            .single();
+
+        if (profile?.first_name) {
+            setFirstName(profile.first_name);
+        }
 
         const { from: dateFrom } = getDateRange(datePreset);
 
@@ -282,6 +294,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         );
     }
 
+    // Greeting logic based on local time
+    const hour = new Date().getHours();
+    const greeting = hour >= 5 && hour < 12 ? 'Good morning' : hour >= 12 && hour < 17 ? 'Good afternoon' : 'Good evening';
+    const formattedDate = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
     return (
         <div className="min-h-screen bg-[#F8F9FA] p-6 space-y-6">
             {/* TopBar Actions Portal */}
@@ -325,6 +342,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                 </>,
                 portalTarget
             )}
+
+            {/* Welcome Message */}
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-[#111827]">
+                    {greeting}, {firstName || 'there'} 👋
+                </h2>
+                <p className="text-sm text-[#6B7280] mt-1">{formattedDate} · Let's make today count.</p>
+            </div>
 
             {/* Trial Usage Summary */}
             {plan === 'trial' && (
@@ -374,8 +399,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     isPositive={true}
                     subtitle={datePreset === 'all' ? 'total database' : `in ${DATE_PRESETS.find(p => p.key === datePreset)?.label?.toLowerCase()}`}
                     icon={Users}
-                    iconBg="bg-indigo-50"
-                    iconColor="text-[#4F46E5]"
+                    iconBg="bg-cyan-50"
+                    iconColor="text-cyan-600"
                 />
                 <StatCard
                     label="Leads with Emails"
@@ -394,8 +419,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     isPositive={true}
                     subtitle="outreach initiated"
                     icon={MessageCircle}
-                    iconBg="bg-blue-50"
-                    iconColor="text-blue-500"
+                    iconBg="bg-purple-50"
+                    iconColor="text-purple-600"
                 />
                 <StatCard
                     label="Total Deals"
@@ -404,8 +429,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     isPositive={true}
                     subtitle="in pipeline"
                     icon={TrendingUp}
-                    iconBg="bg-purple-50"
-                    iconColor="text-purple-500"
+                    iconBg="bg-rose-50"
+                    iconColor="text-rose-500"
                 />
             </div>
 

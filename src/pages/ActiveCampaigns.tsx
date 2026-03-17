@@ -170,9 +170,9 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
     const getAccentColor = (status: string) => {
         const s = String(status).toLowerCase();
-        if (s === 'completed') return 'bg-[#4F46E5]';
+        if (s === 'completed') return 'bg-emerald-400';
         if (s === 'error') return 'bg-red-500';
-        if (s === 'active') return 'bg-[#4F46E5]';
+        if (s === 'active') return 'bg-cyan-400';
         return 'bg-amber-400';
     };
 

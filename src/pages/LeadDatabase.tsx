@@ -1255,13 +1255,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             
             {/* Header & Actions Bar */}
             <div className={`px-6 py-4 bg-white border-b border-gray-200 ${campaignFilter ? 'mt-0' : ''}`}>
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">Lead Database</h1>
-                        <p className="text-sm text-gray-500 mt-1">Manage and track all your leads here</p>
-                    </div>
-
-                    <div className="flex items-center gap-3 border-t sm:border-t-0 pt-4 sm:pt-0 border-gray-100 w-full sm:w-auto mt-2 sm:mt-0">
+                <div className="flex flex-wrap items-center justify-end gap-4 mb-4">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button
                             onClick={handleExport}
                             disabled={isExporting}

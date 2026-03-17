@@ -160,7 +160,7 @@ const Compliance: React.FC = () => {
                     className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
                 >
                     {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                    {saving ? 'Saving...' : '💾 SAVE SETTINGS'}
+                    {saving ? 'Saving...' : 'Save settings'}
                 </button>
             </div>
 
@@ -372,10 +372,10 @@ const Compliance: React.FC = () => {
                                 <button
                                     onClick={handleDeleteLeadByEmail}
                                     disabled={deleting || !deleteEmail.trim()}
-                                    className="flex items-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-xl text-sm font-black hover:bg-rose-700 transition-all shadow-md active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-xl text-sm font-semibold hover:bg-rose-700 transition-all shadow-md active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} className="group-hover:rotate-12 transition-transform" />}
-                                    DELETE
+                                    Delete
                                 </button>
                             </div>
                             <div className="flex items-center gap-1.5 mt-3 text-rose-600">

@@ -104,10 +104,10 @@ const EmailConfig: React.FC = () => {
                         <button
                             onClick={() => saveSettings({ daily_email_limit: dailyEmailLimit, email_send_delay: emailSendDelay, auto_detect_timezone: autoDetectTimezone })}
                             disabled={saving}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
                         >
                             {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                            SAVE
+                            Save
                         </button>
                     </div>
 

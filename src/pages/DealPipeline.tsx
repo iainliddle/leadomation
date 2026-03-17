@@ -35,12 +35,12 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
     const [saving, setSaving] = useState(false);
 
     const stages = [
-        { id: 'new_reply', label: 'New Reply', color: 'blue' },
-        { id: 'qualified', label: 'Qualified', color: 'indigo' },
-        { id: 'proposal_sent', label: 'Proposal Sent', color: 'amber' },
-        { id: 'negotiating', label: 'Negotiating', color: 'orange' },
-        { id: 'won', label: 'Won', color: 'green' },
-        { id: 'lost', label: 'Lost', color: 'red' }
+        { id: 'new_reply', label: '💬 New Reply', color: 'cyan' },
+        { id: 'qualified', label: '⭐ Qualified', color: 'purple' },
+        { id: 'proposal_sent', label: '📄 Proposal Sent', color: 'amber' },
+        { id: 'negotiating', label: '🤝 Negotiating', color: 'orange' },
+        { id: 'won', label: '🎉 Won', color: 'emerald' },
+        { id: 'lost', label: '❌ Lost', color: 'rose' }
     ];
 
     const loadDeals = async () => {
@@ -157,12 +157,12 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
 
     const getStageColor = (color: string) => {
         switch (color) {
-            case 'blue': return 'border-t-blue-400';
-            case 'indigo': return 'border-t-[#4F46E5]';
+            case 'cyan': return 'border-t-cyan-400';
+            case 'purple': return 'border-t-purple-400';
             case 'amber': return 'border-t-amber-400';
             case 'orange': return 'border-t-orange-400';
-            case 'green': return 'border-t-green-400';
-            case 'red': return 'border-t-red-400';
+            case 'emerald': return 'border-t-emerald-400';
+            case 'rose': return 'border-t-rose-400';
             default: return 'border-t-gray-400';
         }
     };
