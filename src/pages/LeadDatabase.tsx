@@ -264,7 +264,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'connected' | 'ended' | 'error'>('idle');
     const [callLeadTarget, setCallLeadTarget] = useState<Lead | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [showInfoCard, setShowInfoCard] = useState(true);
 
     // Batch Email Modal State
     const [showEmailModal, setShowEmailModal] = useState(false);
@@ -1253,45 +1252,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                     </button>
                 </div>
             )}
-            {/* Info Card */}
-            {showInfoCard && (
-                <div className="relative bg-indigo-50/70 border border-indigo-100 rounded-2xl p-5 flex gap-4 items-start">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-[#4F46E5] shrink-0 mt-0.5">
-                        <Info size={20} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-black text-[#111827] mb-1">Your Lead Database</h3>
-                        <p className="text-xs font-medium text-[#4B5563] leading-relaxed mb-3">
-                            This is where all your scraped leads land after a campaign runs. Use the filters to find your best prospects, check the local time indicator before calling, and take action directly from here to send emails, make AI-powered calls, or export to CSV. Leads marked as Qualified will automatically appear in your Deal Pipeline.
-                            <br /><br />
-                            <strong className="text-[#111827]">Smart Intent Filters</strong> help you identify the warmest leads in your database. These are businesses that are most likely to need your help right now. A business with a low rating may be struggling with reputation management, and a new business may need services to get established quickly. No photos or an incomplete listing suggests they haven't invested in their online presence yet, making them ideal outreach targets. Use multiple filters together to find your highest-priority prospects.
-                        </p>
-                        <div className="flex items-center gap-4 flex-wrap">
-                            <div className="flex items-center gap-1.5">
-                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10B981' }} />
-                                <span className="text-[10px] font-bold text-[#6B7280]">Business hours (Mon-Fri 9am-5pm)</span>
-                            </div>
-                            <span className="text-gray-300">|</span>
-                            <div className="flex items-center gap-1.5">
-                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F59E0B' }} />
-                                <span className="text-[10px] font-bold text-[#6B7280]">Borderline (8-9am or 5-6pm)</span>
-                            </div>
-                            <span className="text-gray-300">|</span>
-                            <div className="flex items-center gap-1.5">
-                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: '#EF4444' }} />
-                                <span className="text-[10px] font-bold text-[#6B7280]">Outside hours / Weekend</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => setShowInfoCard(false)}
-                        className="p-1.5 hover:bg-indigo-100 rounded-lg text-[#9CA3AF] hover:text-[#6B7280] transition-all shrink-0"
-                    >
-                        <X size={16} />
-                    </button>
-                </div>
-            )}
-
+            
             {/* Filters and Actions Bar */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-6">
@@ -1500,8 +1461,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         <p className="text-sm font-medium text-[#6B7280]">Try adjusting your search or filters, or launch a campaign to generate more.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto w-full">
+                        <table className="w-full min-w-[1400px] text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50">
                                     <th className="w-10 px-6 py-4">
@@ -1534,8 +1495,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 {filteredLeads.map((lead) => (
                                     <tr
                                         key={lead.id}
-                                        className={`group cursor-pointer transition-colors duration-100 border-b border-slate-100 ${selectedLeads.includes(lead.id) ? 'bg-indigo-50' : 'hover:bg-slate-50'
-                                            }`}
+                                        className={`group cursor-pointer transition-colors duration-100 border-b border-slate-100 ${selectedLeads.includes(lead.id) ? 'bg-indigo-50' : 'bg-white hover:bg-slate-50'}`}
                                         onClick={() => setSelectedLead(lead)}
                                     >
                                         <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
