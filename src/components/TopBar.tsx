@@ -29,23 +29,24 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign }) => {
             const initials = (first[0] || '') + (parts[1] ? parts[1][0] : '');
             setUserInitials(initials.toUpperCase() || '?');
 
-            // Load profile data
+            // Load profile data (profiles table has full_name, not first_name/last_name)
             const { data } = await supabase
                 .from('profiles')
-                .select('first_name, last_name')
+                .select('full_name')
                 .eq('id', user.id)
                 .single();
 
-            if (data?.first_name) {
-                setHeaderFirstName(data.first_name);
-                const fn = data.first_name || '';
-                const ln = data.last_name || '';
+            if (data?.full_name) {
+                const nameParts = data.full_name.split(' ');
+                const fn = nameParts[0] || '';
+                const ln = nameParts.slice(1).join(' ') || '';
+                setHeaderFirstName(fn);
+                setHeaderLastName(ln);
                 const displayName = fn + (ln ? ' ' + ln[0] + '.' : '');
                 setUserName(displayName || userName);
                 const newInitials = (fn[0] || '') + (ln[0] || '');
                 setUserInitials(newInitials.toUpperCase() || '?');
             }
-            if (data?.last_name) setHeaderLastName(data.last_name);
         };
         loadAvatar();
 
