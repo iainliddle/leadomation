@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Mail, MessageCircle, Linkedin, Loader2, Phone, UserPlus, Star, Download, Calendar, ChevronDown } from 'lucide-react';
+import { Users, Mail, MessageCircle, TrendingUp, Loader2, Phone, UserPlus, Star, Download, Calendar, ChevronDown, ArrowUpRight, Info } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import StatCard from '../components/StatCard';
 import CampaignPerformance from '../components/CampaignPerformance';
 import TopCampaigns from '../components/TopCampaigns';
 import RecentActivity from '../components/RecentActivity';
@@ -43,8 +42,51 @@ function formatDateLabel(preset: DatePreset): string {
     const fromDate = new Date(from);
     const toDate = new Date();
     const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    return `${fmt(fromDate)} to ${fmt(toDate)}`;
+    return `${fmt(fromDate)} - ${fmt(toDate)}`;
 }
+
+// Stat Card Component
+interface StatCardProps {
+    label: string;
+    value: string;
+    change: string;
+    isPositive: boolean;
+    subtitle: string;
+    icon: React.ElementType;
+    iconBg: string;
+    iconColor: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({
+    label,
+    value,
+    change,
+    isPositive,
+    subtitle,
+    icon: Icon,
+    iconBg,
+    iconColor
+}) => (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+        <div className="flex justify-between items-start mb-3">
+            <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium text-gray-500">{label}</p>
+                <Info size={14} className="text-gray-300 cursor-help" />
+            </div>
+            <div className={`p-2 rounded-lg ${iconBg}`}>
+                <Icon size={18} className={iconColor} />
+            </div>
+        </div>
+        <h3 className="text-3xl font-bold text-gray-900 mb-3">{value}</h3>
+        <div className="flex items-center gap-1.5 text-xs font-medium">
+            <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />
+                {change}
+            </span>
+            <span className="text-gray-400">{subtitle}</span>
+        </div>
+    </div>
+);
 
 const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const { plan, usage, limits, trialDaysRemaining } = usePlan();
@@ -73,7 +115,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
 
         const { from: dateFrom } = getDateRange(datePreset);
 
-        // Build queries with optional date filter
         const addDateFilter = (query: any) => {
             if (dateFrom) return query.gte('created_at', dateFrom);
             return query;
@@ -114,10 +155,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             const companyName = leadInfo?.company || 'Unknown';
             const statusLabel = call.status === 'completed' ? 'COMPLETED' : call.status === 'initiated' ? 'INITIATED' : (call.status || 'CALL').toUpperCase();
             const statusClass = call.status === 'completed'
-                ? 'bg-[#ECFDF5] text-[#059669]'
+                ? 'bg-emerald-50 text-emerald-700'
                 : call.status === 'initiated'
-                    ? 'bg-[#FEF3C7] text-[#D97706]'
-                    : 'bg-[#F3F4F6] text-[#6B7280]';
+                    ? 'bg-amber-50 text-amber-700'
+                    : 'bg-gray-100 text-gray-600';
 
             activityItems.push({
                 id: `call-${call.id}`, icon: Phone, bgColor: 'bg-green-50', iconColor: 'text-green-600',
@@ -128,9 +169,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
 
         (recentNewLeads || []).forEach((lead: any) => {
             activityItems.push({
-                id: `lead-${lead.id}`, icon: UserPlus, bgColor: 'bg-[#EFF6FF]', iconColor: 'text-[#2563EB]',
+                id: `lead-${lead.id}`, icon: UserPlus, bgColor: 'bg-blue-50', iconColor: 'text-blue-600',
                 text: `New lead: ${lead.company || 'Unknown'}`, time: lead.created_at,
-                sortDate: new Date(lead.created_at).getTime(), status: 'NEW', statusClass: 'bg-[#EFF6FF] text-[#2563EB]'
+                sortDate: new Date(lead.created_at).getTime(), status: 'NEW', statusClass: 'bg-blue-50 text-blue-700'
             });
         });
 
@@ -235,34 +276,35 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="flex items-center justify-center min-h-[400px] bg-[#F8F9FA]">
+                <Loader2 className="w-8 h-8 text-[#4F46E5] animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#F8F9FA] p-6 space-y-6 animate-in fade-in duration-700">
+        <div className="min-h-screen bg-[#F8F9FA] p-6 space-y-6">
+            {/* TopBar Actions Portal */}
             {portalTarget && createPortal(
                 <>
                     <div className="relative">
                         <button
                             onClick={() => setShowDatePicker(!showDatePicker)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm font-semibold text-[#374151] hover:border-[#4F46E5] hover:text-[#4F46E5] transition-all shadow-sm"
+                            className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm"
                         >
-                            <Calendar size={14} />
-                            <span>{formatDateLabel(datePreset)}</span>
-                            <ChevronDown size={14} className={`transition-transform ${showDatePicker ? 'rotate-180' : ''}`} />
+                            <Calendar size={14} className="text-gray-400" />
+                            <span className="hidden md:inline">{formatDateLabel(datePreset)}</span>
+                            <ChevronDown size={14} className={`text-gray-400 transition-transform ${showDatePicker ? 'rotate-180' : ''}`} />
                         </button>
                         {showDatePicker && (
                             <>
                                 <div className="fixed inset-0 z-40" onClick={() => setShowDatePicker(false)} />
-                                <div className="absolute right-0 mt-2 w-48 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-150">
                                     {DATE_PRESETS.map(p => (
                                         <button
                                             key={p.key}
                                             onClick={() => { setDatePreset(p.key); setShowDatePicker(false); }}
-                                            className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${datePreset === p.key ? 'bg-[#EEF2FF] text-[#4F46E5] font-bold' : 'text-[#374151] hover:bg-[#F9FAFB]'}`}
+                                            className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors ${datePreset === p.key ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-gray-700 hover:bg-gray-50'}`}
                                         >
                                             {p.label}
                                         </button>
@@ -275,107 +317,106 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     <button
                         onClick={handleExport}
                         disabled={isExporting}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#374151] rounded-xl text-sm font-bold hover:bg-gray-50 transition-all shadow-sm disabled:opacity-60"
+                        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-sm disabled:opacity-60"
                     >
-                        {isExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} className="text-[#9CA3AF]" />}
-                        {isExporting ? 'Exporting...' : 'Export'}
+                        {isExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} className="text-gray-400" />}
+                        <span className="hidden md:inline">{isExporting ? 'Exporting...' : 'Export'}</span>
                     </button>
                 </>,
                 portalTarget
             )}
 
-            {/* Usage Summary (Conditional) */}
+            {/* Trial Usage Summary */}
             {plan === 'trial' && (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 animate-in slide-in-from-top duration-500">
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-[#111827]">Trial Usage</span>
-                            <span className="px-1.5 py-0.5 bg-indigo-50 text-[10px] font-black text-[#4F46E5] rounded uppercase tracking-tighter">Pro Features Active</span>
+                            <span className="text-sm font-semibold text-gray-900">Trial Usage</span>
+                            <span className="px-2 py-0.5 bg-[#EEF2FF] text-[10px] font-semibold text-[#4F46E5] rounded-full uppercase tracking-wide">Pro Features Active</span>
                         </div>
-                        <span className="text-xs font-bold text-[#6B7280]">{trialDaysRemaining} days remaining</span>
+                        <span className="text-xs font-medium text-gray-500">{trialDaysRemaining} days remaining</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
-                            <div className="text-lg font-black text-[#4F46E5]">{usage.leadsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxLeads}</span></div>
-                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Leads</div>
-                        </div>
-                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
-                            <div className="text-lg font-black text-[#4F46E5]">{usage.emailsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxEmails}</span></div>
-                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Emails</div>
-                        </div>
-                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
-                            <div className="text-lg font-black text-[#4F46E5]">{usage.voiceCallsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxVoiceCalls}</span></div>
-                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Voice Calls</div>
-                        </div>
-                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all">
-                            <div className="text-lg font-black text-[#4F46E5]">{usage.aiEmailsUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxAiEmails}</span></div>
-                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">AI Emails</div>
-                        </div>
-                        <div className="text-center p-2.5 bg-gray-50 rounded-lg border border-transparent hover:border-indigo-100 transition-all sm:col-span-2 lg:col-span-1">
-                            <div className="text-lg font-black text-[#4F46E5]">{usage.keywordSearchesUsed}<span className="text-xs font-bold text-[#9CA3AF]">/{limits.trialMaxKeywordSearches}</span></div>
-                            <div className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide">Searches</div>
-                        </div>
+                        {[
+                            { label: 'Leads', used: usage.leadsUsed, max: limits.trialMaxLeads },
+                            { label: 'Emails', used: usage.emailsUsed, max: limits.trialMaxEmails },
+                            { label: 'Voice Calls', used: usage.voiceCallsUsed, max: limits.trialMaxVoiceCalls },
+                            { label: 'AI Emails', used: usage.aiEmailsUsed, max: limits.trialMaxAiEmails },
+                            { label: 'Searches', used: usage.keywordSearchesUsed, max: limits.trialMaxKeywordSearches },
+                        ].map((item) => (
+                            <div key={item.label} className="text-center p-3 bg-gray-50 rounded-lg hover:bg-[#EEF2FF] transition-colors">
+                                <div className="text-lg font-bold text-[#4F46E5]">
+                                    {item.used}<span className="text-xs font-medium text-gray-400">/{item.max}</span>
+                                </div>
+                                <div className="text-[10px] font-medium text-gray-500 uppercase tracking-wide">{item.label}</div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
 
+            {/* Starter Plan Usage Warning */}
             {plan === 'starter' && (usage.monthlyLeadsUsed / limits.maxLeadsPerMonth > 0.4 || usage.monthlyKeywordSearchesUsed / limits.maxKeywordSearches > 0.4) && (
-                <div className="mb-6 bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                         <UsageLimitBar label="Monthly Leads" used={usage.monthlyLeadsUsed || 0} max={limits.maxLeadsPerMonth} onUpgradeClick={() => onPageChange('Pricing')} />
                         <UsageLimitBar label="Keyword Searches" used={usage.monthlyKeywordSearchesUsed || 0} max={limits.maxKeywordSearches} onUpgradeClick={() => onPageChange('Pricing')} />
                     </div>
                 </div>
             )}
 
-            {/* Metrics Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
-                <StatCard 
-                    label="Total Leads" 
-                    value={stats.totalLeads.toLocaleString()} 
-                    change="+0%" 
+            {/* Stats Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
+                    label="Total Leads"
+                    value={stats.totalLeads.toLocaleString()}
+                    change="+0%"
                     isPositive={true}
                     subtitle={datePreset === 'all' ? 'total database' : `in ${DATE_PRESETS.find(p => p.key === datePreset)?.label?.toLowerCase()}`}
-                    icon={Users} 
-                    iconColor="text-[#4F46E5]" 
+                    icon={Users}
+                    iconBg="bg-indigo-50"
+                    iconColor="text-[#4F46E5]"
                 />
-                <StatCard 
-                    label="Leads with Emails" 
-                    value={stats.leadsWithEmails.toLocaleString()} 
-                    change="+0%" 
+                <StatCard
+                    label="Leads with Emails"
+                    value={stats.leadsWithEmails.toLocaleString()}
+                    change="+0%"
                     isPositive={true}
-                    subtitle="verified emails" 
-                    icon={Mail} 
-                    iconColor="text-emerald-600" 
+                    subtitle="verified emails"
+                    icon={Mail}
+                    iconBg="bg-emerald-50"
+                    iconColor="text-emerald-600"
                 />
-                <StatCard 
-                    label="Leads Contacted" 
-                    value={stats.leadsContacted.toLocaleString()} 
-                    change="+0%" 
+                <StatCard
+                    label="Leads Contacted"
+                    value={stats.leadsContacted.toLocaleString()}
+                    change="+0%"
                     isPositive={true}
-                    subtitle="outreach initiated" 
-                    icon={MessageCircle} 
-                    iconColor="text-blue-500" 
+                    subtitle="outreach initiated"
+                    icon={MessageCircle}
+                    iconBg="bg-blue-50"
+                    iconColor="text-blue-500"
                 />
-                <StatCard 
-                    label="Total Deals" 
-                    value={stats.dealsCount.toLocaleString()} 
-                    change="+0%" 
+                <StatCard
+                    label="Total Deals"
+                    value={stats.dealsCount.toLocaleString()}
+                    change="+0%"
                     isPositive={true}
-                    subtitle="current pipeline" 
-                    icon={Linkedin} 
-                    iconColor="text-purple-500" 
+                    subtitle="in pipeline"
+                    icon={TrendingUp}
+                    iconBg="bg-purple-50"
+                    iconColor="text-purple-500"
                 />
             </div>
 
-            {/* Current Plan Card (Moved Out of Stats Grid) */}
-            <div className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-xl p-5 sm:p-6 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            {/* Current Plan Card */}
+            <div className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-xl p-5 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
                         <Star size={24} className="text-white" />
                     </div>
                     <div>
-                        <div className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1">
+                        <div className="text-xs font-semibold text-white/80 uppercase tracking-wide mb-1">
                             Current Plan: {plan === 'trial' ? 'Pro Trial' : plan}
                         </div>
                         <h3 className="text-xl font-bold">
@@ -384,9 +425,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     </div>
                 </div>
                 {(plan === 'trial' || plan === 'starter' || plan === 'expired' || plan === 'cancelled') && (
-                    <button 
-                        onClick={() => onPageChange('Pricing')} 
-                        className="px-6 py-2.5 bg-white text-[#4F46E5] text-sm font-bold rounded-lg hover:bg-indigo-50 transition-colors shadow-sm whitespace-nowrap"
+                    <button
+                        onClick={() => onPageChange('Pricing')}
+                        className="px-5 py-2.5 bg-white text-[#4F46E5] text-sm font-semibold rounded-lg hover:bg-indigo-50 transition-colors shadow-sm whitespace-nowrap"
                     >
                         Upgrade Plan
                     </button>
@@ -408,36 +449,38 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                 <div className="lg:col-span-6">
                     <RecentActivity activities={activities} />
                 </div>
-                <div className="lg:col-span-4 transition-all duration-300">
-                    <div className="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm h-full">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-semibold text-slate-900">Recent Leads</h3>
-                            <button onClick={() => onPageChange('Lead Database')} className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">View All</button>
+                <div className="lg:col-span-4">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 h-full flex flex-col">
+                        <div className="flex justify-between items-center mb-5">
+                            <h3 className="text-base font-semibold text-gray-900">Recent Leads</h3>
+                            <button onClick={() => onPageChange('Lead Database')} className="text-xs font-semibold text-[#4F46E5] hover:underline uppercase tracking-wide">View All</button>
                         </div>
-                        <div className="space-y-2">
+                        <div className="flex-1 space-y-1">
                             {recentLeads.length === 0 ? (
                                 <p className="text-sm font-medium text-gray-400 text-center py-10">No leads found.</p>
                             ) : (
                                 recentLeads.map((lead) => (
-                                    <div key={lead.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors duration-150 group cursor-pointer">
+                                    <div key={lead.id} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 transition-colors duration-150 group cursor-pointer">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[#4F46E5] font-bold animate-in zoom-in duration-300">
+                                            <div className="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center text-[#4F46E5] font-semibold text-sm">
                                                 {lead.company ? lead.company.substring(0, 1).toUpperCase() : 'L'}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-[#0F172A] group-hover:text-primary transition-colors">{lead.company || 'N/A'}</p>
-                                                <p className="text-[11px] font-medium text-slate-500">{lead.industry || 'Lead'}</p>
+                                                <p className="text-sm font-semibold text-gray-900 group-hover:text-[#4F46E5] transition-colors">{lead.company || 'N/A'}</p>
+                                                <p className="text-xs text-gray-500">{lead.industry || 'Lead'}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[11px] font-bold text-slate-500">{formatRelativeTime(lead.created_at)}</p>
+                                            <p className="text-xs font-medium text-gray-400">{formatRelativeTime(lead.created_at)}</p>
                                         </div>
                                     </div>
                                 ))
                             )}
                         </div>
-                        <button onClick={() => window.location.reload()}
-                            className="w-full mt-6 py-3 border border-slate-100 rounded-xl text-xs font-black text-slate-500 hover:bg-slate-50 hover:text-primary transition-all uppercase tracking-widest">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-4 w-full py-2.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-[#4F46E5] transition-all"
+                        >
                             Refresh Dashboard
                         </button>
                     </div>

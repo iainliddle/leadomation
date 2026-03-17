@@ -19,13 +19,16 @@ import {
     Inbox,
     CreditCard,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    ChevronDown
 } from 'lucide-react';
 import { signOut } from '../lib/auth';
 import logoFull from '../assets/logo-full.png';
 import logoIcon from '../assets/logo-icon.png';
 import SidebarLock from './SidebarLock';
 import type { FeatureAccess } from '../lib/planLimits';
+
+const SIDEBAR_COLLAPSED_KEY = 'leadomation_sidebar_collapsed';
 
 interface NavItemProps {
     icon: React.ElementType;
@@ -39,18 +42,22 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, onClick, isCollapsed, badge }) => (
     <button
         onClick={onClick}
-        title={isCollapsed ? label : ''}
+        title={isCollapsed ? label : undefined}
         className={`
-            w-full flex items-center transition-colors duration-150 group relative
-            ${isCollapsed ? 'justify-center px-0 py-2 mx-0' : 'gap-3 px-3 py-2 mx-2'}
+            w-full flex items-center transition-all duration-150 group relative
+            ${isCollapsed ? 'justify-center px-0 py-2.5 mx-0' : 'gap-3 px-3 py-2.5 mx-2'}
             ${active
-                ? 'bg-[#EEF2FF] text-[#4F46E5] font-medium rounded-lg border-l-2 border-[#4F46E5]'
-                : 'text-gray-600 hover:bg-gray-100 rounded-lg border-l-2 border-transparent'
+                ? 'bg-[#EEF2FF] text-[#4F46E5] font-medium rounded-lg'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg'
             }
         `}
         style={isCollapsed ? { width: 'calc(100% - 16px)', margin: '0 8px' } : {}}
     >
-        <Icon size={18} className="shrink-0 transition-colors duration-150" />
+        {/* Active indicator bar */}
+        {active && !isCollapsed && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#4F46E5] rounded-r-full" />
+        )}
+        <Icon size={18} className={`shrink-0 transition-colors duration-150 ${active ? 'text-[#4F46E5]' : 'text-gray-400 group-hover:text-gray-600'}`} />
         {!isCollapsed && (
             <div className="flex items-center justify-between flex-1 min-w-0">
                 <span className="text-sm truncate">{label}</span>
@@ -66,18 +73,26 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, onClick, i
                 {badge}
             </span>
         )}
+
+        {/* Tooltip for collapsed state */}
+        {isCollapsed && (
+            <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
+                {label}
+                {badge && <span className="ml-1.5 px-1.5 py-0.5 bg-[#4F46E5] rounded text-[10px]">{badge}</span>}
+            </div>
+        )}
     </button>
 );
 
 const NavSection: React.FC<{ title: string; children: React.ReactNode; isCollapsed?: boolean }> = ({ title, children, isCollapsed }) => (
     <div className="mb-1">
         {!isCollapsed && (
-            <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider px-5 pt-5 pb-1.5">
+            <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-5 pt-4 pb-2">
                 {title}
             </h3>
         )}
-        {isCollapsed && <div className="h-4" />}
-        <div className="space-y-0.5 px-0">
+        {isCollapsed && <div className="h-3" />}
+        <div className="space-y-0.5">
             {children}
         </div>
     </div>
@@ -100,17 +115,36 @@ const Sidebar: React.FC<SidebarProps> = ({
     onPageChange,
     isOpen,
     setIsOpen,
-    isCollapsed = false,
-    setIsCollapsed,
+    isCollapsed: externalIsCollapsed,
+    setIsCollapsed: externalSetIsCollapsed,
     userPlan,
     canAccess,
     triggerUpgrade
 }) => {
+    // Use internal state if no external state provided, with localStorage persistence
+    const [internalCollapsed, setInternalCollapsed] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+            return stored === 'true';
+        }
+        return false;
+    });
+
+    const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalCollapsed;
+
+    // Sync external state changes to localStorage
+    useEffect(() => {
+        if (externalIsCollapsed !== undefined) {
+            localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(externalIsCollapsed));
+        }
+    }, [externalIsCollapsed]);
+
     const [leadCount, setLeadCount] = useState(0);
     const [dealCount, setDealCount] = useState(0);
     const [emailCount, setEmailCount] = useState(0);
     const [userName, setUserName] = useState('');
     const [userInitials, setUserInitials] = useState('U');
+    const [showUserMenu, setShowUserMenu] = useState(false);
 
     const handleSignOut = async () => {
         try {
@@ -158,6 +192,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         loadData();
     }, []);
 
+    const handleToggleCollapse = () => {
+        const newValue = !isCollapsed;
+        if (externalSetIsCollapsed) {
+            externalSetIsCollapsed(newValue);
+        } else {
+            setInternalCollapsed(newValue);
+        }
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newValue));
+    };
+
     return (
         <>
             {/* Mobile Backdrop */}
@@ -173,42 +217,57 @@ const Sidebar: React.FC<SidebarProps> = ({
                 style={{
                     width: isCollapsed ? '64px' : '240px',
                     minWidth: isCollapsed ? '64px' : '240px',
-                    transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                    transition: 'width 0.2s ease-out, min-width 0.2s ease-out',
                 }}
             >
                 <div className="bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
 
                     {/* Header: Logo + collapse button */}
-                    <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-4 pt-5 pb-4 relative`}>
+                    <div className={`flex items-center ${isCollapsed ? 'justify-center py-5' : 'justify-between px-4 py-5'} relative`}>
                         {isCollapsed ? (
                             <img src={logoIcon} alt="L" className="h-8 w-auto" />
                         ) : (
                             <div className="flex flex-col min-w-0">
-                                <img src={logoFull} alt="Leadomation" className="h-8 w-auto" />
-                                <span className="text-xs text-gray-400 mt-1 pl-0.5">B2B Outreach Platform</span>
+                                <img src={logoFull} alt="Leadomation" className="h-7 w-auto" />
+                                <span className="text-[10px] text-gray-400 mt-1.5 pl-0.5 font-medium">B2B Outreach Platform</span>
                             </div>
                         )}
 
                         {/* Collapse toggle button */}
-                        <button
-                            onClick={() => setIsCollapsed?.(!isCollapsed)}
-                            className={`hidden lg:flex items-center justify-center w-7 h-7 rounded-md border border-gray-200 bg-white text-gray-400 hover:text-[#4F46E5] hover:border-[#4F46E5] transition-all duration-150 shrink-0 ${isCollapsed ? 'mx-auto mt-2' : ''}`}
-                            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                        >
-                            {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-                        </button>
+                        {!isCollapsed && (
+                            <button
+                                onClick={handleToggleCollapse}
+                                className="hidden lg:flex items-center justify-center w-6 h-6 rounded-md border border-gray-200 bg-white text-gray-400 hover:text-[#4F46E5] hover:border-[#4F46E5] transition-all duration-150 shrink-0"
+                                title="Collapse sidebar"
+                            >
+                                <ChevronLeft size={14} />
+                            </button>
+                        )}
 
                         {/* Mobile close button */}
                         <button
-                            className="lg:hidden p-1 text-gray-400 hover:text-gray-700"
+                            className="lg:hidden p-1 text-gray-400 hover:text-gray-700 absolute right-3 top-4"
                             onClick={() => setIsOpen?.(false)}
                         >
                             <X size={18} />
                         </button>
                     </div>
 
+                    {/* Collapsed state expand button */}
+                    {isCollapsed && (
+                        <div className="flex justify-center pb-2">
+                            <button
+                                onClick={handleToggleCollapse}
+                                className="hidden lg:flex items-center justify-center w-6 h-6 rounded-md border border-gray-200 bg-white text-gray-400 hover:text-[#4F46E5] hover:border-[#4F46E5] transition-all duration-150"
+                                title="Expand sidebar"
+                            >
+                                <ChevronRight size={14} />
+                            </button>
+                        </div>
+                    )}
+
                     {/* Divider */}
-                    <div className="border-b border-gray-100 mx-4" />
+                    <div className="border-b border-gray-100 mx-3" />
 
                     {/* Navigation */}
                     <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 scrollbar-hide">
@@ -359,15 +418,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                     {/* Upgrade card (free users only) */}
                     {userPlan === 'free' && !isCollapsed && (
-                        <div className="px-4 pb-2">
+                        <div className="px-3 pb-2">
                             <div
                                 className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-xl p-4 text-white shadow-sm cursor-pointer hover:shadow-md transition-all"
                                 onClick={() => onPageChange('Pricing')}
                             >
-                                <p className="text-[10px] font-bold opacity-80 mb-0.5 uppercase tracking-wide">Pro Plan</p>
+                                <p className="text-[10px] font-semibold opacity-80 mb-0.5 uppercase tracking-wide">Pro Plan</p>
                                 <p className="text-sm font-semibold mb-1">Upgrade to Pro</p>
                                 <p className="text-[11px] opacity-75 mb-3 leading-snug">Unlock AI Voice Call Agent and advanced analytics</p>
-                                <button className="w-full py-1.5 bg-white text-[#4F46E5] text-xs font-bold rounded-lg hover:bg-blue-50 transition-all">
+                                <button className="w-full py-1.5 bg-white text-[#4F46E5] text-xs font-semibold rounded-lg hover:bg-indigo-50 transition-all">
                                     Upgrade Now
                                 </button>
                             </div>
@@ -378,33 +437,79 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <div className="border-t border-gray-200" />
 
                     {/* User profile footer */}
-                    <div className={`p-4 ${isCollapsed ? 'flex justify-center' : 'flex items-center justify-between gap-3'}`}>
+                    <div className={`p-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
                         {isCollapsed ? (
-                            <button
-                                onClick={handleSignOut}
-                                title="Sign Out"
-                                className="w-9 h-9 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-bold text-sm flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all"
-                            >
-                                {userInitials}
-                            </button>
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowUserMenu(!showUserMenu)}
+                                    className="w-9 h-9 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-semibold text-sm flex items-center justify-center hover:ring-2 hover:ring-[#4F46E5]/20 transition-all"
+                                >
+                                    {userInitials}
+                                </button>
+                                {showUserMenu && (
+                                    <>
+                                        <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+                                        <div className="absolute bottom-full left-0 mb-2 w-40 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-150">
+                                            <button
+                                                onClick={() => { onPageChange('Settings'); setShowUserMenu(false); }}
+                                                className="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                            >
+                                                <User size={14} className="text-gray-400" />
+                                                Profile
+                                            </button>
+                                            <button
+                                                onClick={handleSignOut}
+                                                className="w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                            >
+                                                <LogOut size={14} />
+                                                Sign Out
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         ) : (
-                            <>
+                            <div className="flex items-center justify-between gap-2 px-1">
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="w-9 h-9 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-bold text-sm flex items-center justify-center shrink-0">
+                                    <div className="w-9 h-9 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-semibold text-sm flex items-center justify-center shrink-0">
                                         {userInitials}
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium text-gray-900 truncate">{userName || 'User'}</p>
-                                        <p className="text-xs text-gray-400">Admin</p>
+                                        <p className="text-[11px] text-gray-400">Admin</p>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={handleSignOut}
-                                    title="Sign Out"
-                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all shrink-0"
-                                >
-                                    <LogOut size={16} />
-                                </button>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => setShowUserMenu(!showUserMenu)}
+                                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-all"
+                                    >
+                                        <ChevronDown size={14} className={`transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* User menu dropdown for expanded state */}
+                        {!isCollapsed && showUserMenu && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+                                <div className="absolute bottom-16 left-3 right-3 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                                    <button
+                                        onClick={() => { onPageChange('Settings'); setShowUserMenu(false); }}
+                                        className="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                    >
+                                        <User size={14} className="text-gray-400" />
+                                        Profile
+                                    </button>
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="w-full text-left px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                    >
+                                        <LogOut size={14} />
+                                        Sign Out
+                                    </button>
+                                </div>
                             </>
                         )}
                     </div>
