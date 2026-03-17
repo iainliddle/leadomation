@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Activity, ArrowLeft, Target, Bot, CheckCircle2, ChevronDown, Key, Clock, Settings, Database, Flame, ListFilter, Users, Building2, Globe2, Briefcase, Hash, Rocket, Loader2
+    Activity, ArrowLeft, Target, Bot, CheckCircle2, ChevronDown, Key, Clock, Settings, Database, Flame, Users, Building2, Briefcase, Hash, Rocket, Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -138,253 +138,209 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
 
     return (
         <div className="pb-24 bg-[#F8F9FA] min-h-screen">
-            <div className="max-w-4xl mx-auto p-6 pt-8">
+            <div className="max-w-3xl mx-auto p-6">
                 {/* Header */}
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6"
+                >
+                    <ArrowLeft size={16} /> Back
+                </button>
+
                 <div className="mb-8">
-                    <button
-                        onClick={onBack}
-                        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-6 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors"
-                    >
-                        <ArrowLeft size={16} /> Back
-                    </button>
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Configure New Campaign</h1>
-                    <p className="text-sm text-gray-500 mt-1">Define your targeting, enrichment, and outreach parameters</p>
+                    <h1 className="text-2xl font-semibold text-gray-900">New Campaign</h1>
+                    <p className="text-sm text-gray-500 mt-1">Configure your lead generation and outreach campaign</p>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {/* Basic Info */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[#EEF2FF] text-[#4F46E5] font-bold text-sm">1</span>
-                                <h2 className="text-lg font-semibold text-gray-900">Campaign Details</h2>
-                            </div>
-                        </div>
-                        <div className="p-6">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Campaign Name <span className="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                className="w-full text-lg px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all shadow-sm"
-                                placeholder="e.g. Q3 NYC B2B Outreach"
-                                value={campaignName}
-                                onChange={(e) => setCampaignName(e.target.value)}
-                            />
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                        <h2 className="text-base font-semibold text-gray-900 mb-4">Campaign Details</h2>
 
-                            <label className="block text-sm font-semibold text-gray-700 mt-6 mb-3">Select Campaign Type <span className="text-red-500">*</span></label>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {tracks.map(track => (
-                                    <div
-                                        key={track.id}
-                                        onClick={() => setSelectedTrack(track.id)}
-                                        className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all duration-200
-                                            ${selectedTrack === track.id
-                                                ? 'border-[#4F46E5] bg-[#EEF2FF]/50 shadow-md ring-1 ring-[#4F46E5]'
-                                                : 'border-gray-200 bg-white hover:border-[#818CF8] hover:shadow-sm'
-                                            }
-                                        `}
-                                    >
-                                        {selectedTrack === track.id && (
-                                            <div className="absolute top-4 right-4 text-[#4F46E5]">
-                                                <CheckCircle2 size={20} className="fill-current text-white" />
-                                            </div>
-                                        )}
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${selectedTrack === track.id ? 'bg-[#4F46E5] text-white' : 'bg-gray-100'}`}>
-                                            {React.cloneElement(track.icon, { className: 'w-5 h-5 ' + (selectedTrack === track.id ? 'text-white' : 'text-gray-600') })}
-                                        </div>
-                                        <h3 className={`font-semibold text-base mb-1 ${selectedTrack === track.id ? 'text-[#3730A3]' : 'text-gray-900'}`}>{track.title}</h3>
-                                        <p className="text-xs leading-relaxed text-gray-500 mb-4 h-12">{track.description}</p>
-                                        <div className="inline-flex items-center px-2 py-1 rounded bg-white/60 border border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
-                                            {track.metrics}
-                                        </div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Name</label>
+                        <input
+                            type="text"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all text-sm"
+                            placeholder="e.g. Q3 NYC B2B Outreach"
+                            value={campaignName}
+                            onChange={(e) => setCampaignName(e.target.value)}
+                        />
+
+                        <label className="block text-sm font-medium text-gray-700 mt-6 mb-3">Select Campaign Type</label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {tracks.map(track => (
+                                <div
+                                    key={track.id}
+                                    onClick={() => setSelectedTrack(track.id)}
+                                    className={`p-4 rounded-xl cursor-pointer transition-all duration-150
+                                        ${selectedTrack === track.id
+                                            ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                            : 'bg-white border border-gray-200 hover:border-[#4F46E5]'
+                                        }
+                                    `}
+                                >
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${selectedTrack === track.id ? 'bg-[#4F46E5]' : 'bg-[#EEF2FF]'}`}>
+                                        {React.cloneElement(track.icon, { className: 'w-5 h-5 ' + (selectedTrack === track.id ? 'text-white' : 'text-[#4F46E5]') })}
                                     </div>
-                                ))}
-                            </div>
+                                    <h3 className="font-semibold text-sm text-gray-900 mb-1">{track.title}</h3>
+                                    <p className="text-xs text-gray-500 leading-relaxed">{track.description}</p>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
                     {/* Advanced Targeting */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                         <div
-                            className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between cursor-pointer group"
+                            className="flex items-center justify-between cursor-pointer mb-4"
                             onClick={() => setTargetingExpanded(!targetingExpanded)}
                         >
-                            <div className="flex items-center gap-3">
-                                <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm transition-colors ${selectedTrack ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-gray-100 text-gray-400'}`}>2</span>
-                                <div>
-                                    <h2 className={`text-lg font-semibold transition-colors ${selectedTrack ? 'text-gray-900' : 'text-gray-400'}`}>Advanced Targeting</h2>
-                                    <p className="text-xs text-gray-500 font-medium">Define your ideal customer profile</p>
-                                </div>
-                            </div>
+                            <h2 className="text-base font-semibold text-gray-900">Advanced Targeting</h2>
                             <ChevronDown className={`text-gray-400 transition-transform duration-300 ${targetingExpanded ? 'rotate-180' : ''}`} />
                         </div>
                         {targetingExpanded && (
-                            <div className="p-6 bg-white animate-in slide-in-from-top-2 duration-200">
-                                <div className="space-y-6">
-                                    {/* Business Profile */}
+                            <div className="space-y-6">
+                                {/* Business Type Tags */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Type</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {businessTypes.map(type => (
+                                            <button
+                                                key={type}
+                                                onClick={() => {
+                                                    if (selectedBusinessTypes.includes(type)) {
+                                                        setSelectedBusinessTypes(prev => prev.filter(t => t !== type));
+                                                    } else {
+                                                        setSelectedBusinessTypes(prev => [...prev, type]);
+                                                    }
+                                                }}
+                                                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                                                    selectedBusinessTypes.includes(type)
+                                                        ? 'bg-[#EEF2FF] text-[#4F46E5] border border-[#4F46E5]'
+                                                        : 'bg-white text-gray-600 border border-gray-200 hover:border-[#4F46E5]'
+                                                }`}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                        <button className="px-3 py-1.5 rounded-full text-sm font-medium bg-white text-gray-500 border border-dashed border-gray-300 hover:border-[#4F46E5] hover:text-[#4F46E5] transition-all">
+                                            + Add Custom
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Custom Keywords */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Custom Keywords</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] text-sm"
+                                        placeholder="e.g. software, consultant, marketing, B2B, wholesale"
+                                        value={customKeywords}
+                                        onChange={(e) => setCustomKeywords(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* Geographic */}
+                                <div className="grid grid-cols-3 gap-4">
                                     <div>
-                                        <h3 className="text-sm font-bold tracking-wide text-gray-800 uppercase flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
-                                            <Building2 size={16} className="text-[#4F46E5]" /> Business Profile
-                                        </h3>
-                                        <div className="mb-4">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Industry Categories</label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {businessTypes.map(type => (
-                                                    <button
-                                                        key={type}
-                                                        onClick={() => {
-                                                            if (selectedBusinessTypes.includes(type)) {
-                                                                setSelectedBusinessTypes(prev => prev.filter(t => t !== type));
-                                                            } else {
-                                                                setSelectedBusinessTypes(prev => [...prev, type]);
-                                                            }
-                                                        }}
-                                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                                            selectedBusinessTypes.includes(type)
-                                                                ? 'bg-[#EEF2FF] text-[#4F46E5] border border-[#C7D2FE] ring-1 ring-[#EEF2FF]'
-                                                                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                                        }`}
-                                                    >
-                                                        {type}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Custom Keywords <span className="text-xs font-normal text-gray-400 ml-1">(Optional)</span></label>
-                                            <input
-                                                type="text"
-                                                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] text-sm shadow-sm"
-                                                placeholder="e.g. software, consultant, marketing, B2B, wholesale"
-                                                value={customKeywords}
-                                                onChange={(e) => setCustomKeywords(e.target.value)}
-                                            />
-                                        </div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Region</label>
+                                        <select
+                                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                            value={selectedRegion}
+                                            onChange={e => setSelectedRegion(e.target.value)}
+                                        >
+                                            <option value="">Select Region</option>
+                                            <option value="US">United States</option>
+                                            <option value="UK">United Kingdom</option>
+                                            <option value="CA">Canada</option>
+                                            <option value="AU">Australia</option>
+                                            <option value="EU">Europe</option>
+                                        </select>
                                     </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                            placeholder="e.g. London"
+                                            value={cityInput}
+                                            onChange={e => setCityInput(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Radius</label>
+                                        <select
+                                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                            value={radius}
+                                            onChange={e => setRadius(e.target.value)}
+                                        >
+                                            <option value="10">10 Miles</option>
+                                            <option value="25">25 Miles</option>
+                                            <option value="50">50 Miles</option>
+                                            <option value="100">100 Miles</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                                    {/* Geographic */}
-                                    <div className="pt-2">
-                                        <h3 className="text-sm font-bold tracking-wide text-gray-800 uppercase flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
-                                            <Globe2 size={16} className="text-[#4F46E5]" /> Geographic Targeting
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Region</label>
-                                                <select
-                                                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] shadow-sm appearance-none"
-                                                    value={selectedRegion}
-                                                    onChange={e => setSelectedRegion(e.target.value)}
-                                                >
-                                                    <option value="">Select Region</option>
-                                                    <option value="US">United States</option>
-                                                    <option value="UK">United Kingdom</option>
-                                                    <option value="CA">Canada</option>
-                                                    <option value="AU">Australia</option>
-                                                    <option value="EU">Europe</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">City / Location</label>
-                                                <input
-                                                    type="text"
-                                                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] shadow-sm"
-                                                    placeholder="e.g. London, M1 1AA"
-                                                    value={cityInput}
-                                                    onChange={e => setCityInput(e.target.value)}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Search Radius</label>
-                                                <select
-                                                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] shadow-sm appearance-none"
-                                                    value={radius}
-                                                    onChange={e => setRadius(e.target.value)}
-                                                >
-                                                    <option value="10">10 Miles</option>
-                                                    <option value="25">25 Miles</option>
-                                                    <option value="50">50 Miles</option>
-                                                    <option value="100">100 Miles</option>
-                                                    <option value="national">National</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Criteria */}
-                                    <div className="pt-2">
-                                        <h3 className="text-sm font-bold tracking-wide text-gray-800 uppercase flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
-                                            <ListFilter size={16} className="text-[#4F46E5]" /> Quality Criteria
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Google Rating</label>
-                                                <select
-                                                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] shadow-sm appearance-none"
-                                                    value={minRating}
-                                                    onChange={e => setMinRating(e.target.value)}
-                                                >
-                                                    <option value="any">Any Rating</option>
-                                                    <option value="3.0">3.0+ Stars</option>
-                                                    <option value="4.0">4.0+ Stars</option>
-                                                    <option value="4.5">4.5+ Stars</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
+                                {/* Google Rating */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Google Rating</label>
+                                    <select
+                                        className="w-full max-w-xs px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                        value={minRating}
+                                        onChange={e => setMinRating(e.target.value)}
+                                    >
+                                        <option value="any">Any Rating</option>
+                                        <option value="3.0">3.0+ Stars</option>
+                                        <option value="4.0">4.0+ Stars</option>
+                                        <option value="4.5">4.5+ Stars</option>
+                                    </select>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Smart Intent Filters */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden border-t-4 border-t-[#EEF2FF]">
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                         <div
-                            className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between cursor-pointer group"
+                            className="flex items-center justify-between cursor-pointer mb-4"
                             onClick={() => setIntentExpanded(!intentExpanded)}
                         >
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                    <Flame size={18} className="text-[#4F46E5]" />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-lg font-semibold text-gray-900">Smart Intent Filters</h2>
-                                        <span className="bg-gradient-to-r from-[#4F46E5] to-indigo-600 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full tracking-wider shadow-sm">AI Powered</span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 font-medium">Prioritize leads showing active buying signals</p>
-                                </div>
+                                <Flame size={18} className="text-[#4F46E5]" />
+                                <h2 className="text-base font-semibold text-gray-900">Smart Intent Filters</h2>
                             </div>
                             <ChevronDown className={`text-gray-400 transition-transform duration-300 ${intentExpanded ? 'rotate-180' : ''}`} />
                         </div>
                         {intentExpanded && (
-                            <div className="p-6 bg-white animate-in slide-in-from-top-2 duration-200 divide-y divide-gray-100">
+                            <div className="space-y-4">
                                 {[
                                     { state: buyingSignals, setState: setBuyingSignals, icon: Target, title: "Active Buying Signals", desc: "Detect recent job postings, technology stack changes, or executive hiring", intent: "high" },
                                     { state: competitorMentions, setState: setCompetitorMentions, icon: Users, title: "Competitor Mentions", desc: "Find businesses discussing alternative solutions on social platforms", intent: "high" },
                                     { state: recentGrowth, setState: setRecentGrowth, icon: Activity, title: "Recent Growth Indicators", desc: "Prioritize companies with recent funding or headcount expansion" },
                                 ].map((item, idx) => (
-                                    <div key={idx} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between">
-                                        <div className="flex items-start gap-4">
-                                            <div className={`mt-1 bg-gray-50 p-2 rounded-lg border ${item.state ? 'border-[#4F46E5] text-[#4F46E5]' : 'border-gray-200 text-gray-400'}`}>
-                                                <item.icon size={18} />
+                                    <div key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                                        <div className="flex items-start gap-3">
+                                            <div className={`mt-0.5 p-2 rounded-lg ${item.state ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-gray-100 text-gray-400'}`}>
+                                                <item.icon size={16} />
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <p className={`font-semibold text-sm ${item.state ? 'text-gray-900' : 'text-gray-600'}`}>{item.title}</p>
+                                                    <p className="font-semibold text-sm text-gray-900">{item.title}</p>
                                                     {item.intent === 'high' && (
-                                                        <span className="bg-red-50 text-red-600 border border-red-100 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded tracking-wide">High Intent</span>
+                                                        <span className="bg-red-50 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">HIGH INTENT</span>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed max-w-lg">{item.desc}</p>
+                                                <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
                                             </div>
                                         </div>
-                                        <div className="ml-4">
-                                            <button
-                                                onClick={() => item.setState(!item.state)}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
-                                            >
-                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out shadow-sm ${item.state ? 'translate-x-6' : 'translate-x-1'}`} />
-                                            </button>
-                                        </div>
+                                        <button
+                                            onClick={() => item.setState(!item.state)}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
+                                        >
+                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out shadow-sm ${item.state ? 'translate-x-6' : 'translate-x-1'}`} />
+                                        </button>
                                     </div>
                                 ))}
                             </div>

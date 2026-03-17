@@ -1234,7 +1234,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     }
 
     return (
-        <div className="flex flex-col h-full bg-[#F8F9FA] animate-in fade-in duration-700">
+        <div className="flex flex-col h-screen bg-[#F8F9FA]">
             {campaignFilter && (
                 <div className="flex items-center justify-between bg-blue-50 border border-blue-100 p-3 mx-6 mt-6 rounded-lg">
                     <div className="flex items-center gap-2">
@@ -1254,11 +1254,11 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             )}
             
             {/* Header & Actions Bar */}
-            <div className={`px-6 pt-6 pb-4 bg-white border-b border-gray-200 ${campaignFilter ? 'mt-0 pt-4' : ''}`}>
+            <div className={`px-6 py-4 bg-white border-b border-gray-200 ${campaignFilter ? 'mt-0' : ''}`}>
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Lead Database</h1>
-                        <p className="text-sm text-gray-500 mt-1">Manage and filter all your scraped leads</p>
+                        <h1 className="text-2xl font-semibold text-gray-900">Lead Database</h1>
+                        <p className="text-sm text-gray-500 mt-1">Manage and track all your leads here</p>
                     </div>
 
                     <div className="flex items-center gap-3 border-t sm:border-t-0 pt-4 sm:pt-0 border-gray-100 w-full sm:w-auto mt-2 sm:mt-0">
@@ -1331,10 +1331,10 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 </div>
 
                 {/* Smart & Intent Pill Filters */}
-                <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4">
+                <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4 px-6 py-3 bg-white border-b border-gray-100 -mx-6">
                     {/* Smart Filters */}
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">Smart</span>
+                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mr-1">Smart</span>
                         {['new_business', 'low_rating', 'no_photos', 'no_reviews', 'incomplete'].map((filter) => {
                             const isAct = activeIntentFilters.includes(filter);
                             const icons: Record<string, string> = { new_business: '⚡', low_rating: '⭐', no_photos: '📸', no_reviews: '💬', incomplete: '📍' };
@@ -1360,7 +1360,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
                     {/* Intent Filters */}
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">Intent</span>
+                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mr-1">Intent</span>
                         
                         <button onClick={() => toggleIntentScoreFilter('hot')} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${intentScoreFilters.includes('hot') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
                             <Flame size={12} className={intentScoreFilters.includes('hot') ? 'text-red-500' : 'text-gray-400'} /> Hot <span className="opacity-60">({intentScoreCounts.hot})</span>
@@ -1383,7 +1383,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             </div>
 
             {/* Main Content: Data Table */}
-            <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col relative min-h-[400px]">
+            <div className="flex-1 mx-6 mt-4 mb-4 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col relative min-h-[400px]">
                 {filteredLeads.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
                         <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mb-4">
@@ -1394,10 +1394,10 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                     </div>
                 ) : (
                     <div className="flex-1 overflow-auto w-full relative">
-                        <table className="w-full min-w-[1400px] text-left border-collapse">
-                            <thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 shadow-sm">
+                        <table className="w-full min-w-[1200px] text-left border-collapse">
+                            <thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="w-12 px-6 py-3">
+                                    <th className="w-[44px] px-4 py-3">
                                         <input
                                             type="checkbox"
                                             className="w-4 h-4 rounded border-gray-300 text-[#4F46E5] focus:ring-[#4F46E5]"
@@ -1405,22 +1405,22 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                             onChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest cursor-pointer group whitespace-nowrap">
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group whitespace-nowrap min-w-[200px]">
                                         <div className="flex items-center gap-1.5">
                                             Company
                                             <ChevronDown size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
                                     </th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Email</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Phone</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Location</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Local Time</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Industry</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Status</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Intent</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap">Website</th>
-                                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest whitespace-nowrap text-center">In</th>
-                                    <th className="min-w-[140px] px-6 py-3 sticky right-0 bg-gray-50 border-l border-gray-200 z-10 shadow-[-4px_0_6px_-1px_rgb(0,0,0,0.02)]"></th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[180px]">Email</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[140px]">Phone</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Location</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[90px]">Local Time</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[110px]">Industry</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">Status</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">Intent</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">Website</th>
+                                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px] text-center">LinkedIn</th>
+                                    <th className="min-w-[100px] px-4 py-3 sticky right-0 bg-gray-50 border-l border-gray-200 z-10 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
@@ -1430,7 +1430,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                         className={`group cursor-pointer transition-colors duration-150 ${selectedLeads.includes(lead.id) ? 'bg-[#EEF2FF]' : 'hover:bg-gray-50'}`}
                                         onClick={() => setSelectedLead(lead)}
                                     >
-                                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                             <input
                                                 type="checkbox"
                                                 className="w-4 h-4 rounded border-gray-300 text-[#4F46E5] focus:ring-[#4F46E5]"
@@ -1559,7 +1559,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 )}
 
                 {/* Bottom Section: Pagination */}
-                <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200 bg-white z-20">
+                <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200 bg-white z-20 shrink-0">
                     <span className="text-xs font-medium text-gray-500">
                         Showing {filteredLeads.length} of {leads.length} leads
                     </span>
@@ -1589,7 +1589,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             {selectedLead && (
                 <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-300">
                     <div className="absolute inset-0 bg-gray-900/20 backdrop-blur-sm" onClick={() => { setSelectedLead(null); setIsEditingLead(false); }}></div>
-                    <div className="relative w-full max-w-[380px] bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500 border-l border-gray-200">
+                    <div className="relative w-[380px] flex-shrink-0 bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-200 overflow-y-auto">
                         {/* Drawer Header */}
                         <div className="p-6 border-b border-gray-100 bg-white">
                             {isEditingLead ? (
