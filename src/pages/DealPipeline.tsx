@@ -6,8 +6,7 @@ import {
     Trash2,
     ChevronLeft,
     ChevronRight,
-    TrendingUp,
-    Info
+    TrendingUp
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
