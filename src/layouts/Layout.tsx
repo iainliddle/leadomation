@@ -12,12 +12,32 @@ interface LayoutProps {
     triggerUpgrade: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
 
+const SIDEBAR_WIDTH_EXPANDED = 240;
+const SIDEBAR_WIDTH_COLLAPSED = 64;
+
 const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free', canAccess, triggerUpgrade }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsedState] = useState(() => {
+        try {
+            return localStorage.getItem('sidebar-collapsed') === 'true';
+        } catch {
+            return false;
+        }
+    });
+
+    const setIsCollapsed = (collapsed: boolean) => {
+        setIsCollapsedState(collapsed);
+        try {
+            localStorage.setItem('sidebar-collapsed', String(collapsed));
+        } catch {
+            // ignore
+        }
+    };
+
+    const sidebarWidth = isCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED;
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] flex font-sans">
+        <div className="min-h-screen bg-[#F8F9FA] flex font-sans">
             <Sidebar
                 activePage={activePage}
                 onPageChange={onPageChange}
@@ -33,16 +53,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
             <div
                 className="flex-1 main-content-area flex flex-col min-w-0"
                 style={{
+                    marginLeft: sidebarWidth,
                     transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
             >
-                <style>{`
-                    @media (min-width: 1024px) {
-                        .main-content-area {
-                            margin-left: ${isCollapsed ? '72px' : '260px'};
-                        }
-                    }
-                `}</style>
                 <div className="flex items-center lg:sticky lg:top-0 z-30 bg-white">
                     <button
                         className="lg:hidden p-4 text-[#9CA3AF] hover:text-[#111827] transition-colors"
@@ -58,7 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                     </div>
                 </div>
 
-                <main className="flex-1 p-6 md:p-8 lg:p-10 overflow-y-auto">
+                <main className="flex-1 p-6 overflow-y-auto">
                     <div className="max-w-[1400px] mx-auto">
                         {children(activePage)}
                     </div>

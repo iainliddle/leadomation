@@ -5,7 +5,6 @@ import {
     Loader2,
     X,
     ExternalLink,
-    Calendar,
     Send,
     Check,
     AlertCircle,
@@ -14,7 +13,6 @@ import {
     Mail,
     User,
     Building,
-    Clock,
     RefreshCw
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -59,13 +57,13 @@ interface LeadInboxProps {
 const AI_LABELS = ['Interested', 'Not Interested', 'Out of Office', 'Unsubscribe', 'Question', 'Referral'] as const;
 type AILabel = typeof AI_LABELS[number];
 
-const LABEL_STYLES: Record<AILabel, { bg: string; text: string; border: string }> = {
-    'Interested': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-    'Not Interested': { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
-    'Out of Office': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-    'Unsubscribe': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-    'Question': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-    'Referral': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' }
+const LABEL_STYLES: Record<AILabel, { bg: string; text: string }> = {
+    'Interested': { bg: 'bg-green-50', text: 'text-green-700' },
+    'Not Interested': { bg: 'bg-gray-100', text: 'text-gray-600' },
+    'Out of Office': { bg: 'bg-amber-50', text: 'text-amber-700' },
+    'Unsubscribe': { bg: 'bg-red-50', text: 'text-red-600' },
+    'Question': { bg: 'bg-blue-50', text: 'text-blue-700' },
+    'Referral': { bg: 'bg-purple-50', text: 'text-purple-700' }
 };
 
 const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer }) => {
@@ -133,7 +131,6 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
         loadCampaigns();
     }, [loadEmails, loadCampaigns]);
 
-    // Set up Supabase Realtime subscription for new inbound emails
     useEffect(() => {
         const setupRealtimeSubscription = async () => {
             const { data: { user } } = await supabase.auth.getUser();
@@ -150,7 +147,6 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                         filter: `user_id=eq.${user.id}`
                     },
                     (payload) => {
-                        // Add new email to the top of the list
                         setEmails(prev => [payload.new as InboundEmail, ...prev]);
                         setUnreadCount(prev => prev + 1);
                     }
@@ -213,7 +209,6 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
-            // Get user's email_from_address from profile
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('email_from_address, email_from_name')
@@ -226,7 +221,6 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                 return;
             }
 
-            // Get auth token
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
 
@@ -234,7 +228,6 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                 throw new Error('Please log in to send replies');
             }
 
-            // Send reply via API
             const response = await fetch('/api/send-inbox-reply', {
                 method: 'POST',
                 headers: {
@@ -255,7 +248,6 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                 throw new Error('Failed to send reply');
             }
 
-            // Update local state
             setEmails(prev => prev.map(e =>
                 e.id === selectedEmail.id
                     ? { ...e, replied: true, reply_body: replyText }
@@ -303,7 +295,7 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
 
     const getLabelStyle = (label: string | null) => {
         if (!label || !LABEL_STYLES[label as AILabel]) {
-            return { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200' };
+            return { bg: 'bg-gray-100', text: 'text-gray-600' };
         }
         return LABEL_STYLES[label as AILabel];
     };
@@ -339,7 +331,6 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
         return matchesSearch && matchesLabel && matchesCampaign;
     });
 
-    // Count emails by label for filter badges
     const labelCounts = emails.reduce((acc, email) => {
         const label = email.ai_label || 'Unknown';
         acc[label] = (acc[label] || 0) + 1;
@@ -348,436 +339,360 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
 
     if (loading) {
         return (
-            <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="flex h-screen bg-[#F8F9FA] items-center justify-center">
+                <Loader2 className="w-8 h-8 text-[#4F46E5] animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-100px)]">
-            <div className="flex bg-white flex-1 rounded-2xl border border-slate-200 overflow-hidden animate-in fade-in duration-200">
-                {/* Left Panel: Email List */}
-                <aside className="w-[400px] shrink-0 border-r border-slate-200 flex flex-col bg-white">
-                    {/* Header & Search */}
-                    <div className="p-4 border-b border-[#E5E7EB] bg-white">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg font-black text-[#111827]">Lead Inbox</h2>
-                                {unreadCount > 0 && (
-                                    <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </div>
+        <div className="flex h-screen bg-[#F8F9FA]">
+            {/* Left Panel - Inbox List */}
+            <div className="w-80 bg-white border-r border-[#E5E7EB] flex flex-col flex-shrink-0">
+                {/* Header */}
+                <div className="p-4 border-b border-[#E5E7EB]">
+                    <div className="flex items-center justify-between mb-3">
+                        <div>
+                            <h2 className="text-base font-semibold text-[#111827]">Inbox</h2>
+                            <p className="text-xs text-gray-400 mt-0.5">AI-classified email replies</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {unreadCount > 0 && (
+                                <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                    {unreadCount}
+                                </span>
+                            )}
                             <button
                                 onClick={() => { setLoading(true); loadEmails(); }}
-                                className="p-2 text-gray-400 hover:text-primary hover:bg-gray-50 rounded-lg transition-all"
-                                title="Refresh"
+                                className="p-2 text-gray-400 hover:text-[#4F46E5] hover:bg-gray-50 rounded-lg transition-all"
                             >
                                 <RefreshCw size={16} />
                             </button>
                         </div>
-
-                        <div className="relative mb-3">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Search by sender, subject, or company..."
-                                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white transition-all shadow-sm"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Filter Toggle */}
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                                showFilters || labelFilter !== 'all' || campaignFilter !== 'all'
-                                    ? 'bg-[#EEF2FF] text-primary border border-indigo-100'
-                                    : 'text-gray-500 hover:bg-gray-50'
-                            }`}
-                        >
-                            <Filter size={12} />
-                            Filters
-                            {(labelFilter !== 'all' || campaignFilter !== 'all') && (
-                                <span className="bg-primary text-white w-4 h-4 rounded-full text-[9px] flex items-center justify-center">
-                                    {(labelFilter !== 'all' ? 1 : 0) + (campaignFilter !== 'all' ? 1 : 0)}
-                                </span>
-                            )}
-                            <ChevronDown size={12} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {/* Filter Panel */}
-                        {showFilters && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-3 animate-in slide-in-from-top-2 duration-200">
-                                {/* Label Filter */}
-                                <div>
-                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
-                                        AI Label
-                                    </label>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        <button
-                                            onClick={() => setLabelFilter('all')}
-                                            className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                                                labelFilter === 'all'
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-white border border-gray-200 text-gray-600 hover:border-primary'
-                                            }`}
-                                        >
-                                            All ({emails.length})
-                                        </button>
-                                        {AI_LABELS.map(label => {
-                                            const style = LABEL_STYLES[label];
-                                            const count = labelCounts[label] || 0;
-                                            if (count === 0) return null;
-                                            return (
-                                                <button
-                                                    key={label}
-                                                    onClick={() => setLabelFilter(label)}
-                                                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all border ${
-                                                        labelFilter === label
-                                                            ? `${style.bg} ${style.text} ${style.border}`
-                                                            : 'bg-white border-gray-200 text-gray-600 hover:border-primary'
-                                                    }`}
-                                                >
-                                                    {label} ({count})
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Campaign Filter */}
-                                {campaigns.length > 0 && (
-                                    <div>
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
-                                            Campaign
-                                        </label>
-                                        <select
-                                            value={campaignFilter}
-                                            onChange={(e) => setCampaignFilter(e.target.value)}
-                                            className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                                        >
-                                            <option value="all">All Campaigns</option>
-                                            {campaigns.map(c => (
-                                                <option key={c.id} value={c.id}>{c.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-
-                                {/* Clear Filters */}
-                                {(labelFilter !== 'all' || campaignFilter !== 'all') && (
-                                    <button
-                                        onClick={() => { setLabelFilter('all'); setCampaignFilter('all'); }}
-                                        className="text-[10px] font-bold text-primary hover:underline"
-                                    >
-                                        Clear all filters
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Email List */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        {filteredEmails.length === 0 ? (
-                            <div className="p-8 text-center">
-                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                    <Inbox size={24} className="text-gray-400" />
-                                </div>
-                                <p className="text-sm font-bold text-gray-500 mb-1">No replies yet</p>
-                                <p className="text-xs text-gray-400">
-                                    {searchQuery || labelFilter !== 'all' || campaignFilter !== 'all'
-                                        ? 'Try adjusting your filters'
-                                        : 'Replies to your outreach will appear here'}
-                                </p>
-                            </div>
-                        ) : (
-                            filteredEmails.map((email) => {
-                                const labelStyle = getLabelStyle(email.ai_label);
-                                const isSelected = selectedEmail?.id === email.id;
-
-                                return (
-                                    <div
-                                        key={email.id}
-                                        onClick={() => handleSelectEmail(email)}
-                                        className={`p-4 border-b border-slate-100 cursor-pointer transition-colors duration-150 relative group ${
-                                            isSelected
-                                                ? 'bg-indigo-50 border-l-4 border-l-indigo-500'
-                                                : email.is_read
-                                                    ? 'bg-white hover:bg-slate-50'
-                                                    : 'bg-indigo-50 border-l-4 border-l-indigo-500'
-                                        }`}
-                                    >
-                                        {/* Unread indicator */}
-                                        {!email.is_read && (
-                                            <div className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rounded-full" />
-                                        )}
-
-                                        <div className="flex items-start gap-3">
-                                            {/* Avatar */}
-                                            <div className="w-10 h-10 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full flex items-center justify-center shrink-0">
-                                                <span className="text-sm font-bold text-primary">
-                                                    {getSenderName(email).charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                {/* Sender & Time */}
-                                                <div className="flex items-center justify-between mb-0.5">
-                                                    <h4 className={`text-xs truncate ${!email.is_read ? 'font-black text-[#111827]' : 'font-bold text-[#374151]'}`}>
-                                                        {getSenderName(email)}
-                                                    </h4>
-                                                    <span className="text-[9px] font-bold text-[#9CA3AF] whitespace-nowrap ml-2">
-                                                        {formatDate(email.received_at)}
-                                                    </span>
-                                                </div>
-
-                                                {/* Company */}
-                                                {getSenderCompany(email) && (
-                                                    <p className="text-[10px] text-gray-500 truncate mb-1">
-                                                        {getSenderCompany(email)}
-                                                    </p>
-                                                )}
-
-                                                {/* Subject */}
-                                                <p className={`text-[11px] truncate mb-2 ${!email.is_read ? 'font-bold text-gray-700' : 'font-medium text-gray-500'}`}>
-                                                    {email.subject || '(No subject)'}
-                                                </p>
-
-                                                {/* AI Label & Replied Badge */}
-                                                <div className="flex items-center gap-2">
-                                                    {email.ai_label && (
-                                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border uppercase tracking-wider ${labelStyle.bg} ${labelStyle.text} ${labelStyle.border}`}>
-                                                            {email.ai_label}
-                                                        </span>
-                                                    )}
-                                                    {email.replied && (
-                                                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-50 text-green-600 border border-green-200">
-                                                            Replied
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </aside>
-
-                {/* Right Panel: Email Detail */}
-                <main className="flex-1 flex flex-col bg-white">
-                    {selectedEmail ? (
-                        <>
-                            {/* Detail Header */}
-                            <div className="px-8 py-6 border-b border-[#F3F4F6] sticky top-0 bg-white z-10">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex-1 min-w-0">
-                                        <h2 className="text-xl font-black text-[#111827] mb-1 truncate">
-                                            {selectedEmail.subject || '(No subject)'}
-                                        </h2>
-                                        <div className="flex items-center gap-3 text-sm text-gray-500">
-                                            <div className="flex items-center gap-1.5">
-                                                <User size={14} />
-                                                <span className="font-medium">{getSenderName(selectedEmail)}</span>
-                                            </div>
-                                            {getSenderCompany(selectedEmail) && (
-                                                <div className="flex items-center gap-1.5">
-                                                    <Building size={14} />
-                                                    <span>{getSenderCompany(selectedEmail)}</span>
-                                                </div>
-                                            )}
-                                            <div className="flex items-center gap-1.5">
-                                                <Mail size={14} />
-                                                <span className="text-xs">{selectedEmail.from_email}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setSelectedEmail(null)}
-                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                </div>
-
-                                {/* Meta Row */}
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    {/* AI Label Badge */}
-                                    {selectedEmail.ai_label && (
-                                        <div className="flex items-center gap-2">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest ${getLabelStyle(selectedEmail.ai_label).bg} ${getLabelStyle(selectedEmail.ai_label).text} ${getLabelStyle(selectedEmail.ai_label).border}`}>
-                                                {selectedEmail.ai_label}
-                                            </span>
-                                            {selectedEmail.ai_confidence && (
-                                                <span className="text-[10px] text-gray-400 font-medium">
-                                                    {Math.round(selectedEmail.ai_confidence * 100)}% confidence
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Replied Badge */}
-                                    {selectedEmail.replied && (
-                                        <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-600 border border-green-200 flex items-center gap-1">
-                                            <Check size={12} />
-                                            Replied
-                                        </span>
-                                    )}
-
-                                    {/* Timestamp */}
-                                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                                        <Calendar size={12} />
-                                        {formatFullDate(selectedEmail.received_at)}
-                                    </div>
-
-                                    {/* Link to Lead */}
-                                    {selectedEmail.lead_id && (
-                                        <button
-                                            onClick={() => {
-                                                if (onOpenLeadDrawer) {
-                                                    onOpenLeadDrawer(selectedEmail.lead_id!);
-                                                } else if (onPageChange) {
-                                                    onPageChange('Lead Database');
-                                                }
-                                            }}
-                                            className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-primary hover:bg-[#EEF2FF] rounded-lg transition-all"
-                                        >
-                                            <ExternalLink size={12} />
-                                            View Lead
-                                        </button>
-                                    )}
-
-                                    {/* Campaign Link */}
-                                    {selectedEmail.campaign?.name && (
-                                        <span className="text-[10px] text-gray-400 font-medium">
-                                            Campaign: {selectedEmail.campaign.name}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Email Content */}
-                            <div className="flex-1 overflow-y-auto p-8 bg-gray-50/30 custom-scrollbar">
-                                <div className="max-w-3xl space-y-6">
-                                    {/* Email Body */}
-                                    <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
-                                        <div className="prose prose-sm max-w-none">
-                                            {selectedEmail.body_html ? (
-                                                <div
-                                                    dangerouslySetInnerHTML={{ __html: selectedEmail.body_html }}
-                                                    className="text-sm text-[#374151] leading-relaxed"
-                                                />
-                                            ) : (
-                                                <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-wrap">
-                                                    {selectedEmail.body_text || 'No content'}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Previous Reply */}
-                                    {selectedEmail.replied && selectedEmail.reply_body && (
-                                        <div className="bg-green-50/50 border border-green-100 p-6 rounded-2xl">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <Check size={14} className="text-green-600" />
-                                                <span className="text-xs font-bold text-green-700 uppercase tracking-wider">Your Reply</span>
-                                            </div>
-                                            <p className="text-sm text-green-800 whitespace-pre-wrap">
-                                                {selectedEmail.reply_body}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Reply Composer */}
-                                    {!selectedEmail.replied && (
-                                        <div className="bg-white border border-slate-200 rounded-xl p-4 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
-                                            <div className="mb-3">
-                                                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Reply to {getSenderName(selectedEmail)}</span>
-                                            </div>
-                                            <textarea
-                                                value={replyText}
-                                                onChange={(e) => setReplyText(e.target.value)}
-                                                placeholder="Type your reply..."
-                                                className="w-full p-0 text-sm text-slate-700 placeholder-slate-400 resize-none focus:outline-none min-h-[150px] border-0"
-                                            />
-                                            <div className="pt-4 border-t border-slate-100 mt-4 flex items-center justify-between">
-                                                <p className="text-xs text-slate-400">
-                                                    Replying from your configured sender email
-                                                </p>
-                                                <button
-                                                    onClick={handleSendReply}
-                                                    disabled={!replyText.trim() || isSendingReply}
-                                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                                                        replyText.trim() && !isSendingReply
-                                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm'
-                                                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                                    }`}
-                                                >
-                                                    {isSendingReply ? (
-                                                        <>
-                                                            <Loader2 size={14} className="animate-spin" />
-                                                            Sending...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Send size={14} />
-                                                            Send Reply
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
-
-                                            {/* Reply Status */}
-                                            {replyStatus === 'success' && (
-                                                <div className="px-4 py-3 bg-green-50 border-t border-green-100 flex items-center gap-2 text-green-700 animate-in slide-in-from-bottom-2">
-                                                    <Check size={14} />
-                                                    <span className="text-xs font-bold">Reply sent successfully!</span>
-                                                </div>
-                                            )}
-                                            {replyStatus === 'error' && (
-                                                <div className="px-4 py-3 bg-red-50 border-t border-red-100 flex items-center gap-2 text-red-700 animate-in slide-in-from-bottom-2">
-                                                    <AlertCircle size={14} />
-                                                    <span className="text-xs font-bold">Failed to send reply. Please try again.</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-gray-50/30">
-                            <div className="w-16 h-16 bg-white border border-gray-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                                <Inbox size={32} className="text-gray-200" />
-                            </div>
-                            <h3 className="text-lg font-black text-[#111827] mb-2">Select a reply to read</h3>
-                            <p className="text-sm text-gray-400 font-medium max-w-xs">
-                                Choose a conversation from the list on the left to view the full message and respond.
-                            </p>
-                        </div>
-                    )}
-                </main>
-            </div>
-
-            {/* Info Banner */}
-            <div className="mt-4">
-                <div className="bg-[#EEF2FF] border border-indigo-100 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
-                    <div className="bg-white p-2 rounded-xl text-primary shadow-sm">
-                        <Clock size={20} />
-                    </div>
-                    <div>
-                        <h4 className="text-xs font-black text-[#111827] uppercase tracking-widest mb-1">AI-Powered Inbox</h4>
-                        <p className="text-sm font-bold text-[#3730A3] leading-relaxed">
-                            Replies are automatically labelled by AI to help you prioritise. Interested leads appear in green, questions in blue, and unsubscribes are handled automatically.
-                        </p>
                     </div>
                 </div>
+
+                {/* Search */}
+                <div className="p-3 border-b border-gray-100">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search emails..."
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Filter Toggle */}
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium mt-2 transition-all ${showFilters || labelFilter !== 'all' || campaignFilter !== 'all'
+                            ? 'bg-[#EEF2FF] text-[#4F46E5]'
+                            : 'text-gray-500 hover:bg-gray-50'
+                            }`}
+                    >
+                        <Filter size={12} />
+                        Filters
+                        {(labelFilter !== 'all' || campaignFilter !== 'all') && (
+                            <span className="bg-[#4F46E5] text-white w-4 h-4 rounded-full text-[10px] flex items-center justify-center">
+                                {(labelFilter !== 'all' ? 1 : 0) + (campaignFilter !== 'all' ? 1 : 0)}
+                            </span>
+                        )}
+                        <ChevronDown size={12} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Filter Panel */}
+                    {showFilters && (
+                        <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
+                            <div>
+                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 block">
+                                    AI Label
+                                </label>
+                                <div className="flex flex-wrap gap-1.5">
+                                    <button
+                                        onClick={() => setLabelFilter('all')}
+                                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${labelFilter === 'all'
+                                            ? 'bg-[#4F46E5] text-white'
+                                            : 'bg-white border border-gray-200 text-gray-600 hover:border-[#4F46E5]'
+                                            }`}
+                                    >
+                                        All ({emails.length})
+                                    </button>
+                                    {AI_LABELS.map(label => {
+                                        const style = LABEL_STYLES[label];
+                                        const count = labelCounts[label] || 0;
+                                        if (count === 0) return null;
+                                        return (
+                                            <button
+                                                key={label}
+                                                onClick={() => setLabelFilter(label)}
+                                                className={`px-2 py-1 rounded-lg text-xs font-medium transition-all border ${labelFilter === label
+                                                    ? `${style.bg} ${style.text} border-current`
+                                                    : 'bg-white border-gray-200 text-gray-600 hover:border-[#4F46E5]'
+                                                    }`}
+                                            >
+                                                {label} ({count})
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {campaigns.length > 0 && (
+                                <div>
+                                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 block">
+                                        Campaign
+                                    </label>
+                                    <select
+                                        value={campaignFilter}
+                                        onChange={(e) => setCampaignFilter(e.target.value)}
+                                        className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5]"
+                                    >
+                                        <option value="all">All Campaigns</option>
+                                        {campaigns.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {(labelFilter !== 'all' || campaignFilter !== 'all') && (
+                                <button
+                                    onClick={() => { setLabelFilter('all'); setCampaignFilter('all'); }}
+                                    className="text-xs font-medium text-[#4F46E5] hover:underline"
+                                >
+                                    Clear all filters
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Email List */}
+                <div className="flex-1 overflow-y-auto">
+                    {filteredEmails.length === 0 ? (
+                        <div className="p-8 text-center">
+                            <Inbox size={32} className="text-gray-300 mx-auto mb-3" />
+                            <p className="text-sm font-medium text-gray-500 mb-1">No replies yet</p>
+                            <p className="text-xs text-gray-400">
+                                {searchQuery || labelFilter !== 'all' || campaignFilter !== 'all'
+                                    ? 'Try adjusting your filters'
+                                    : 'Replies to your outreach will appear here'}
+                            </p>
+                        </div>
+                    ) : (
+                        filteredEmails.map((email) => {
+                            const labelStyle = getLabelStyle(email.ai_label);
+                            const isSelected = selectedEmail?.id === email.id;
+
+                            return (
+                                <div
+                                    key={email.id}
+                                    onClick={() => handleSelectEmail(email)}
+                                    className={`px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 ${isSelected
+                                        ? 'bg-[#EEF2FF] border-l-4 border-l-[#4F46E5]'
+                                        : email.is_read
+                                            ? 'bg-white hover:bg-gray-50'
+                                            : 'bg-[#EEF2FF] border-l-4 border-l-[#4F46E5]'
+                                        }`}
+                                >
+                                    {/* Top row: Company + time */}
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className={`text-sm ${!email.is_read ? 'font-semibold text-[#111827]' : 'font-medium text-[#111827]'}`}>
+                                            {getSenderCompany(email) || getSenderName(email)}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                            {formatDate(email.received_at)}
+                                        </span>
+                                    </div>
+
+                                    {/* Subject */}
+                                    <p className="text-sm text-[#6B7280] truncate mb-2">
+                                        {email.subject || '(No subject)'}
+                                    </p>
+
+                                    {/* AI Label Badge */}
+                                    <div className="flex items-center gap-2">
+                                        {email.ai_label && (
+                                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${labelStyle.bg} ${labelStyle.text}`}>
+                                                {email.ai_label}
+                                            </span>
+                                        )}
+                                        {email.replied && (
+                                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-600">
+                                                Replied
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            </div>
+
+            {/* Right Panel - Email Detail */}
+            <div className="flex-1 flex flex-col bg-white">
+                {selectedEmail ? (
+                    <>
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-[#E5E7EB]">
+                            <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center gap-3">
+                                    <span className={`px-2.5 py-1 rounded text-xs font-medium ${getLabelStyle(selectedEmail.ai_label).bg} ${getLabelStyle(selectedEmail.ai_label).text}`}>
+                                        {selectedEmail.ai_label || 'Unknown'}
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                        {formatFullDate(selectedEmail.received_at)}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedEmail(null)}
+                                    className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            <h2 className="text-lg font-semibold text-[#111827]">
+                                {selectedEmail.subject || '(No subject)'}
+                            </h2>
+                            <div className="flex items-center gap-4 mt-2 text-sm text-[#6B7280]">
+                                <div className="flex items-center gap-1.5">
+                                    <User size={14} />
+                                    <span>{getSenderName(selectedEmail)}</span>
+                                </div>
+                                {getSenderCompany(selectedEmail) && (
+                                    <div className="flex items-center gap-1.5">
+                                        <Building size={14} />
+                                        <span>{getSenderCompany(selectedEmail)}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-1.5">
+                                    <Mail size={14} />
+                                    <span className="text-xs">{selectedEmail.from_email}</span>
+                                </div>
+                            </div>
+
+                            {/* Action Links */}
+                            <div className="flex items-center gap-3 mt-3">
+                                {selectedEmail.lead_id && (
+                                    <button
+                                        onClick={() => {
+                                            if (onOpenLeadDrawer) {
+                                                onOpenLeadDrawer(selectedEmail.lead_id!);
+                                            } else if (onPageChange) {
+                                                onPageChange('Lead Database');
+                                            }
+                                        }}
+                                        className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
+                                    >
+                                        <ExternalLink size={12} />
+                                        View Lead
+                                    </button>
+                                )}
+                                {selectedEmail.campaign?.name && (
+                                    <span className="text-xs text-gray-400">
+                                        Campaign: {selectedEmail.campaign.name}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Email Body */}
+                        <div className="flex-1 overflow-y-auto px-6 py-4">
+                            <div className="max-w-2xl">
+                                <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
+                                    {selectedEmail.body_html ? (
+                                        <div
+                                            dangerouslySetInnerHTML={{ __html: selectedEmail.body_html }}
+                                            className="text-sm text-[#111827] leading-relaxed prose prose-sm max-w-none"
+                                        />
+                                    ) : (
+                                        <p className="text-sm text-[#111827] leading-relaxed whitespace-pre-wrap">
+                                            {selectedEmail.body_text || 'No content'}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Previous Reply */}
+                                {selectedEmail.replied && selectedEmail.reply_body && (
+                                    <div className="mt-4 bg-green-50 border border-green-100 rounded-xl p-5">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Check size={14} className="text-green-600" />
+                                            <span className="text-xs font-semibold text-green-700 uppercase">Your Reply</span>
+                                        </div>
+                                        <p className="text-sm text-green-800 whitespace-pre-wrap">
+                                            {selectedEmail.reply_body}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Reply Composer */}
+                        {!selectedEmail.replied && (
+                            <div className="px-6 py-4 border-t border-[#E5E7EB]">
+                                <div className="border border-[#E5E7EB] rounded-xl focus-within:border-[#4F46E5] focus-within:ring-2 focus-within:ring-[#EEF2FF] transition-all">
+                                    <textarea
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        placeholder="Write a reply..."
+                                        className="w-full p-4 text-sm rounded-t-xl resize-none focus:outline-none"
+                                        rows={3}
+                                    />
+                                    <div className="flex items-center justify-between px-4 pb-3">
+                                        <p className="text-xs text-gray-400">
+                                            Replying from your configured sender
+                                        </p>
+                                        <button
+                                            onClick={handleSendReply}
+                                            disabled={!replyText.trim() || isSendingReply}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${replyText.trim() && !isSendingReply
+                                                ? 'bg-[#4F46E5] text-white hover:bg-[#4338CA]'
+                                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                }`}
+                                        >
+                                            {isSendingReply ? (
+                                                <>
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                    Sending...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Send size={14} />
+                                                    Send Reply
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Reply Status */}
+                                {replyStatus === 'success' && (
+                                    <div className="mt-3 px-4 py-3 bg-green-50 border border-green-100 rounded-lg flex items-center gap-2 text-green-700">
+                                        <Check size={14} />
+                                        <span className="text-sm font-medium">Reply sent successfully!</span>
+                                    </div>
+                                )}
+                                {replyStatus === 'error' && (
+                                    <div className="mt-3 px-4 py-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-red-700">
+                                        <AlertCircle size={14} />
+                                        <span className="text-sm font-medium">Failed to send reply. Please try again.</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                        <div className="text-center">
+                            <Inbox className="w-12 h-12 text-gray-300 mx-auto" />
+                            <p className="text-gray-400 mt-3">Select an email to read</p>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

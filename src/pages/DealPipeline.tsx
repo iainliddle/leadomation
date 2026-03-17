@@ -28,7 +28,6 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
 
-    // New Deal Form State
     const [newDealTitle, setNewDealTitle] = useState('');
     const [newDealValue, setNewDealValue] = useState('');
     const [newDealStage, setNewDealStage] = useState('new_reply');
@@ -37,8 +36,8 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
 
     const stages = [
         { id: 'new_reply', label: 'New Reply', color: 'blue' },
-        { id: 'qualified', label: 'Qualified', color: 'purple' },
-        { id: 'proposal_sent', label: 'Proposal Sent', color: 'yellow' },
+        { id: 'qualified', label: 'Qualified', color: 'indigo' },
+        { id: 'proposal_sent', label: 'Proposal Sent', color: 'amber' },
         { id: 'negotiating', label: 'Negotiating', color: 'orange' },
         { id: 'won', label: 'Won', color: 'green' },
         { id: 'lost', label: 'Lost', color: 'red' }
@@ -155,32 +154,32 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
 
     const getStageColor = (color: string) => {
         switch (color) {
-            case 'blue': return 'border-t-4 border-t-blue-400';
-            case 'purple': return 'border-t-4 border-t-indigo-400';
-            case 'yellow': return 'border-t-4 border-t-amber-400';
-            case 'orange': return 'border-t-4 border-t-orange-400';
-            case 'green': return 'border-t-4 border-t-emerald-400';
-            case 'red': return 'border-t-4 border-t-red-400';
-            default: return 'border-t-4 border-t-slate-400';
+            case 'blue': return 'border-t-blue-400';
+            case 'indigo': return 'border-t-[#4F46E5]';
+            case 'amber': return 'border-t-amber-400';
+            case 'orange': return 'border-t-orange-400';
+            case 'green': return 'border-t-green-400';
+            case 'red': return 'border-t-red-400';
+            default: return 'border-t-gray-400';
         }
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-100px)] animate-in fade-in duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
+            {/* Page Header */}
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 mb-1">Deal Pipeline</h1>
-                    <p className="text-sm text-slate-500">Manage your revenue pipeline from reply to won</p>
+                    <h1 className="text-xl font-semibold text-[#111827]">Deal Pipeline</h1>
+                    <p className="text-sm text-[#6B7280] mt-0.5">Manage your revenue pipeline from reply to won</p>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                     <div className="text-right">
-                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">Total Pipeline Value</p>
-                        <p className="text-2xl font-bold text-indigo-600">£{totalPipelineValue.toLocaleString()}</p>
+                        <p className="text-xs text-gray-400">Total Pipeline Value</p>
+                        <p className="text-xl font-bold text-[#4F46E5]">£{totalPipelineValue.toLocaleString()}</p>
                     </div>
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200"
+                        className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-medium rounded-lg px-4 py-2 transition-all"
                     >
                         <Plus size={18} />
                         Add Deal
@@ -189,114 +188,135 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
             </div>
 
             {loading ? (
-                <div className="flex-1 flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="flex items-center justify-center h-96">
+                    <Loader2 className="w-8 h-8 text-[#4F46E5] animate-spin" />
                 </div>
             ) : (
-                <div className="flex-1 overflow-x-auto pb-4 custom-scrollbar-horizontal">
-                    <div className="flex gap-4 h-full min-w-max pb-4">
-                        {stages.map(stage => {
-                            const stageDeals = deals.filter(d => d.stage === stage.id);
-                            const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+                <div className="flex gap-4 overflow-x-auto pb-4">
+                    {stages.map(stage => {
+                        const stageDeals = deals.filter(d => d.stage === stage.id);
+                        const stageValue = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0);
 
-                            return (
-                                <div key={stage.id} className={`w-[280px] flex flex-col h-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden ${getStageColor(stage.color)}`}>
-                                    <div className="bg-slate-50 rounded-t-2xl px-4 py-3 border-b border-slate-200">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">{stage.label}</h3>
-                                            <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full ml-2">{stageDeals.length}</span>
-                                        </div>
-                                        <p className="text-xs text-slate-500">£{stageValue.toLocaleString()}</p>
+                        return (
+                            <div
+                                key={stage.id}
+                                className={`flex-shrink-0 w-64 bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden border-t-4 ${getStageColor(stage.color)}`}
+                            >
+                                {/* Column Header */}
+                                <div className="px-4 py-3 border-b border-gray-100">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide">
+                                            {stage.label}
+                                        </span>
+                                        <span className="bg-gray-100 text-[#6B7280] text-xs font-bold px-2 py-0.5 rounded-full">
+                                            {stageDeals.length}
+                                        </span>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
-                                        {stageDeals.map(deal => (
-                                            <div key={deal.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer group">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="text-sm font-semibold text-slate-700 line-clamp-1">{deal.title}</h4>
-                                                    <button onClick={() => deleteDeal(deal.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all">
+                                    <p className="text-xs text-gray-400 mt-0.5">£{stageValue.toLocaleString()}</p>
+                                </div>
+
+                                {/* Column Body */}
+                                <div className="min-h-96 p-3 space-y-2">
+                                    {stageDeals.length === 0 ? (
+                                        <div className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-6 text-center">
+                                            <Plus className="w-5 h-5 text-gray-300 mx-auto" />
+                                            <p className="text-xs text-gray-400 mt-2">No deals yet</p>
+                                        </div>
+                                    ) : (
+                                        stageDeals.map(deal => (
+                                            <div
+                                                key={deal.id}
+                                                className="bg-white border border-[#E5E7EB] rounded-xl p-3 hover:shadow-md hover:border-[#4F46E5] transition-all duration-200 cursor-pointer group"
+                                            >
+                                                <div className="flex items-start justify-between mb-2">
+                                                    <h4 className="text-sm font-medium text-[#111827] line-clamp-1">{deal.title}</h4>
+                                                    <button
+                                                        onClick={() => deleteDeal(deal.id)}
+                                                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                                                    >
                                                         <Trash2 size={12} />
                                                     </button>
                                                 </div>
-                                                <p className="text-lg font-bold text-slate-900 mb-2">£{Number(deal.value || 0).toLocaleString()}</p>
+                                                <p className="text-lg font-bold text-[#111827] mb-2">
+                                                    £{Number(deal.value || 0).toLocaleString()}
+                                                </p>
                                                 {deal.notes && (
-                                                    <p className="text-[10px] text-slate-500 font-medium line-clamp-2 mb-4 italic">"{deal.notes}"</p>
+                                                    <p className="text-xs text-[#6B7280] line-clamp-2 mb-3">
+                                                        {deal.notes}
+                                                    </p>
                                                 )}
-                                                <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
+                                                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                                                     <button
                                                         onClick={() => moveStage(deal, 'left')}
                                                         disabled={stages.findIndex(s => s.id === deal.stage) === 0}
-                                                        className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all disabled:opacity-0"
+                                                        className="p-1 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-[#4F46E5] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                                     >
                                                         <ChevronLeft size={16} />
                                                     </button>
-                                                    <span className="text-[9px] font-semibold text-slate-300 uppercase tracking-wide">Move</span>
+                                                    <span className="text-[10px] font-medium text-gray-300 uppercase tracking-wide">Move</span>
                                                     <button
                                                         onClick={() => moveStage(deal, 'right')}
                                                         disabled={stages.findIndex(s => s.id === deal.stage) === stages.length - 1}
-                                                        className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all disabled:opacity-0"
+                                                        className="p-1 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-[#4F46E5] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                                     >
                                                         <ChevronRight size={16} />
                                                     </button>
                                                 </div>
                                             </div>
-                                        ))}
-                                        {stageDeals.length === 0 && (
-                                            <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center">
-                                                <Plus size={20} className="mx-auto text-slate-300 mb-2" />
-                                                <p className="text-sm text-slate-400">No deals yet</p>
-                                            </div>
-                                        )}
-                                    </div>
+                                        ))
+                                    )}
                                 </div>
-                            );
-                        })}
-                    </div>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 
-
             {/* Add Deal Modal */}
             {showAddModal && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-                        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-blue-50/50">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white rounded-xl w-full max-w-md overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary text-white rounded-lg shadow-sm">
-                                    <TrendingUp size={20} />
+                                <div className="w-10 h-10 bg-[#EEF2FF] rounded-lg flex items-center justify-center">
+                                    <TrendingUp size={20} className="text-[#4F46E5]" />
                                 </div>
-                                <h3 className="text-lg font-black text-[#111827]">New Pipeline Opportunity</h3>
+                                <h3 className="text-lg font-semibold text-[#111827]">Add New Deal</h3>
                             </div>
-                            <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <button
+                                onClick={() => setShowAddModal(false)}
+                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all"
+                            >
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Deal Title / Company</label>
+                                <label className="block text-sm font-medium text-[#111827] mb-1.5">Deal Title / Company</label>
                                 <input
                                     autoFocus
                                     type="text"
                                     placeholder="e.g. Acme Corp Contract"
-                                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-inter"
+                                    className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
                                     value={newDealTitle}
                                     onChange={(e) => setNewDealTitle(e.target.value)}
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Value (£)</label>
+                                    <label className="block text-sm font-medium text-[#111827] mb-1.5">Value (£)</label>
                                     <input
                                         type="number"
                                         placeholder="0.00"
-                                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all"
                                         value={newDealValue}
                                         onChange={(e) => setNewDealValue(e.target.value)}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Stage</label>
+                                    <label className="block text-sm font-medium text-[#111827] mb-1.5">Stage</label>
                                     <select
-                                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+                                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all appearance-none"
                                         value={newDealStage}
                                         onChange={(e) => setNewDealStage(e.target.value)}
                                     >
@@ -305,30 +325,30 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-[#6B7280] uppercase tracking-widest mb-2">Notes / Context</label>
+                                <label className="block text-sm font-medium text-[#111827] mb-1.5">Notes (Optional)</label>
                                 <textarea
                                     placeholder="Add any extra details here..."
                                     rows={3}
-                                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                                    className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all resize-none"
                                     value={newDealNotes}
                                     onChange={(e) => setNewDealNotes(e.target.value)}
                                 />
                             </div>
                         </div>
-                        <div className="p-6 bg-gray-50 flex gap-3">
+                        <div className="p-6 bg-gray-50 flex gap-3 border-t border-[#E5E7EB]">
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="flex-1 px-6 py-4 border border-gray-200 rounded-xl text-sm font-bold text-[#6B7280] hover:bg-white transition-all"
+                                className="flex-1 px-4 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#6B7280] hover:bg-white transition-all"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={addDeal}
                                 disabled={saving || !newDealTitle.trim()}
-                                className="flex-2 px-8 py-4 bg-primary text-white rounded-xl text-sm font-black hover:bg-[#4338CA] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
+                                className="flex-1 px-4 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                                {saving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-                                CREATE DEAL
+                                {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                                Create Deal
                             </button>
                         </div>
                     </div>

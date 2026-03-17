@@ -55,11 +55,10 @@ const defaultScript: CallScript = {
 };
 
 const objectives = [
-    { id: 'book_discovery', label: 'Book a Discovery Call', icon: '📅', desc: 'Schedule a meeting or demo with the prospect' },
-    { id: 'qualify_lead', label: 'Qualify the Lead', icon: '🎯', desc: 'Determine if the prospect is a good fit' },
-    { id: 'schedule_demo', label: 'Schedule a Demo', icon: '💻', desc: 'Book a product demonstration' },
-    { id: 'invite_event', label: 'Invite to Event', icon: '🎟️', desc: 'Get them to attend a webinar or event' },
-    { id: 'custom', label: 'Custom Objective', icon: '✏️', desc: 'Define your own call objective' }
+    { id: 'book_discovery', label: 'Book a Discovery Call', icon: Calendar, desc: 'Schedule a meeting or demo with the prospect' },
+    { id: 'qualify_lead', label: 'Qualify the Lead', icon: Target, desc: 'Determine if the prospect is a good fit' },
+    { id: 'schedule_demo', label: 'Schedule a Demo', icon: Phone, desc: 'Book a product demonstration' },
+    { id: 'custom', label: 'Custom Objective', icon: Wand2, desc: 'Define your own call objective' }
 ];
 
 const tones = [
@@ -70,26 +69,11 @@ const tones = [
 ];
 
 const successActions = [
-    { id: 'send_booking_link', label: 'Send Booking Link via SMS', icon: '📱' },
-    { id: 'confirm_time', label: 'Confirm a Time on the Call', icon: '⏰' },
-    { id: 'take_email', label: 'Take Their Email for Follow-up', icon: '📧' },
-    { id: 'transfer_call', label: 'Transfer to a Team Member', icon: '📞' }
+    { id: 'send_booking_link', label: 'Send Booking Link via SMS', icon: Phone },
+    { id: 'confirm_time', label: 'Confirm a Time on the Call', icon: Calendar },
+    { id: 'take_email', label: 'Take Their Email for Follow-up', icon: MessageSquare },
+    { id: 'transfer_call', label: 'Transfer to a Team Member', icon: Phone }
 ];
-
-const Section: React.FC<{ title: string; icon: React.ElementType; children: React.ReactNode; step?: number }> = ({ title, icon: Icon, children, step }) => (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7 mb-6 hover:shadow-md transition-shadow duration-200">
-        <div className="flex items-center gap-3 mb-6">
-            {step && (
-                <div className="w-9 h-9 bg-indigo-600 text-white rounded-full font-bold text-sm flex items-center justify-center shadow-sm">
-                    {step}
-                </div>
-            )}
-            <Icon size={18} className="text-indigo-600" />
-            <h3 className="text-base font-semibold text-slate-900 ml-1">{title}</h3>
-        </div>
-        {children}
-    </div>
-);
 
 interface CallScriptBuilderProps {
 }
@@ -374,24 +358,18 @@ IMPORTANT RULES:
     };
 
     return (
-        <div className="max-w-[800px] mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
-            {/* AI Call Agent Hero Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-6 mb-8">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                        <Phone size={24} className="text-white" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">AI Call Agent</h1>
-                        <p className="text-indigo-200 text-sm">Configure your AI voice agent to make outbound calls to leads</p>
-                    </div>
+        <div className="p-6 max-w-3xl mx-auto bg-[#F8F9FA] min-h-screen">
+            {/* Hero Header Card */}
+            <div className="bg-gradient-to-r from-[#4F46E5] to-[#6366F1] rounded-xl p-6 mb-6 flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Phone className="w-6 h-6 text-white" />
                 </div>
-            </div>
-
-            {/* Script Selector */}
-            <div className="card p-4 bg-white border border-[#E5E7EB] rounded-xl shadow-sm mb-6 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1">
-                    <div className="relative flex-1 max-w-xs">
+                <div className="flex-1">
+                    <h1 className="text-xl font-semibold text-white">AI Call Agent</h1>
+                    <p className="text-sm text-indigo-200 mt-0.5">Configure your AI voice agent for outbound calls</p>
+                </div>
+                <div className="flex gap-3">
+                    <div className="relative">
                         <select
                             value={selectedScriptId}
                             onChange={(e) => {
@@ -401,129 +379,164 @@ IMPORTANT RULES:
                                     loadScript(e.target.value);
                                 }
                             }}
-                            className="w-full appearance-none px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold text-[#374151]"
+                            className="appearance-none bg-white/20 text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg hover:bg-white/30 transition-all cursor-pointer focus:outline-none"
                         >
-                            <option value="">+ New Call Script</option>
+                            <option value="" className="text-[#111827]">+ New Call Script</option>
                             {savedScripts.map(s => (
-                                <option key={s.id} value={s.id}>{s.name}</option>
+                                <option key={s.id} value={s.id} className="text-[#111827]">{s.name}</option>
                             ))}
                         </select>
-                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                        <ChevronDown size={16} className="absolute right-2 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
+                        {loadingScripts && <Loader2 size={14} className="absolute right-8 top-1/2 -translate-y-1/2 animate-spin text-white" />}
                     </div>
-                    {loadingScripts && <Loader2 size={16} className="animate-spin text-[#9CA3AF]" />}
+                    <button
+                        onClick={() => {
+                            setGeneratedPrompt(generateSystemPrompt());
+                            setShowPromptPreview(true);
+                        }}
+                        className="bg-white text-[#4F46E5] text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-50 transition-all"
+                    >
+                        Preview AI Prompt
+                    </button>
                 </div>
-                <button
-                    onClick={() => {
-                        setGeneratedPrompt(generateSystemPrompt());
-                        setShowPromptPreview(true);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#6B7280] hover:bg-gray-50 transition-all"
-                >
-                    <Wand2 size={16} />
-                    Preview AI Prompt
-                </button>
             </div>
 
             {/* Step 1: Script Basics */}
-            <Section title="Script Basics" icon={Mic} step={1}>
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        1
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Mic className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">Script Basics</h2>
+                    </div>
+                </div>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Script Name</label>
+                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Script Name</label>
                         <input
                             type="text"
                             value={script.name}
                             onChange={(e) => setScript(prev => ({ ...prev, name: e.target.value }))}
                             placeholder="e.g., Hotel Discovery Call Script"
-                            className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Your Company Name</label>
+                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Your Company Name</label>
                         <input
                             type="text"
                             value={script.company_name}
                             onChange={(e) => setScript(prev => ({ ...prev, company_name: e.target.value }))}
                             placeholder="e.g., Arctic Edge Cold Therapy"
-                            className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
                         />
-                        <p className="text-[10px] text-[#9CA3AF] mt-1.5 italic">The AI agent will introduce itself as calling from this company</p>
+                        <p className="text-xs text-[#6B7280] mt-1.5">The AI agent will introduce itself as calling from this company</p>
                     </div>
                 </div>
-            </Section>
+            </div>
 
             {/* Step 2: Call Objective */}
-            <Section title="Call Objective" icon={Target} step={2}>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {objectives.map(obj => (
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        2
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Target className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">Call Objective</h2>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    {objectives.map(obj => {
+                        const Icon = obj.icon;
+                        return (
                             <button
                                 key={obj.id}
                                 onClick={() => setScript(prev => ({ ...prev, objective: obj.id }))}
-                                className={`p-4 text-left rounded-xl transition-all duration-150 relative group ${script.objective === obj.id
-                                    ? 'border-2 border-indigo-500 bg-indigo-50 shadow-sm'
-                                    : 'border border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50'
+                                className={`p-4 text-left rounded-xl transition-all relative ${script.objective === obj.id
+                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                    : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
                                     }`}
                             >
                                 {script.objective === obj.id && (
-                                    <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-600 text-white rounded-full flex items-center justify-center">
-                                        <CheckCircle2 size={12} />
+                                    <div className="absolute top-3 right-3">
+                                        <CheckCircle2 className="w-5 h-5 text-[#4F46E5]" />
                                     </div>
                                 )}
-                                <span className="text-xl mb-2 block">{obj.icon}</span>
-                                <p className="text-sm font-bold text-slate-900">{obj.label}</p>
-                                <p className="text-[11px] text-slate-500 mt-0.5">{obj.desc}</p>
+                                <Icon className="w-5 h-5 text-[#4F46E5] mb-2" />
+                                <p className="text-sm font-semibold text-[#111827]">{obj.label}</p>
+                                <p className="text-xs text-[#6B7280] mt-0.5">{obj.desc}</p>
                             </button>
-                        ))}
-                    </div>
-
-                    {script.objective === 'custom' && (
-                        <div className="animate-in fade-in duration-200">
-                            <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Custom Objective</label>
-                            <input
-                                type="text"
-                                value={script.custom_objective}
-                                onChange={(e) => setScript(prev => ({ ...prev, custom_objective: e.target.value }))}
-                                placeholder="e.g., Get them to visit our showroom"
-                                className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
-                            />
-                        </div>
-                    )}
+                        );
+                    })}
                 </div>
-            </Section>
+                {script.objective === 'custom' && (
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Custom Objective</label>
+                        <input
+                            type="text"
+                            value={script.custom_objective}
+                            onChange={(e) => setScript(prev => ({ ...prev, custom_objective: e.target.value }))}
+                            placeholder="e.g., Get them to visit our showroom"
+                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                        />
+                    </div>
+                )}
+            </div>
 
             {/* Step 3: Opening Line */}
-            <Section title="Opening Line" icon={MessageSquare} step={3}>
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        3
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">Opening Line</h2>
+                    </div>
+                </div>
                 <div>
-                    <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">How Should the Agent Introduce the Call?</label>
+                    <label className="block text-sm font-medium text-[#111827] mb-1.5">How Should the Agent Introduce the Call?</label>
                     <textarea
                         value={script.opening_line}
                         onChange={(e) => setScript(prev => ({ ...prev, opening_line: e.target.value }))}
                         placeholder={`e.g., Hi, I'm calling from ${script.company_name || '[Your Company]'}. We work with hotels and spas on cold water therapy installations. Do you have a moment for a quick chat?`}
                         rows={3}
-                        className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-none"
+                        className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-none"
                     />
-                    <p className="text-[10px] text-[#9CA3AF] mt-1.5 italic">This is what the agent says first. Keep it short and natural; under 30 words works best.</p>
+                    <p className="text-xs text-[#6B7280] mt-1.5">This is what the agent says first. Keep it short and natural; under 30 words works best.</p>
                 </div>
-            </Section>
+            </div>
 
             {/* Step 4: Qualifying Questions */}
-            <Section title="Qualifying Questions" icon={Target} step={4}>
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        4
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Target className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">Qualifying Questions</h2>
+                    </div>
+                </div>
+                <p className="text-sm text-[#6B7280] mb-4">Questions the agent asks to determine if the prospect is a good fit.</p>
                 <div className="space-y-3">
-                    <p className="text-xs text-[#6B7280] mb-2">Questions the agent asks to determine if the prospect is a good fit. The agent will adapt these naturally during conversation.</p>
                     {script.qualifying_questions.map((q, i) => (
                         <div key={i} className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-[#9CA3AF] w-6 text-center shrink-0">Q{i + 1}</span>
+                            <span className="text-xs font-medium text-[#6B7280] w-6 text-center shrink-0">Q{i + 1}</span>
                             <input
                                 type="text"
                                 value={q}
                                 onChange={(e) => updateQuestion(i, e.target.value)}
                                 placeholder={i === 0 ? 'e.g., Do you currently offer wellness experiences for your guests?' : 'e.g., Is this something you\'ve been looking into recently?'}
-                                className="flex-1 px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                                className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
                             />
                             {script.qualifying_questions.length > 1 && (
                                 <button
                                     onClick={() => removeQuestion(i)}
-                                    className="p-2 text-[#9CA3AF] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    className="p-2 text-[#6B7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                 >
                                     <Trash2 size={14} />
                                 </button>
@@ -532,25 +545,34 @@ IMPORTANT RULES:
                     ))}
                     <button
                         onClick={addQuestion}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
                     >
                         <Plus size={14} /> Add Question
                     </button>
                 </div>
-            </Section>
+            </div>
 
             {/* Step 5: Objection Handling */}
-            <Section title="Objection Handling" icon={Shield} step={5}>
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        5
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">Objection Handling</h2>
+                    </div>
+                </div>
+                <p className="text-sm text-[#6B7280] mb-4">Define how the agent responds to common pushback.</p>
                 <div className="space-y-4">
-                    <p className="text-xs text-[#6B7280] mb-2">Define how the agent responds to common pushback. The agent also has built-in handling for "I'm busy", "Send me an email", and unknown questions.</p>
                     {script.objection_responses.map((obj, i) => (
-                        <div key={i} className="p-4 bg-[#F9FAFB] rounded-xl border border-[#F3F4F6] space-y-3">
+                        <div key={i} className="p-4 bg-[#F8F9FA] rounded-xl border border-[#E5E7EB] space-y-3">
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">Objection {i + 1}</span>
+                                <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide">Objection {i + 1}</span>
                                 {script.objection_responses.length > 1 && (
                                     <button
                                         onClick={() => removeObjection(i)}
-                                        className="p-1 text-[#9CA3AF] hover:text-red-500 transition-all"
+                                        className="p-1 text-[#6B7280] hover:text-red-500 transition-all"
                                     >
                                         <X size={14} />
                                     </button>
@@ -561,184 +583,196 @@ IMPORTANT RULES:
                                 value={obj.objection}
                                 onChange={(e) => updateObjection(i, 'objection', e.target.value)}
                                 placeholder='e.g., "I am not interested"'
-                                className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                                className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
                             />
                             <input
                                 type="text"
                                 value={obj.response}
                                 onChange={(e) => updateObjection(i, 'response', e.target.value)}
                                 placeholder={'e.g., "I completely understand. Just wanted to share one quick thing..."'}
-                                className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                                className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
                             />
                         </div>
                     ))}
                     <button
                         onClick={addObjection}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
                     >
                         <Plus size={14} /> Add Objection Response
                     </button>
                 </div>
-            </Section>
+            </div>
 
             {/* Step 6: Success Action */}
-            <Section title="When They Say Yes" icon={Calendar} step={6}>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {successActions.map(action => (
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        6
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">When They Say Yes</h2>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    {successActions.map(action => {
+                        const Icon = action.icon;
+                        return (
                             <button
                                 key={action.id}
                                 onClick={() => setScript(prev => ({ ...prev, success_action: action.id }))}
-                                className={`p-4 border text-left rounded-xl transition-all duration-200 ${script.success_action === action.id
-                                    ? 'border-[#4F46E5] bg-[#EEF2FF] shadow-sm'
-                                    : 'border-[#E5E7EB] bg-white hover:border-gray-300'
+                                className={`p-4 text-left rounded-xl transition-all ${script.success_action === action.id
+                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                    : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
                                     }`}
                             >
-                                <span className="text-xl mb-2 block">{action.icon}</span>
-                                <p className="text-sm font-bold text-[#374151]">{action.label}</p>
+                                <Icon className="w-5 h-5 text-[#4F46E5] mb-2" />
+                                <p className="text-sm font-semibold text-[#111827]">{action.label}</p>
                             </button>
-                        ))}
-                    </div>
-
-                    {(script.success_action === 'send_booking_link' || script.success_action === 'confirm_time') && (
-                        <div className="animate-in fade-in duration-200">
-                            <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Meeting Booking Link</label>
-                            <input
-                                type="url"
-                                value={script.booking_url}
-                                onChange={(e) => setScript(prev => ({ ...prev, booking_url: e.target.value, system_prompt: undefined }))}
-                                placeholder="https://calendly.com/your-name/meeting"
-                                className="w-full px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
-                            />
-                            <p className="text-[10px] text-[#9CA3AF] mt-1.5 italic">Your Calendly, Cal.com, or scheduling link. Sent to leads who book a meeting.</p>
-                        </div>
-                    )}
+                        );
+                    })}
                 </div>
-            </Section>
+                {(script.success_action === 'send_booking_link' || script.success_action === 'confirm_time') && (
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Meeting Booking Link</label>
+                        <input
+                            type="url"
+                            value={script.booking_url}
+                            onChange={(e) => setScript(prev => ({ ...prev, booking_url: e.target.value, system_prompt: undefined }))}
+                            placeholder="https://calendly.com/your-name/meeting"
+                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                        />
+                        <p className="text-xs text-[#6B7280] mt-1.5">Your Calendly, Cal.com, or scheduling link. Sent to leads who book a meeting.</p>
+                    </div>
+                )}
+            </div>
 
             {/* Step 7: Voicemail Script */}
-            <Section title="Voicemail Script" icon={Mic} step={7}>
-                <div className="space-y-4">
-                    <div className="bg-indigo-50 border-l-4 border-l-indigo-500 rounded-r-2xl p-4 mb-4">
-                        <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 shrink-0">
-                                <Phone size={16} />
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-semibold text-slate-900 mb-1">How Voicemail Works</h4>
-                                <p className="text-sm text-indigo-700 leading-relaxed">
-                                    If your lead doesn't answer, Sarah will leave a voicemail automatically. Write a short, friendly message that mentions why you're calling and gives them a way to reach you. Keep it under 30 seconds. Around 60 to 75 words is ideal.
-                                </p>
-                            </div>
-                        </div>
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        7
                     </div>
-
-                    <div>
-                        <div className="mb-2">
-                            <label className="block text-sm font-bold text-[#374151] uppercase tracking-tight">Voicemail Script</label>
-                            <p className="text-[10px] text-[#6B7280] mt-0.5">Played when the call goes to voicemail. If left empty, the main script will be used as fallback.</p>
-                        </div>
-
-                        <div className="mb-3">
-                            <p className="text-[10px] text-[#9CA3AF] font-bold uppercase tracking-wider mb-2">Insert variable:</p>
-                            <div className="flex flex-wrap gap-2">
-                                <button onClick={() => insertVariable('[first_name]')} className="px-3 py-1 text-xs font-bold text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
-                                    + First Name
-                                </button>
-                                <button onClick={() => insertVariable('[company_name]')} className="px-3 py-1 text-xs font-bold text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
-                                    + Company Name
-                                </button>
-                                <button onClick={() => insertVariable('[booking_link]')} className="px-3 py-1 text-xs font-bold text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
-                                    + Booking Link
-                                </button>
-                            </div>
-                        </div>
-
-                        <textarea
-                            id="voicemail_script"
-                            value={script.voicemail_script || ''}
-                            onChange={(e) => setScript(prev => ({ ...prev, voicemail_script: e.target.value }))}
-                            placeholder="Leave a brief voicemail message introducing yourself and asking them to call back..."
-                            rows={5}
-                            className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-y"
-                        />
-
-                        <div className="mt-2 flex items-center justify-between">
-                            <p className="text-xs text-slate-400">Aim for 60–75 words for a natural 20–25 second voicemail.</p>
-                            <div className={`text-xs text-slate-400 text-right ${vmStats.colorClass}`}>
-                                {vmStats.words} words · ~{vmStats.seconds} seconds
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <Mic className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">Voicemail Script</h2>
                     </div>
                 </div>
-            </Section>
+
+                {/* Voicemail Info Box */}
+                <div className="bg-[#EEF2FF] border-l-4 border-[#4F46E5] rounded-r-xl p-4 mb-4 flex items-start gap-3">
+                    <Phone className="w-4 h-4 text-[#4F46E5] mt-0.5 flex-shrink-0" />
+                    <div>
+                        <p className="text-sm font-semibold text-[#3730A3]">How Voicemail Works</p>
+                        <p className="text-xs text-[#4F46E5] mt-1">
+                            Sarah will leave a voicemail automatically if the lead doesn't answer. Keep it under 30 seconds (60-75 words).
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mb-3">
+                    <p className="text-xs text-[#6B7280] font-medium mb-2">Insert variable:</p>
+                    <div className="flex flex-wrap gap-2">
+                        <button onClick={() => insertVariable('[first_name]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                            + First Name
+                        </button>
+                        <button onClick={() => insertVariable('[company_name]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                            + Company Name
+                        </button>
+                        <button onClick={() => insertVariable('[booking_link]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                            + Booking Link
+                        </button>
+                    </div>
+                </div>
+
+                <textarea
+                    id="voicemail_script"
+                    value={script.voicemail_script || ''}
+                    onChange={(e) => setScript(prev => ({ ...prev, voicemail_script: e.target.value }))}
+                    placeholder="Leave a brief voicemail message introducing yourself and asking them to call back..."
+                    rows={5}
+                    className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-y"
+                />
+                <p className={`text-xs text-right mt-2 ${vmStats.colorClass}`}>
+                    {vmStats.words} words · ~{vmStats.seconds} seconds
+                </p>
+            </div>
 
             {/* Step 8: Tone & Context */}
-            <Section title="Tone & Additional Context" icon={Volume2} step={8}>
+            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-6">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        8
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Volume2 className="w-5 h-5 text-[#6B7280]" />
+                        <h2 className="text-base font-semibold text-[#111827]">Tone & Additional Context</h2>
+                    </div>
+                </div>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-bold text-[#374151] mb-3 uppercase tracking-tight">Agent Personality</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <label className="block text-sm font-medium text-[#111827] mb-3">Agent Personality</label>
+                        <div className="grid grid-cols-4 gap-3">
                             {tones.map(t => (
                                 <button
                                     key={t.id}
                                     onClick={() => setScript(prev => ({ ...prev, tone: t.id }))}
-                                    className={`p-3 border text-center rounded-xl transition-all duration-200 ${script.tone === t.id
-                                        ? 'border-[#4F46E5] bg-[#EEF2FF] shadow-sm'
-                                        : 'border-[#E5E7EB] bg-white hover:border-gray-300'
+                                    className={`p-3 text-center rounded-xl transition-all ${script.tone === t.id
+                                        ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                        : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
                                         }`}
                                 >
-                                    <p className="text-xs font-bold text-[#374151]">{t.label}</p>
-                                    <p className="text-[10px] text-[#6B7280] mt-0.5">{t.desc}</p>
+                                    <p className="text-sm font-semibold text-[#111827]">{t.label}</p>
+                                    <p className="text-xs text-[#6B7280] mt-0.5">{t.desc}</p>
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-[#374151] mb-2 uppercase tracking-tight">Additional Context for the Agent</label>
+                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Additional Context for the Agent</label>
                         <textarea
                             value={script.additional_context}
                             onChange={(e) => setScript(prev => ({ ...prev, additional_context: e.target.value }))}
-                            placeholder="e.g., We specialise in luxury cold water therapy installations for 5-star hotels. Our units are handcrafted in Sweden. Average project value is £15,000-£50,000. We've worked with Hilton, Four Seasons, and Mandarin Oriental."
+                            placeholder="e.g., We specialise in luxury cold water therapy installations for 5-star hotels. Our units are handcrafted in Sweden. Average project value is £15,000-£50,000."
                             rows={4}
-                            className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium resize-none"
+                            className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-none"
                         />
-                        <p className="text-[10px] text-[#9CA3AF] mt-1.5 italic">Give the agent background knowledge about your product, pricing, notable clients, or anything it might be asked about on a call.</p>
+                        <p className="text-xs text-[#6B7280] mt-1.5">Give the agent background knowledge about your product, pricing, notable clients, or anything it might be asked about.</p>
                     </div>
                 </div>
-            </Section>
+            </div>
 
             {/* Save Bar */}
-            <div className="bg-white border-t border-[#E5E7EB] -mx-8 px-8 py-6 flex items-center justify-between sticky bottom-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex items-center justify-between sticky bottom-4 shadow-lg">
                 <div className="flex-1">
                     {saveSuccess ? (
-                        <div className="flex items-center gap-2 text-green-600 animate-in fade-in duration-300">
+                        <div className="flex items-center gap-2 text-green-600">
                             <CheckCircle2 size={16} />
-                            <p className="text-xs font-bold">Script saved successfully!</p>
+                            <p className="text-sm font-medium">Script saved successfully!</p>
                         </div>
                     ) : (
-                        <p className="text-[11px] text-[#9CA3AF] font-medium max-w-[300px]">
-                            Your call script generates an AI prompt that powers the voice agent. Save to use it with your leads.
+                        <p className="text-xs text-[#6B7280]">
+                            Your call script generates an AI prompt that powers the voice agent.
                         </p>
                     )}
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => {
                             setGeneratedPrompt(script.system_prompt || generateSystemPrompt());
                             setShowPromptPreview(true);
                         }}
-                        className="px-6 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#374151] hover:bg-gray-50 transition-all"
+                        className="px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#111827] hover:bg-gray-50 transition-all"
                     >
                         Preview Prompt
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className={`px-8 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md transform active:scale-95 transition-all ${saving
+                        className={`px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all ${saving
                             ? 'bg-gray-400 cursor-not-allowed text-white'
-                            : 'bg-primary text-white hover:bg-[#4338CA]'
+                            : 'bg-[#4F46E5] text-white hover:bg-[#4338CA]'
                             }`}
                     >
                         {saving ? (
@@ -753,19 +787,19 @@ IMPORTANT RULES:
 
             {/* Prompt Preview Modal */}
             {showPromptPreview && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
-                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
+                        <div className="p-6 border-b border-[#E5E7EB] flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <Wand2 size={20} className="text-[#4F46E5]" />
                                 <div>
-                                    <h3 className="text-lg font-black text-[#111827]">Generated AI Prompt</h3>
+                                    <h3 className="text-lg font-semibold text-[#111827]">Generated AI Prompt</h3>
                                     <p className="text-xs text-[#6B7280]">This is what your voice agent will follow during calls</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setShowPromptPreview(false)}
-                                className="p-2 hover:bg-gray-50 rounded-xl text-[#9CA3AF] transition-all"
+                                className="p-2 hover:bg-gray-50 rounded-lg text-[#6B7280] transition-all"
                             >
                                 <X size={20} />
                             </button>
@@ -774,52 +808,48 @@ IMPORTANT RULES:
                             {showEnhancedPreview ? (
                                 <div className="grid grid-cols-2 gap-4 h-full">
                                     <div className="flex flex-col h-full">
-                                        <h4 className="text-sm font-bold text-[#6B7280] mb-2 uppercase tracking-tight">Original</h4>
-                                        <div className="flex-1 overflow-y-auto">
-                                            <pre className="whitespace-pre-wrap text-sm text-[#9CA3AF] font-mono leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 h-full">
-                                                {generatedPrompt}
-                                            </pre>
-                                        </div>
+                                        <h4 className="text-sm font-semibold text-[#6B7280] mb-2">Original</h4>
+                                        <pre className="flex-1 whitespace-pre-wrap text-sm text-[#6B7280] font-mono leading-relaxed bg-gray-50 p-4 rounded-xl border border-[#E5E7EB] overflow-y-auto">
+                                            {generatedPrompt}
+                                        </pre>
                                     </div>
                                     <div className="flex flex-col h-full">
-                                        <h4 className="text-sm font-bold text-primary mb-2 uppercase tracking-tight flex items-center gap-1.5">
+                                        <h4 className="text-sm font-semibold text-[#4F46E5] mb-2 flex items-center gap-1.5">
                                             <Sparkles size={16} /> Enhanced
                                         </h4>
-                                        <div className="flex-1 overflow-y-auto">
-                                            <pre className="whitespace-pre-wrap text-sm text-[#374151] font-mono leading-relaxed bg-[#EEF2FF] p-4 rounded-xl border border-primary/20 h-full shadow-inner ring-1 ring-white">
-                                                {enhancedPrompt}
-                                            </pre>
-                                        </div>
+                                        <pre className="flex-1 whitespace-pre-wrap text-sm text-[#111827] font-mono leading-relaxed bg-[#EEF2FF] p-4 rounded-xl border border-[#4F46E5]/20 overflow-y-auto">
+                                            {enhancedPrompt}
+                                        </pre>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex flex-col h-full gap-2 relative group">
+                                <div className="flex flex-col gap-2 relative">
                                     <textarea
                                         value={generatedPrompt}
                                         onChange={(e) => {
                                             setGeneratedPrompt(e.target.value);
                                             setScript(prev => ({ ...prev, system_prompt: e.target.value }));
                                         }}
-                                        className="w-full flex-1 min-h-[400px] whitespace-pre-wrap text-sm text-[#374151] font-mono leading-relaxed bg-[#F9FAFB] p-6 rounded-xl border border-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y"
+                                        className="w-full min-h-[400px] whitespace-pre-wrap text-sm text-[#111827] font-mono leading-relaxed bg-[#F8F9FA] p-6 rounded-xl border border-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all resize-y"
                                         spellCheck={false}
                                     />
-                                    <p className="text-[11px] text-[#6B7280] italic ml-1 flex items-center gap-1.5 mt-1">
-                                        <AlertCircle size={12} className="text-[#9CA3AF]" />
+                                    <p className="text-xs text-[#6B7280] flex items-center gap-1.5 mt-1">
+                                        <AlertCircle size={12} className="text-[#6B7280]" />
                                         You can edit this prompt directly. Changes will be used when making calls.
                                     </p>
                                 </div>
                             )}
                         </div>
-                        <div className="p-6 border-t border-gray-100 flex items-center justify-between">
+                        <div className="p-6 border-t border-[#E5E7EB] flex items-center justify-between">
                             <div>
                                 {!showEnhancedPreview && (
                                     <button
                                         onClick={handleEnhanceWithAI}
                                         disabled={isEnhancing}
-                                        className="flex items-center gap-2 px-6 py-2.5 bg-indigo-50 text-[#4F46E5] border border-indigo-100 rounded-lg text-sm font-bold hover:bg-indigo-100 transition-all disabled:opacity-50"
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#EEF2FF] text-[#4F46E5] border border-[#4F46E5]/20 rounded-lg text-sm font-medium hover:bg-indigo-100 transition-all disabled:opacity-50"
                                     >
                                         {isEnhancing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                                        {isEnhancing ? 'Enhancing your script...' : 'Enhance with AI'}
+                                        {isEnhancing ? 'Enhancing...' : 'Enhance with AI'}
                                     </button>
                                 )}
                             </div>
@@ -828,7 +858,7 @@ IMPORTANT RULES:
                                     <>
                                         <button
                                             onClick={() => setShowEnhancedPreview(false)}
-                                            className="px-6 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#374151] hover:bg-gray-50 transition-all"
+                                            className="px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#111827] hover:bg-gray-50 transition-all"
                                         >
                                             Keep Original
                                         </button>
@@ -838,10 +868,10 @@ IMPORTANT RULES:
                                                 setScript(prev => ({ ...prev, system_prompt: enhancedPrompt }));
                                                 setShowEnhancedPreview(false);
                                             }}
-                                            className="px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#4338CA] transition-all"
+                                            className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-[#4338CA] transition-all"
                                         >
                                             <Sparkles size={16} />
-                                            Accept Enhanced Version
+                                            Accept Enhanced
                                         </button>
                                     </>
                                 ) : (
@@ -851,13 +881,13 @@ IMPORTANT RULES:
                                                 navigator.clipboard.writeText(generatedPrompt);
                                                 alert('Prompt copied to clipboard!');
                                             }}
-                                            className="px-6 py-2.5 border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#374151] hover:bg-gray-50 transition-all"
+                                            className="px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm font-medium text-[#111827] hover:bg-gray-50 transition-all"
                                         >
-                                            Copy to Clipboard
+                                            Copy
                                         </button>
                                         <button
                                             onClick={() => setShowPromptPreview(false)}
-                                            className="px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-[#4338CA] transition-all"
+                                            className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all"
                                         >
                                             Close
                                         </button>

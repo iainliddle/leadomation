@@ -5,15 +5,12 @@ import {
     Plus,
     Trash2,
     Play,
-    Pause,
     ChevronRight,
-    Phone,
     GripVertical,
     Save,
     X,
     Mail,
     Linkedin,
-    Layers,
     Loader2,
     Users,
     Calendar
@@ -150,23 +147,16 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
             .from('linkedin_enrollments')
             .update({ status: newStatus })
             .eq('id', enrollment.id);
-
-        if (!error) {
-            fetchLinkedinEnrollments();
-        }
+        if (!error) fetchLinkedinEnrollments();
     };
 
     const handleRemoveLinkedInEnrollment = async (id: string) => {
         if (!confirm('Are you sure you want to remove this lead from the LinkedIn sequence?')) return;
-
         const { error } = await supabase
             .from('linkedin_enrollments')
             .delete()
             .eq('id', id);
-
-        if (!error) {
-            fetchLinkedinEnrollments();
-        }
+        if (!error) fetchLinkedinEnrollments();
     };
 
     const getPhaseInfo = (phase: number) => {
@@ -210,15 +200,10 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
         };
 
         if (editingSequence.id) {
-            const { error } = await supabase
-                .from('sequences')
-                .update(sequenceData)
-                .eq('id', editingSequence.id);
+            const { error } = await supabase.from('sequences').update(sequenceData).eq('id', editingSequence.id);
             if (!error) console.log('Sequence updated!');
         } else {
-            const { error } = await supabase
-                .from('sequences')
-                .insert(sequenceData);
+            const { error } = await supabase.from('sequences').insert(sequenceData);
             if (!error) console.log('Sequence saved!');
         }
 
@@ -235,10 +220,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 
     const handleToggleStatus = async (seq: Sequence) => {
         const newStatus = seq.status === 'active' ? 'paused' : 'active';
-        const { error } = await supabase
-            .from('sequences')
-            .update({ status: newStatus })
-            .eq('id', seq.id);
+        const { error } = await supabase.from('sequences').update({ status: newStatus }).eq('id', seq.id);
         if (!error) fetchSequences();
     };
 
@@ -271,7 +253,6 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 
     const addStep = async (channel: 'email' | 'linkedin' | 'phone') => {
         if (!editingSequence) return;
-
         const canAdd = await checkSequenceStepLimit();
         if (!canAdd) return;
 
@@ -332,25 +313,40 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 
     if (isLoading) {
         return (
-            <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="p-6 bg-[#F8F9FA] min-h-screen flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-[#4F46E5] animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="max-w-[1600px] mx-auto w-full h-full">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {!editingSequence ? (
                 /* Sequence List View */
-                <div className="animate-in fade-in duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
-                    {/* Tab Navigation */}
-                    <div className="flex items-center gap-2 mb-6">
+                <div>
+                    {/* Page Header */}
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 className="text-2xl font-semibold text-gray-900">Sequence Builder</h1>
+                            <p className="text-sm text-gray-500 mt-0.5">Build multi-step outreach automation flows</p>
+                        </div>
+                        <button
+                            onClick={handleCreateNew}
+                            className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150 shadow-sm"
+                        >
+                            <Plus size={16} />
+                            New Sequence
+                        </button>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="flex border-b border-gray-200 mb-6">
                         <button
                             onClick={() => setActiveTab('email')}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium cursor-pointer transition-colors ${
                                 activeTab === 'email'
-                                    ? 'bg-white text-indigo-600 shadow-sm border border-slate-200'
-                                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                                    ? 'text-[#4F46E5] border-b-2 border-[#4F46E5] -mb-px'
+                                    : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
                             <Mail size={16} />
@@ -358,16 +354,16 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                         </button>
                         <button
                             onClick={() => setActiveTab('linkedin')}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium cursor-pointer transition-colors ${
                                 activeTab === 'linkedin'
-                                    ? 'bg-white text-blue-600 shadow-sm border border-slate-200'
-                                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                                    ? 'text-[#4F46E5] border-b-2 border-[#4F46E5] -mb-px'
+                                    : 'text-gray-500 hover:text-gray-700'
                             }`}
                         >
                             <Linkedin size={16} />
                             LinkedIn Sequences
                             {linkedinEnrollments.filter(e => e.status === 'active').length > 0 && (
-                                <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                                <span className="bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-[#C7D2FE]">
                                     {linkedinEnrollments.filter(e => e.status === 'active').length}
                                 </span>
                             )}
@@ -377,214 +373,174 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                     {activeTab === 'email' ? (
                         /* Email Sequences Tab */
                         <>
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h1 className="text-2xl font-bold text-slate-900 mb-1">Outreach Sequences</h1>
-                            <p className="text-sm text-slate-500">Manage your multi-channel automation flows</p>
-                        </div>
-                        <button
-                            onClick={handleCreateNew}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200"
-                        >
-                            <Plus size={18} />
-                            New Sequence
-                        </button>
-                    </div>
-
-                    {sequences.length === 0 ? (
-                        <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm hover:shadow-md transition-shadow duration-200">
-                            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                <Layers size={32} />
-                            </div>
-                            <h3 className="text-lg font-semibold text-slate-700 mb-2">No sequences yet</h3>
-                            <p className="text-sm text-slate-500 mb-6">Create your first outreach sequence to start automating</p>
-                            <button
-                                onClick={handleCreateNew}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200 inline-flex items-center gap-2"
-                            >
-                                <Plus size={16} />
-                                New Sequence
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-4">
-                            {sequences.map(seq => (
-                                <div key={seq.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex items-center justify-between group">
-                                    <div className="flex items-center gap-6">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${seq.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
-                                            {seq.status === 'active' ? <Play size={20} /> : <Pause size={20} />}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-base font-semibold text-slate-900 mb-1">{seq.name}</h3>
-                                            <div className="flex items-center gap-2 text-sm text-slate-500">
-                                                <span>{seq.steps?.length || 0} steps</span>
-                                                <span className="text-slate-300">·</span>
-                                                <span>{(seq as any).sequence_enrollments?.[0]?.count || 0} enrolled</span>
-                                                <span className="text-slate-300">·</span>
-                                                <span>Created {new Date(seq.created_at).toLocaleDateString()}</span>
+                            {sequences.length === 0 ? (
+                                <div className="text-center py-20">
+                                    <div className="w-16 h-16 bg-[#EEF2FF] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <Mail className="w-8 h-8 text-[#4F46E5]" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No sequences yet</h3>
+                                    <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+                                        Create your first outreach sequence to start automating your campaigns
+                                    </p>
+                                    <button
+                                        onClick={handleCreateNew}
+                                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-lg px-5 py-2.5 shadow-sm transition-all duration-150 inline-flex items-center gap-2"
+                                    >
+                                        <Plus size={16} />
+                                        New Sequence
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {sequences.map(seq => (
+                                        <div
+                                            key={seq.id}
+                                            onClick={() => setEditingSequence(seq)}
+                                            className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:border-[#4F46E5] hover:shadow-md transition-all duration-200 cursor-pointer group flex items-center justify-between"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                                                    seq.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'
+                                                }`}>
+                                                    <Play size={16} className={seq.status === 'active' ? '' : 'opacity-50'} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-[#4F46E5] transition-colors">
+                                                        {seq.name}
+                                                    </h3>
+                                                    <div className="flex items-center gap-1.5 text-sm text-gray-400 mt-0.5">
+                                                        <span>{seq.steps?.length || 0} Steps</span>
+                                                        <span className="text-gray-300">·</span>
+                                                        <span>{(seq as any).sequence_enrollments?.[0]?.count || 0} enrolled lead{(seq as any).sequence_enrollments?.[0]?.count !== 1 ? 's' : ''}</span>
+                                                        <span className="text-gray-300">·</span>
+                                                        <span>Created {new Date(seq.created_at).toLocaleDateString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                                                    seq.status === 'active'
+                                                        ? 'bg-green-50 text-green-700 border-green-200'
+                                                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                }`}>
+                                                    {seq.status === 'active' ? 'ACTIVE' : 'PAUSED'}
+                                                </span>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleToggleStatus(seq); }}
+                                                    className="text-gray-400 hover:text-gray-700 transition-colors p-2 text-sm font-medium"
+                                                >
+                                                    {seq.status === 'active' ? 'Pause' : 'Activate'}
+                                                </button>
+                                                <ChevronRight className="text-gray-400 group-hover:text-[#4F46E5] transition-colors" size={20} />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(seq.id); }}
+                                                    className="p-2 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${seq.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-                                            {seq.status === 'active' ? 'ACTIVE' : 'PAUSED'}
-                                        </span>
-                                        <button
-                                            onClick={() => handleToggleStatus(seq)}
-                                            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${seq.status === 'active' ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}
-                                        >
-                                            {seq.status === 'active' ? 'Pause' : 'Activate'}
-                                        </button>
-                                        <button
-                                            onClick={() => setEditingSequence(seq)}
-                                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-                                        >
-                                            <ChevronRight size={20} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(seq.id)}
-                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            )}
                         </>
                     ) : (
                         /* LinkedIn Sequences Tab */
                         <>
-                            <div className="mb-8">
-                                <h1 className="text-2xl font-bold text-slate-900 mb-1">LinkedIn Relationship Sequencer</h1>
-                                <p className="text-sm text-slate-500">35-day relationship funnel that builds genuine connections before making any ask. Runs automatically.</p>
-                            </div>
-
                             {/* Phase Timeline */}
-                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
-                                <h3 className="text-sm font-bold text-slate-700 mb-4">Sequence Phases</h3>
-                                <div className="flex items-center justify-between relative">
-                                    <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 z-0"></div>
-                                    {LINKEDIN_PHASES.map((phase, idx) => (
-                                        <div key={phase.phase} className="flex flex-col items-center relative z-10">
-                                            <div className={`w-10 h-10 rounded-full ${phase.bgColor} ${phase.textColor} flex items-center justify-center font-bold text-sm border-2 ${phase.borderColor} bg-white`}>
-                                                {phase.phase}
-                                            </div>
-                                            <div className="mt-2 text-center">
-                                                <div className="text-xs font-bold text-slate-700">{phase.name}</div>
-                                                <div className="text-[10px] text-slate-400">Days {phase.days}</div>
-                                            </div>
-                                            {idx < LINKEDIN_PHASES.length - 1 && (
-                                                <ChevronRight size={14} className="absolute top-3 -right-6 text-slate-300" />
-                                            )}
+                            <div className="flex items-center mb-6 bg-white rounded-xl border border-gray-200 shadow-sm p-4 relative overflow-hidden">
+                                <div className="absolute left-10 right-10 h-0.5 bg-gray-100 top-8 -z-0" />
+                                {LINKEDIN_PHASES.map((phase) => (
+                                    <div key={phase.phase} className="flex-1 flex flex-col items-center relative z-10">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                                            phase.phase === 1
+                                                ? 'bg-[#4F46E5] text-white ring-4 ring-[#EEF2FF]'
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors cursor-default'
+                                        }`}>
+                                            {phase.phase}
                                         </div>
-                                    ))}
-                                </div>
+                                        <span className="text-xs font-semibold text-gray-700 mt-2">{phase.name}</span>
+                                        <span className="text-[10px] text-gray-400">Day {phase.days}</span>
+                                    </div>
+                                ))}
                             </div>
 
-                            {/* Enrollments List */}
                             {linkedinLoading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <Loader2 size={24} className="animate-spin text-slate-400" />
+                                    <Loader2 size={24} className="animate-spin text-[#4F46E5]" />
                                 </div>
                             ) : linkedinEnrollments.length === 0 ? (
-                                <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm">
-                                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                        <Users size={32} />
+                                <div className="text-center py-20">
+                                    <div className="w-16 h-16 bg-[#EEF2FF] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <Users className="w-8 h-8 text-[#4F46E5]" />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-slate-700 mb-2">No LinkedIn sequences running</h3>
-                                    <p className="text-sm text-slate-500 mb-6">Enrol leads from the Lead Database to get started</p>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No LinkedIn sequences running</h3>
+                                    <p className="text-sm text-gray-500 mb-6">Enrol leads from the Lead Database to get started</p>
                                     <button
                                         onClick={() => onPageChange?.('Lead Database')}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200 inline-flex items-center gap-2"
+                                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-lg px-5 py-2.5 shadow-sm transition-all duration-150 inline-flex items-center gap-2"
                                     >
-                                        <Users size={16} />
-                                        Go to Lead Database
+                                        <Users size={16} /> Go to Lead Database
                                     </button>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-3">
                                     {linkedinEnrollments.map(enrollment => {
                                         const phaseInfo = getPhaseInfo(enrollment.current_phase);
                                         return (
-                                            <div key={enrollment.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200">
-                                                <div className="flex items-center justify-between">
+                                            <div key={enrollment.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:border-[#4F46E5] hover:shadow-md transition-all duration-200">
+                                                <div className="flex items-center justify-between mb-3">
                                                     <div className="flex items-center gap-4">
-                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${enrollment.status === 'active' ? 'bg-blue-50 text-blue-600' : enrollment.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
-                                                            <Linkedin size={20} />
+                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                                                            enrollment.status === 'active' ? 'bg-[#EEF2FF] text-[#4F46E5]' :
+                                                            enrollment.status === 'completed' ? 'bg-green-50 text-green-600' :
+                                                            'bg-gray-100 text-gray-400'
+                                                        }`}>
+                                                            <Linkedin size={18} />
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-base font-semibold text-slate-900 mb-1">
+                                                            <h3 className="text-base font-semibold text-gray-900">
                                                                 {enrollment.leads?.company || 'Unknown Company'}
                                                             </h3>
-                                                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                            <div className="flex items-center gap-2 text-sm text-gray-500 mt-0.5">
                                                                 <a
                                                                     href={enrollment.linkedin_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="text-blue-600 hover:underline text-xs"
-                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    className="text-[#4F46E5] hover:underline"
                                                                 >
                                                                     View Profile
                                                                 </a>
-                                                                <span className="text-slate-300">|</span>
-                                                                <span className="text-xs">
-                                                                    {enrollment.leads?.first_name} {enrollment.leads?.last_name}
-                                                                </span>
+                                                                <span className="text-gray-300">·</span>
+                                                                <span>{enrollment.leads?.first_name} {enrollment.leads?.last_name}</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div className="flex items-center gap-4">
-                                                        {/* Phase Badge */}
-                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${phaseInfo.bgColor} ${phaseInfo.textColor} ${phaseInfo.borderColor}`}>
+                                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${phaseInfo.bgColor} ${phaseInfo.textColor} ${phaseInfo.borderColor}`}>
                                                             Phase {enrollment.current_phase}: {phaseInfo.name}
                                                         </span>
-
-                                                        {/* Day Counter */}
-                                                        <div className="flex items-center gap-1.5 text-sm">
-                                                            <Calendar size={14} className="text-slate-400" />
-                                                            <span className="font-bold text-slate-700">Day {enrollment.current_day}</span>
-                                                            <span className="text-slate-400">of 35</span>
-                                                        </div>
-
-                                                        {/* Status Badge */}
-                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                                                            enrollment.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                                            enrollment.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                            enrollment.status === 'connected' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                                                            enrollment.status === 'active' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                            enrollment.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                                                             enrollment.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
                                                             'bg-amber-50 text-amber-700 border-amber-200'
                                                         }`}>
                                                             {enrollment.status.toUpperCase()}
                                                         </span>
-
-                                                        {/* Last Action */}
-                                                        {enrollment.last_action_at && (
-                                                            <div className="text-xs text-slate-400">
-                                                                Last: {new Date(enrollment.last_action_at).toLocaleDateString()}
-                                                            </div>
-                                                        )}
-
-                                                        {/* Actions */}
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex gap-2">
                                                             {enrollment.status !== 'completed' && enrollment.status !== 'failed' && (
                                                                 <button
                                                                     onClick={() => handleToggleLinkedInStatus(enrollment)}
-                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                                                        enrollment.status === 'active'
-                                                                            ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                                                                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-                                                                    }`}
+                                                                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 border border-gray-200 transition-colors"
                                                                 >
                                                                     {enrollment.status === 'active' ? 'Pause' : 'Resume'}
                                                                 </button>
                                                             )}
                                                             <button
                                                                 onClick={() => handleRemoveLinkedInEnrollment(enrollment.id)}
-                                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                                title="Remove"
+                                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
                                                             >
                                                                 <Trash2 size={16} />
                                                             </button>
@@ -592,19 +548,21 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                                     </div>
                                                 </div>
 
-                                                {/* Progress Bar */}
-                                                <div className="mt-4 pt-4 border-t border-slate-100">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                <div className="flex items-center gap-4 pt-3 border-t border-gray-100">
+                                                    <div className="flex-1 flex items-center gap-3">
+                                                        <span className="text-xs font-medium text-gray-500 min-w-[50px]">Day {enrollment.current_day} of 35</span>
+                                                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                                             <div
-                                                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+                                                                className="h-full bg-[#4F46E5] rounded-full transition-all duration-500"
                                                                 style={{ width: `${(enrollment.current_day / 35) * 100}%` }}
-                                                            ></div>
+                                                            />
                                                         </div>
-                                                        <span className="text-xs font-bold text-slate-500">
-                                                            {Math.round((enrollment.current_day / 35) * 100)}%
-                                                        </span>
                                                     </div>
+                                                    {enrollment.last_action_at && (
+                                                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                                                            <Calendar size={12} /> Last: {new Date(enrollment.last_action_at).toLocaleDateString()}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -616,203 +574,182 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                 </div>
             ) : (
                 /* Detail/Editor View */
-                <div className="flex flex-col lg:flex-row gap-8 animate-in slide-in-from-right duration-500 h-full w-full">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex h-[calc(100vh-6rem)] relative">
                     {/* Left Panel: Steps list */}
-                    <aside className="w-full lg:w-[320px] shrink-0 flex flex-col gap-6 lg:h-[calc(100vh-140px)]">
-                        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 flex flex-col h-full overflow-hidden">
-                            <div className="flex items-center justify-between mb-6">
-                                <button onClick={() => setEditingSequence(null)} className="text-gray-400 hover:text-[#111827]">
-                                    <X size={20} />
-                                </button>
-                                <span className="px-3 py-1 bg-blue-50 text-primary rounded-full text-[10px] font-black uppercase">
-                                    Editing Sequence
-                                </span>
-                            </div>
-
+                    <div className="w-[320px] shrink-0 border-r border-gray-200 flex flex-col bg-gray-50 h-full overflow-hidden relative">
+                        {/* Editor Header */}
+                        <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+                            <button
+                                onClick={() => setEditingSequence(null)}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 mb-3"
+                            >
+                                ← Back to sequences
+                            </button>
                             <input
                                 type="text"
-                                className="w-full text-lg font-black text-[#111827] mb-6 focus:outline-none placeholder:text-gray-300"
+                                className="w-full text-lg font-semibold text-gray-900 bg-transparent focus:outline-none placeholder:text-gray-300"
                                 value={editingSequence.name}
                                 onChange={(e) => setEditingSequence({ ...editingSequence, name: e.target.value })}
                                 placeholder="Sequence Name"
                             />
-
-                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2 relative">
-                                <div className="absolute left-[22px] top-4 bottom-4 w-0.5 bg-gray-100 z-0 border-l-2 border-dashed border-gray-100"></div>
-
-                                {editingSequence.steps.map((step, index) => (
-                                    <React.Fragment key={index}>
-                                        {index > 0 && (
-                                            <div className="flex justify-center py-1">
-                                                <div className="px-3 py-1 bg-gray-50 border border-gray-100 rounded-full text-[9px] font-black text-gray-400 flex items-center gap-1 z-10">
-                                                    <Clock size={10} />
-                                                    WAIT {step.delay_days} DAYS
-                                                </div>
-                                            </div>
-                                        )}
-                                        <div
-                                            draggable
-                                            onDragStart={() => handleDragStart(index)}
-                                            onDragOver={handleDragOver}
-                                            onDrop={() => handleDrop(index)}
-                                            className={`group relative flex items-center gap-3 p-4 rounded-xl border shadow-sm transition-all duration-200 cursor-grab active:cursor-grabbing z-10 ${activeStepIndex === index ? 'bg-white border-indigo-300 ring-1 ring-indigo-300 shadow-md' : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-md'}`}
-                                            onClick={() => setActiveStepIndex(index)}
-                                        >
-                                            <div className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <GripVertical size={14} className="text-slate-300" />
-                                            </div>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${activeStepIndex === index ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                                                {index + 1}
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <p className={`text-[11px] font-black truncate uppercase ${activeStepIndex === index ? 'text-primary' : 'text-[#111827]'}`}>Step {index + 1}: {step.channel}</p>
-                                                <p className="text-[10px] text-gray-400 font-bold truncate">{step.subject || step.body.slice(0, 20) || 'Empty step'}</p>
-                                            </div>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); removeStep(index); }}
-                                                className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-red-500 transition-all"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        </div>
-                                    </React.Fragment>
-                                ))}
-                            </div>
-
-                            {/* Merge Tags Tip Card */}
-                            <div style={{
-                                background: '#F8F9FF',
-                                border: '1px solid #E0E7FF',
-                                borderRadius: '8px',
-                                padding: '12px 16px',
-                                marginTop: '16px',
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: '10px'
-                            }}>
-                                <span style={{ fontSize: '16px' }}>💡</span>
-                                <div>
-                                    <p style={{ margin: '0 0 2px', fontSize: '12px', fontWeight: '600', color: '#4F46E5' }}>
-                                        Merge Tags
-                                    </p>
-                                    <p style={{ margin: 0, fontSize: '11px', color: '#6B7280', lineHeight: '1.4' }}>
-                                        Click the merge tags above the message body to personalise each email automatically with the lead's details.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 pt-6 border-t border-gray-100 space-y-2">
-                                <button onClick={() => addStep('email')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-[#6B7280] rounded-xl text-xs font-black hover:bg-blue-50 hover:text-primary transition-all">
-                                    <Mail size={14} /> + EMAIL STEP
-                                </button>
-                                <button onClick={() => addStep('linkedin')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-[#6B7280] rounded-xl text-xs font-black hover:bg-blue-50 hover:text-primary transition-all">
-                                    <Linkedin size={14} /> + LINKEDIN STEP
-                                </button>
-                                <button onClick={() => addStep('phone')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-[#6B7280] rounded-xl text-xs font-black hover:bg-blue-50 hover:text-primary transition-all">
-                                    <Phone size={14} /> + PHONE STEP
-                                </button>
-                            </div>
                         </div>
-                    </aside>
+
+                        {/* Steps flow */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-2 relative custom-scrollbar">
+                            <div className="absolute left-8 top-8 bottom-8 w-px bg-gray-200 z-0"></div>
+
+                            {editingSequence.steps.map((step, index) => (
+                                <React.Fragment key={index}>
+                                    {index > 0 && (
+                                        <div className="flex justify-center py-2 relative z-10">
+                                            <div className="px-2.5 py-1 bg-white border border-gray-200 rounded-full text-[10px] font-semibold text-gray-500 flex items-center gap-1.5 shadow-sm">
+                                                <Clock size={10} /> Wait {step.delay_days} days
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div
+                                        draggable
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={handleDragOver}
+                                        onDrop={() => handleDrop(index)}
+                                        className={`group relative flex items-center gap-3 p-3 rounded-xl border shadow-sm transition-all duration-150 cursor-grab active:cursor-grabbing z-10 ${
+                                            activeStepIndex === index
+                                                ? 'bg-white border-[#4F46E5] ring-1 ring-[#4F46E5] shadow-md'
+                                                : 'bg-white border-gray-200 hover:border-[#818CF8]'
+                                        }`}
+                                        onClick={() => setActiveStepIndex(index)}
+                                    >
+                                        <div className="absolute -left-2.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-400 p-0.5 rounded shadow-sm border border-gray-200">
+                                            <GripVertical size={12} />
+                                        </div>
+                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
+                                            activeStepIndex === index ? 'bg-[#4F46E5] text-white' : 'bg-gray-100 text-gray-600'
+                                        }`}>
+                                            {index + 1}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className={`text-xs font-semibold uppercase tracking-wide ${activeStepIndex === index ? 'text-[#4F46E5]' : 'text-gray-900'}`}>
+                                                    {step.channel}
+                                                </p>
+                                            </div>
+                                            <p className="text-[11px] text-gray-500 font-medium truncate mt-0.5">
+                                                {step.subject || step.body.slice(0, 20) || 'Empty step'}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); removeStep(index); }}
+                                            className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                </React.Fragment>
+                            ))}
+                        </div>
+
+                        <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10 space-y-2">
+                            <button onClick={() => addStep('email')} className="w-full flex items-center justify-center gap-2 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 rounded-lg text-xs font-semibold transition-colors">
+                                <Mail size={14} /> Add Email
+                            </button>
+                            <button onClick={() => addStep('linkedin')} className="w-full flex items-center justify-center gap-2 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 rounded-lg text-xs font-semibold transition-colors">
+                                <Linkedin size={14} /> Add LinkedIn
+                            </button>
+                        </div>
+                    </div>
 
                     {/* Right Panel: Editor Canvas */}
-                    <main className="flex-1 flex flex-col gap-6">
-                        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col flex-1 overflow-hidden min-h-[700px]">
-                            {/* Editor Header */}
-                            <div className="px-8 py-4 border-b border-gray-50 flex items-center justify-between">
-                                <div className="flex bg-gray-100 p-1 rounded-xl">
-                                    <button onClick={() => setIsPreview(false)} className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${!isPreview ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>EDITOR</button>
-                                    <button onClick={() => setIsPreview(true)} className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${isPreview ? 'bg-white text-primary shadow-sm' : 'text-gray-400'}`}>PREVIEW</button>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={isSaving}
-                                        className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                                        Save Sequence
-                                    </button>
-                                </div>
+                    <div className="flex-1 flex flex-col h-full bg-white relative">
+                        <div className="px-8 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 bg-white/80 backdrop-blur-md">
+                            <div className="flex bg-gray-100 p-1 rounded-lg">
+                                <button onClick={() => setIsPreview(false)} className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${!isPreview ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Editor</button>
+                                <button onClick={() => setIsPreview(true)} className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${isPreview ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Preview</button>
                             </div>
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="flex items-center gap-2 px-5 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-semibold hover:bg-[#4338CA] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                Save Sequence
+                            </button>
+                        </div>
 
-                            {/* Editor Body */}
-                            <div className="p-8 flex-1 flex flex-col animate-in fade-in duration-300">
-                                {editingSequence.steps[activeStepIndex] && (
-                                    <div className="space-y-8 max-w-3xl">
-                                        {editingSequence.steps[activeStepIndex].channel === 'email' && (
-                                            <div>
-                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Subject Line</label>
-                                                <input
-                                                    type="text"
-                                                    className="w-full text-2xl font-black text-[#111827] focus:outline-none placeholder:text-gray-200"
-                                                    value={editingSequence.steps[activeStepIndex].subject}
-                                                    onChange={(e) => updateStep(activeStepIndex, { subject: e.target.value })}
-                                                    placeholder="Enter subject line..."
-                                                />
-                                            </div>
-                                        )}
-
+                        <div className="p-8 flex-1 overflow-y-auto">
+                            {editingSequence.steps[activeStepIndex] && (
+                                <div className="max-w-3xl mx-auto space-y-6">
+                                    <div className="flex items-center gap-6 pb-6 border-b border-gray-100">
                                         <div>
-                                            <div className="flex items-center justify-between mb-3">
-                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Message Body</label>
-                                                <div className="flex gap-2">
-                                                    {mergeTags.map(tag => (
-                                                        <button
-                                                            key={tag.label}
-                                                            onClick={() => updateStep(activeStepIndex, { body: (editingSequence.steps[activeStepIndex].body || '') + ' ' + tag.label })}
-                                                            className={`px-2 py-1 rounded-md text-[9px] font-bold border transition-all ${tag.color}`}
-                                                        >
-                                                            {tag.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            {isPreview ? (
-                                                <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100 min-h-[300px] whitespace-pre-line text-sm font-medium text-[#4B5563] leading-relaxed">
-                                                    {getPreviewText(editingSequence.steps[activeStepIndex].body) || 'No content to preview'}
-                                                </div>
-                                            ) : (
-                                                <textarea
-                                                    className="w-full min-h-[300px] p-6 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 text-sm font-medium leading-relaxed transition-all"
-                                                    value={editingSequence.steps[activeStepIndex].body}
-                                                    onChange={(e) => updateStep(activeStepIndex, { body: e.target.value })}
-                                                    placeholder={`Write your ${editingSequence.steps[activeStepIndex].channel} message here...`}
+                                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Delay</label>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="number"
+                                                    className="w-20 p-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                                    value={editingSequence.steps[activeStepIndex].delay_days}
+                                                    onChange={(e) => updateStep(activeStepIndex, { delay_days: parseInt(e.target.value) || 0 })}
                                                 />
-                                            )}
+                                                <span className="text-sm font-medium text-gray-500">days</span>
+                                            </div>
                                         </div>
-
-                                        <div className="flex items-center gap-8 pt-6 border-t border-gray-100">
-                                            <div>
-                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Wait Time (Days)</label>
-                                                <div className="flex items-center gap-3">
-                                                    <input
-                                                        type="number"
-                                                        className="w-20 p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-black text-center focus:outline-none focus:ring-2 focus:ring-primary/10"
-                                                        value={editingSequence.steps[activeStepIndex].delay_days}
-                                                        onChange={(e) => updateStep(activeStepIndex, { delay_days: parseInt(e.target.value) || 0 })}
-                                                    />
-                                                    <span className="text-xs font-bold text-gray-400">days after previous step</span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Channel</label>
-                                                <select
-                                                    className="p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-black focus:outline-none focus:ring-2 focus:ring-primary/10"
-                                                    value={editingSequence.steps[activeStepIndex].channel}
-                                                    onChange={(e) => updateStep(activeStepIndex, { channel: e.target.value as Step['channel'] })}
-                                                >
-                                                    <option value="email">Email</option>
-                                                    <option value="linkedin">LinkedIn</option>
-                                                    <option value="phone">Phone Call</option>
-                                                </select>
-                                            </div>
+                                        <div className="flex-1">
+                                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Channel</label>
+                                            <select
+                                                className="w-full max-w-[200px] p-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                                value={editingSequence.steps[activeStepIndex].channel}
+                                                onChange={(e) => updateStep(activeStepIndex, { channel: e.target.value as Step['channel'] })}
+                                            >
+                                                <option value="email">Email</option>
+                                                <option value="linkedin">LinkedIn</option>
+                                                <option value="phone">Phone Call</option>
+                                            </select>
                                         </div>
                                     </div>
-                                )}
-                            </div>
+
+                                    {editingSequence.steps[activeStepIndex].channel === 'email' && (
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Subject Line</label>
+                                            <input
+                                                type="text"
+                                                className="w-full text-lg font-semibold text-gray-900 bg-transparent border-b border-gray-200 pb-2 focus:outline-none focus:border-[#4F46E5] placeholder:text-gray-300 transition-colors"
+                                                value={editingSequence.steps[activeStepIndex].subject}
+                                                onChange={(e) => updateStep(activeStepIndex, { subject: e.target.value })}
+                                                placeholder="Enter subject line..."
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Message Body</label>
+                                            <div className="flex flex-wrap gap-1.5 justify-end">
+                                                {mergeTags.map(tag => (
+                                                    <button
+                                                        key={tag.label}
+                                                        onClick={() => updateStep(activeStepIndex, { body: (editingSequence.steps[activeStepIndex].body || '') + ' ' + tag.label })}
+                                                        className="px-2 py-1 rounded bg-[#EEF2FF] text-[#4F46E5] hover:bg-[#E0E7FF] text-[10px] font-semibold transition-colors"
+                                                    >
+                                                        {tag.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        {isPreview ? (
+                                            <div className="p-6 bg-gray-50 rounded-xl border border-gray-200 min-h-[400px] whitespace-pre-line text-sm text-gray-700 leading-relaxed shadow-inner">
+                                                {getPreviewText(editingSequence.steps[activeStepIndex].body) || 'No content to preview'}
+                                            </div>
+                                        ) : (
+                                            <textarea
+                                                className="w-full min-h-[400px] p-6 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] text-sm text-gray-800 leading-relaxed transition-all shadow-sm resize-y"
+                                                value={editingSequence.steps[activeStepIndex].body}
+                                                onChange={(e) => updateStep(activeStepIndex, { body: e.target.value })}
+                                                placeholder={`Write your ${editingSequence.steps[activeStepIndex].channel} message here...`}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    </main>
+                    </div>
                 </div>
             )}
 

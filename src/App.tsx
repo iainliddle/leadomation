@@ -153,7 +153,7 @@ const App: React.FC = () => {
           </FeatureGate>
         );
       case 'New Campaign':
-        return <NewCampaign onPageChange={setActivePage} />;
+        return <NewCampaign onBack={() => setActivePage('Dashboard')} />;
       case 'Active Campaigns':
         return <ActiveCampaigns key={activePage} onPageChange={setActivePage} />;
       case 'Lead Database':
