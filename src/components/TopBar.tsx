@@ -32,11 +32,10 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign }) => {
             // Load profile data
             const { data } = await supabase
                 .from('profiles')
-                .select('avatar_url, first_name, last_name')
+                .select('first_name, last_name')
                 .eq('id', user.id)
                 .single();
 
-            if (data?.avatar_url) setHeaderAvatarUrl(data.avatar_url);
             if (data?.first_name) {
                 setHeaderFirstName(data.first_name);
                 const fn = data.first_name || '';
