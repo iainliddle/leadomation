@@ -14,10 +14,43 @@ import {
     Mail,
     Linkedin,
     Layers,
-    Loader2
+    Loader2,
+    Users,
+    Calendar
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
+
+interface LinkedInEnrollment {
+    id: string;
+    user_id: string;
+    lead_id: string;
+    unipile_account_id: string;
+    linkedin_url: string;
+    current_phase: number;
+    current_day: number;
+    status: 'active' | 'paused' | 'completed' | 'failed' | 'connected';
+    connected_at: string | null;
+    last_action_at: string | null;
+    next_action_at: string | null;
+    enrolled_at: string;
+    notes: string | null;
+    created_at: string;
+    leads?: {
+        company: string;
+        first_name: string;
+        last_name: string;
+    };
+}
+
+const LINKEDIN_PHASES = [
+    { phase: 1, name: 'Silent Awareness', days: '1-10', color: 'slate', bgColor: 'bg-slate-100', textColor: 'text-slate-700', borderColor: 'border-slate-200' },
+    { phase: 2, name: 'Connection', days: '12-14', color: 'blue', bgColor: 'bg-blue-100', textColor: 'text-blue-700', borderColor: 'border-blue-200' },
+    { phase: 3, name: 'Warm Thanks', days: '15-16', color: 'green', bgColor: 'bg-green-100', textColor: 'text-green-700', borderColor: 'border-green-200' },
+    { phase: 4, name: 'Advice Ask', days: '20-22', color: 'amber', bgColor: 'bg-amber-100', textColor: 'text-amber-700', borderColor: 'border-amber-200' },
+    { phase: 5, name: 'Follow Up', days: '25-27', color: 'orange', bgColor: 'bg-orange-100', textColor: 'text-orange-700', borderColor: 'border-orange-200' },
+    { phase: 6, name: 'Soft Offer', days: '30-35', color: 'indigo', bgColor: 'bg-indigo-100', textColor: 'text-indigo-700', borderColor: 'border-indigo-200' },
+];
 
 interface Step {
     step: number;
@@ -47,6 +80,13 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [upgradeModal, setUpgradeModal] = useState({ show: false, message: '' });
 
+    // Tab State
+    const [activeTab, setActiveTab] = useState<'email' | 'linkedin'>('email');
+
+    // LinkedIn Enrollments State
+    const [linkedinEnrollments, setLinkedinEnrollments] = useState<LinkedInEnrollment[]>([]);
+    const [linkedinLoading, setLinkedinLoading] = useState(false);
+
     // Editor State
     const [activeStepIndex, setActiveStepIndex] = useState(0);
     const [isPreview, setIsPreview] = useState(false);
@@ -54,6 +94,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
 
     useEffect(() => {
         fetchSequences();
+        fetchLinkedinEnrollments();
     }, []);
 
     const fetchSequences = async () => {
@@ -72,6 +113,64 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
             setSequences(data || []);
         }
         setIsLoading(false);
+    };
+
+    const fetchLinkedinEnrollments = async () => {
+        setLinkedinLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            setLinkedinLoading(false);
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('linkedin_enrollments')
+            .select(`
+                *,
+                leads (
+                    company,
+                    first_name,
+                    last_name
+                )
+            `)
+            .eq('user_id', user.id)
+            .order('enrolled_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching LinkedIn enrollments:', error);
+        } else {
+            setLinkedinEnrollments(data || []);
+        }
+        setLinkedinLoading(false);
+    };
+
+    const handleToggleLinkedInStatus = async (enrollment: LinkedInEnrollment) => {
+        const newStatus = enrollment.status === 'active' ? 'paused' : 'active';
+        const { error } = await supabase
+            .from('linkedin_enrollments')
+            .update({ status: newStatus })
+            .eq('id', enrollment.id);
+
+        if (!error) {
+            fetchLinkedinEnrollments();
+        }
+    };
+
+    const handleRemoveLinkedInEnrollment = async (id: string) => {
+        if (!confirm('Are you sure you want to remove this lead from the LinkedIn sequence?')) return;
+
+        const { error } = await supabase
+            .from('linkedin_enrollments')
+            .delete()
+            .eq('id', id);
+
+        if (!error) {
+            fetchLinkedinEnrollments();
+        }
+    };
+
+    const getPhaseInfo = (phase: number) => {
+        return LINKEDIN_PHASES.find(p => p.phase === phase) || LINKEDIN_PHASES[0];
     };
 
     const handleCreateNew = () => {
@@ -244,6 +343,40 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
             {!editingSequence ? (
                 /* Sequence List View */
                 <div className="animate-in fade-in duration-700 bg-[#F8FAFC] min-h-full -m-6 p-6">
+                    {/* Tab Navigation */}
+                    <div className="flex items-center gap-2 mb-6">
+                        <button
+                            onClick={() => setActiveTab('email')}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                activeTab === 'email'
+                                    ? 'bg-white text-indigo-600 shadow-sm border border-slate-200'
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                            }`}
+                        >
+                            <Mail size={16} />
+                            Email Sequences
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('linkedin')}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                activeTab === 'linkedin'
+                                    ? 'bg-white text-blue-600 shadow-sm border border-slate-200'
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                            }`}
+                        >
+                            <Linkedin size={16} />
+                            LinkedIn Sequences
+                            {linkedinEnrollments.filter(e => e.status === 'active').length > 0 && (
+                                <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                                    {linkedinEnrollments.filter(e => e.status === 'active').length}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+
+                    {activeTab === 'email' ? (
+                        /* Email Sequences Tab */
+                        <>
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h1 className="text-2xl font-bold text-slate-900 mb-1">Outreach Sequences</h1>
@@ -318,6 +451,167 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                 </div>
                             ))}
                         </div>
+                    )}
+                        </>
+                    ) : (
+                        /* LinkedIn Sequences Tab */
+                        <>
+                            <div className="mb-8">
+                                <h1 className="text-2xl font-bold text-slate-900 mb-1">LinkedIn Relationship Sequencer</h1>
+                                <p className="text-sm text-slate-500">35-day relationship funnel that builds genuine connections before making any ask. Runs automatically.</p>
+                            </div>
+
+                            {/* Phase Timeline */}
+                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+                                <h3 className="text-sm font-bold text-slate-700 mb-4">Sequence Phases</h3>
+                                <div className="flex items-center justify-between relative">
+                                    <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 z-0"></div>
+                                    {LINKEDIN_PHASES.map((phase, idx) => (
+                                        <div key={phase.phase} className="flex flex-col items-center relative z-10">
+                                            <div className={`w-10 h-10 rounded-full ${phase.bgColor} ${phase.textColor} flex items-center justify-center font-bold text-sm border-2 ${phase.borderColor} bg-white`}>
+                                                {phase.phase}
+                                            </div>
+                                            <div className="mt-2 text-center">
+                                                <div className="text-xs font-bold text-slate-700">{phase.name}</div>
+                                                <div className="text-[10px] text-slate-400">Days {phase.days}</div>
+                                            </div>
+                                            {idx < LINKEDIN_PHASES.length - 1 && (
+                                                <ChevronRight size={14} className="absolute top-3 -right-6 text-slate-300" />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Enrollments List */}
+                            {linkedinLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 size={24} className="animate-spin text-slate-400" />
+                                </div>
+                            ) : linkedinEnrollments.length === 0 ? (
+                                <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm">
+                                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                        <Users size={32} />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-slate-700 mb-2">No LinkedIn sequences running</h3>
+                                    <p className="text-sm text-slate-500 mb-6">Enrol leads from the Lead Database to get started</p>
+                                    <button
+                                        onClick={() => onPageChange?.('Lead Database')}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl px-5 py-2.5 shadow-sm hover:shadow-md transition-all duration-200 inline-flex items-center gap-2"
+                                    >
+                                        <Users size={16} />
+                                        Go to Lead Database
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-4">
+                                    {linkedinEnrollments.map(enrollment => {
+                                        const phaseInfo = getPhaseInfo(enrollment.current_phase);
+                                        return (
+                                            <div key={enrollment.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${enrollment.status === 'active' ? 'bg-blue-50 text-blue-600' : enrollment.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                                                            <Linkedin size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-base font-semibold text-slate-900 mb-1">
+                                                                {enrollment.leads?.company || 'Unknown Company'}
+                                                            </h3>
+                                                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                                <a
+                                                                    href={enrollment.linkedin_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-600 hover:underline text-xs"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    View Profile
+                                                                </a>
+                                                                <span className="text-slate-300">|</span>
+                                                                <span className="text-xs">
+                                                                    {enrollment.leads?.first_name} {enrollment.leads?.last_name}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-4">
+                                                        {/* Phase Badge */}
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${phaseInfo.bgColor} ${phaseInfo.textColor} ${phaseInfo.borderColor}`}>
+                                                            Phase {enrollment.current_phase}: {phaseInfo.name}
+                                                        </span>
+
+                                                        {/* Day Counter */}
+                                                        <div className="flex items-center gap-1.5 text-sm">
+                                                            <Calendar size={14} className="text-slate-400" />
+                                                            <span className="font-bold text-slate-700">Day {enrollment.current_day}</span>
+                                                            <span className="text-slate-400">of 35</span>
+                                                        </div>
+
+                                                        {/* Status Badge */}
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                                                            enrollment.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                            enrollment.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                            enrollment.status === 'connected' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                            enrollment.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                            'bg-amber-50 text-amber-700 border-amber-200'
+                                                        }`}>
+                                                            {enrollment.status.toUpperCase()}
+                                                        </span>
+
+                                                        {/* Last Action */}
+                                                        {enrollment.last_action_at && (
+                                                            <div className="text-xs text-slate-400">
+                                                                Last: {new Date(enrollment.last_action_at).toLocaleDateString()}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Actions */}
+                                                        <div className="flex items-center gap-2">
+                                                            {enrollment.status !== 'completed' && enrollment.status !== 'failed' && (
+                                                                <button
+                                                                    onClick={() => handleToggleLinkedInStatus(enrollment)}
+                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                                                        enrollment.status === 'active'
+                                                                            ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                                                                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                                                                    }`}
+                                                                >
+                                                                    {enrollment.status === 'active' ? 'Pause' : 'Resume'}
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                onClick={() => handleRemoveLinkedInEnrollment(enrollment.id)}
+                                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                                title="Remove"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Progress Bar */}
+                                                <div className="mt-4 pt-4 border-t border-slate-100">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                            <div
+                                                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+                                                                style={{ width: `${(enrollment.current_day / 35) * 100}%` }}
+                                                            ></div>
+                                                        </div>
+                                                        <span className="text-xs font-bold text-slate-500">
+                                                            {Math.round((enrollment.current_day / 35) * 100)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             ) : (
