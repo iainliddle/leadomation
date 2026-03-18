@@ -1255,29 +1255,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             
             {/* Header & Actions Bar */}
             <div className={`mx-6 mt-6 px-6 py-4 bg-white border border-[#E5E7EB] rounded-xl shadow-sm ${campaignFilter ? 'mt-2' : ''}`}>
-                <div className="flex flex-wrap items-center justify-end gap-4 mb-4">
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <button
-                            onClick={handleExport}
-                            disabled={isExporting}
-                            className={`flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm disabled:opacity-50 flex-1 sm:flex-auto ${canAccess && !canAccess('csvExport') ? 'opacity-70' : ''}`}
-                        >
-                            {isExporting ? <Loader2 size={16} className="animate-spin text-gray-400" /> : <Download size={16} className="text-gray-400" />}
-                            {isExporting ? 'Exporting...' : 'Export CSV'}
-                            {canAccess && !canAccess('csvExport') && (
-                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-1 font-bold">PRO</span>
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setIsAddModalOpen(true)}
-                            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-semibold hover:bg-[#4338CA] transition-colors shadow-sm flex-1 sm:flex-auto"
-                        >
-                            <Plus size={16} />
-                            Add Lead
-                        </button>
-                    </div>
-                </div>
-
                 {/* Search & Basic Filters row */}
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex-1 min-w-[280px] relative">
@@ -1326,10 +1303,10 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 </div>
 
                 {/* Smart & Intent Pill Filters */}
-                <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4 py-3 border-t border-gray-100">
-                    {/* Smart Filters */}
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mr-1">Smart</span>
+                <div className="flex items-center justify-between mt-4 py-3 border-t border-gray-100">
+                    {/* Left side: Smart + Intent filter chips */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider">Smart</span>
                         {['new_business', 'low_rating', 'no_photos', 'no_reviews', 'incomplete'].map((filter) => {
                             const isAct = activeIntentFilters.includes(filter);
                             const icons: Record<string, string> = { new_business: '⚡', low_rating: '⭐', no_photos: '📸', no_reviews: '💬', incomplete: '📍' };
@@ -1349,14 +1326,11 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         {activeIntentFilters.length > 0 && (
                             <button onClick={() => setActiveIntentFilters([])} className="text-xs text-gray-400 hover:text-gray-600 underline ml-1">Clear</button>
                         )}
-                    </div>
 
-                    <div className="w-px bg-gray-200 hidden md:block"></div>
+                        <div className="w-px h-4 bg-gray-200 mx-1" />
 
-                    {/* Intent Filters */}
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mr-1">Intent</span>
-                        
+                        <span className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider">Intent</span>
+
                         <button onClick={() => toggleIntentScoreFilter('hot')} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${intentScoreFilters.includes('hot') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
                             <Flame size={12} className={intentScoreFilters.includes('hot') ? 'text-red-500' : 'text-gray-400'} /> Hot <span className="opacity-60">({intentScoreCounts.hot})</span>
                         </button>
@@ -1373,6 +1347,28 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                         {intentScoreFilters.length > 0 && (
                             <button onClick={() => setIntentScoreFilters([])} className="text-xs text-gray-400 hover:text-gray-600 underline ml-1">Clear</button>
                         )}
+                    </div>
+
+                    {/* Right side: Action buttons */}
+                    <div className="flex items-center gap-2 shrink-0 ml-4">
+                        <button
+                            onClick={handleExport}
+                            disabled={isExporting}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-xs font-medium hover:bg-gray-50 transition-all disabled:opacity-50 ${canAccess && !canAccess('csvExport') ? 'opacity-70' : ''}`}
+                        >
+                            {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                            {isExporting ? 'Exporting...' : 'Export CSV'}
+                            {canAccess && !canAccess('csvExport') && (
+                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-1 font-bold">PRO</span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4F46E5] text-white rounded-lg text-xs font-medium hover:bg-[#4338CA] transition-all"
+                        >
+                            <Plus size={12} />
+                            Add Lead
+                        </button>
                     </div>
                 </div>
             </div>
