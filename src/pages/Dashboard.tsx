@@ -9,6 +9,7 @@ import OnboardingModal from '../components/OnboardingModal';
 import { supabase } from '../lib/supabase';
 import UsageLimitBar from '../components/UsageLimitBar';
 import { usePlan } from '../hooks/usePlan';
+import logoIcon from '../assets/logo-icon.png';
 
 interface DashboardProps {
     onPageChange: (page: string) => void;
@@ -550,7 +551,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             )}
 
             {/* Stats Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatCard
                     label="Total Leads"
                     value={stats.totalLeads.toLocaleString()}
@@ -609,31 +610,34 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     chartColor="#F43F5E"
                     tooltipLabel="Deals"
                 />
-            </div>
-
-            {/* Current Plan Card */}
-            <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#4F46E5] flex items-center justify-center shrink-0">
-                        <Star size={24} className="text-white" />
+                <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <img
+                                src={logoIcon}
+                                alt="Leadomation"
+                                className="w-6 h-6 object-contain"
+                            />
+                            <span className="text-xs font-semibold text-[#4F46E5] uppercase tracking-wide">
+                                Current Plan
+                            </span>
+                        </div>
                     </div>
                     <div>
-                        <div className="text-xs font-semibold text-[#4F46E5] uppercase tracking-wide mb-1">
-                            Current Plan: {plan === 'trial' ? 'Pro Trial' : plan}
-                        </div>
-                        <h3 className="text-xl font-bold text-[#111827]">
-                            {plan === 'trial' ? `${trialDaysRemaining} days remaining` : 'Unlock more limits'}
-                        </h3>
+                        <p className="text-2xl font-bold text-[#111827] capitalize">{plan === 'trial' ? 'Pro Trial' : plan || 'Starter'}</p>
+                        <p className="text-xs text-[#6B7280] mt-1">
+                            {plan === 'trial'
+                                ? `${trialDaysRemaining} days remaining`
+                                : 'Upgrade to unlock all features'}
+                        </p>
                     </div>
-                </div>
-                {(plan === 'trial' || plan === 'starter' || plan === 'expired' || plan === 'cancelled') && (
                     <button
                         onClick={() => onPageChange('Pricing')}
-                        className="bg-[#4F46E5] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#4338CA] transition-colors shadow-sm whitespace-nowrap"
+                        className="mt-3 w-full py-1.5 bg-[#4F46E5] text-white text-xs font-medium rounded-lg hover:bg-[#4338CA] transition-all"
                     >
-                        Upgrade Plan
+                        {plan === 'trial' ? 'View plans' : 'Upgrade now'}
                     </button>
-                )}
+                </div>
             </div>
 
             {/* Charts Row */}
