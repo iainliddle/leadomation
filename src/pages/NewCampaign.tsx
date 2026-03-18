@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Activity, ArrowLeft, Target, CheckCircle2, ChevronDown, Key, Database, Flame, Users, Building2, Briefcase, Hash, Rocket, Loader2
+    ArrowLeft, Target, CheckCircle2, Key, Database, Users, Building2, Briefcase, Hash, Rocket, Loader2, Activity, FileText, Zap, Send, Info, ChevronDown, Mail, Linkedin, Sparkles
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -17,7 +17,6 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
     const [upgradeMessage] = useState('');
 
     // Advanced Targeting State
-    const [targetingExpanded, setTargetingExpanded] = useState(true);
     const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>([]);
     const [customKeywords, setCustomKeywords] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('');
@@ -26,26 +25,56 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
     const [minRating, setMinRating] = useState('4.0');
 
     // Smart Intent State
-    const [intentExpanded, setIntentExpanded] = useState(true);
     const [buyingSignals, setBuyingSignals] = useState(true);
     const [competitorMentions, setCompetitorMentions] = useState(false);
     const [recentGrowth, setRecentGrowth] = useState(true);
 
     // Automation State
-    const [enrichmentExpanded, setEnrichmentExpanded] = useState(true);
     const [findEmails, setFindEmails] = useState(true);
     const [findLinkedin, setFindLinkedin] = useState(true);
     const [verifyData, setVerifyData] = useState(true);
     const [enrichCompany, setEnrichCompany] = useState(false);
 
     // Outreach Sequence State
-    const [sequenceExpanded, setSequenceExpanded] = useState(true);
     const [selectedSequence, setSelectedSequence] = useState('');
     const [maxLeadsTarget, setMaxLeadsTarget] = useState(100);
     const [availableSequences, setAvailableSequences] = useState<{ id: string, name: string }[]>([]);
+    const [selectedOutreachStrategy, setSelectedOutreachStrategy] = useState('cold_email');
+
+    // Navigation State
+    const [activeSection, setActiveSection] = useState('campaign_details');
+
+    // Dropdown States
+    const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
+    const [radiusDropdownOpen, setRadiusDropdownOpen] = useState(false);
+    const [ratingDropdownOpen, setRatingDropdownOpen] = useState(false);
+    const [sequenceDropdownOpen, setSequenceDropdownOpen] = useState(false);
 
     const businessTypes = [
         "SaaS", "E-commerce", "Healthcare", "Real Estate", "Financial Services", "Legal", "Marketing Agency", "Manufacturing", "Logistics", "Software Development", "Construction", "Education"
+    ];
+
+    const regions = [
+        { value: '', label: 'Select region' },
+        { value: 'US', label: 'United States' },
+        { value: 'UK', label: 'United Kingdom' },
+        { value: 'CA', label: 'Canada' },
+        { value: 'AU', label: 'Australia' },
+        { value: 'EU', label: 'Europe' },
+    ];
+
+    const radiusOptions = [
+        { value: '10', label: '10 Miles' },
+        { value: '25', label: '25 Miles' },
+        { value: '50', label: '50 Miles' },
+        { value: '100', label: '100 Miles' },
+    ];
+
+    const ratingOptions = [
+        { value: 'any', label: 'Any rating' },
+        { value: '3.0', label: '3.0+ Stars' },
+        { value: '4.0', label: '4.0+ Stars' },
+        { value: '4.5', label: '4.5+ Stars' },
     ];
 
     useEffect(() => {
@@ -69,7 +98,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
             id: 1,
             title: 'Local Businesses',
             description: 'Find retail, restaurants, and local services in specific geographic areas.',
-            icon: <Building2 className="w-5 h-5 text-blue-500" />,
+            icon: <Building2 className="w-5 h-5" />,
             metrics: 'High Volume · Local',
             color: 'blue'
         },
@@ -77,7 +106,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
             id: 2,
             title: 'B2B Services',
             description: 'Target professional services, agencies, and consulting firms.',
-            icon: <Briefcase className="w-5 h-5 text-indigo-500" />,
+            icon: <Briefcase className="w-5 h-5" />,
             metrics: 'High Value · B2B',
             color: 'indigo'
         },
@@ -85,7 +114,7 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
             id: 3,
             title: 'Custom Search',
             description: 'Define your exact ideal customer profile with advanced filtering parameters.',
-            icon: <Target className="w-5 h-5 text-emerald-500" />,
+            icon: <Target className="w-5 h-5" />,
             metrics: 'Highly Targeted · Specific',
             color: 'emerald'
         }
@@ -136,73 +165,128 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
         }
     };
 
-    return (
-        <div className="pb-24 bg-[#F8F9FA] min-h-screen">
-            <div className="max-w-3xl mx-auto p-6">
-                {/* Header */}
-                <button
-                    onClick={onBack}
-                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6"
-                >
-                    <ArrowLeft size={16} /> Back
-                </button>
+    const navItems = [
+        { id: 'campaign_details', label: 'Campaign details', icon: FileText },
+        { id: 'targeting', label: 'Advanced targeting', icon: Target },
+        { id: 'intent_filters', label: 'Intent filters', icon: Zap },
+        { id: 'enrichment', label: 'Data enrichment', icon: Database },
+        { id: 'outreach', label: 'Outreach config', icon: Send },
+    ];
 
-                <div className="mb-8">
-                    <h1 className="text-2xl font-semibold text-gray-900">New Campaign</h1>
-                    <p className="text-sm text-gray-500 mt-1">Configure your lead generation and outreach campaign</p>
+    const sectionOrder = ['campaign_details', 'targeting', 'intent_filters', 'enrichment', 'outreach'];
+
+    const goToNextSection = () => {
+        const currentIndex = sectionOrder.indexOf(activeSection);
+        if (currentIndex < sectionOrder.length - 1) {
+            setActiveSection(sectionOrder[currentIndex + 1]);
+        }
+    };
+
+    const goToPrevSection = () => {
+        const currentIndex = sectionOrder.indexOf(activeSection);
+        if (currentIndex > 0) {
+            setActiveSection(sectionOrder[currentIndex - 1]);
+        }
+    };
+
+    return (
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
+            {/* Back Button */}
+            <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#111827] mb-6"
+            >
+                <ArrowLeft size={16} /> Back
+            </button>
+
+            <div className="flex gap-6">
+                {/* Left Nav Panel */}
+                <div className="w-52 shrink-0">
+                    <div className="sticky top-6 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        {navItems.map(({ id, label, icon: Icon }) => (
+                            <button
+                                key={id}
+                                onClick={() => setActiveSection(id)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium border-l-2 text-left ${
+                                    activeSection === id
+                                        ? 'bg-[#EEF2FF] text-[#4F46E5] border-[#4F46E5]'
+                                        : 'text-[#6B7280] border-transparent hover:bg-gray-50'
+                                }`}
+                            >
+                                <Icon size={16} className="shrink-0" />
+                                {label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="space-y-4">
-                    {/* Basic Info */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <h2 className="text-base font-semibold text-gray-900 mb-4">Campaign Details</h2>
+                {/* Right Content Panel */}
+                <div className="flex-1">
+                    {/* Campaign Details Section */}
+                    {activeSection === 'campaign_details' && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <h2 className="text-base font-semibold text-[#111827] mb-1">Campaign details</h2>
+                            <p className="text-sm text-[#6B7280] mb-6">Name your campaign and choose the type of leads you want to find.</p>
 
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Name</label>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all text-sm"
-                            placeholder="e.g. Q3 NYC B2B Outreach"
-                            value={campaignName}
-                            onChange={(e) => setCampaignName(e.target.value)}
-                        />
-
-                        <label className="block text-sm font-medium text-gray-700 mt-6 mb-3">Select Campaign Type</label>
-                        <div className="grid grid-cols-3 gap-3">
-                            {tracks.map(track => (
-                                <div
-                                    key={track.id}
-                                    onClick={() => setSelectedTrack(track.id)}
-                                    className={`p-4 rounded-xl cursor-pointer transition-all duration-150
-                                        ${selectedTrack === track.id
-                                            ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
-                                            : 'bg-white border border-gray-200 hover:border-[#4F46E5]'
-                                        }
-                                    `}
-                                >
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${selectedTrack === track.id ? 'bg-[#4F46E5]' : 'bg-[#EEF2FF]'}`}>
-                                        {React.cloneElement(track.icon, { className: 'w-5 h-5 ' + (selectedTrack === track.id ? 'text-white' : 'text-[#4F46E5]') })}
-                                    </div>
-                                    <h3 className="font-semibold text-sm text-gray-900 mb-1">{track.title}</h3>
-                                    <p className="text-xs text-gray-500 leading-relaxed">{track.description}</p>
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Campaign name</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+                                        placeholder="e.g. Q3 NYC B2B Outreach"
+                                        value={campaignName}
+                                        onChange={(e) => setCampaignName(e.target.value)}
+                                    />
                                 </div>
-                            ))}
-                        </div>
-                    </div>
 
-                    {/* Advanced Targeting */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <div
-                            className="flex items-center justify-between cursor-pointer mb-4"
-                            onClick={() => setTargetingExpanded(!targetingExpanded)}
-                        >
-                            <h2 className="text-base font-semibold text-gray-900">Advanced Targeting</h2>
-                            <ChevronDown className={`text-gray-400 transition-transform duration-300 ${targetingExpanded ? 'rotate-180' : ''}`} />
+                                <div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Campaign type</label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {tracks.map(track => (
+                                            <div
+                                                key={track.id}
+                                                onClick={() => setSelectedTrack(track.id)}
+                                                className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                                                    selectedTrack === track.id
+                                                        ? 'border-[#4F46E5] bg-[#EEF2FF]'
+                                                        : 'border-[#E5E7EB] hover:border-[#4F46E5] hover:bg-[#EEF2FF]'
+                                                }`}
+                                            >
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
+                                                    selectedTrack === track.id ? 'bg-[#4F46E5] text-white' : 'bg-[#EEF2FF] text-[#4F46E5]'
+                                                }`}>
+                                                    {track.icon}
+                                                </div>
+                                                <h3 className="text-sm font-semibold text-[#111827] mb-1">{track.title}</h3>
+                                                <p className="text-xs text-[#6B7280]">{track.description}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end">
+                                    <button
+                                        onClick={goToNextSection}
+                                        className="px-5 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA]"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        {targetingExpanded && (
+                    )}
+
+                    {/* Advanced Targeting Section */}
+                    {activeSection === 'targeting' && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <h2 className="text-base font-semibold text-[#111827] mb-1">Advanced targeting</h2>
+                            <p className="text-sm text-[#6B7280] mb-6">Define exactly which businesses to find.</p>
+
                             <div className="space-y-6">
                                 {/* Business Type Tags */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Type</label>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Business type</label>
                                     <div className="flex flex-wrap gap-2">
                                         {businessTypes.map(type => (
                                             <button
@@ -214,27 +298,24 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                                                         setSelectedBusinessTypes(prev => [...prev, type]);
                                                     }
                                                 }}
-                                                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                                                className={`px-3 py-1.5 rounded-lg border text-sm font-medium cursor-pointer transition-all ${
                                                     selectedBusinessTypes.includes(type)
-                                                        ? 'bg-[#EEF2FF] text-[#4F46E5] border border-[#4F46E5]'
-                                                        : 'bg-white text-gray-600 border border-gray-200 hover:border-[#4F46E5]'
+                                                        ? 'border-[#4F46E5] bg-[#EEF2FF] text-[#4F46E5]'
+                                                        : 'border-[#E5E7EB] text-[#374151] hover:border-[#4F46E5]'
                                                 }`}
                                             >
                                                 {type}
                                             </button>
                                         ))}
-                                        <button className="px-3 py-1.5 rounded-full text-sm font-medium bg-white text-gray-500 border border-dashed border-gray-300 hover:border-[#4F46E5] hover:text-[#4F46E5] transition-all">
-                                            + Add Custom
-                                        </button>
                                     </div>
                                 </div>
 
                                 {/* Custom Keywords */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Custom Keywords</label>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Custom keywords</label>
                                     <input
                                         type="text"
-                                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] text-sm"
+                                        className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
                                         placeholder="e.g. software, consultant, marketing, B2B, wholesale"
                                         value={customKeywords}
                                         onChange={(e) => setCustomKeywords(e.target.value)}
@@ -243,166 +324,224 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
 
                                 {/* Geographic */}
                                 <div className="grid grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Region</label>
-                                        <select
-                                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
-                                            value={selectedRegion}
-                                            onChange={e => setSelectedRegion(e.target.value)}
+                                    {/* Region Dropdown */}
+                                    <div className="relative">
+                                        <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Geographic region</label>
+                                        <button
+                                            onClick={() => { setRegionDropdownOpen(!regionDropdownOpen); setRadiusDropdownOpen(false); setRatingDropdownOpen(false); }}
+                                            className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent bg-white flex items-center justify-between"
                                         >
-                                            <option value="">Select Region</option>
-                                            <option value="US">United States</option>
-                                            <option value="UK">United Kingdom</option>
-                                            <option value="CA">Canada</option>
-                                            <option value="AU">Australia</option>
-                                            <option value="EU">Europe</option>
-                                        </select>
+                                            <span>{regions.find(r => r.value === selectedRegion)?.label || 'Select region'}</span>
+                                            <ChevronDown size={16} className="text-[#6B7280]" />
+                                        </button>
+                                        {regionDropdownOpen && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                                                {regions.map(option => (
+                                                    <button
+                                                        key={option.value}
+                                                        onClick={() => { setSelectedRegion(option.value); setRegionDropdownOpen(false); }}
+                                                        className={`w-full px-3 py-2 text-left text-sm transition-all ${
+                                                            selectedRegion === option.value
+                                                                ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                                                : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                                        }`}
+                                                    >
+                                                        {option.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
+
+                                    {/* City Input */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                        <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">City</label>
                                         <input
                                             type="text"
-                                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
+                                            className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
                                             placeholder="e.g. London"
                                             value={cityInput}
                                             onChange={e => setCityInput(e.target.value)}
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Radius</label>
-                                        <select
-                                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
-                                            value={radius}
-                                            onChange={e => setRadius(e.target.value)}
+
+                                    {/* Radius Dropdown */}
+                                    <div className="relative">
+                                        <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Search radius</label>
+                                        <button
+                                            onClick={() => { setRadiusDropdownOpen(!radiusDropdownOpen); setRegionDropdownOpen(false); setRatingDropdownOpen(false); }}
+                                            className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent bg-white flex items-center justify-between"
                                         >
-                                            <option value="10">10 Miles</option>
-                                            <option value="25">25 Miles</option>
-                                            <option value="50">50 Miles</option>
-                                            <option value="100">100 Miles</option>
-                                        </select>
+                                            <span>{radiusOptions.find(r => r.value === radius)?.label || '25 Miles'}</span>
+                                            <ChevronDown size={16} className="text-[#6B7280]" />
+                                        </button>
+                                        {radiusDropdownOpen && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                                                {radiusOptions.map(option => (
+                                                    <button
+                                                        key={option.value}
+                                                        onClick={() => { setRadius(option.value); setRadiusDropdownOpen(false); }}
+                                                        className={`w-full px-3 py-2 text-left text-sm transition-all ${
+                                                            radius === option.value
+                                                                ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                                                : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                                        }`}
+                                                    >
+                                                        {option.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                {/* Google Rating */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Google Rating</label>
-                                    <select
-                                        className="w-full max-w-xs px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
-                                        value={minRating}
-                                        onChange={e => setMinRating(e.target.value)}
+                                {/* Google Rating Dropdown */}
+                                <div className="relative max-w-xs">
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Minimum Google rating</label>
+                                    <button
+                                        onClick={() => { setRatingDropdownOpen(!ratingDropdownOpen); setRegionDropdownOpen(false); setRadiusDropdownOpen(false); }}
+                                        className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent bg-white flex items-center justify-between"
                                     >
-                                        <option value="any">Any Rating</option>
-                                        <option value="3.0">3.0+ Stars</option>
-                                        <option value="4.0">4.0+ Stars</option>
-                                        <option value="4.5">4.5+ Stars</option>
-                                    </select>
+                                        <span>{ratingOptions.find(r => r.value === minRating)?.label || '4.0+ Stars'}</span>
+                                        <ChevronDown size={16} className="text-[#6B7280]" />
+                                    </button>
+                                    {ratingDropdownOpen && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                                            {ratingOptions.map(option => (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() => { setMinRating(option.value); setRatingDropdownOpen(false); }}
+                                                    className={`w-full px-3 py-2 text-left text-sm transition-all ${
+                                                        minRating === option.value
+                                                            ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                                            : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                                    }`}
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        onClick={goToPrevSection}
+                                        className="px-5 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                                    >
+                                        Back
+                                    </button>
+                                    <button
+                                        onClick={goToNextSection}
+                                        className="px-5 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA]"
+                                    >
+                                        Next
+                                    </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
-
-                    {/* Smart Intent Filters */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <div
-                            className="flex items-center justify-between cursor-pointer mb-4"
-                            onClick={() => setIntentExpanded(!intentExpanded)}
-                        >
-                            <div className="flex items-center gap-3">
-                                <Flame size={18} className="text-[#4F46E5]" />
-                                <h2 className="text-base font-semibold text-gray-900">Smart Intent Filters</h2>
-                            </div>
-                            <ChevronDown className={`text-gray-400 transition-transform duration-300 ${intentExpanded ? 'rotate-180' : ''}`} />
                         </div>
-                        {intentExpanded && (
-                            <div className="space-y-4">
+                    )}
+
+                    {/* Intent Filters Section */}
+                    {activeSection === 'intent_filters' && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <h2 className="text-base font-semibold text-[#111827] mb-1">Intent filters</h2>
+                            <p className="text-sm text-[#6B7280] mb-6">Target leads most likely to need your service right now.</p>
+
+                            <div className="space-y-0">
                                 {[
-                                    { state: buyingSignals, setState: setBuyingSignals, icon: Target, title: "Active Buying Signals", desc: "Detect recent job postings, technology stack changes, or executive hiring", intent: "high" },
-                                    { state: competitorMentions, setState: setCompetitorMentions, icon: Users, title: "Competitor Mentions", desc: "Find businesses discussing alternative solutions on social platforms", intent: "high" },
-                                    { state: recentGrowth, setState: setRecentGrowth, icon: Activity, title: "Recent Growth Indicators", desc: "Prioritize companies with recent funding or headcount expansion" },
+                                    { state: buyingSignals, setState: setBuyingSignals, icon: Target, title: "Active buying signals", desc: "Detect recent job postings, technology stack changes, or executive hiring" },
+                                    { state: competitorMentions, setState: setCompetitorMentions, icon: Users, title: "Competitor mentions", desc: "Find businesses discussing alternative solutions on social platforms" },
+                                    { state: recentGrowth, setState: setRecentGrowth, icon: Activity, title: "Recent growth indicators", desc: "Prioritize companies with recent funding or headcount expansion" },
                                 ].map((item, idx) => (
                                     <div key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                                        <div className="flex items-start gap-3">
-                                            <div className={`mt-0.5 p-2 rounded-lg ${item.state ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-gray-100 text-gray-400'}`}>
-                                                <item.icon size={16} />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-semibold text-sm text-gray-900">{item.title}</p>
-                                                    {item.intent === 'high' && (
-                                                        <span className="bg-red-50 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">HIGH INTENT</span>
-                                                    )}
-                                                </div>
-                                                <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
-                                            </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-[#111827]">{item.title}</p>
+                                            <p className="text-xs text-[#6B7280] mt-0.5">{item.desc}</p>
                                         </div>
                                         <button
                                             onClick={() => item.setState(!item.state)}
-                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
+                                            className={`relative h-5 w-9 rounded-full transition-colors duration-200 ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
                                         >
-                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out shadow-sm ${item.state ? 'translate-x-6' : 'translate-x-1'}`} />
+                                            <span className={`absolute top-0.5 left-0.5 h-4 w-4 bg-white rounded-full transition-transform duration-200 ${item.state ? 'translate-x-4' : ''}`} />
                                         </button>
                                     </div>
                                 ))}
                             </div>
-                        )}
-                    </div>
 
-                    {/* Data Enrichment */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <div
-                            className="flex items-center justify-between cursor-pointer mb-4"
-                            onClick={() => setEnrichmentExpanded(!enrichmentExpanded)}
-                        >
-                            <h2 className="text-base font-semibold text-gray-900">Data Enrichment</h2>
-                            <ChevronDown className={`text-gray-400 transition-transform duration-300 ${enrichmentExpanded ? 'rotate-180' : ''}`} />
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    onClick={goToPrevSection}
+                                    className="px-5 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    onClick={goToNextSection}
+                                    className="px-5 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA]"
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
-                        {enrichmentExpanded && (
-                            <div className="space-y-4">
+                    )}
+
+                    {/* Data Enrichment Section */}
+                    {activeSection === 'enrichment' && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <h2 className="text-base font-semibold text-[#111827] mb-1">Data enrichment</h2>
+                            <p className="text-sm text-[#6B7280] mb-6">Choose what additional data to find for each lead.</p>
+
+                            <div className="space-y-0">
                                 {[
-                                    { state: findEmails, setState: setFindEmails, icon: Key, title: "Decision Maker Emails", desc: "Find personal & corporate email addresses for key contacts" },
-                                    { state: findLinkedin, setState: setFindLinkedin, icon: Hash, title: "LinkedIn Profiles", desc: "Extract URLs for businesses and individual decision makers" },
-                                    { state: verifyData, setState: setVerifyData, icon: CheckCircle2, title: "Real-time Verification", desc: "Verify emails via SMTP and validate social profiles automatically" },
-                                    { state: enrichCompany, setState: setEnrichCompany, icon: Database, title: "Deep Company Data", desc: "Extract tech stack, structured descriptions, employee count, and revenue estimates" },
+                                    { state: findEmails, setState: setFindEmails, icon: Key, title: "Decision maker emails", desc: "Find personal & corporate email addresses for key contacts" },
+                                    { state: findLinkedin, setState: setFindLinkedin, icon: Hash, title: "LinkedIn profiles", desc: "Extract URLs for businesses and individual decision makers" },
+                                    { state: verifyData, setState: setVerifyData, icon: CheckCircle2, title: "Real-time verification", desc: "Verify emails via SMTP and validate social profiles automatically" },
+                                    { state: enrichCompany, setState: setEnrichCompany, icon: Database, title: "Deep company data", desc: "Extract tech stack, structured descriptions, employee count, and revenue estimates" },
                                 ].map((item, idx) => (
                                     <div key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                                        <div className="flex items-start gap-3">
-                                            <div className={`mt-0.5 p-2 rounded-lg ${item.state ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-gray-100 text-gray-400'}`}>
-                                                <item.icon size={16} />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-sm text-gray-900">{item.title}</p>
-                                                <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
-                                            </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-[#111827]">{item.title}</p>
+                                            <p className="text-xs text-[#6B7280] mt-0.5">{item.desc}</p>
                                         </div>
                                         <button
                                             onClick={() => item.setState(!item.state)}
-                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
+                                            className={`relative h-5 w-9 rounded-full transition-colors duration-200 ${item.state ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
                                         >
-                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out shadow-sm ${item.state ? 'translate-x-6' : 'translate-x-1'}`} />
+                                            <span className={`absolute top-0.5 left-0.5 h-4 w-4 bg-white rounded-full transition-transform duration-200 ${item.state ? 'translate-x-4' : ''}`} />
                                         </button>
                                     </div>
                                 ))}
                             </div>
-                        )}
-                    </div>
 
-                    {/* Outreach Config */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
-                        <div
-                            className="flex items-center justify-between cursor-pointer mb-4"
-                            onClick={() => setSequenceExpanded(!sequenceExpanded)}
-                        >
-                            <h2 className="text-base font-semibold text-gray-900">Outreach Configuration</h2>
-                            <ChevronDown className={`text-gray-400 transition-transform duration-300 ${sequenceExpanded ? 'rotate-180' : ''}`} />
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    onClick={goToPrevSection}
+                                    className="px-5 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    onClick={goToNextSection}
+                                    className="px-5 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA]"
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
-                        {sequenceExpanded && (
+                    )}
+
+                    {/* Outreach Config Section */}
+                    {activeSection === 'outreach' && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <h2 className="text-base font-semibold text-[#111827] mb-1">Outreach config</h2>
+                            <p className="text-sm text-[#6B7280] mb-6">Set how many leads to find and how to contact them.</p>
+
                             <div className="space-y-6">
                                 {/* Number of leads slider */}
                                 <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <label className="text-sm font-medium text-gray-700">Number of Leads</label>
-                                        <span className="bg-[#EEF2FF] text-[#4F46E5] text-sm font-semibold px-3 py-1 rounded-full">{maxLeadsTarget}</span>
-                                    </div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Number of leads</label>
+                                    <div className="text-2xl font-semibold text-[#4F46E5] mb-3">{maxLeadsTarget}</div>
                                     <input
                                         type="range"
                                         min="10"
@@ -412,62 +551,157 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                                         onChange={(e) => setMaxLeadsTarget(parseInt(e.target.value))}
                                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4F46E5]"
                                     />
-                                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                    <div className="flex justify-between text-xs text-[#6B7280] mt-1">
                                         <span>10</span>
                                         <span>1,000</span>
                                     </div>
                                 </div>
 
-                                {/* Sequence selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Auto-enroll into Sequence</label>
-                                    <select
-                                        className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
-                                        value={selectedSequence}
-                                        onChange={(e) => setSelectedSequence(e.target.value)}
+                                {/* Sequence selection dropdown */}
+                                <div className="relative">
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Auto-enrol into sequence</label>
+                                    <button
+                                        onClick={() => setSequenceDropdownOpen(!sequenceDropdownOpen)}
+                                        className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent bg-white flex items-center justify-between"
                                     >
-                                        <option value="">No Automatic Sequence</option>
-                                        {availableSequences.map(seq => (
-                                            <option key={seq.id} value={seq.id}>{seq.name}</option>
-                                        ))}
-                                    </select>
+                                        <span>{selectedSequence ? availableSequences.find(s => s.id === selectedSequence)?.name : 'No automatic sequence'}</span>
+                                        <ChevronDown size={16} className="text-[#6B7280]" />
+                                    </button>
+                                    {sequenceDropdownOpen && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden max-h-60 overflow-y-auto">
+                                            <button
+                                                onClick={() => { setSelectedSequence(''); setSequenceDropdownOpen(false); }}
+                                                className={`w-full px-3 py-2 text-left text-sm transition-all ${
+                                                    selectedSequence === ''
+                                                        ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                                        : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                                }`}
+                                            >
+                                                No automatic sequence
+                                            </button>
+                                            {availableSequences.map(seq => (
+                                                <button
+                                                    key={seq.id}
+                                                    onClick={() => { setSelectedSequence(seq.id); setSequenceDropdownOpen(false); }}
+                                                    className={`w-full px-3 py-2 text-left text-sm transition-all ${
+                                                        selectedSequence === seq.id
+                                                            ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                                            : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                                    }`}
+                                                >
+                                                    {seq.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Outreach Strategy Cards */}
+                                <div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Outreach strategy</label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div
+                                            onClick={() => setSelectedOutreachStrategy('cold_email')}
+                                            className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                                                selectedOutreachStrategy === 'cold_email'
+                                                    ? 'border-[#4F46E5] bg-[#EEF2FF]'
+                                                    : 'border-[#E5E7EB] hover:border-[#4F46E5] hover:bg-[#EEF2FF]'
+                                            }`}
+                                        >
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
+                                                selectedOutreachStrategy === 'cold_email' ? 'bg-[#4F46E5] text-white' : 'bg-[#EEF2FF] text-[#4F46E5]'
+                                            }`}>
+                                                <Mail size={18} />
+                                            </div>
+                                            <h3 className="text-sm font-semibold text-[#111827] mb-1">Cold email + AI voice</h3>
+                                            <p className="text-xs text-[#6B7280]">Email sequences with AI-powered voice follow-ups</p>
+                                        </div>
+
+                                        <div
+                                            onClick={() => setSelectedOutreachStrategy('linkedin')}
+                                            className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                                                selectedOutreachStrategy === 'linkedin'
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-[#E5E7EB] hover:border-blue-500 hover:bg-blue-50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                                    selectedOutreachStrategy === 'linkedin' ? 'bg-blue-500 text-white' : 'bg-blue-50 text-blue-500'
+                                                }`}>
+                                                    <Linkedin size={18} />
+                                                </div>
+                                                <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-[#4F46E5] text-white rounded-full">Pro</span>
+                                            </div>
+                                            <h3 className="text-sm font-semibold text-[#111827] mb-1">LinkedIn only</h3>
+                                            <p className="text-xs text-[#6B7280]">Connection requests and InMail sequences</p>
+                                        </div>
+
+                                        <div
+                                            onClick={() => setSelectedOutreachStrategy('full_pipeline')}
+                                            className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                                                selectedOutreachStrategy === 'full_pipeline'
+                                                    ? 'border-purple-500 bg-purple-50'
+                                                    : 'border-[#E5E7EB] hover:border-purple-500 hover:bg-purple-50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                                    selectedOutreachStrategy === 'full_pipeline' ? 'bg-purple-500 text-white' : 'bg-purple-50 text-purple-500'
+                                                }`}>
+                                                    <Sparkles size={18} />
+                                                </div>
+                                                <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-[#4F46E5] text-white rounded-full">Pro</span>
+                                            </div>
+                                            <h3 className="text-sm font-semibold text-[#111827] mb-1">Full pipeline</h3>
+                                            <p className="text-xs text-[#6B7280]">Email, LinkedIn, and AI voice combined</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        onClick={goToPrevSection}
+                                        className="px-5 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                                    >
+                                        Back
+                                    </button>
+                                    <button
+                                        onClick={() => handleCreateCampaign('draft')}
+                                        disabled={isSubmitting || !campaignName || !selectedTrack}
+                                        className="px-5 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        Save as draft
+                                    </button>
+                                    <button
+                                        onClick={() => handleCreateCampaign('active')}
+                                        disabled={isSubmitting || !campaignName || !selectedTrack}
+                                        className="flex items-center gap-2 px-5 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] disabled:opacity-50"
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Rocket size={16} />
+                                                Launch campaign
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+                        </div>
+                    )}
 
-            {/* Sticky Bottom Bar */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                    Scraping typically takes 2-5 minutes
-                </span>
-                <div className="flex gap-3">
-                    <button
-                        className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                        onClick={() => handleCreateCampaign('draft')}
-                        disabled={isSubmitting || !campaignName || !selectedTrack}
-                    >
-                        Save as Draft
-                    </button>
-                    <button
-                        className="flex items-center gap-2 px-5 py-2 bg-[#4F46E5] text-white text-sm font-semibold rounded-lg hover:bg-[#4338CA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => handleCreateCampaign('active')}
-                        disabled={isSubmitting || !campaignName || !selectedTrack}
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 size={16} className="animate-spin" />
-                                Processing...
-                            </>
-                        ) : (
-                            <>
-                                <Rocket size={16} />
-                                Launch Campaign
-                            </>
-                        )}
-                    </button>
+                    {/* Info Banner */}
+                    <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mt-4">
+                        <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                        <p className="text-xs font-medium text-[#374151] leading-relaxed">
+                            Campaigns automatically scrape Google Maps leads, enrich with decision maker emails, score intent, and enrol into your chosen outreach sequence.
+                        </p>
+                    </div>
                 </div>
             </div>
 
