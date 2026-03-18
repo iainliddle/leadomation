@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, memo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, memo, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import {
     ComposableMap,
@@ -95,10 +95,10 @@ interface RegionData {
 
 const getDotColor = (businesses: number, maxBusinesses: number): string => {
     const ratio = businesses / maxBusinesses;
-    if (ratio > 0.7) return '#EF4444';
-    if (ratio > 0.4) return '#F59E0B';
-    if (ratio > 0.2) return '#3B82F6';
-    return '#6366F1';
+    if (ratio > 0.7) return '#6EE7B7';   // soft emerald mint - Very High
+    if (ratio > 0.4) return '#F9A8D4';   // soft rose/pink - High
+    if (ratio > 0.2) return '#67E8F9';   // soft cyan (brand teal) - Moderate
+    return '#A5B4FC';                     // soft indigo/lavender - Emerging
 };
 
 const getDotSize = (businesses: number, maxBusinesses: number): number => {
@@ -230,44 +230,6 @@ const MapChart = memo(({
                                 strokeWidth={1.5}
                                 filter={isHovered || isSelected ? 'url(#glow)' : undefined}
                             />
-                            {/* Label */}
-                            {(isHovered || isSelected) && (
-                                <text
-                                    textAnchor="middle"
-                                    y={-size * 0.55 - 6}
-                                    style={{
-                                        fontSize: `${Math.max(8, 10 / Math.sqrt(position.zoom))}px`,
-                                        fontWeight: 700,
-                                        fill: '#374151',
-                                        paintOrder: 'stroke',
-                                        stroke: 'white',
-                                        strokeWidth: 3,
-                                        strokeLinecap: 'round',
-                                        strokeLinejoin: 'round'
-                                    }}
-                                >
-                                    {region.name}
-                                </text>
-                            )}
-                            {/* Business count badge */}
-                            {(isHovered || isSelected) && (
-                                <text
-                                    textAnchor="middle"
-                                    y={size * 0.5 + 12}
-                                    style={{
-                                        fontSize: `${Math.max(7, 9 / Math.sqrt(position.zoom))}px`,
-                                        fontWeight: 800,
-                                        fill: color,
-                                        paintOrder: 'stroke',
-                                        stroke: 'white',
-                                        strokeWidth: 3,
-                                        strokeLinecap: 'round',
-                                        strokeLinejoin: 'round'
-                                    }}
-                                >
-                                    {region.businesses.toLocaleString()} businesses
-                                </text>
-                            )}
                         </Marker>
                     );
                 })}
@@ -305,9 +267,12 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
         coordinates: [0, 20],
         zoom: 1
     });
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
     const [regionData, setRegionData] = useState<RegionData[]>([]);
     const [isLoadingDensity, setIsLoadingDensity] = useState(false);
+
+    const mapContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchDemandData = async () => {
@@ -480,95 +445,96 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
         setPosition({ coordinates: [0, 20], zoom: 1 });
     };
 
+    const mapContainerWidth = mapContainerRef.current?.offsetWidth || 800;
+
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
-            <div className="space-y-6 animate-in fade-in duration-700">
+            <div className="space-y-4 animate-in fade-in duration-700">
 
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                {/* Industry Selector */}
-                <div className="relative w-full md:w-[320px]">
+            {/* Header with Tabs and Industry Dropdown */}
+            <div className="flex items-center justify-between mb-6">
+                {/* Tab switcher - left side */}
+                <div className="flex items-center border-b border-gray-200">
                     <button
-                        onClick={() => setShowIndustryDropdown(!showIndustryDropdown)}
-                        className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#111827] hover:border-indigo-300 hover:shadow-sm transition-all"
-                    >
-                        <div className="flex items-center gap-2">
-                            <Filter size={14} className="text-[#4F46E5]" />
-                            <span>{selectedIndustry}</span>
-                        </div>
-                        <ChevronDown size={14} className={`text-gray-400 transition-transform ${showIndustryDropdown ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {showIndustryDropdown && (
-                        <>
-                            <div className="fixed inset-0 z-40" onClick={() => setShowIndustryDropdown(false)} />
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 max-h-[320px] overflow-hidden">
-                                <div className="p-2 border-b border-gray-100">
-                                    <div className="relative">
-                                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Search industries..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-100 rounded-lg focus:outline-none focus:border-indigo-300"
-                                            autoFocus
-                                        />
-                                    </div>
-                                </div>
-                                <div className="overflow-y-auto max-h-[250px]">
-                                    {filteredIndustries.map((industry) => (
-                                        <button
-                                            key={industry}
-                                            onClick={() => handleIndustrySelect(industry)}
-                                            className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${industry === selectedIndustry
-                                                ? 'bg-blue-50 text-blue-600 font-bold'
-                                                : 'text-[#374151] hover:bg-gray-50'
-                                                }`}
-                                        >
-                                            {industry}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            {/* Tab Switcher */}
-            <div className="flex items-center gap-6 border-b border-gray-200">
-                <button
-                    onClick={() => setActiveTab('density')}
-                    className={`pb-3 text-sm font-semibold border-b-2 transition-all ${activeTab === 'density'
-                        ? 'border-[#4F46E5] text-[#4F46E5]'
-                        : 'border-transparent text-[#6B7280] hover:text-[#111827]'
+                        onClick={() => setActiveTab('density')}
+                        className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-all ${
+                            activeTab === 'density'
+                                ? 'text-[#4F46E5] border-[#4F46E5]'
+                                : 'text-[#6B7280] border-transparent hover:text-[#111827]'
                         }`}
-                >
-                    <span className="flex items-center gap-2">
+                    >
                         <Building2 size={14} />
                         Business Density
-                    </span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('search')}
-                    className={`pb-3 text-sm font-semibold border-b-2 transition-all ${activeTab === 'search'
-                        ? 'border-[#4F46E5] text-[#4F46E5]'
-                        : 'border-transparent text-[#6B7280] hover:text-[#111827]'
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('search')}
+                        className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-all ${
+                            activeTab === 'search'
+                                ? 'text-[#4F46E5] border-[#4F46E5]'
+                                : 'text-[#6B7280] border-transparent hover:text-[#111827]'
                         }`}
-                >
-                    <span className="flex items-center gap-2">
+                    >
                         <Search size={14} />
                         Search Demand
-                    </span>
-                </button>
+                    </button>
+                </div>
+
+                {/* Industry dropdown - right side, only show on density tab */}
+                {activeTab === 'density' && (
+                    <div className="relative w-[260px]">
+                        <button
+                            onClick={() => setShowIndustryDropdown(!showIndustryDropdown)}
+                            className="w-full flex items-center justify-between gap-2 px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#111827] hover:border-indigo-300 hover:shadow-sm transition-all"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Filter size={14} className="text-[#4F46E5]" />
+                                <span>{selectedIndustry}</span>
+                            </div>
+                            <ChevronDown size={14} className={`text-gray-400 transition-transform ${showIndustryDropdown ? 'rotate-180' : ''}`} />
+                        </button>
+                        {showIndustryDropdown && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setShowIndustryDropdown(false)} />
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 max-h-[320px] overflow-hidden">
+                                    <div className="p-2 border-b border-gray-100">
+                                        <div className="relative">
+                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search industries..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-100 rounded-lg focus:outline-none focus:border-indigo-300"
+                                                autoFocus
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="overflow-y-auto max-h-[250px]">
+                                        {filteredIndustries.map((industry) => (
+                                            <button
+                                                key={industry}
+                                                onClick={() => handleIndustrySelect(industry)}
+                                                className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${industry === selectedIndustry
+                                                    ? 'bg-blue-50 text-blue-600 font-bold'
+                                                    : 'text-[#374151] hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                {industry}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
 
             {activeTab === 'density' && (
                 <>
                     {/* Stats Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-medium text-[#9CA3AF]">Total businesses</span>
                                 <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center">
@@ -578,7 +544,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                             <p className="text-2xl font-bold text-[#111827]">{totalBusinesses.toLocaleString()}</p>
                             <p className="text-xs text-[#9CA3AF] font-medium mt-0.5">across {regionData.length} regions</p>
                         </div>
-                        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-medium text-[#9CA3AF]">Hottest market</span>
                                 <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
@@ -588,7 +554,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                             <p className="text-2xl font-bold text-[#111827]">{topRegion.name}</p>
                             <p className="text-xs text-[#9CA3AF] font-medium mt-0.5">{topRegion.businesses.toLocaleString()} businesses</p>
                         </div>
-                        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm hover:shadow-md transition-all">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-medium text-[#9CA3AF]">Industry</span>
                                 <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
@@ -601,10 +567,10 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     </div>
 
                     {/* Map + Sidebar */}
-                    <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
 
                         {/* Map */}
-                        <div className="lg:col-span-7 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-all relative">
+                        <div className="lg:col-span-7 bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all relative">
                             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Globe size={16} className="text-[#4F46E5]" />
@@ -612,25 +578,33 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 </div>
                                 <div className="flex items-center gap-4 text-xs font-medium text-[#9CA3AF]">
                                     <div className="flex items-center gap-1.5">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-[#6366F1]" />
+                                        <div className="w-2.5 h-2.5 rounded-full bg-[#A5B4FC]" />
                                         <span>Emerging</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-[#3B82F6]" />
+                                        <div className="w-2.5 h-2.5 rounded-full bg-[#67E8F9]" />
                                         <span>Moderate</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
+                                        <div className="w-2.5 h-2.5 rounded-full bg-[#F9A8D4]" />
                                         <span>High</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+                                        <div className="w-2.5 h-2.5 rounded-full bg-[#6EE7B7]" />
                                         <span>Very high</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="relative" style={{ height: '480px', background: '#FAFBFD' }}>
+                            <div
+                                ref={mapContainerRef}
+                                className="relative"
+                                style={{ height: '560px', background: '#FAFBFD' }}
+                                onMouseMove={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                                }}
+                            >
                                 {isSearching && (
                                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center">
                                         <div className="flex items-center gap-3">
@@ -682,20 +656,36 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                     </button>
                                 </div>
 
-                                {/* Hover tooltip */}
+                                {/* Floating location card on hover */}
                                 {hoveredRegion && !selectedRegion && (
-                                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl p-4 shadow-lg z-10 min-w-[220px] animate-in fade-in zoom-in duration-200">
-                                        <p className="text-xs font-semibold text-[#111827] mb-1">{hoveredRegion.name}</p>
-                                        <p className="text-[10px] text-[#9CA3AF] font-medium mb-2">{hoveredRegion.subregion}</p>
-                                        <div className="flex items-center gap-4">
-                                            <div>
-                                                <p className="text-lg font-black text-[#111827]">{hoveredRegion.businesses.toLocaleString()}</p>
-                                                <p className="text-[10px] text-[#9CA3AF] font-normal">businesses</p>
+                                    <div
+                                        className="absolute pointer-events-none z-20 animate-in fade-in zoom-in-95 duration-150"
+                                        style={{
+                                            top: Math.max(8, mousePos.y - 90) + 'px',
+                                            left: Math.min(mousePos.x + 16, mapContainerWidth - 200) + 'px',
+                                            transform: 'none',
+                                        }}
+                                    >
+                                        <div className="bg-white border border-gray-200 rounded-xl shadow-lg px-4 py-3 min-w-[180px]">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <MapPin size={14} className="text-[#4F46E5] shrink-0" />
+                                                <p className="text-sm font-semibold text-[#111827]">{hoveredRegion.name}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-lg font-black text-emerald-600">+{hoveredRegion.growth}%</p>
-                                                <p className="text-[10px] text-[#9CA3AF] font-normal">growth</p>
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs text-[#6B7280]">{hoveredRegion.businesses.toLocaleString()} businesses</p>
+                                                <span
+                                                    className="ml-3 text-xs font-medium px-2 py-0.5 rounded-full"
+                                                    style={{
+                                                        backgroundColor: getDotColor(hoveredRegion.businesses, maxBusinesses) + '30',
+                                                        color: getDotColor(hoveredRegion.businesses, maxBusinesses),
+                                                    }}
+                                                >
+                                                    {getHeatLabel(hoveredRegion.businesses, maxBusinesses)}
+                                                </span>
                                             </div>
+                                            {hoveredRegion.growth > 0 && (
+                                                <p className="text-xs text-emerald-600 mt-1">+{hoveredRegion.growth}% growth</p>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -703,7 +693,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                         </div>
 
                         {/* Region List */}
-                        <div className="lg:col-span-3 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col">
+                        <div className="lg:col-span-3 bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col">
                             <div className="px-5 py-4 border-b border-gray-100">
                                 <div className="flex items-center gap-2">
                                     <BarChart3 size={16} className="text-blue-500" />
@@ -711,7 +701,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                 </div>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto max-h-[460px]">
+                            <div className="flex-1 overflow-y-auto max-h-[540px]">
                                 {sortedRegions.map((region, index) => {
                                     const isSelected = selectedRegion?.id === region.id;
                                     const barWidth = (region.businesses / maxBusinesses) * 100;
@@ -751,7 +741,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
 
                     {/* Selected Region Detail */}
                     {selectedRegion && (
-                        <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-6 animate-in slide-in-from-bottom-4 fade-in duration-300">
+                        <div className="bg-white border border-[#E5E7EB] rounded-xl shadow-sm p-6 animate-in slide-in-from-bottom-4 fade-in duration-300">
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-3">
@@ -816,7 +806,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
             {activeTab === 'search' && (
                 <>
                     {/* Search Input */}
-                    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm">
+                    <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 shadow-sm">
                         <div className="flex items-center gap-2 mb-3">
                             <Search size={16} className="text-[#4F46E5]" />
                             <h3 className="text-sm font-semibold text-[#111827] uppercase tracking-wide">Keyword Search Volume</h3>
@@ -934,7 +924,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                         <>
                             {/* Summary Stats */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
+                                <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <MapPin size={14} className="text-[#4F46E5]" />
                                         <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Target Market</span>
@@ -942,7 +932,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                     <p className="text-2xl font-black text-[#111827]">{selectedCountry.flag} {selectedCountry.name}</p>
                                     <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">{keywordResults.length} keywords analysed</p>
                                 </div>
-                                <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
+                                <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <TrendingUp size={14} className="text-emerald-500" />
                                         <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Total Monthly Searches</span>
@@ -951,7 +941,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                         {keywordResults.reduce((sum: number, k: any) => sum + (k.search_volume || 0), 0).toLocaleString()}
                                     </p>
                                 </div>
-                                <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
+                                <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <Zap size={14} className="text-amber-500" />
                                         <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Top Keyword</span>
@@ -960,7 +950,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                         {keywordResults.reduce((max: any, k: any) => (k.search_volume || 0) > (max.search_volume || 0) ? k : max, keywordResults[0])?.keyword}
                                     </p>
                                 </div>
-                                <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
+                                <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">
                                         <BarChart3 size={14} className="text-purple-500" />
                                         <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Avg CPC</span>
