@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Calendar,
-    Linkedin,
-    Mail,
-    CheckCircle2,
-    Loader2,
-    XCircle,
-    Info
-} from 'lucide-react';
+import { Linkedin, Mail, Calendar, CheckCircle, XCircle, Info, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface LinkedInStatus {
@@ -36,9 +28,7 @@ const Integrations: React.FC = () => {
 
         if (linkedinParam === 'connected') {
             setToast({ message: 'LinkedIn connected successfully!', type: 'success' });
-            // Clean up URL
             window.history.replaceState({}, '', window.location.pathname);
-            // Refresh status after connection
             checkLinkedInStatus();
         } else if (linkedinParam === 'failed') {
             setToast({ message: 'LinkedIn connection failed. Please try again.', type: 'error' });
@@ -114,7 +104,7 @@ const Integrations: React.FC = () => {
         loadSettings();
     }, []);
 
-    const saveField = async (field: string, value: any) => {
+    const saveField = async (field: string, value: string) => {
         setSaving(field);
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -161,45 +151,15 @@ const Integrations: React.FC = () => {
             const data = await response.json();
 
             if (data.url) {
-                // Open Unipile auth in new tab
                 window.open(data.url, '_blank');
                 setToast({ message: 'Complete the connection in the new tab', type: 'success' });
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('LinkedIn connect error:', err);
-            setToast({ message: err.message || 'Failed to connect LinkedIn', type: 'error' });
+            const errorMessage = err instanceof Error ? err.message : 'Failed to connect LinkedIn';
+            setToast({ message: errorMessage, type: 'error' });
         } finally {
             setLinkedinConnecting(false);
-        }
-    };
-
-    const handleDisconnectLinkedIn = async () => {
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            // Clear the Unipile account ID from the profile
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    unipile_account_id: null,
-                    linkedin_connected: false
-                })
-                .eq('id', user.id);
-
-            if (error) {
-                throw error;
-            }
-
-            setLinkedinStatus({
-                connected: false,
-                account_id: null,
-                name: null
-            });
-            setToast({ message: 'LinkedIn disconnected', type: 'success' });
-        } catch (err) {
-            console.error('Disconnect error:', err);
-            setToast({ message: 'Failed to disconnect LinkedIn', type: 'error' });
         }
     };
 
@@ -207,21 +167,30 @@ const Integrations: React.FC = () => {
         alert('Email integration coming soon. Contact support@leadomation.co.uk to get set up.');
     };
 
+    const infrastructureTools = [
+        { name: 'Apify', desc: 'Google Maps lead scraping', bgColor: 'bg-amber-50', textColor: 'text-amber-600' },
+        { name: 'Hunter.io', desc: 'Email finding and verification', bgColor: 'bg-cyan-50', textColor: 'text-cyan-600' },
+        { name: 'Vapi.ai', desc: 'AI voice calling (Pro)', bgColor: 'bg-purple-50', textColor: 'text-purple-600' },
+        { name: 'Resend', desc: 'Email delivery and tracking', bgColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
+        { name: 'DataForSEO', desc: 'Keyword search volume', bgColor: 'bg-blue-50', textColor: 'text-blue-600' },
+        { name: 'Claude AI', desc: 'Reply classification and sequences', bgColor: 'bg-[#EEF2FF]', textColor: 'text-[#4F46E5]' }
+    ];
+
     return (
-        <div className="p-6 bg-[#F8F9FA] min-h-screen animate-in fade-in duration-700 max-w-[1200px] mx-auto pb-12">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {/* Toast Notification */}
             {toast && (
-                <div className={`fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg ${
+                <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg ${
                     toast.type === 'success'
                         ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
                         : 'bg-red-50 border border-red-200 text-red-800'
                 }`}>
                     {toast.type === 'success' ? (
-                        <CheckCircle2 size={18} className="text-emerald-600" />
+                        <CheckCircle size={18} className="text-emerald-600" />
                     ) : (
                         <XCircle size={18} className="text-red-600" />
                     )}
-                    <span className="text-sm font-bold">{toast.message}</span>
+                    <span className="text-sm font-medium">{toast.message}</span>
                     <button
                         onClick={() => setToast(null)}
                         className="ml-2 text-gray-400 hover:text-gray-600"
@@ -231,158 +200,185 @@ const Integrations: React.FC = () => {
                 </div>
             )}
 
-
-            {/* Meeting Link Section */}
-            <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-blue-100/50 transition-colors duration-500"></div>
-
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm shrink-0">
-                            <Calendar size={28} />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-black text-[#111827]">Meeting Link</h3>
-                            <p className="text-sm text-[#6B7280] font-medium mt-1">Paste your Calendly or Cal.com booking URL for email sequences.</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <input
-                            type="text"
-                            placeholder="https://calendly.com/your-name"
-                            className="w-full px-4 py-3 bg-gray-50/50 border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/10 focus:border-[#4F46E5] focus:bg-white transition-all"
-                            value={meetingLink}
-                            onChange={(e) => setMeetingLink(e.target.value)}
-                        />
-                        <button
-                            onClick={() => saveField('meeting_link', meetingLink)}
-                            disabled={saving === 'meeting_link' || loadingSettings}
-                            className="flex items-center gap-2 px-6 py-3 bg-[#4F46E5] text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/20 hover:bg-[#4338CA] transition-all active:scale-95 disabled:opacity-50 shrink-0"
-                        >
-                            {saving === 'meeting_link' ? 'Saving...' : 'Save'}
-                        </button>
-                    </div>
-                </div>
+            {/* Page Header */}
+            <div className="mb-4">
+                <h1 className="text-xl font-semibold text-[#111827]">Integrations</h1>
+                <p className="text-sm text-[#6B7280]">Connect your accounts and manage infrastructure</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                {/* LinkedIn Card */}
-                <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-6 transition-all duration-300 hover:shadow-xl group">
-                    <div className="flex items-start justify-between mb-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm transition-transform group-hover:scale-110 duration-300">
-                                <Linkedin size={24} fill="currentColor" />
-                            </div>
-                            <div>
-                                <h3 className="text-base font-bold text-[#111827]">LinkedIn Account</h3>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                    {linkedinLoading ? (
-                                        <>
-                                            <Loader2 size={12} className="animate-spin text-gray-400" />
-                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Checking...</span>
-                                        </>
-                                    ) : linkedinStatus.connected ? (
-                                        <>
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
-                                            <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Connected</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="w-2 h-2 rounded-full bg-red-400"></div>
-                                            <span className="text-[11px] font-medium text-red-500">Not connected</span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+            <div className="space-y-4">
+                {/* Meeting Link Card */}
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                    <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
+                            <Calendar size={20} />
                         </div>
-                    </div>
-
-                    <p className="text-sm text-[#6B7280] leading-relaxed mb-4">
-                        Connect your LinkedIn account to send connection requests and messages directly from Leadomation.
-                    </p>
-
-                    {linkedinStatus.connected && linkedinStatus.name && (
-                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
-                            <p className="text-xs font-bold text-emerald-700">
-                                Connected as: <span className="text-emerald-900">{linkedinStatus.name}</span>
-                            </p>
-                        </div>
-                    )}
-
-                    <div className="pt-4 border-t border-[#F3F4F6]">
-                        {linkedinLoading ? (
-                            <div className="flex items-center justify-center py-3">
-                                <Loader2 size={20} className="animate-spin text-gray-400" />
-                            </div>
-                        ) : linkedinStatus.connected ? (
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-600 uppercase tracking-widest">
-                                    <CheckCircle2 size={14} />
-                                    Active Account
-                                </div>
+                        <div className="flex-1">
+                            <h3 className="text-sm font-semibold text-[#111827]">Meeting link</h3>
+                            <p className="text-xs text-[#6B7280] mb-3">Paste your Calendly or Cal.com booking URL for email sequences</p>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="text"
+                                    placeholder="https://calendly.com/your-name"
+                                    className="flex-1 px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+                                    value={meetingLink}
+                                    onChange={(e) => setMeetingLink(e.target.value)}
+                                />
                                 <button
-                                    onClick={handleDisconnectLinkedIn}
-                                    className="px-4 py-2 text-red-500 border border-red-200 hover:bg-red-50 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+                                    onClick={() => saveField('meeting_link', meetingLink)}
+                                    disabled={saving === 'meeting_link' || loadingSettings}
+                                    className="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] disabled:opacity-50"
                                 >
-                                    Disconnect
+                                    <Save size={16} />
+                                    {saving === 'meeting_link' ? 'Saving...' : 'Save'}
                                 </button>
                             </div>
-                        ) : (
-                            <button
-                                onClick={handleConnectLinkedIn}
-                                disabled={linkedinConnecting}
-                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all w-full max-w-xs disabled:opacity-50"
-                            >
-                                {linkedinConnecting ? (
-                                    <>
-                                        <Loader2 size={16} className="animate-spin" />
-                                        Connecting...
-                                    </>
-                                ) : (
-                                    'Connect LinkedIn account'
-                                )}
-                            </button>
-                        )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Email Card */}
-                <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-6 transition-all duration-300 hover:shadow-xl group">
-                    <div className="flex items-start justify-between mb-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#4F46E5] shadow-sm transition-transform group-hover:scale-110 duration-300">
-                                <Mail size={24} />
-                            </div>
-                            <div>
-                                <h3 className="text-base font-bold text-[#111827]">Email Account</h3>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                    <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                                    <span className="text-[11px] font-medium text-gray-400">Not connected</span>
+                {/* LinkedIn + Email Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                    {/* LinkedIn Card */}
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <Linkedin size={20} />
                                 </div>
+                                <h3 className="text-sm font-semibold text-[#111827]">LinkedIn account</h3>
                             </div>
+                            {linkedinStatus.connected ? (
+                                <div className="flex items-center gap-1 text-xs font-medium text-emerald-500">
+                                    <CheckCircle size={14} />
+                                    <span>Connected</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1 text-xs font-medium text-red-500">
+                                    <XCircle size={14} />
+                                    <span>Not connected</span>
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+                            Connect your LinkedIn account to send connection requests and messages directly from Leadomation.
+                        </p>
+
+                        {linkedinStatus.connected && linkedinStatus.name && (
+                            <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 mb-4">
+                                <p className="text-xs text-emerald-700">
+                                    Connected as: <span className="font-medium">{linkedinStatus.name}</span>
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="border-t border-gray-100 pt-4 mt-4">
+                            <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-3">Requirements</p>
+                            <ul className="space-y-2 mb-4">
+                                <li className="flex items-center gap-2 text-xs text-[#6B7280]">
+                                    <span className="w-1 h-1 rounded-full bg-[#9CA3AF]"></span>
+                                    Pro plan required
+                                </li>
+                                <li className="flex items-center gap-2 text-xs text-[#6B7280]">
+                                    <span className="w-1 h-1 rounded-full bg-[#9CA3AF]"></span>
+                                    LinkedIn personal account
+                                </li>
+                                <li className="flex items-center gap-2 text-xs text-[#6B7280]">
+                                    <span className="w-1 h-1 rounded-full bg-[#9CA3AF]"></span>
+                                    Unipile OAuth flow
+                                </li>
+                            </ul>
+                            {linkedinStatus.connected ? (
+                                <button
+                                    onClick={() => {}}
+                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                                >
+                                    <Linkedin size={16} />
+                                    Disconnect account
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleConnectLinkedIn}
+                                    disabled={linkedinConnecting || linkedinLoading}
+                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] disabled:opacity-50"
+                                >
+                                    <Linkedin size={16} />
+                                    {linkedinConnecting ? 'Connecting...' : 'Connect LinkedIn account'}
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    <p className="text-sm text-[#6B7280] leading-relaxed mb-8 h-12">
-                        Connect your Microsoft 365 or Gmail account to send outreach emails from your own address.
-                    </p>
+                    {/* Email Card */}
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                    <Mail size={20} />
+                                </div>
+                                <h3 className="text-sm font-semibold text-[#111827]">Email account</h3>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-medium text-[#9CA3AF]">
+                                <span className="w-2 h-2 rounded-full bg-[#9CA3AF]"></span>
+                                <span>Not connected</span>
+                            </div>
+                        </div>
+                        <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+                            Connect your email account to send outreach emails from your own address.
+                        </p>
 
-                    <div className="pt-4 border-t border-[#F3F4F6]">
-                        <button
-                            onClick={handleConnectEmail}
-                            className="flex items-center justify-center gap-2 px-5 py-2.5 border border-[#E5E7EB] text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50 transition-all w-full max-w-xs"
-                        >
-                            Connect email account
-                        </button>
+                        <div className="border-t border-gray-100 pt-4 mt-4">
+                            <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-3">Supported providers</p>
+                            <ul className="space-y-2 mb-4">
+                                <li className="flex items-center gap-2 text-xs text-[#6B7280]">
+                                    <span className="w-1 h-1 rounded-full bg-[#9CA3AF]"></span>
+                                    Gmail / Google Workspace
+                                </li>
+                                <li className="flex items-center gap-2 text-xs text-[#6B7280]">
+                                    <span className="w-1 h-1 rounded-full bg-[#9CA3AF]"></span>
+                                    Microsoft 365 / Outlook
+                                </li>
+                                <li className="flex items-center gap-2 text-xs text-[#6B7280]">
+                                    <span className="w-1 h-1 rounded-full bg-[#9CA3AF]"></span>
+                                    SMTP (custom)
+                                </li>
+                            </ul>
+                            <button
+                                onClick={handleConnectEmail}
+                                className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                            >
+                                <Mail size={16} />
+                                Connect email account
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Bottom Info Banner */}
-            <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl">
-                <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
-                <p className="text-xs font-medium text-[#374151] leading-relaxed">All lead scraping, email finding, and data enrichment tools are included in your plan. No additional API keys or subscriptions required. Leadomation handles the infrastructure so you can focus on outreach.</p>
+                {/* Info Banner */}
+                <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl">
+                    <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                    <p className="text-xs text-[#6B7280] leading-relaxed">
+                        All lead scraping, email finding, and data enrichment tools are included in your plan. No additional API keys or subscriptions required. Leadomation handles the infrastructure so you can focus on outreach.
+                    </p>
+                </div>
+
+                {/* Included Infrastructure Card */}
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                    <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-3">Included infrastructure</p>
+                    <div className="grid grid-cols-3 gap-3">
+                        {infrastructureTools.map((tool) => (
+                            <div key={tool.name} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
+                                <div className={`w-8 h-8 rounded-lg ${tool.bgColor} flex items-center justify-center ${tool.textColor}`}>
+                                    <CheckCircle size={14} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-[#111827]">{tool.name}</p>
+                                    <p className="text-xs text-[#9CA3AF]">{tool.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
