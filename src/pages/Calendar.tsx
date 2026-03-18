@@ -470,7 +470,11 @@ function EventDetailModal({ event, onClose, onDelete }: EventDetailModalProps) {
 // MAIN COMPONENT
 // ============================================================================
 
-const Calendar: React.FC = () => {
+interface CalendarProps {
+  onPageChange?: (page: string) => void;
+}
+
+const Calendar: React.FC<CalendarProps> = ({ onPageChange: _onPageChange }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -478,7 +482,6 @@ const Calendar: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [saving, setSaving] = useState(false);
 
   const loadEvents = async () => {
     try {
@@ -505,24 +508,19 @@ const Calendar: React.FC = () => {
   }, []);
 
   const addEvent = async (eventData: Omit<CalendarEvent, 'id' | 'user_id' | 'created_at' | 'source'>) => {
-    setSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase
-        .from('calendar_events')
-        .insert({
-          ...eventData,
-          user_id: user.id,
-          source: 'manual',
-        });
+    const { error } = await supabase
+      .from('calendar_events')
+      .insert({
+        ...eventData,
+        user_id: user.id,
+        source: 'manual',
+      });
 
-      if (error) throw error;
-      await loadEvents();
-    } finally {
-      setSaving(false);
-    }
+    if (error) throw error;
+    await loadEvents();
   };
 
   const deleteEvent = async (id: string) => {
@@ -594,26 +592,8 @@ const Calendar: React.FC = () => {
 
   return (
     <div className="p-6 bg-[#F8F9FA] min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold text-[#111827]">Calendar</h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">Manage your meetings and calls</p>
-        </div>
-        <button
-          onClick={() => {
-            setSelectedDate(new Date());
-            setShowAddModal(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add event
-        </button>
-      </div>
-
       {/* Calendar Card */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden mb-6">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
         {/* Top Bar */}
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -640,26 +620,38 @@ const Calendar: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex rounded-lg border border-[#E5E7EB] overflow-hidden">
+          <div className="flex items-center gap-3">
+            <div className="flex rounded-lg border border-[#E5E7EB] overflow-hidden">
+              <button
+                onClick={() => setView('week')}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  view === 'week'
+                    ? 'bg-[#4F46E5] text-white'
+                    : 'text-[#6B7280] hover:bg-gray-50'
+                }`}
+              >
+                Week
+              </button>
+              <button
+                onClick={() => setView('month')}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  view === 'month'
+                    ? 'bg-[#4F46E5] text-white'
+                    : 'text-[#6B7280] hover:bg-gray-50'
+                }`}
+              >
+                Month
+              </button>
+            </div>
             <button
-              onClick={() => setView('week')}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                view === 'week'
-                  ? 'bg-[#4F46E5] text-white'
-                  : 'text-[#6B7280] hover:bg-gray-50'
-              }`}
+              onClick={() => {
+                setSelectedDate(new Date());
+                setShowAddModal(true);
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA]"
             >
-              Week
-            </button>
-            <button
-              onClick={() => setView('month')}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                view === 'month'
-                  ? 'bg-[#4F46E5] text-white'
-                  : 'text-[#6B7280] hover:bg-gray-50'
-              }`}
-            >
-              Month
+              <Plus size={14} />
+              Add event
             </button>
           </div>
         </div>
@@ -676,8 +668,9 @@ const Calendar: React.FC = () => {
               <div className="w-16" />
               {weekDays.map((day, idx) => {
                 const isToday = isSameDay(day, today);
+                const isLastColumn = idx === 6;
                 return (
-                  <div key={idx} className="py-3 text-center border-r border-gray-50 last:border-r-0">
+                  <div key={idx} className={`py-3 text-center border-r border-gray-100 ${isLastColumn ? 'border-r-0' : ''}`}>
                     <div className="text-xs font-medium text-[#6B7280]">
                       {day.toLocaleDateString('en-GB', { weekday: 'short' })}
                     </div>
@@ -702,13 +695,16 @@ const Calendar: React.FC = () => {
                   <div className="text-xs text-[#9CA3AF] pr-3 text-right pt-1 h-14">
                     {formatHour(hour)}
                   </div>
-                  {weekDays.map((day, idx) => (
-                    <div
-                      key={idx}
-                      className="h-14 border-b border-r border-gray-50 relative cursor-pointer hover:bg-gray-50/50 transition-colors"
-                      onClick={() => handleDayClick(day)}
-                    />
-                  ))}
+                  {weekDays.map((day, idx) => {
+                    const isLastColumn = idx === 6;
+                    return (
+                      <div
+                        key={idx}
+                        className={`h-14 border-b border-gray-50 relative cursor-pointer hover:bg-gray-50/50 transition-colors border-r border-gray-100 ${isLastColumn ? 'border-r-0' : ''}`}
+                        onClick={() => handleDayClick(day)}
+                      />
+                    );
+                  })}
                 </div>
               ))}
 
@@ -804,63 +800,53 @@ const Calendar: React.FC = () => {
       </div>
 
       {/* Calendar Integrations Card */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5 mb-6">
-        <h3 className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-4">
-          Calendar integrations
-        </h3>
+      <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-5 mt-4">
+        <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-4">Calendar integrations</p>
         <div className="grid grid-cols-2 gap-4">
-          {/* Calendly / Cal.com - Connected */}
+
+          {/* Calendly / Cal.com — active */}
           <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#4F46E5] flex items-center justify-center flex-shrink-0">
-                <CalendarCheck className="w-[18px] h-[18px] text-white" />
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-[#4F46E5] flex items-center justify-center shrink-0">
+                <CalendarCheck size={18} className="text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-[#111827]">Calendly / Cal.com</h4>
-                <p className="text-xs text-[#6B7280] mt-1">
-                  When a call is booked via your booking link, it automatically appears in your calendar and moves the deal to Discovery Call Booked.
-                </p>
-                <div className="flex items-center gap-1 mt-2">
-                  <span className="flex items-center gap-1 text-xs font-medium text-[#4F46E5] bg-white rounded-full px-2 py-0.5 border border-indigo-100">
-                    <Zap className="w-[10px] h-[10px]" />
-                    Auto-sync active
-                  </span>
+              <div>
+                <p className="text-sm font-semibold text-[#111827]">Calendly / Cal.com</p>
+                <p className="text-xs text-[#6B7280] mt-0.5 leading-relaxed">When a call is booked via your booking link, it automatically appears in your calendar and moves the deal to Discovery Call Booked.</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-[#4F46E5] bg-white rounded-full px-2.5 py-1 border border-indigo-100">
+                <Zap size={10} />
+                Auto-sync active
+              </span>
+              <span className="text-xs text-[#6B7280]">Configure in Integrations</span>
+            </div>
+          </div>
+
+          {/* Gmail + Outlook — coming soon */}
+          <div className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-4 bg-gray-50">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                <Mail size={18} className="text-[#9CA3AF]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-sm font-semibold text-[#9CA3AF]">Gmail + Outlook sync</p>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-200 text-[#9CA3AF]">Coming soon</span>
                 </div>
-                <p className="text-xs text-[#6B7280] mt-2">
-                  Configure your booking URL in Integrations.
-                </p>
+                <p className="text-xs text-[#9CA3AF] leading-relaxed">Two-way sync with your Google or Microsoft calendar. Events created in either direction stay in sync automatically.</p>
               </div>
             </div>
           </div>
 
-          {/* Gmail + Outlook - Coming Soon */}
-          <div className="bg-gray-50 border border-dashed border-[#E5E7EB] rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                <Mail className="w-[18px] h-[18px] text-[#9CA3AF]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-[#9CA3AF]">Gmail + Outlook sync</h4>
-                <p className="text-xs text-[#9CA3AF] mt-1">
-                  Two-way sync with your Google or Microsoft calendar. Events created in either direction stay in sync automatically.
-                </p>
-                <div className="mt-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-200 text-[#9CA3AF]">
-                    Coming soon
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Info Banner */}
-      <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl">
-        <Info className="w-5 h-5 text-[#4F46E5] flex-shrink-0 mt-0.5" />
-        <p className="text-sm text-[#374151]">
-          Your calendar shows all discovery calls booked through Leadomation sequences, plus any meetings you add manually. Calls booked via your Calendly or Cal.com link will appear here automatically once a lead books.
-        </p>
+      <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mt-4">
+        <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+        <p className="text-xs font-medium text-[#374151] leading-relaxed">Your calendar shows all discovery calls booked through Leadomation sequences, plus any meetings you add manually. Calls booked via your Calendly or Cal.com link will appear here automatically once a lead books.</p>
       </div>
 
       {/* Modals */}
