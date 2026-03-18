@@ -168,14 +168,6 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
         }
     };
 
-    const getAccentColor = (status: string) => {
-        const s = String(status).toLowerCase();
-        if (s === 'completed') return 'bg-emerald-400';
-        if (s === 'error') return 'bg-red-500';
-        if (s === 'active') return 'bg-cyan-400';
-        return 'bg-amber-400';
-    };
-
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {/* Page Header */}
@@ -216,10 +208,8 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                     {campaigns.map((campaign) => (
                         <div
                             key={campaign.id}
-                            className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+                            className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 border-t-4 border-t-cyan-400"
                         >
-                            {/* Top accent bar */}
-                            <div className={`h-1 w-full ${getAccentColor(campaign.status)}`} />
 
                             {/* Card body */}
                             <div className="p-5">

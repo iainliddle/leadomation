@@ -10,7 +10,8 @@ import {
     Upload,
     AlertTriangle,
     Loader2,
-    Save
+    Save,
+    Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -145,7 +146,7 @@ const Compliance: React.FC = () => {
     }
 
     return (
-        <div className="animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
             <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4 mb-10">
                 <button
                     onClick={() => saveSettings({
@@ -390,16 +391,9 @@ const Compliance: React.FC = () => {
             </div>
 
             {/* Bottom Info Banner */}
-            <div className="mt-10 bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm shrink-0">
-                    <Shield size={20} />
-                </div>
-                <div>
-                    <h4 className="text-sm font-bold text-blue-900">Compliance & Protection</h4>
-                    <p className="text-xs text-blue-700/80 font-medium mt-1.5 leading-relaxed">
-                        Compliance settings help ensure your outreach follows GDPR, CAN-SPAM, and other regulations. The unsubscribe link is required by law in most jurisdictions and cannot be disabled. B2B filtering helps protect your sender reputation by excluding personal email addresses.
-                    </p>
-                </div>
+            <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mt-10">
+                <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                <p className="text-xs font-medium text-[#374151] leading-relaxed">Compliance settings help ensure your outreach follows GDPR, CAN-SPAM, and other regulations. The unsubscribe link is required by law in most jurisdictions and cannot be disabled. B2B filtering helps protect your sender reputation by excluding personal email addresses.</p>
             </div>
 
             {showSuppressionModal && (

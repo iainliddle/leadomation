@@ -9,7 +9,7 @@ import {
     Image as ImageIcon,
     Loader2,
     Eye,
-    Lightbulb
+    Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -90,7 +90,7 @@ const EmailConfig: React.FC = () => {
     }
 
     return (
-        <div className="animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen animate-in fade-in duration-700 max-w-[1000px] mx-auto pb-12">
             <div className="space-y-8">
                 {/* Section 1: Sending Limits */}
                 <div className="card bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
@@ -297,16 +297,9 @@ const EmailConfig: React.FC = () => {
                 </div>
 
                 {/* Bottom Info Banner */}
-                <div className="mt-10 bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#4F46E5] shadow-sm shrink-0">
-                        <Lightbulb size={20} />
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-bold text-blue-900">Outreach Deliverability</h4>
-                        <p className="text-xs text-blue-700/80 font-medium mt-1.5 leading-relaxed">
-                            These settings control how your outreach emails are sent. Daily limits help protect your sender reputation and ensure high deliverability. Your sending identity should match the email account connected in Integrations to avoid spam filters.
-                        </p>
-                    </div>
+                <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mt-10">
+                    <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                    <p className="text-xs font-medium text-[#374151] leading-relaxed">These settings control how your outreach emails are sent. Daily limits help protect your sender reputation and ensure high deliverability. Your sending identity should match the email account connected in Integrations to avoid spam filters.</p>
                 </div>
             </div>
         </div>

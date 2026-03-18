@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Lightbulb,
     Calendar,
     Linkedin,
     Mail,
     CheckCircle2,
     Loader2,
-    XCircle
+    XCircle,
+    Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -208,7 +208,7 @@ const Integrations: React.FC = () => {
     };
 
     return (
-        <div className="animate-in fade-in duration-700 max-w-[1200px] mx-auto pb-12">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen animate-in fade-in duration-700 max-w-[1200px] mx-auto pb-12">
             {/* Toast Notification */}
             {toast && (
                 <div className={`fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg ${
@@ -290,7 +290,7 @@ const Integrations: React.FC = () => {
                                     ) : (
                                         <>
                                             <div className="w-2 h-2 rounded-full bg-red-400"></div>
-                                            <span className="text-[11px] font-bold text-red-500 uppercase tracking-wider">Not Connected</span>
+                                            <span className="text-[11px] font-medium text-red-500">Not connected</span>
                                         </>
                                     )}
                                 </div>
@@ -332,7 +332,7 @@ const Integrations: React.FC = () => {
                             <button
                                 onClick={handleConnectLinkedIn}
                                 disabled={linkedinConnecting}
-                                className="w-full py-3 bg-[#4F46E5] text-white rounded-xl text-sm font-black shadow-md hover:bg-[#4338CA] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all w-full max-w-xs disabled:opacity-50"
                             >
                                 {linkedinConnecting ? (
                                     <>
@@ -340,7 +340,7 @@ const Integrations: React.FC = () => {
                                         Connecting...
                                     </>
                                 ) : (
-                                    'Connect LinkedIn Account'
+                                    'Connect LinkedIn account'
                                 )}
                             </button>
                         )}
@@ -358,7 +358,7 @@ const Integrations: React.FC = () => {
                                 <h3 className="text-base font-bold text-[#111827]">Email Account</h3>
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                     <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Not Connected</span>
+                                    <span className="text-[11px] font-medium text-gray-400">Not connected</span>
                                 </div>
                             </div>
                         </div>
@@ -371,25 +371,18 @@ const Integrations: React.FC = () => {
                     <div className="pt-4 border-t border-[#F3F4F6]">
                         <button
                             onClick={handleConnectEmail}
-                            className="w-full py-3 bg-white border border-[#E5E7EB] text-[#374151] rounded-xl text-sm font-black shadow-sm hover:bg-gray-50 transition-all active:scale-[0.98]"
+                            className="flex items-center justify-center gap-2 px-5 py-2.5 border border-[#E5E7EB] text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50 transition-all w-full max-w-xs"
                         >
-                            Connect Email Account
+                            Connect email account
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* Bottom Info Banner */}
-            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm shrink-0">
-                    <Lightbulb size={20} />
-                </div>
-                <div>
-                    <h4 className="text-sm font-bold text-blue-900">Infrastructure Included</h4>
-                    <p className="text-xs text-blue-700/80 font-medium mt-1.5 leading-relaxed">
-                        All lead scraping, email finding, and data enrichment tools are included in your plan. No additional API keys or subscriptions required. Leadomation handles the infrastructure so you can focus on outreach.
-                    </p>
-                </div>
+            <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl">
+                <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                <p className="text-xs font-medium text-[#374151] leading-relaxed">All lead scraping, email finding, and data enrichment tools are included in your plan. No additional API keys or subscriptions required. Leadomation handles the infrastructure so you can focus on outreach.</p>
             </div>
         </div>
     );
