@@ -1254,7 +1254,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             )}
             
             {/* Header & Actions Bar */}
-            <div className={`px-6 py-4 bg-white border-b border-gray-200 ${campaignFilter ? 'mt-0' : ''}`}>
+            <div className={`mx-6 mt-6 px-6 py-4 bg-white border border-[#E5E7EB] rounded-xl shadow-sm ${campaignFilter ? 'mt-2' : ''}`}>
                 <div className="flex flex-wrap items-center justify-end gap-4 mb-4">
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button
@@ -1326,7 +1326,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 </div>
 
                 {/* Smart & Intent Pill Filters */}
-                <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4 px-6 py-3 bg-white border-b border-gray-100 -mx-6">
+                <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4 py-3 border-t border-gray-100">
                     {/* Smart Filters */}
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mr-1">Smart</span>
