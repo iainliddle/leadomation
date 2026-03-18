@@ -200,12 +200,6 @@ const Integrations: React.FC = () => {
                 </div>
             )}
 
-            {/* Page Header */}
-            <div className="mb-4">
-                <h1 className="text-xl font-semibold text-[#111827]">Integrations</h1>
-                <p className="text-sm text-[#6B7280]">Connect your accounts and manage infrastructure</p>
-            </div>
-
             <div className="space-y-4">
                 {/* Meeting Link Card */}
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
