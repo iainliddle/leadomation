@@ -11,7 +11,7 @@ import EmailTemplates from './pages/EmailTemplates';
 import Integrations from './pages/Integrations';
 import EmailConfig from './pages/EmailConfig';
 import Compliance from './pages/Compliance';
-import UnifiedInbox from './pages/UnifiedInbox';
+import LeadInbox from './pages/LeadInbox';
 import DealPipeline from './pages/DealPipeline';
 import Pricing from './pages/Pricing';
 import Settings from './pages/Settings';
@@ -21,6 +21,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
 import GlobalDemand from './pages/GlobalDemand';
 import CallScriptBuilder from './pages/CallScriptBuilder';
+import Calendar from './pages/Calendar';
 import { supabase } from './lib/supabase';
 import { usePlan } from './hooks/usePlan';
 import TrialBanner from './components/TrialBanner';
@@ -164,6 +165,12 @@ const App: React.FC = () => {
             <DealPipeline />
           </FeatureGate>
         );
+      case 'Calendar':
+        return (
+          <FeatureGate feature="Calendar" hasAccess={canAccess('dealPipeline')} targetPlan="pro">
+            <Calendar onPageChange={setActivePage} />
+          </FeatureGate>
+        );
       case 'Sequence Builder':
         return <SequenceBuilder onPageChange={setActivePage} />;
       case 'Call Agent':
@@ -171,7 +178,7 @@ const App: React.FC = () => {
       case 'Inbox':
         return (
           <FeatureGate feature="Unified Inbox" hasAccess={canAccess('inbox')} targetPlan="pro">
-            <UnifiedInbox onPageChange={setActivePage} />
+            <LeadInbox onPageChange={setActivePage} />
           </FeatureGate>
         );
       case 'Email Templates':
