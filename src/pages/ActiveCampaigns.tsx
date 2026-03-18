@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Rocket, ChevronRight, Eye, AlertCircle, Plus } from 'lucide-react';
+import { Rocket, ChevronRight, Eye, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Campaign {
@@ -170,17 +170,6 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
-            {/* Page Header */}
-            <div className="flex items-center justify-end mb-6">
-                <button
-                    onClick={() => onPageChange?.('New Campaign')}
-                    className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150 shadow-sm"
-                >
-                    <Plus size={16} />
-                    New Campaign
-                </button>
-            </div>
-
             {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map(i => (
@@ -208,7 +197,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                     {campaigns.map((campaign) => (
                         <div
                             key={campaign.id}
-                            className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 border-t-4 border-t-cyan-400"
+                            className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 border-t-2 border-t-gray-200"
                         >
 
                             {/* Card body */}
@@ -320,7 +309,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                             window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
                                             onPageChange?.('Lead Database');
                                         }}
-                                        className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-all"
+                                        className="flex items-center gap-2 px-4 py-2 bg-cyan-50 text-cyan-600 border border-cyan-200 rounded-lg text-sm font-medium hover:bg-cyan-100 transition-all"
                                     >
                                         <Eye size={14} />
                                         View Leads
