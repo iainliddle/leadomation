@@ -13,7 +13,9 @@ import {
     Mail,
     User,
     Building,
-    RefreshCw
+    RefreshCw,
+    TrendingUp,
+    CheckCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -79,6 +81,8 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
     const [isSendingReply, setIsSendingReply] = useState(false);
     const [replyStatus, setReplyStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [unreadCount, setUnreadCount] = useState(0);
+    const [pushedToCrm, setPushedToCrm] = useState<Set<string>>(new Set());
+    const [crmToast, setCrmToast] = useState<{ type: 'success' | 'exists' | 'error'; emailId: string } | null>(null);
 
     const loadEmails = useCallback(async () => {
         try {
@@ -315,6 +319,58 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
             return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
         }
         return null;
+    };
+
+    const pushToCrm = async (email: InboundEmail) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            // Check if deal already exists
+            const { data: existingDeal, error: checkError } = await supabase
+                .from('deals')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('contact_email', email.from_email)
+                .single();
+
+            if (!checkError && existingDeal) {
+                // Deal already exists
+                setCrmToast({ type: 'exists', emailId: email.id });
+                setTimeout(() => setCrmToast(null), 3000);
+                return;
+            }
+
+            // Insert new deal
+            const { error: insertError } = await supabase
+                .from('deals')
+                .insert({
+                    user_id: user.id,
+                    title: getSenderCompany(email) || getSenderName(email),
+                    contact_name: getSenderName(email),
+                    contact_email: email.from_email,
+                    value: 0,
+                    currency: '£',
+                    stage: 'new_reply',
+                    notes: 'Created from inbox reply: ' + (email.subject || ''),
+                    source: 'google_maps',
+                    probability: 20,
+                    stage_entered_at: new Date().toISOString()
+                });
+
+            if (insertError) {
+                throw insertError;
+            }
+
+            // Success
+            setPushedToCrm(prev => new Set(prev).add(email.id));
+            setCrmToast({ type: 'success', emailId: email.id });
+            setTimeout(() => setCrmToast(null), 3000);
+        } catch (error) {
+            console.error('Error pushing to CRM:', error);
+            setCrmToast({ type: 'error', emailId: email.id });
+            setTimeout(() => setCrmToast(null), 3000);
+        }
     };
 
     const filteredEmails = emails.filter(email => {
@@ -592,12 +648,47 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                                         View Lead
                                     </button>
                                 )}
+                                {selectedEmail.ai_label === 'Interested' && !pushedToCrm.has(selectedEmail.id) && (
+                                    <button
+                                        onClick={() => pushToCrm(selectedEmail)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-all"
+                                    >
+                                        <TrendingUp size={12} />
+                                        Push to CRM
+                                    </button>
+                                )}
+                                {selectedEmail.ai_label === 'Interested' && pushedToCrm.has(selectedEmail.id) && (
+                                    <span className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 rounded-lg">
+                                        <CheckCircle size={12} />
+                                        In CRM pipeline
+                                    </span>
+                                )}
                                 {selectedEmail.campaign?.name && (
                                     <span className="text-xs text-gray-400">
                                         Campaign: {selectedEmail.campaign.name}
                                     </span>
                                 )}
                             </div>
+
+                            {/* CRM Toast */}
+                            {crmToast && crmToast.emailId === selectedEmail.id && crmToast.type === 'success' && (
+                                <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-lg">
+                                    <CheckCircle size={13} className="text-emerald-600" />
+                                    <span className="text-xs font-medium text-emerald-700">Added to Deal Pipeline as New Reply</span>
+                                </div>
+                            )}
+                            {crmToast && crmToast.emailId === selectedEmail.id && crmToast.type === 'exists' && (
+                                <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
+                                    <AlertCircle size={13} className="text-amber-600" />
+                                    <span className="text-xs font-medium text-amber-700">Already in CRM pipeline</span>
+                                </div>
+                            )}
+                            {crmToast && crmToast.emailId === selectedEmail.id && crmToast.type === 'error' && (
+                                <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-100 rounded-lg">
+                                    <AlertCircle size={13} className="text-red-500" />
+                                    <span className="text-xs font-medium text-red-600">Failed to push to CRM</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Email Body */}
