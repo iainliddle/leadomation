@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Mail, MessageCircle, TrendingUp, Loader2, Phone, UserPlus, Star, Download, Calendar, ChevronDown, ArrowUpRight, Info } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
 import CampaignPerformance from '../components/CampaignPerformance';
 import TopCampaigns from '../components/TopCampaigns';
 import RecentActivity from '../components/RecentActivity';
@@ -45,6 +46,21 @@ function formatDateLabel(preset: DatePreset): string {
     return `${fmt(fromDate)} - ${fmt(toDate)}`;
 }
 
+const getLast7Days = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        days.push(d.toISOString().split('T')[0]);
+    }
+    return days;
+};
+
+const bucketByDay = (rows: { day: string; count: number }[], days: string[]) => {
+    const map = Object.fromEntries(rows.map(r => [r.day, r.count]));
+    return days.map(day => ({ day, value: map[day] || 0 }));
+};
+
 // Stat Card Component
 interface StatCardProps {
     label: string;
@@ -55,6 +71,11 @@ interface StatCardProps {
     icon: React.ElementType;
     iconBg: string;
     iconColor: string;
+    chartData?: { day: string; value: number }[];
+    chartType?: 'bar' | 'area';
+    chartColor?: string;
+    chartGradientId?: string;
+    tooltipLabel?: string;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -65,7 +86,12 @@ const StatCard: React.FC<StatCardProps> = ({
     subtitle,
     icon: Icon,
     iconBg,
-    iconColor
+    iconColor,
+    chartData,
+    chartType = 'bar',
+    chartColor = '#22D3EE',
+    chartGradientId,
+    tooltipLabel = 'Count'
 }) => (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
         <div className="flex justify-between items-start mb-3">
@@ -77,13 +103,59 @@ const StatCard: React.FC<StatCardProps> = ({
                 <Icon size={18} className={iconColor} />
             </div>
         </div>
-        <h3 className="text-2xl font-bold text-[#111827] mb-3">{value}</h3>
-        <div className="flex items-center gap-1.5 text-xs font-medium">
-            <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />
-                {change}
-            </span>
-            <span className="text-gray-400">{subtitle}</span>
+        <div className="flex items-end justify-between">
+            <div>
+                <h3 className="text-2xl font-bold text-[#111827] mb-3">{value}</h3>
+                <div className="flex items-center gap-1.5 text-xs font-medium">
+                    <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                        <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />
+                        {change}
+                    </span>
+                    <span className="text-gray-400">{subtitle}</span>
+                </div>
+            </div>
+            {chartData && (
+                <div className="w-20 h-10 opacity-80">
+                    {chartType === 'bar' ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={chartData} barSize={4}>
+                                <Bar dataKey="value" fill={chartColor} radius={[2, 2, 0, 0]} />
+                                <Tooltip
+                                    contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
+                                    formatter={(v) => [v, tooltipLabel]}
+                                    labelFormatter={(l) => String(l)}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData}>
+                                {chartGradientId && (
+                                    <defs>
+                                        <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                )}
+                                <Area
+                                    type="monotone"
+                                    dataKey="value"
+                                    stroke={chartColor}
+                                    strokeWidth={1.5}
+                                    fill={chartGradientId ? `url(#${chartGradientId})` : chartColor}
+                                    dot={false}
+                                />
+                                <Tooltip
+                                    contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
+                                    formatter={(v) => [v, tooltipLabel]}
+                                    labelFormatter={(l) => String(l)}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    )}
+                </div>
+            )}
         </div>
     </div>
 );
@@ -105,6 +177,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+    const [leadsChartData, setLeadsChartData] = useState<{day: string; value: number}[]>([]);
+    const [emailsChartData, setEmailsChartData] = useState<{day: string; value: number}[]>([]);
+    const [contactedChartData, setContactedChartData] = useState<{day: string; value: number}[]>([]);
+    const [dealsChartData, setDealsChartData] = useState<{day: string; value: number}[]>([]);
 
     useEffect(() => {
         setPortalTarget(document.getElementById('topbar-actions'));
@@ -159,6 +235,89 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             dealsCount: dealsCount || 0
         });
         setRecentLeads(recentLeadsData || []);
+
+        // Fetch sparkline chart data (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoISO = sevenDaysAgo.toISOString();
+        const days = getLast7Days();
+
+        // Total leads per day
+        const { data: leadsDaily } = await supabase
+            .from('leads')
+            .select('created_at')
+            .eq('user_id', user.id)
+            .gte('created_at', sevenDaysAgoISO);
+
+        const leadsBucketed = bucketByDay(
+            Object.entries(
+                (leadsDaily || []).reduce((acc: Record<string, number>, row) => {
+                    const day = row.created_at.split('T')[0];
+                    acc[day] = (acc[day] || 0) + 1;
+                    return acc;
+                }, {})
+            ).map(([day, count]) => ({ day, count: count as number })),
+            days
+        );
+        setLeadsChartData(leadsBucketed);
+
+        // Leads with emails per day
+        const { data: emailsDaily } = await supabase
+            .from('leads')
+            .select('created_at')
+            .eq('user_id', user.id)
+            .not('email', 'is', null)
+            .gte('created_at', sevenDaysAgoISO);
+
+        const emailsBucketed = bucketByDay(
+            Object.entries(
+                (emailsDaily || []).reduce((acc: Record<string, number>, row) => {
+                    const day = row.created_at.split('T')[0];
+                    acc[day] = (acc[day] || 0) + 1;
+                    return acc;
+                }, {})
+            ).map(([day, count]) => ({ day, count: count as number })),
+            days
+        );
+        setEmailsChartData(emailsBucketed);
+
+        // Leads contacted (sequence enrollments) per day
+        const { data: contactedDaily } = await supabase
+            .from('sequence_enrollments')
+            .select('enrolled_at')
+            .eq('user_id', user.id)
+            .gte('enrolled_at', sevenDaysAgoISO);
+
+        const contactedBucketed = bucketByDay(
+            Object.entries(
+                (contactedDaily || []).reduce((acc: Record<string, number>, row) => {
+                    const day = row.enrolled_at.split('T')[0];
+                    acc[day] = (acc[day] || 0) + 1;
+                    return acc;
+                }, {})
+            ).map(([day, count]) => ({ day, count: count as number })),
+            days
+        );
+        setContactedChartData(contactedBucketed);
+
+        // Deals per day
+        const { data: dealsDaily } = await supabase
+            .from('deals')
+            .select('created_at')
+            .eq('user_id', user.id)
+            .gte('created_at', sevenDaysAgoISO);
+
+        const dealsBucketed = bucketByDay(
+            Object.entries(
+                (dealsDaily || []).reduce((acc: Record<string, number>, row) => {
+                    const day = row.created_at.split('T')[0];
+                    acc[day] = (acc[day] || 0) + 1;
+                    return acc;
+                }, {})
+            ).map(([day, count]) => ({ day, count: count as number })),
+            days
+        );
+        setDealsChartData(dealsBucketed);
 
         const activityItems: any[] = [];
 
@@ -401,6 +560,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     icon={Users}
                     iconBg="bg-cyan-50"
                     iconColor="text-cyan-600"
+                    chartData={leadsChartData}
+                    chartType="bar"
+                    chartColor="#22D3EE"
+                    tooltipLabel="Leads"
                 />
                 <StatCard
                     label="Leads with Emails"
@@ -411,6 +574,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     icon={Mail}
                     iconBg="bg-emerald-50"
                     iconColor="text-emerald-600"
+                    chartData={emailsChartData}
+                    chartType="area"
+                    chartColor="#10B981"
+                    chartGradientId="emailGrad"
+                    tooltipLabel="With email"
                 />
                 <StatCard
                     label="Leads Contacted"
@@ -421,6 +589,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     icon={MessageCircle}
                     iconBg="bg-purple-50"
                     iconColor="text-purple-600"
+                    chartData={contactedChartData}
+                    chartType="area"
+                    chartColor="#8B5CF6"
+                    chartGradientId="contactGrad"
+                    tooltipLabel="Contacted"
                 />
                 <StatCard
                     label="Total Deals"
@@ -431,6 +604,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     icon={TrendingUp}
                     iconBg="bg-rose-50"
                     iconColor="text-rose-500"
+                    chartData={dealsChartData}
+                    chartType="bar"
+                    chartColor="#F43F5E"
+                    tooltipLabel="Deals"
                 />
             </div>
 
