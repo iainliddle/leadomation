@@ -243,6 +243,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [statusFilter, setStatusFilter] = useState('All');
     const [activeIntentFilters, setActiveIntentFilters] = useState<string[]>([]);
     const [intentScoreSort, setIntentScoreSort] = useState<'none' | 'desc' | 'asc'>('none');
+    const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+    const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [intentScoreFilters, setIntentScoreFilters] = useState<string[]>([]);
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [isExporting, setIsExporting] = useState(false);
@@ -1270,34 +1272,84 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <select
-                                className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all shadow-sm appearance-none min-w-[140px]"
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                                <option value="All">All Statuses</option>
-                                <option value="New">New</option>
-                                <option value="Contacted">Contacted</option>
-                                <option value="Replied">Replied</option>
-                                <option value="Qualified">Qualified</option>
-                                <option value="Lost">Lost / Not Interested</option>
-                            </select>
-                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                          <button
+                            onClick={() => { setShowStatusDropdown(!showStatusDropdown); setShowSortDropdown(false); }}
+                            className="flex items-center gap-2 pl-3 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-[#4F46E5] hover:shadow-sm transition-all shadow-sm min-w-[150px] justify-between"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Tag size={14} className="text-gray-400 shrink-0" />
+                              <span>{statusFilter === 'All' ? 'All Statuses' : statusFilter === 'Lost' ? 'Lost / Not Interested' : statusFilter}</span>
+                            </div>
+                            <ChevronDown size={14} className={`text-gray-400 transition-transform shrink-0 ${showStatusDropdown ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {showStatusDropdown && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setShowStatusDropdown(false)} />
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 min-w-[180px] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                                {[
+                                  { value: 'All', label: 'All Statuses' },
+                                  { value: 'New', label: 'New' },
+                                  { value: 'Contacted', label: 'Contacted' },
+                                  { value: 'Replied', label: 'Replied' },
+                                  { value: 'Qualified', label: 'Qualified' },
+                                  { value: 'Lost', label: 'Lost / Not Interested' },
+                                ].map(option => (
+                                  <button
+                                    key={option.value}
+                                    onClick={() => { setStatusFilter(option.value); setShowStatusDropdown(false); }}
+                                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                                      statusFilter === option.value
+                                        ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                        : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                    }`}
+                                  >
+                                    {option.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
 
                         <div className="relative">
-                            <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <select
-                                className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all shadow-sm appearance-none min-w-[160px]"
-                                value={intentScoreSort}
-                                onChange={(e) => setIntentScoreSort(e.target.value as 'none' | 'desc' | 'asc')}
-                            >
-                                <option value="none">Sort: Recent</option>
-                                <option value="desc">Highest Intent First</option>
-                                <option value="asc">Lowest Intent First</option>
-                            </select>
-                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                          <button
+                            onClick={() => { setShowSortDropdown(!showSortDropdown); setShowStatusDropdown(false); }}
+                            className="flex items-center gap-2 pl-3 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-[#4F46E5] hover:shadow-sm transition-all shadow-sm min-w-[180px] justify-between"
+                          >
+                            <div className="flex items-center gap-2">
+                              <TrendingUp size={14} className="text-gray-400 shrink-0" />
+                              <span>
+                                {intentScoreSort === 'none' ? 'Sort: Recent' : intentScoreSort === 'desc' ? 'Highest Intent First' : 'Lowest Intent First'}
+                              </span>
+                            </div>
+                            <ChevronDown size={14} className={`text-gray-400 transition-transform shrink-0 ${showSortDropdown ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {showSortDropdown && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setShowSortDropdown(false)} />
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 min-w-[200px] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                                {[
+                                  { value: 'none', label: 'Sort: Recent' },
+                                  { value: 'desc', label: 'Highest Intent First' },
+                                  { value: 'asc', label: 'Lowest Intent First' },
+                                ].map(option => (
+                                  <button
+                                    key={option.value}
+                                    onClick={() => { setIntentScoreSort(option.value as 'none' | 'desc' | 'asc'); setShowSortDropdown(false); }}
+                                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                                      intentScoreSort === option.value
+                                        ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                        : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                    }`}
+                                  >
+                                    {option.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                     </div>
                 </div>
