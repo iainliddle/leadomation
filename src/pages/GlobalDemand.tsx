@@ -569,28 +569,34 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     {/* Stats Row */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Building2 size={14} className="text-[#4F46E5]" />
-                                <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Total Businesses</span>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-medium text-[#9CA3AF]">Total businesses</span>
+                                <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center">
+                                    <Building2 size={16} className="text-cyan-600" />
+                                </div>
                             </div>
-                            <p className="text-2xl font-black text-[#111827]">{totalBusinesses.toLocaleString()}</p>
-                            <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">across {regionData.length} regions</p>
+                            <p className="text-2xl font-bold text-[#111827]">{totalBusinesses.toLocaleString()}</p>
+                            <p className="text-xs text-[#9CA3AF] font-medium mt-0.5">across {regionData.length} regions</p>
                         </div>
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Zap size={14} className="text-amber-500" />
-                                <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Hottest Market</span>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-medium text-[#9CA3AF]">Hottest market</span>
+                                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                                    <Zap size={16} className="text-amber-600" />
+                                </div>
                             </div>
-                            <p className="text-2xl font-black text-[#111827]">{topRegion.name}</p>
-                            <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">{topRegion.businesses.toLocaleString()} businesses</p>
+                            <p className="text-2xl font-bold text-[#111827]">{topRegion.name}</p>
+                            <p className="text-xs text-[#9CA3AF] font-medium mt-0.5">{topRegion.businesses.toLocaleString()} businesses</p>
                         </div>
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Sparkles size={14} className="text-purple-500" />
-                                <span className="text-[10px] font-medium text-[#9CA3AF] uppercase tracking-widest">Industry</span>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-medium text-[#9CA3AF]">Industry</span>
+                                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                                    <Sparkles size={16} className="text-purple-600" />
+                                </div>
                             </div>
-                            <p className="text-2xl font-black text-[#111827] truncate">{selectedIndustry}</p>
-                            <p className="text-[11px] text-[#9CA3AF] font-medium mt-0.5">selected sector</p>
+                            <p className="text-2xl font-bold text-[#111827] truncate">{selectedIndustry}</p>
+                            <p className="text-xs text-[#9CA3AF] font-medium mt-0.5">selected sector</p>
                         </div>
                     </div>
 
@@ -602,9 +608,9 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Globe size={16} className="text-[#4F46E5]" />
-                                    <h3 className="text-sm font-semibold text-[#111827] uppercase tracking-wide">Business Density Map</h3>
+                                    <h3 className="text-sm font-semibold text-[#111827]">Business density map</h3>
                                 </div>
-                                <div className="flex items-center gap-4 text-[10px] font-medium text-[#9CA3AF] uppercase tracking-wider">
+                                <div className="flex items-center gap-4 text-xs font-medium text-[#9CA3AF]">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-2.5 h-2.5 rounded-full bg-[#6366F1]" />
                                         <span>Emerging</span>
@@ -619,7 +625,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
-                                        <span>Very High</span>
+                                        <span>Very high</span>
                                     </div>
                                 </div>
                             </div>
@@ -701,7 +707,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                             <div className="px-5 py-4 border-b border-gray-100">
                                 <div className="flex items-center gap-2">
                                     <BarChart3 size={16} className="text-blue-500" />
-                                    <h3 className="text-sm font-semibold text-[#111827] uppercase tracking-wide">Top Markets</h3>
+                                    <h3 className="text-sm font-semibold text-[#111827]">Top markets</h3>
                                 </div>
                             </div>
 
@@ -800,11 +806,9 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     )}
 
                     {/* Info Banner */}
-                    <div className="flex items-start gap-3 px-5 py-4 bg-[#EEF2FF]/80 border border-indigo-100 rounded-xl">
+                    <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl">
                         <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
-                        <p className="text-xs text-[#3730A3] font-medium leading-relaxed">
-                            <span className="font-bold">How it works:</span> Select your target industry, explore demand hotspots across the globe, then click "Launch Campaign" to start scraping leads and building your outreach sequence for that market. Data is sourced from Google Places, company registries, and aggregated platform intelligence. Growth trend data will be available after 6 months of data collection to show accurate year-over-year market changes.
-                        </p>
+                        <p className="text-xs font-medium text-[#374151] leading-relaxed">Select your target industry, explore demand hotspots across the globe, then click "Launch Campaign" to start scraping leads and building your outreach sequence for that market. Data is sourced from Google Places, company registries, and aggregated platform intelligence.</p>
                     </div>
                 </>
             )}
@@ -1030,11 +1034,9 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     )}
 
                     {/* Info Banner */}
-                    <div className="flex items-start gap-3 px-5 py-4 bg-[#EEF2FF]/80 border border-indigo-100 rounded-xl">
+                    <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl">
                         <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
-                        <p className="text-xs text-[#3730A3] font-medium leading-relaxed">
-                            <span className="font-bold">Search Demand Intelligence:</span> Enter keywords related to your target niche to see real Google search volume data. Use this to identify high-demand keywords, understand seasonal trends, and find opportunities your competitors might be missing. Data powered by Google Ads via DataForSEO.
-                        </p>
+                        <p className="text-xs font-medium text-[#374151] leading-relaxed">Enter keywords related to your target niche to see real Google search volume data. Use this to identify high-demand keywords, understand seasonal trends, and find opportunities your competitors might be missing. Data powered by Google Ads via DataForSEO.</p>
                     </div>
                 </>
             )}

@@ -6,8 +6,8 @@ import {
     Loader2,
     X,
     Mail,
-    Sparkles,
-    Search
+    Search,
+    Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -137,16 +137,9 @@ const EmailTemplates: React.FC = () => {
             </div>
 
             {/* Merge Tags Tip Card */}
-            <div className="bg-[#EEF2FF] border border-[#C7D2FE] rounded-xl p-4 mb-6 flex items-start gap-3">
-                <div className="w-8 h-8 bg-[#4F46E5] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                    <p className="text-sm font-semibold text-[#3730A3]">Personalisation &amp; Merge Tags</p>
-                    <p className="text-xs text-[#4F46E5] mt-1">
-                        Use {'{{first_name}}'}, {'{{company}}'}, {'{{city}}'} to personalise emails automatically
-                    </p>
-                </div>
+            <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mb-6">
+                <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                <p className="text-xs font-medium text-[#374151] leading-relaxed">Use {'{{first_name}}'}, {'{{company}}'}, {'{{city}}'} to personalise emails automatically with merge tags.</p>
             </div>
 
             {/* Filter Tabs */}

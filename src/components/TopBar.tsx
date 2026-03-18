@@ -85,7 +85,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick 
     const displayInitials = userInitials || '?';
 
     return (
-        <header className="sticky top-0 right-0 left-0 bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 z-10">
+        <header className="sticky top-0 right-0 left-0 bg-[#F8F9FA] h-16 flex items-center justify-between px-6 z-10">
             {/* Left side: Mobile menu + Page title */}
             <div className="flex items-center gap-4">
                 {/* Mobile menu button */}

@@ -70,14 +70,14 @@ const StatCard: React.FC<StatCardProps> = ({
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
         <div className="flex justify-between items-start mb-3">
             <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium text-gray-500">{label}</p>
+                <p className="text-xs font-medium text-[#9CA3AF]">{label}</p>
                 <Info size={14} className="text-gray-300 cursor-help" />
             </div>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
                 <Icon size={18} className={iconColor} />
             </div>
         </div>
-        <h3 className="text-3xl font-bold text-gray-900 mb-3">{value}</h3>
+        <h3 className="text-2xl font-bold text-[#111827] mb-3">{value}</h3>
         <div className="flex items-center gap-1.5 text-xs font-medium">
             <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
                 <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />

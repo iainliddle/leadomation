@@ -6,7 +6,11 @@ import {
     Trash2,
     ChevronLeft,
     ChevronRight,
-    TrendingUp
+    TrendingUp,
+    DollarSign,
+    CheckCircle,
+    Trophy,
+    Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -172,20 +176,40 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
             {/* Stats Bar */}
             <div className="grid grid-cols-4 gap-4 mb-6">
                 <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
-                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Total deals</p>
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-[#9CA3AF]">Total deals</p>
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                            <TrendingUp size={16} className="text-indigo-600" />
+                        </div>
+                    </div>
                     <p className="text-2xl font-bold text-[#111827]">{deals.length}</p>
                 </div>
                 <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
-                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Total pipeline</p>
-                    <p className="text-2xl font-bold text-[#4F46E5]">£{totalPipelineValue.toLocaleString()}</p>
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-[#9CA3AF]">Total pipeline</p>
+                        <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                            <DollarSign size={16} className="text-rose-500" />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold text-[#111827]">£{totalPipelineValue.toLocaleString()}</p>
                 </div>
                 <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
-                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Won deals</p>
-                    <p className="text-2xl font-bold text-emerald-600">{wonDeals.length}</p>
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-[#9CA3AF]">Won deals</p>
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                            <CheckCircle size={16} className="text-emerald-600" />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold text-[#111827]">{wonDeals.length}</p>
                 </div>
                 <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
-                    <p className="text-xs font-medium text-[#9CA3AF] mb-1">Won value</p>
-                    <p className="text-2xl font-bold text-emerald-600">£{wonValue.toLocaleString()}</p>
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-[#9CA3AF]">Won value</p>
+                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <Trophy size={16} className="text-amber-600" />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold text-[#111827]">£{wonValue.toLocaleString()}</p>
                 </div>
             </div>
 
@@ -284,6 +308,12 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                     })}
                 </div>
             )}
+
+            {/* Info Banner */}
+            <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mt-6">
+                <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                <p className="text-xs font-medium text-[#374151] leading-relaxed">Deals are automatically created when leads reply to your outreach sequences. Move deals through stages as you progress each conversation towards a close.</p>
+            </div>
 
             {/* Add Deal Modal */}
             {showAddModal && (

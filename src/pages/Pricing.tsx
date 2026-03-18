@@ -87,7 +87,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         </div>
 
         {isPopular && (
-            <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-3">
+            <p className="text-xs font-semibold text-[#4F46E5] mb-3">
                 Everything in Starter, plus:
             </p>
         )}
