@@ -192,14 +192,19 @@ const Pricing: React.FC = () => {
     const comparisonData = [
         { name: "Keyword searches", starter: "50/month", pro: "Unlimited" },
         { name: "Active campaigns", starter: "3", pro: "Unlimited" },
-        { name: "Leads per month", starter: "500", pro: "Unlimited" },
-        { name: "Emails per day", starter: "50", pro: "Unlimited" },
+        { name: "Leads per month", starter: "500", pro: "5,000+" },
+        { name: "Emails per day", starter: "50", pro: "200" },
+        { name: "LinkedIn automation", starter: true, pro: true },
+        { name: "Email sequences", starter: "4 steps", pro: "Unlimited" },
+        { name: "CSV export", starter: true, pro: true },
+        { name: "AI Voice Call Agent", starter: false, pro: true },
         { name: "AI email personalisation", starter: false, pro: true },
         { name: "Deal Pipeline (CRM)", starter: false, pro: true },
         { name: "Unified Inbox", starter: false, pro: true },
-        { name: "AI Voice Agent", starter: false, pro: true },
         { name: "Global Demand", starter: false, pro: true },
-        { name: "LinkedIn automation", starter: false, pro: true }
+        { name: "Multi-channel sequences", starter: false, pro: true },
+        { name: "Advanced analytics", starter: false, pro: true },
+        { name: "Decision Maker enrichment", starter: false, pro: true }
     ];
 
     return (
@@ -260,9 +265,16 @@ const Pricing: React.FC = () => {
                             "3 active campaigns",
                             "500 leads per month",
                             "50 emails per day",
-                            "Keyword searches (50/mo)",
                             "Email sequences up to 4 steps",
-                            "Lead database with filters"
+                            "LinkedIn automation",
+                            "Lead database with search & filters",
+                            "6 pre-built email templates",
+                            "Email signature builder",
+                            "Basic dashboard & analytics",
+                            "CSV export",
+                            "Integrations panel",
+                            "Email config & compliance tools",
+                            "Keyword searches (50/mo)"
                         ]}
                     />
                     <PricingCard
@@ -280,12 +292,20 @@ const Pricing: React.FC = () => {
                         features={[
                             "AI Voice Call Agent",
                             "Unlimited campaigns",
-                            "Unlimited leads per month",
-                            "Unlimited emails per day",
+                            "5,000+ leads per month",
+                            "200 emails per day",
+                            "Unlimited sequence steps",
+                            "Global Demand Intelligence",
                             "Deal Pipeline / Kanban CRM",
                             "Unified Inbox",
-                            "AI email personalisation",
-                            "LinkedIn automation"
+                            "AI email generation",
+                            "Multi-channel sequence builder",
+                            "Spintax support",
+                            "Advanced analytics",
+                            "Inbox warm-up tools",
+                            "Inbox rotation",
+                            "Decision Maker enrichment",
+                            "Priority support"
                         ]}
                     />
                     <PricingCard
@@ -300,12 +320,17 @@ const Pricing: React.FC = () => {
                         buttonText="Coming Soon"
                         onCheckout={() => {}}
                         features={[
-                            "Everything in Pro",
-                            "Dedicated account manager",
-                            "Custom integrations",
-                            "Priority support",
-                            "Team collaboration",
-                            "Advanced analytics"
+                            "AI Video Prospecting (NEW)",
+                            "30 AI-generated videos/month",
+                            "SMS Outreach (Twilio)",
+                            "WhatsApp Outreach",
+                            "LinkedIn Video Messages",
+                            "10,000+ leads per month",
+                            "500 emails per day",
+                            "Advanced Smart Intent Filters",
+                            "API Access + CSV Export",
+                            "Priority Support",
+                            "Everything in Pro, plus:"
                         ]}
                     />
                 </div>

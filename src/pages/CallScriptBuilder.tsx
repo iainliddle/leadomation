@@ -75,6 +75,17 @@ const successActions = [
     { id: 'transfer_call', label: 'Transfer to a Team Member', icon: Phone }
 ];
 
+const steps = [
+    { id: 1, label: 'Script Basics', icon: Mic },
+    { id: 2, label: 'Call Objective', icon: Target },
+    { id: 3, label: 'Opening Line', icon: MessageSquare },
+    { id: 4, label: 'Qualifying Questions', icon: Target },
+    { id: 5, label: 'Objection Handling', icon: Shield },
+    { id: 6, label: 'When They Say Yes', icon: Calendar },
+    { id: 7, label: 'Voicemail Script', icon: Mic },
+    { id: 8, label: 'Tone & Context', icon: Volume2 },
+];
+
 interface CallScriptBuilderProps {
 }
 
@@ -90,6 +101,7 @@ const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [enhancedPrompt, setEnhancedPrompt] = useState('');
     const [showEnhancedPreview, setShowEnhancedPreview] = useState(false);
+    const [activeStep, setActiveStep] = useState(1);
 
     const insertVariable = (variable: string) => {
         const textarea = document.getElementById('voicemail_script') as HTMLTextAreaElement;
@@ -358,9 +370,9 @@ IMPORTANT RULES:
     };
 
     return (
-        <div className="p-6 max-w-3xl mx-auto bg-[#F8F9FA] min-h-screen">
+        <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {/* Hero Header Card */}
-            <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-6 mb-6 flex items-center gap-4">
+            <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-6 mb-6 flex items-center gap-4 max-w-6xl mx-auto">
                 <div className="w-12 h-12 bg-[#4F46E5] rounded-xl flex items-center justify-center">
                     <Phone className="w-6 h-6 text-white" />
                 </div>
@@ -401,350 +413,385 @@ IMPORTANT RULES:
                 </div>
             </div>
 
-            {/* Step 1: Script Basics */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        1
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Mic className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">Script Basics</h2>
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Script Name</label>
-                        <input
-                            type="text"
-                            value={script.name}
-                            onChange={(e) => setScript(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Hotel Discovery Call Script"
-                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Your Company Name</label>
-                        <input
-                            type="text"
-                            value={script.company_name}
-                            onChange={(e) => setScript(prev => ({ ...prev, company_name: e.target.value }))}
-                            placeholder="e.g., Arctic Edge Cold Therapy"
-                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
-                        />
-                        <p className="text-xs text-[#6B7280] mt-1.5">The AI agent will introduce itself as calling from this company</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Step 2: Call Objective */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        2
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Target className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">Call Objective</h2>
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    {objectives.map(obj => {
-                        const Icon = obj.icon;
-                        return (
+            {/* Two-Column Layout */}
+            <div className="flex gap-6 max-w-6xl mx-auto">
+                {/* Left Panel - Step Navigator */}
+                <div className="w-56 shrink-0">
+                    <div className="sticky top-6 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        {steps.map(step => (
                             <button
-                                key={obj.id}
-                                onClick={() => setScript(prev => ({ ...prev, objective: obj.id }))}
-                                className={`p-4 text-left rounded-xl transition-all relative ${script.objective === obj.id
-                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
-                                    : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
-                                    }`}
+                                key={step.id}
+                                onClick={() => setActiveStep(step.id)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all border-l-2 ${
+                                    activeStep === step.id
+                                        ? 'bg-[#EEF2FF] text-[#4F46E5] border-[#4F46E5]'
+                                        : 'text-[#6B7280] border-transparent hover:bg-gray-50 hover:text-[#111827]'
+                                }`}
                             >
-                                {script.objective === obj.id && (
-                                    <div className="absolute top-3 right-3">
-                                        <CheckCircle2 className="w-5 h-5 text-[#4F46E5]" />
-                                    </div>
-                                )}
-                                <Icon className="w-5 h-5 text-[#4F46E5] mb-2" />
-                                <p className="text-sm font-semibold text-[#111827]">{obj.label}</p>
-                                <p className="text-xs text-[#6B7280] mt-0.5">{obj.desc}</p>
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                    activeStep === step.id ? 'bg-[#4F46E5] text-white' : 'bg-gray-100 text-[#6B7280]'
+                                }`}>
+                                    {step.id}
+                                </div>
+                                {step.label}
                             </button>
-                        );
-                    })}
-                </div>
-                {script.objective === 'custom' && (
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Custom Objective</label>
-                        <input
-                            type="text"
-                            value={script.custom_objective}
-                            onChange={(e) => setScript(prev => ({ ...prev, custom_objective: e.target.value }))}
-                            placeholder="e.g., Get them to visit our showroom"
-                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
-                        />
+                        ))}
                     </div>
-                )}
-            </div>
+                </div>
 
-            {/* Step 3: Opening Line */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        3
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">Opening Line</h2>
-                    </div>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-[#111827] mb-1.5">How Should the Agent Introduce the Call?</label>
-                    <textarea
-                        value={script.opening_line}
-                        onChange={(e) => setScript(prev => ({ ...prev, opening_line: e.target.value }))}
-                        placeholder={`e.g., Hi, I'm calling from ${script.company_name || '[Your Company]'}. We work with hotels and spas on cold water therapy installations. Do you have a moment for a quick chat?`}
-                        rows={3}
-                        className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-none"
-                    />
-                    <p className="text-xs text-[#6B7280] mt-1.5">This is what the agent says first. Keep it short and natural; under 30 words works best.</p>
-                </div>
-            </div>
+                {/* Right Panel - Active Step Content */}
+                <div className="flex-1 space-y-0">
+                    {/* Step 1: Script Basics */}
+                    {activeStep === 1 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Mic className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">Script Basics</h2>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-[#6B7280] mb-1.5">Script Name</label>
+                                    <input
+                                        type="text"
+                                        value={script.name}
+                                        onChange={(e) => setScript(prev => ({ ...prev, name: e.target.value }))}
+                                        placeholder="e.g., Hotel Discovery Call Script"
+                                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-[#6B7280] mb-1.5">Your Company Name</label>
+                                    <input
+                                        type="text"
+                                        value={script.company_name}
+                                        onChange={(e) => setScript(prev => ({ ...prev, company_name: e.target.value }))}
+                                        placeholder="e.g., Arctic Edge Cold Therapy"
+                                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                                    />
+                                    <p className="text-xs text-[#6B7280] mt-1.5">The AI agent will introduce itself as calling from this company</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-            {/* Step 4: Qualifying Questions */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        4
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Target className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">Qualifying Questions</h2>
-                    </div>
-                </div>
-                <p className="text-sm text-[#6B7280] mb-4">Questions the agent asks to determine if the prospect is a good fit.</p>
-                <div className="space-y-3">
-                    {script.qualifying_questions.map((q, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-[#6B7280] w-6 text-center shrink-0">Q{i + 1}</span>
-                            <input
-                                type="text"
-                                value={q}
-                                onChange={(e) => updateQuestion(i, e.target.value)}
-                                placeholder={i === 0 ? 'e.g., Do you currently offer wellness experiences for your guests?' : 'e.g., Is this something you\'ve been looking into recently?'}
-                                className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
-                            />
-                            {script.qualifying_questions.length > 1 && (
-                                <button
-                                    onClick={() => removeQuestion(i)}
-                                    className="p-2 text-[#6B7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
+                    {/* Step 2: Call Objective */}
+                    {activeStep === 2 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Target className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">Call Objective</h2>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                {objectives.map(obj => {
+                                    const Icon = obj.icon;
+                                    return (
+                                        <button
+                                            key={obj.id}
+                                            onClick={() => setScript(prev => ({ ...prev, objective: obj.id }))}
+                                            className={`p-4 text-left rounded-xl transition-all relative ${script.objective === obj.id
+                                                ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                                : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
+                                                }`}
+                                        >
+                                            {script.objective === obj.id && (
+                                                <div className="absolute top-3 right-3">
+                                                    <CheckCircle2 className="w-5 h-5 text-[#4F46E5]" />
+                                                </div>
+                                            )}
+                                            <Icon className="w-5 h-5 text-[#4F46E5] mb-2" />
+                                            <p className="text-sm font-semibold text-[#111827]">{obj.label}</p>
+                                            <p className="text-xs text-[#6B7280] mt-0.5">{obj.desc}</p>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {script.objective === 'custom' && (
+                                <div className="mt-4">
+                                    <label className="block text-xs font-medium text-[#6B7280] mb-1.5">Custom Objective</label>
+                                    <input
+                                        type="text"
+                                        value={script.custom_objective}
+                                        onChange={(e) => setScript(prev => ({ ...prev, custom_objective: e.target.value }))}
+                                        placeholder="e.g., Get them to visit our showroom"
+                                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                                    />
+                                </div>
                             )}
                         </div>
-                    ))}
-                    <button
-                        onClick={addQuestion}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
-                    >
-                        <Plus size={14} /> Add Question
-                    </button>
-                </div>
-            </div>
+                    )}
 
-            {/* Step 5: Objection Handling */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        5
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">Objection Handling</h2>
-                    </div>
-                </div>
-                <p className="text-sm text-[#6B7280] mb-4">Define how the agent responds to common pushback.</p>
-                <div className="space-y-4">
-                    {script.objection_responses.map((obj, i) => (
-                        <div key={i} className="p-4 bg-[#F8F9FA] rounded-xl border border-[#E5E7EB] space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-[#9CA3AF]">Objection {i + 1}</span>
-                                {script.objection_responses.length > 1 && (
-                                    <button
-                                        onClick={() => removeObjection(i)}
-                                        className="p-1 text-[#6B7280] hover:text-red-500 transition-all"
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                )}
+                    {/* Step 3: Opening Line */}
+                    {activeStep === 3 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <MessageSquare className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">Opening Line</h2>
                             </div>
-                            <input
-                                type="text"
-                                value={obj.objection}
-                                onChange={(e) => updateObjection(i, 'objection', e.target.value)}
-                                placeholder='e.g., "I am not interested"'
-                                className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
-                            />
-                            <input
-                                type="text"
-                                value={obj.response}
-                                onChange={(e) => updateObjection(i, 'response', e.target.value)}
-                                placeholder={'e.g., "I completely understand. Just wanted to share one quick thing..."'}
-                                className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
-                            />
+                            <div>
+                                <label className="block text-xs font-medium text-[#6B7280] mb-1.5">How Should the Agent Introduce the Call?</label>
+                                <textarea
+                                    value={script.opening_line}
+                                    onChange={(e) => setScript(prev => ({ ...prev, opening_line: e.target.value }))}
+                                    placeholder={`e.g., Hi, I'm calling from ${script.company_name || '[Your Company]'}. We work with hotels and spas on cold water therapy installations. Do you have a moment for a quick chat?`}
+                                    rows={3}
+                                    className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-none"
+                                />
+                                <p className="text-xs text-[#6B7280] mt-1.5">This is what the agent says first. Keep it short and natural; under 30 words works best.</p>
+                            </div>
                         </div>
-                    ))}
-                    <button
-                        onClick={addObjection}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
-                    >
-                        <Plus size={14} /> Add Objection Response
-                    </button>
-                </div>
-            </div>
+                    )}
 
-            {/* Step 6: Success Action */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        6
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">When They Say Yes</h2>
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    {successActions.map(action => {
-                        const Icon = action.icon;
-                        return (
-                            <button
-                                key={action.id}
-                                onClick={() => setScript(prev => ({ ...prev, success_action: action.id }))}
-                                className={`p-4 text-left rounded-xl transition-all ${script.success_action === action.id
-                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
-                                    : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
-                                    }`}
-                            >
-                                <Icon className="w-5 h-5 text-[#4F46E5] mb-2" />
-                                <p className="text-sm font-semibold text-[#111827]">{action.label}</p>
-                            </button>
-                        );
-                    })}
-                </div>
-                {(script.success_action === 'send_booking_link' || script.success_action === 'confirm_time') && (
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Meeting Booking Link</label>
-                        <input
-                            type="url"
-                            value={script.booking_url}
-                            onChange={(e) => setScript(prev => ({ ...prev, booking_url: e.target.value, system_prompt: undefined }))}
-                            placeholder="https://calendly.com/your-name/meeting"
-                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
-                        />
-                        <p className="text-xs text-[#6B7280] mt-1.5">Your Calendly, Cal.com, or scheduling link. Sent to leads who book a meeting.</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Step 7: Voicemail Script */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-4">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        7
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Mic className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">Voicemail Script</h2>
-                    </div>
-                </div>
-
-                {/* Voicemail Info Box */}
-                <div className="bg-[#EEF2FF] border-l-4 border-[#4F46E5] rounded-r-xl p-4 mb-4 flex items-start gap-3">
-                    <Phone className="w-4 h-4 text-[#4F46E5] mt-0.5 flex-shrink-0" />
-                    <div>
-                        <p className="text-sm font-semibold text-[#3730A3]">How Voicemail Works</p>
-                        <p className="text-xs text-[#4F46E5] mt-1">
-                            Sarah will leave a voicemail automatically if the lead doesn't answer. Keep it under 30 seconds (60-75 words).
-                        </p>
-                    </div>
-                </div>
-
-                <div className="mb-3">
-                    <p className="text-xs text-[#6B7280] font-medium mb-2">Insert variable:</p>
-                    <div className="flex flex-wrap gap-2">
-                        <button onClick={() => insertVariable('[first_name]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
-                            + First Name
-                        </button>
-                        <button onClick={() => insertVariable('[company_name]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
-                            + Company Name
-                        </button>
-                        <button onClick={() => insertVariable('[booking_link]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
-                            + Booking Link
-                        </button>
-                    </div>
-                </div>
-
-                <textarea
-                    id="voicemail_script"
-                    value={script.voicemail_script || ''}
-                    onChange={(e) => setScript(prev => ({ ...prev, voicemail_script: e.target.value }))}
-                    placeholder="Leave a brief voicemail message introducing yourself and asking them to call back..."
-                    rows={5}
-                    className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-y"
-                />
-                <p className={`text-xs text-right mt-2 ${vmStats.colorClass}`}>
-                    {vmStats.words} words · ~{vmStats.seconds} seconds
-                </p>
-            </div>
-
-            {/* Step 8: Tone & Context */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 mb-6">
-                <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-[#4F46E5] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        8
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Volume2 className="w-5 h-5 text-[#6B7280]" />
-                        <h2 className="text-base font-semibold text-[#111827]">Tone & Additional Context</h2>
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-[#111827] mb-3">Agent Personality</label>
-                        <div className="grid grid-cols-4 gap-3">
-                            {tones.map(t => (
+                    {/* Step 4: Qualifying Questions */}
+                    {activeStep === 4 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Target className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">Qualifying Questions</h2>
+                            </div>
+                            <p className="text-sm text-[#6B7280] mb-4">Questions the agent asks to determine if the prospect is a good fit.</p>
+                            <div className="space-y-3">
+                                {script.qualifying_questions.map((q, i) => (
+                                    <div key={i} className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-[#6B7280] w-6 text-center shrink-0">Q{i + 1}</span>
+                                        <input
+                                            type="text"
+                                            value={q}
+                                            onChange={(e) => updateQuestion(i, e.target.value)}
+                                            placeholder={i === 0 ? 'e.g., Do you currently offer wellness experiences for your guests?' : 'e.g., Is this something you\'ve been looking into recently?'}
+                                            className="flex-1 px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                                        />
+                                        {script.qualifying_questions.length > 1 && (
+                                            <button
+                                                onClick={() => removeQuestion(i)}
+                                                className="p-2 text-[#6B7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
                                 <button
-                                    key={t.id}
-                                    onClick={() => setScript(prev => ({ ...prev, tone: t.id }))}
-                                    className={`p-3 text-center rounded-xl transition-all ${script.tone === t.id
-                                        ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
-                                        : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
-                                        }`}
+                                    onClick={addQuestion}
+                                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
                                 >
-                                    <p className="text-sm font-semibold text-[#111827]">{t.label}</p>
-                                    <p className="text-xs text-[#6B7280] mt-0.5">{t.desc}</p>
+                                    <Plus size={14} /> Add Question
                                 </button>
-                            ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
-                    <div>
-                        <label className="block text-sm font-medium text-[#111827] mb-1.5">Additional Context for the Agent</label>
-                        <textarea
-                            value={script.additional_context}
-                            onChange={(e) => setScript(prev => ({ ...prev, additional_context: e.target.value }))}
-                            placeholder="e.g., We specialise in luxury cold water therapy installations for 5-star hotels. Our units are handcrafted in Sweden. Average project value is £15,000-£50,000."
-                            rows={4}
-                            className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-none"
-                        />
-                        <p className="text-xs text-[#6B7280] mt-1.5">Give the agent background knowledge about your product, pricing, notable clients, or anything it might be asked about.</p>
+                    {/* Step 5: Objection Handling */}
+                    {activeStep === 5 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Shield className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">Objection Handling</h2>
+                            </div>
+                            <p className="text-sm text-[#6B7280] mb-4">Define how the agent responds to common pushback.</p>
+                            <div className="space-y-4">
+                                {script.objection_responses.map((obj, i) => (
+                                    <div key={i} className="p-4 bg-[#F8F9FA] rounded-xl border border-[#E5E7EB] space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-medium text-[#9CA3AF]">Objection {i + 1}</span>
+                                            {script.objection_responses.length > 1 && (
+                                                <button
+                                                    onClick={() => removeObjection(i)}
+                                                    className="p-1 text-[#6B7280] hover:text-red-500 transition-all"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={obj.objection}
+                                            onChange={(e) => updateObjection(i, 'objection', e.target.value)}
+                                            placeholder='e.g., "I am not interested"'
+                                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={obj.response}
+                                            onChange={(e) => updateObjection(i, 'response', e.target.value)}
+                                            placeholder={'e.g., "I completely understand. Just wanted to share one quick thing..."'}
+                                            className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                                        />
+                                    </div>
+                                ))}
+                                <button
+                                    onClick={addObjection}
+                                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-all"
+                                >
+                                    <Plus size={14} /> Add Objection Response
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 6: Success Action */}
+                    {activeStep === 6 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Calendar className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">When They Say Yes</h2>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                {successActions.map(action => {
+                                    const Icon = action.icon;
+                                    return (
+                                        <button
+                                            key={action.id}
+                                            onClick={() => setScript(prev => ({ ...prev, success_action: action.id }))}
+                                            className={`p-4 text-left rounded-xl transition-all ${script.success_action === action.id
+                                                ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                                : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
+                                                }`}
+                                        >
+                                            <Icon className="w-5 h-5 text-[#4F46E5] mb-2" />
+                                            <p className="text-sm font-semibold text-[#111827]">{action.label}</p>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {(script.success_action === 'send_booking_link' || script.success_action === 'confirm_time') && (
+                                <div className="mt-4">
+                                    <label className="block text-xs font-medium text-[#6B7280] mb-1.5">Meeting Booking Link</label>
+                                    <input
+                                        type="url"
+                                        value={script.booking_url}
+                                        onChange={(e) => setScript(prev => ({ ...prev, booking_url: e.target.value, system_prompt: undefined }))}
+                                        placeholder="https://calendly.com/your-name/meeting"
+                                        className="w-full px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm"
+                                    />
+                                    <p className="text-xs text-[#6B7280] mt-1.5">Your Calendly, Cal.com, or scheduling link. Sent to leads who book a meeting.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Step 7: Voicemail Script */}
+                    {activeStep === 7 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Mic className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">Voicemail Script</h2>
+                            </div>
+
+                            {/* Voicemail Info Box */}
+                            <div className="bg-[#EEF2FF] border-l-4 border-[#4F46E5] rounded-r-xl p-4 mb-4 flex items-start gap-3">
+                                <Phone className="w-4 h-4 text-[#4F46E5] mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-semibold text-[#3730A3]">How Voicemail Works</p>
+                                    <p className="text-xs text-[#4F46E5] mt-1">
+                                        Sarah will leave a voicemail automatically if the lead doesn't answer. Keep it under 30 seconds (60-75 words).
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mb-3">
+                                <p className="text-xs text-[#6B7280] font-medium mb-2">Insert variable:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <button onClick={() => insertVariable('[first_name]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                                        + First Name
+                                    </button>
+                                    <button onClick={() => insertVariable('[company_name]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                                        + Company Name
+                                    </button>
+                                    <button onClick={() => insertVariable('[booking_link]')} className="px-3 py-1 text-xs font-medium text-[#4F46E5] bg-white border border-[#4F46E5] rounded-full hover:bg-[#EEF2FF] transition-all">
+                                        + Booking Link
+                                    </button>
+                                </div>
+                            </div>
+
+                            <textarea
+                                id="voicemail_script"
+                                value={script.voicemail_script || ''}
+                                onChange={(e) => setScript(prev => ({ ...prev, voicemail_script: e.target.value }))}
+                                placeholder="Leave a brief voicemail message introducing yourself and asking them to call back..."
+                                rows={5}
+                                className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-y"
+                            />
+                            <p className={`text-xs text-right mt-2 ${vmStats.colorClass}`}>
+                                {vmStats.words} words · ~{vmStats.seconds} seconds
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Step 8: Tone & Context */}
+                    {activeStep === 8 && (
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-5">
+                                <Volume2 className="w-5 h-5 text-[#6B7280]" />
+                                <h2 className="text-base font-semibold text-[#111827]">Tone & Additional Context</h2>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-[#6B7280] mb-3">Agent Personality</label>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {tones.map(t => (
+                                            <button
+                                                key={t.id}
+                                                onClick={() => setScript(prev => ({ ...prev, tone: t.id }))}
+                                                className={`p-3 text-center rounded-xl transition-all ${script.tone === t.id
+                                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                                    : 'bg-white border border-[#E5E7EB] hover:border-[#4F46E5] cursor-pointer'
+                                                    }`}
+                                            >
+                                                <p className="text-sm font-semibold text-[#111827]">{t.label}</p>
+                                                <p className="text-xs text-[#6B7280] mt-0.5">{t.desc}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-[#6B7280] mb-1.5">Additional Context for the Agent</label>
+                                    <textarea
+                                        value={script.additional_context}
+                                        onChange={(e) => setScript(prev => ({ ...prev, additional_context: e.target.value }))}
+                                        placeholder="e.g., We specialise in luxury cold water therapy installations for 5-star hotels. Our units are handcrafted in Sweden. Average project value is £15,000-£50,000."
+                                        rows={4}
+                                        className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-none"
+                                    />
+                                    <p className="text-xs text-[#6B7280] mt-1.5">Give the agent background knowledge about your product, pricing, notable clients, or anything it might be asked about.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Previous/Next Navigation */}
+                    <div className="flex items-center justify-between mt-4">
+                        <button
+                            onClick={() => setActiveStep(prev => Math.max(1, prev - 1))}
+                            disabled={activeStep === 1}
+                            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-[#6B7280] hover:bg-gray-50 disabled:opacity-40 transition-all"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-xs text-[#9CA3AF]">Step {activeStep} of 8</span>
+                        {activeStep < 8 ? (
+                            <button
+                                onClick={() => setActiveStep(prev => Math.min(8, prev + 1))}
+                                className="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all"
+                            >
+                                Next
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-all disabled:opacity-50"
+                            >
+                                {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                {saving ? 'Saving...' : 'Save Script'}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Save Bar */}
-            <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex items-center justify-between sticky bottom-4 shadow-lg">
+            <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex items-center justify-between sticky bottom-4 shadow-lg mt-6 max-w-6xl mx-auto">
                 <div className="flex-1">
                     {saveSuccess ? (
                         <div className="flex items-center gap-2 text-green-600">
