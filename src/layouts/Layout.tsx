@@ -57,7 +57,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                     transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
             >
-                <div className="flex items-center lg:sticky lg:top-0 z-30 bg-white">
+                <div className="flex items-center lg:sticky lg:top-0 z-30 bg-[#F8F9FA]">
                     <button
                         className="lg:hidden p-4 text-[#9CA3AF] hover:text-[#111827] transition-colors"
                         onClick={() => setIsSidebarOpen(true)}
@@ -72,8 +72,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                     </div>
                 </div>
 
-                <main className="flex-1 p-6 overflow-y-auto">
-                    <div className="max-w-[1400px] mx-auto">
+                <main className="flex-1 overflow-y-auto">
+                    <div className="w-full">
                         {children(activePage)}
                     </div>
                 </main>
