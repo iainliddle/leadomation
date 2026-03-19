@@ -366,7 +366,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
             if (error) throw error;
 
-            alert('Lead enrolled in LinkedIn sequence. The 35-day funnel will begin shortly.');
+            alert('✓ Lead enrolled in LinkedIn sequence.\n\nWhat happens next:\n• Days 1-10: We will view their profile and engage with their posts\n• Days 12-14: A personalised connection request will be sent\n• Days 15-16: A warm thank you message after they connect\n• Days 20-22: A value-led conversation starter\n• Days 25-27: A soft follow up\n• Days 30-35: A gentle intro to what you do\n\nAll actions are logged in the lead activity timeline.');
         } catch (err) {
             console.error('Error enrolling in LinkedIn:', err);
             alert('Failed to enrol lead. Please try again.');
