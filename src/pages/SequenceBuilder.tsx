@@ -14,7 +14,8 @@ import {
     Loader2,
     Users,
     Calendar,
-    Phone
+    Phone,
+    Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -25,6 +26,7 @@ interface LinkedInEnrollment {
     lead_id: string;
     unipile_account_id: string;
     linkedin_url: string;
+    linkedin_profile_url?: string;
     current_phase: number;
     current_day: number;
     status: 'active' | 'paused' | 'completed' | 'failed' | 'connected';
@@ -90,10 +92,21 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
     const [isPreview, setIsPreview] = useState(false);
     const [draggedStepIndex, setDraggedStepIndex] = useState<number | null>(null);
 
+    // LinkedIn phase dropdown state
+    const [showPhaseDropdown, setShowPhaseDropdown] = useState<string | null>(null);
+
     useEffect(() => {
         fetchSequences();
         fetchLinkedinEnrollments();
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = () => setShowPhaseDropdown(null);
+        if (showPhaseDropdown) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [showPhaseDropdown]);
 
     const fetchSequences = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -158,6 +171,53 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
             .delete()
             .eq('id', id);
         if (!error) fetchLinkedinEnrollments();
+    };
+
+    const handleAdvancePhase = async (enrollment: LinkedInEnrollment) => {
+        if (enrollment.current_phase >= 6) {
+            alert('This enrollment is already in the final phase.');
+            return;
+        }
+        const nextPhase = enrollment.current_phase + 1;
+        const phaseStartDays: Record<number, number> = { 2: 12, 3: 15, 4: 20, 5: 25, 6: 30 };
+        const { error } = await supabase
+            .from('linkedin_enrollments')
+            .update({
+                current_phase: nextPhase,
+                current_day: phaseStartDays[nextPhase] || enrollment.current_day + 1,
+                next_action_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', enrollment.id);
+        if (!error) fetchLinkedinEnrollments();
+    };
+
+    const handleJumpToPhase = async (enrollment: LinkedInEnrollment, phase: number) => {
+        const phaseStartDays: Record<number, number> = { 1: 1, 2: 12, 3: 15, 4: 20, 5: 25, 6: 30 };
+        const { error } = await supabase
+            .from('linkedin_enrollments')
+            .update({
+                current_phase: phase,
+                current_day: phaseStartDays[phase] || 1,
+                next_action_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', enrollment.id);
+        if (!error) fetchLinkedinEnrollments();
+    };
+
+    const handleRunNow = async (enrollment: LinkedInEnrollment) => {
+        const { error } = await supabase
+            .from('linkedin_enrollments')
+            .update({
+                next_action_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', enrollment.id);
+        if (!error) {
+            fetchLinkedinEnrollments();
+            alert('Scheduled for immediate pickup on next N8N run (within 60 seconds).');
+        }
     };
 
     const getPhaseInfo = (phase: number) => {
@@ -444,6 +504,14 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                     ) : (
                         /* LinkedIn Sequences Tab */
                         <>
+                            {/* Recommendation Banner */}
+                            <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mb-4">
+                                <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
+                                <p className="text-xs font-medium text-[#374151] leading-relaxed">
+                                    <span className="text-[#4F46E5] font-semibold">Leadomation recommends following the full 35-day sequence.</span> Research shows prospects who receive gradual, value-led outreach over 4-6 weeks are significantly more likely to convert than those contacted immediately. The sequence builds genuine trust before making any ask. You can advance phases manually if needed, but we recommend letting it run naturally.
+                                </p>
+                            </div>
+
                             {/* Phase Timeline */}
                             <div className="flex items-center mb-6 bg-white rounded-xl border border-gray-200 shadow-sm p-4 relative overflow-hidden">
                                 <div className="absolute left-10 right-10 h-0.5 bg-gray-100 top-8 -z-0" />
@@ -501,7 +569,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                                             </h3>
                                                             <div className="flex items-center gap-2 text-sm text-gray-500 mt-0.5">
                                                                 <a
-                                                                    href={enrollment.linkedin_url}
+                                                                    href={enrollment.linkedin_profile_url || enrollment.linkedin_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="text-[#4F46E5] hover:underline"
@@ -527,6 +595,60 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                                             {enrollment.status.toUpperCase()}
                                                         </span>
                                                         <div className="flex gap-2">
+                                                            {/* Run Now button */}
+                                                            <button
+                                                                onClick={() => handleRunNow(enrollment)}
+                                                                title="Force run on next N8N cycle"
+                                                                className="px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-600 hover:bg-emerald-50 border border-emerald-200 transition-colors"
+                                                            >
+                                                                Run now
+                                                            </button>
+
+                                                            {/* Advance to next phase button */}
+                                                            {enrollment.current_phase < 6 && (
+                                                                <button
+                                                                    onClick={() => handleAdvancePhase(enrollment)}
+                                                                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4F46E5] hover:bg-[#EEF2FF] border border-indigo-200 transition-colors"
+                                                                >
+                                                                    Next phase
+                                                                </button>
+                                                            )}
+
+                                                            {/* Jump to phase dropdown */}
+                                                            <div className="relative">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setShowPhaseDropdown(showPhaseDropdown === enrollment.id ? null : enrollment.id);
+                                                                    }}
+                                                                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#6B7280] hover:bg-gray-50 border border-[#E5E7EB] transition-colors flex items-center gap-1"
+                                                                >
+                                                                    Jump to phase
+                                                                    <ChevronRight size={12} className={`transition-transform ${showPhaseDropdown === enrollment.id ? 'rotate-90' : ''}`} />
+                                                                </button>
+                                                                {showPhaseDropdown === enrollment.id && (
+                                                                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-50 overflow-hidden">
+                                                                        {LINKEDIN_PHASES.map(phase => (
+                                                                            <button
+                                                                                key={phase.phase}
+                                                                                onClick={() => {
+                                                                                    handleJumpToPhase(enrollment, phase.phase);
+                                                                                    setShowPhaseDropdown(null);
+                                                                                }}
+                                                                                className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                                                                                    enrollment.current_phase === phase.phase
+                                                                                        ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                                                                        : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                                                                }`}
+                                                                            >
+                                                                                Phase {phase.phase}: {phase.name}
+                                                                                <span className="text-[#9CA3AF] ml-1">Day {phase.days}</span>
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
                                                             {enrollment.status !== 'completed' && enrollment.status !== 'failed' && (
                                                                 <button
                                                                     onClick={() => handleToggleLinkedInStatus(enrollment)}
