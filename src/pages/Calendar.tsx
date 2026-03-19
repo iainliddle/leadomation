@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X, Trash2, ExternalLink, Loader2, CalendarCheck, Mail, Zap, Info, CalendarPlus, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Trash2, Loader2, CalendarCheck, Mail, Zap, Info, CalendarPlus, Clock, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 // ============================================================================
@@ -354,39 +354,72 @@ function AddEventModal({ defaultDate, onClose, onSave }: AddEventModalProps) {
   );
 }
 
-interface EventDetailModalProps {
+interface EditEventModalProps {
   event: CalendarEvent;
   onClose: () => void;
+  onSave: (id: string, updates: Partial<CalendarEvent>) => Promise<void>;
   onDelete: (id: string) => void;
 }
 
-function EventDetailModal({ event, onClose, onDelete }: EventDetailModalProps) {
-  const [deleting, setDeleting] = useState(false);
-  const style = EVENT_TYPE_STYLES[event.event_type] || EVENT_TYPE_STYLES.manual;
+function EditEventModal({ event, onClose, onSave, onDelete }: EditEventModalProps) {
+  const [title, setTitle] = useState(event.title);
+  const [eventType, setEventType] = useState<string>(event.event_type);
+  const [date, setDate] = useState(new Date(event.start_time).toISOString().split('T')[0]);
+  const [startTime, setStartTime] = useState(
+    new Date(event.start_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  );
+  const [endTime, setEndTime] = useState(
+    new Date(event.end_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  );
+  const [attendeeName, setAttendeeName] = useState(event.attendee_name || '');
+  const [attendeeEmail, setAttendeeEmail] = useState(event.attendee_email || '');
+  const [meetingLink, setMeetingLink] = useState(event.meeting_link || '');
+  const [description, setDescription] = useState(event.description || '');
+  const [saving, setSaving] = useState(false);
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-    setDeleting(true);
-    await onDelete(event.id);
+  const style = EVENT_TYPE_STYLES[eventType] || EVENT_TYPE_STYLES.manual;
+
+  const handleSave = async () => {
+    if (!title.trim()) return;
+
+    setSaving(true);
+    try {
+      const startDateTime = new Date(`${date}T${startTime}:00`);
+      const endDateTime = new Date(`${date}T${endTime}:00`);
+
+      await onSave(event.id, {
+        title: title.trim(),
+        event_type: eventType as CalendarEvent['event_type'],
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
+        attendee_name: attendeeName.trim() || undefined,
+        attendee_email: attendeeEmail.trim() || undefined,
+        meeting_link: meetingLink.trim() || undefined,
+        description: description.trim() || undefined,
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error saving event:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const eventDate = new Date(event.start_time);
-  const formattedDate = eventDate.toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      onDelete(event.id);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-sm w-full shadow-2xl">
+      <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-9 h-9 ${style.bg} rounded-lg flex items-center justify-center`}>
               <Clock className={`w-5 h-5 ${style.text}`} />
             </div>
-            <h2 className="text-lg font-semibold text-[#111827]">{event.title}</h2>
+            <h2 className="text-lg font-semibold text-[#111827]">{title || 'Edit event'}</h2>
           </div>
           <button
             onClick={onClose}
@@ -397,69 +430,127 @@ function EventDetailModal({ event, onClose, onDelete }: EventDetailModalProps) {
         </div>
 
         <div className="p-5 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className={`px-2 py-1 rounded-md text-xs font-medium ${style.bg} ${style.text}`}>
-              {style.label}
-            </span>
+          <div>
+            <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              placeholder="Event title"
+              required
+            />
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-[#374151]">
-              <Clock className="w-4 h-4 text-[#9CA3AF]" />
-              <span>{formattedDate}</span>
+          <div>
+            <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Event type</label>
+            <EventTypeDropdown value={eventType} onChange={setEventType} />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Start time</label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              />
             </div>
-            <div className="text-sm text-[#374151] pl-6">
-              {formatTime(event.start_time)} – {formatTime(event.end_time)}
+            <div>
+              <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">End time</label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              />
             </div>
           </div>
 
-          {(event.attendee_name || event.attendee_email) && (
-            <div className="space-y-1">
-              {event.attendee_name && (
-                <p className="text-sm text-[#374151]">{event.attendee_name}</p>
-              )}
-              {event.attendee_email && (
-                <p className="text-xs text-[#9CA3AF]">{event.attendee_email}</p>
-              )}
-            </div>
-          )}
+          <div>
+            <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Attendee name</label>
+            <input
+              type="text"
+              value={attendeeName}
+              onChange={(e) => setAttendeeName(e.target.value)}
+              className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              placeholder="Contact name"
+            />
+          </div>
 
-          {event.meeting_link && (
-            <a
-              href={event.meeting_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-[#4F46E5] hover:underline"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Join meeting
-            </a>
-          )}
+          <div>
+            <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Attendee email</label>
+            <input
+              type="email"
+              value={attendeeEmail}
+              onChange={(e) => setAttendeeEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              placeholder="email@example.com"
+            />
+          </div>
 
-          {event.description && (
-            <p className="text-sm text-[#374151]">{event.description}</p>
-          )}
+          <div>
+            <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Meeting link</label>
+            <input
+              type="url"
+              value={meetingLink}
+              onChange={(e) => setMeetingLink(e.target.value)}
+              className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent resize-none"
+              placeholder="Add notes..."
+            />
+          </div>
         </div>
 
-        <div className="px-5 py-4 border-t border-gray-100 flex items-center gap-3">
+        <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between">
           <button
             onClick={handleDelete}
-            disabled={deleting}
-            className="flex items-center gap-2 px-4 py-2 border border-red-200 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
           >
-            {deleting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Trash2 className="w-4 h-4" />
-            )}
+            <Trash2 className="w-4 h-4" />
             Delete
           </button>
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
-            Close
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={!title.trim() || saving}
+              className="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <CheckCircle className="w-4 h-4" />
+              )}
+              Save changes
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -535,6 +626,17 @@ const Calendar: React.FC<CalendarProps> = ({ onPageChange: _onPageChange }) => {
       setSelectedEvent(null);
     } catch (error) {
       console.error('Error deleting event:', error);
+    }
+  };
+
+  const updateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
+    try {
+      const { error } = await supabase.from('calendar_events').update(updates).eq('id', id);
+      if (error) throw error;
+      setEvents(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+      setSelectedEvent(null);
+    } catch (err) {
+      console.error('Error updating event:', err);
     }
   };
 
@@ -862,9 +964,10 @@ const Calendar: React.FC<CalendarProps> = ({ onPageChange: _onPageChange }) => {
       )}
 
       {selectedEvent && (
-        <EventDetailModal
+        <EditEventModal
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
+          onSave={updateEvent}
           onDelete={deleteEvent}
         />
       )}
