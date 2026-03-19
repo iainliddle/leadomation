@@ -216,7 +216,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
             .eq('id', enrollment.id);
         if (!error) {
             fetchLinkedinEnrollments();
-            alert('Scheduled for immediate pickup on next N8N run (within 60 seconds).');
+            alert('✓ Running now. The next action for this lead will execute within 60 seconds.');
         }
     };
 
