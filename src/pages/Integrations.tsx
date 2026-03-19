@@ -151,7 +151,7 @@ const Integrations: React.FC = () => {
             const data = await response.json();
 
             if (data.url) {
-                window.open(data.url, '_blank');
+                window.location.href = data.url;
                 setToast({ message: 'Complete the connection in the new tab', type: 'success' });
             }
         } catch (err: unknown) {
