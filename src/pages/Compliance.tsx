@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     Shield,
-    Lock,
     MapPin,
     Database,
     Eye,
@@ -18,7 +17,7 @@ import { supabase } from '../lib/supabase';
 const Compliance: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [includeUnsubscribe, setIncludeUnsubscribe] = useState(true);
+    const [_includeUnsubscribe, setIncludeUnsubscribe] = useState(true);
     const [includeBusinessAddress, setIncludeBusinessAddress] = useState(true);
     const [b2bOnlyFilter, setB2bOnlyFilter] = useState(true);
     const [logConsent, setLogConsent] = useState(false);
