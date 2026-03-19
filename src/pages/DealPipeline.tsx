@@ -259,10 +259,25 @@ const DealDrawer: React.FC<DealDrawerProps> = ({ deal, stages, activity, onClose
     const [nextActionDate, setNextActionDate] = useState(deal.next_action_date || '');
     const [probability, setProbability] = useState(deal.probability ?? 50);
     const [saving, setSaving] = useState(false);
+    const [title, setTitle] = useState(deal.title || '');
+    const [value, setValue] = useState(String(deal.value || ''));
+    const [contactName, setContactName] = useState(deal.contact_name || '');
+    const [contactEmail, setContactEmail] = useState(deal.contact_email || '');
+    const [contactPhone, setContactPhone] = useState(deal.contact_phone || '');
 
     const handleSave = async () => {
         setSaving(true);
-        await onSave({ notes, next_action: nextAction, next_action_date: nextActionDate, probability });
+        await onSave({
+            notes,
+            next_action: nextAction,
+            next_action_date: nextActionDate,
+            probability,
+            title,
+            value: parseFloat(value) || 0,
+            contact_name: contactName,
+            contact_email: contactEmail,
+            contact_phone: contactPhone,
+        });
         setSaving(false);
     };
 
@@ -340,6 +355,62 @@ const DealDrawer: React.FC<DealDrawerProps> = ({ deal, stages, activity, onClose
 
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                    {/* Deal Details */}
+                    <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+                        <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-3">Deal Details</p>
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Deal title</label>
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Value (£)</label>
+                                    <input
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => setValue(e.target.value)}
+                                        className="px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent w-full"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Contact name</label>
+                                <input
+                                    type="text"
+                                    value={contactName}
+                                    onChange={(e) => setContactName(e.target.value)}
+                                    className="px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent w-full"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Email</label>
+                                    <input
+                                        type="email"
+                                        value={contactEmail}
+                                        onChange={(e) => setContactEmail(e.target.value)}
+                                        className="px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-[#6B7280] mb-1.5 block">Phone</label>
+                                    <input
+                                        type="tel"
+                                        value={contactPhone}
+                                        onChange={(e) => setContactPhone(e.target.value)}
+                                        className="px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent w-full"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Value + Probability */}
                     <div className="grid grid-cols-2 gap-3">
                         <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-3">
