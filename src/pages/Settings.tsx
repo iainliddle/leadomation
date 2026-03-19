@@ -17,7 +17,7 @@ interface SettingsProps {
   onPageChange?: (page: string) => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
+const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
     const [activeTab, setActiveTab] = useState('account');
 
     // Account state
