@@ -13,7 +13,11 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const Settings: React.FC = () => {
+interface SettingsProps {
+  onPageChange?: (page: string) => void;
+}
+
+const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
     const [activeTab, setActiveTab] = useState('account');
 
     // Account state
