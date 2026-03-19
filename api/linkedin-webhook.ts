@@ -1,82 +1,136 @@
-import { createClient } from '@supabase/supabase-js';
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { createClient } from '@supabase/supabase-js'
 
-// Use service role for webhook to update any user's profile
 const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+  process.env.VITE_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-export default async function handler(req: any, res: any) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  try {
+    const event = req.body
+
+    // Handle connection accepted event
+    if (event.type === 'connection.accepted' || event.event === 'CONNECTION_ACCEPTED') {
+      const accountId = event.account_id || event.accountId
+      const attendeeProfile = event.attendee || event.profile || {}
+      const attendeeLinkedinUrl = attendeeProfile.url || attendeeProfile.linkedin_url || ''
+
+      if (!accountId) {
+        return res.status(400).json({ error: 'No account_id in event' })
+      }
+
+      // Find the user who owns this Unipile account
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('unipile_account_id', accountId)
+        .single()
+
+      if (!profile) {
+        return res.status(404).json({ error: 'No user found for account_id' })
+      }
+
+      // Find the matching linkedin_enrollment by lead linkedin URL
+      const { data: enrollment } = await supabase
+        .from('linkedin_enrollments')
+        .select('id, lead_id')
+        .eq('user_id', profile.id)
+        .eq('linkedin_profile_url', attendeeLinkedinUrl)
+        .eq('status', 'active')
+        .single()
+
+      if (enrollment) {
+        // Mark connection as accepted
+        await supabase
+          .from('linkedin_enrollments')
+          .update({
+            connection_accepted: true,
+            connection_accepted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', enrollment.id)
+
+        // Log the action
+        await supabase
+          .from('linkedin_action_log')
+          .insert({
+            enrollment_id: enrollment.id,
+            user_id: profile.id,
+            lead_id: enrollment.lead_id,
+            phase: 2,
+            day: 14,
+            action_type: 'connection_accepted',
+            action_payload: { linkedin_url: attendeeLinkedinUrl },
+            status: 'completed',
+            executed_at: new Date().toISOString()
+          })
+
+        // Find or create a deal for this lead and move to discovery_call_booked
+        const { data: existingDeal } = await supabase
+          .from('deals')
+          .select('id, stage')
+          .eq('user_id', profile.id)
+          .eq('lead_id', enrollment.lead_id)
+          .single()
+
+        if (existingDeal) {
+          // Move existing deal forward if it's still in early stages
+          const earlyStages = ['new_reply', 'qualified']
+          if (earlyStages.includes(existingDeal.stage)) {
+            await supabase
+              .from('deals')
+              .update({
+                stage: 'discovery_call_booked',
+                stage_entered_at: new Date().toISOString()
+              })
+              .eq('id', existingDeal.id)
+          }
+        } else {
+          // Get lead details to create a deal
+          const { data: lead } = await supabase
+            .from('leads')
+            .select('company, first_name, last_name')
+            .eq('id', enrollment.lead_id)
+            .single()
+
+          if (lead) {
+            await supabase
+              .from('deals')
+              .insert({
+                user_id: profile.id,
+                lead_id: enrollment.lead_id,
+                title: lead.company || `${lead.first_name || ''} ${lead.last_name || ''}`.trim(),
+                value: 0,
+                currency: '£',
+                stage: 'discovery_call_booked',
+                stage_entered_at: new Date().toISOString(),
+                source: 'linkedin',
+                probability: 40,
+                notes: 'Deal created automatically after LinkedIn connection accepted'
+              })
+          }
+        }
+      }
+
+      return res.status(200).json({ received: true })
     }
 
-    try {
-        const payload = req.body;
-
-        console.log('LinkedIn webhook received:', JSON.stringify(payload, null, 2));
-
-        // Extract account info from Unipile webhook payload
-        const accountId = payload.account_id || payload.id;
-        const accountName = payload.name; // This should be the user's email we set during connect
-        const provider = payload.provider || payload.type;
-
-        if (!accountId) {
-            console.error('No account_id in webhook payload');
-            return res.status(400).json({ error: 'Missing account_id' });
-        }
-
-        if (!accountName) {
-            console.error('No name/email in webhook payload');
-            return res.status(400).json({ error: 'Missing account name' });
-        }
-
-        // Only process LinkedIn accounts
-        if (provider && provider !== 'LINKEDIN') {
-            console.log('Ignoring non-LinkedIn webhook:', provider);
-            return res.status(200).json({ success: true, message: 'Ignored non-LinkedIn webhook' });
-        }
-
-        // Find user by email and update their profile with the Unipile account ID
-        const { data: users, error: userError } = await supabase.auth.admin.listUsers();
-
-        if (userError) {
-            console.error('Error listing users:', userError);
-            return res.status(500).json({ error: 'Failed to find user' });
-        }
-
-        const matchingUser = users.users.find(u => u.email === accountName);
-
-        if (!matchingUser) {
-            console.error('No user found with email:', accountName);
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Update the user's profile with the Unipile account ID
-        const { error: updateError } = await supabase
-            .from('profiles')
-            .update({
-                unipile_account_id: accountId,
-                linkedin_connected: true
-            })
-            .eq('id', matchingUser.id);
-
-        if (updateError) {
-            console.error('Error updating profile:', updateError);
-            return res.status(500).json({ error: 'Failed to update profile' });
-        }
-
-        console.log('Successfully updated profile for user:', matchingUser.email, 'with account:', accountId);
-
-        return res.status(200).json({
-            success: true,
-            message: 'LinkedIn account connected successfully'
-        });
-    } catch (error: any) {
-        console.error('LinkedIn webhook error:', error);
-        return res.status(500).json({
-            error: 'Webhook processing failed',
-            details: error.message
-        });
+    // Handle message received event - log it
+    if (event.type === 'message.received' || event.event === 'MESSAGE_RECEIVED') {
+      console.log('LinkedIn message received:', JSON.stringify(event))
+      return res.status(200).json({ received: true })
     }
+
+    // Unknown event type - acknowledge receipt
+    return res.status(200).json({ received: true })
+
+  } catch (err) {
+    console.error('LinkedIn webhook error:', err)
+    return res.status(500).json({ error: 'Internal server error' })
+  }
 }
