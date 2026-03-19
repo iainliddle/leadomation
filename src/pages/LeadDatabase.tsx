@@ -310,6 +310,69 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         setShowLinkedInModal(true);
     };
 
+    // Direct LinkedIn Enrol (uses lead's existing linkedin_url)
+    const enrollInLinkedIn = async (lead: Lead) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            // Check if LinkedIn is connected
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('linkedin_connected, unipile_account_id')
+                .eq('id', user.id)
+                .single();
+
+            if (!profile?.linkedin_connected || !profile?.unipile_account_id) {
+                alert('Please connect your LinkedIn account in Integrations first.');
+                return;
+            }
+
+            if (!lead.linkedin_url) {
+                alert('This lead does not have a LinkedIn URL. Please add one before enrolling.');
+                return;
+            }
+
+            // Check if already enrolled
+            const { data: existing } = await supabase
+                .from('linkedin_enrollments')
+                .select('id, status')
+                .eq('user_id', user.id)
+                .eq('lead_id', lead.id)
+                .single();
+
+            if (existing) {
+                alert(`This lead is already enrolled in LinkedIn sequencer (status: ${existing.status}).`);
+                return;
+            }
+
+            // Create enrollment
+            const { error } = await supabase
+                .from('linkedin_enrollments')
+                .insert({
+                    user_id: user.id,
+                    lead_id: lead.id,
+                    linkedin_profile_url: lead.linkedin_url,
+                    lead_name: `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || lead.company,
+                    lead_company: lead.company,
+                    current_phase: 1,
+                    current_day: 1,
+                    status: 'active',
+                    connection_accepted: false,
+                    enrolled_at: new Date().toISOString(),
+                    next_action_at: new Date().toISOString(),
+                    retry_count: 0
+                });
+
+            if (error) throw error;
+
+            alert('Lead enrolled in LinkedIn sequence. The 35-day funnel will begin shortly.');
+        } catch (err) {
+            console.error('Error enrolling in LinkedIn:', err);
+            alert('Failed to enrol lead. Please try again.');
+        }
+    };
+
     const submitLinkedInEnroll = async () => {
         if (!linkedInEnrollLead || !linkedInUrl.trim()) {
             showToast('Please enter a LinkedIn URL');
@@ -2022,6 +2085,14 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                             >
                                 {enrichingLeads.includes(selectedLead.id) ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
                                 {enrichingLeads.includes(selectedLead.id) ? 'ENRICHING LEAD...' : 'ENRICH LEAD DATA'}
+                            </button>
+
+                            <button
+                                onClick={() => enrollInLinkedIn(selectedLead)}
+                                className="w-full py-4 rounded-2xl font-black text-sm shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 bg-white border border-[#E5E7EB] text-[#0A66C2] hover:bg-blue-50 hover:border-blue-200 shadow-blue-500/10"
+                            >
+                                <Linkedin size={18} />
+                                ENROL IN LINKEDIN SEQUENCE
                             </button>
 
                             <button
