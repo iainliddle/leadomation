@@ -561,11 +561,7 @@ function EditEventModal({ event, onClose, onSave, onDelete }: EditEventModalProp
 // MAIN COMPONENT
 // ============================================================================
 
-interface CalendarProps {
-  onPageChange?: (page: string) => void;
-}
-
-const Calendar: React.FC<CalendarProps> = ({ onPageChange: _onPageChange }) => {
+const Calendar: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(() => new Date());
