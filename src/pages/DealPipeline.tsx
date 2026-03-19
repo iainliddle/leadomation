@@ -246,14 +246,13 @@ const LostReasonModal: React.FC<LostReasonModalProps> = ({ onConfirm, onCancel }
 // DealDrawer component
 interface DealDrawerProps {
     deal: Deal;
-    stages: { id: string; label: string; color: string }[];
     activity: ActivityItem[];
     onClose: () => void;
     onSave: (updates: Partial<Deal>) => Promise<void>;
     onDelete: (id: string) => void;
 }
 
-const DealDrawer: React.FC<DealDrawerProps> = ({ deal, stages, activity, onClose, onSave, onDelete }) => {
+const DealDrawer: React.FC<DealDrawerProps> = ({ deal, activity, onClose, onSave, onDelete }) => {
     const [notes, setNotes] = useState(deal.notes || '');
     const [nextAction, setNextAction] = useState(deal.next_action || '');
     const [nextActionDate, setNextActionDate] = useState(deal.next_action_date || '');
@@ -1114,7 +1113,6 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
             {selectedDeal && (
                 <DealDrawer
                     deal={selectedDeal}
-                    stages={stages}
                     activity={dealActivity}
                     onClose={() => setSelectedDeal(null)}
                     onSave={saveDealUpdates}
