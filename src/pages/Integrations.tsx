@@ -23,15 +23,14 @@ const Integrations: React.FC = () => {
 
     // Check for URL params on mount (linkedin=connected or linkedin=failed)
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const linkedinParam = urlParams.get('linkedin');
-
+        const params = new URLSearchParams(window.location.search);
+        const linkedinParam = params.get('linkedin');
         if (linkedinParam === 'connected') {
+            setLinkedinStatus(prev => ({ ...prev, connected: true }));
             setToast({ message: 'LinkedIn connected successfully!', type: 'success' });
             window.history.replaceState({}, '', window.location.pathname);
-            checkLinkedInStatus();
-        } else if (linkedinParam === 'failed' || linkedinParam === 'error') {
-            setToast({ message: 'LinkedIn connection failed. Please try again.', type: 'error' });
+        } else if (linkedinParam === 'error') {
+            alert('LinkedIn connection failed. Please try again.');
             window.history.replaceState({}, '', window.location.pathname);
         }
     }, []);
@@ -45,39 +44,34 @@ const Integrations: React.FC = () => {
     }, [toast]);
 
     // Check LinkedIn status on mount
-    const checkLinkedInStatus = async () => {
-        setLinkedinLoading(true);
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.access_token) {
-                setLinkedinLoading(false);
-                return;
-            }
-
-            const response = await fetch('/api/linkedin-status', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setLinkedinStatus({
-                    connected: data.connected,
-                    account_id: data.account_id,
-                    name: data.name
-                });
-            }
-        } catch (err) {
-            console.error('Error checking LinkedIn status:', err);
-        } finally {
-            setLinkedinLoading(false);
-        }
-    };
-
     useEffect(() => {
-        checkLinkedInStatus();
+        const checkLinkedIn = async () => {
+            setLinkedinLoading(true);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    setLinkedinLoading(false);
+                    return;
+                }
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('linkedin_connected, unipile_account_id')
+                    .eq('id', user.id)
+                    .single();
+                if (data?.linkedin_connected && data?.unipile_account_id) {
+                    setLinkedinStatus({
+                        connected: true,
+                        account_id: data.unipile_account_id,
+                        name: null
+                    });
+                }
+            } catch (err) {
+                console.error('Error checking LinkedIn status:', err);
+            } finally {
+                setLinkedinLoading(false);
+            }
+        };
+        checkLinkedIn();
     }, []);
 
     useEffect(() => {
