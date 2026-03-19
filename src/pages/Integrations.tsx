@@ -30,7 +30,7 @@ const Integrations: React.FC = () => {
             setToast({ message: 'LinkedIn connected successfully!', type: 'success' });
             window.history.replaceState({}, '', window.location.pathname);
             checkLinkedInStatus();
-        } else if (linkedinParam === 'failed') {
+        } else if (linkedinParam === 'failed' || linkedinParam === 'error') {
             setToast({ message: 'LinkedIn connection failed. Please try again.', type: 'error' });
             window.history.replaceState({}, '', window.location.pathname);
         }
