@@ -168,7 +168,7 @@ const App: React.FC = () => {
       case 'Calendar':
         return (
           <FeatureGate feature="Calendar" hasAccess={canAccess('dealPipeline')} targetPlan="pro">
-            <Calendar onPageChange={setActivePage} />
+            <Calendar />
           </FeatureGate>
         );
       case 'Sequence Builder':
