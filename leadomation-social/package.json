@@ -1,0 +1,23 @@
+{
+  "name": "leadomation-social",
+  "version": "1.0.0",
+  "description": "Leadomation social media videos built with Remotion",
+  "scripts": {
+    "start": "npx remotion studio",
+    "build": "npx remotion render",
+    "upgrade": "npx remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.0",
+    "@remotion/player": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}
