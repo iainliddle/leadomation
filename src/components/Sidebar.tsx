@@ -19,7 +19,8 @@ import {
     Inbox,
     CreditCard,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    CalendarDays
 } from 'lucide-react';
 import { signOut } from '../lib/auth';
 import logoFull from '../assets/logo-full.png';
@@ -321,6 +322,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     badge={dealCount > 0 ? dealCount.toString() : undefined}
                                 />
                             </SidebarLock>
+                            <NavItem
+                                icon={CalendarDays}
+                                label="Calendar"
+                                active={activePage === 'Calendar'}
+                                onClick={() => { onPageChange('Calendar'); setIsOpen?.(false); }}
+                                isCollapsed={isCollapsed}
+                            />
                         </NavSection>
 
                         <NavSection title="OUTREACH" isCollapsed={isCollapsed}>
