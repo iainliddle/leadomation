@@ -9,6 +9,7 @@ export interface PlanLimits {
     maxSequenceSteps: number;
     maxKeywordSearches: number;
     maxEmailTemplates: number;
+    maxVoiceCallsPerMonth: number;
     trialMaxLeads: number;
     trialMaxEmails: number;
     trialMaxVoiceCalls: number;
@@ -54,6 +55,7 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         maxSequenceSteps: 4,
         maxKeywordSearches: 5,
         maxEmailTemplates: 6,
+        maxVoiceCallsPerMonth: 2,
         trialMaxLeads: 25,
         trialMaxEmails: 10,
         trialMaxVoiceCalls: 2,
@@ -63,11 +65,12 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
     },
     starter: {
         maxCampaigns: 3,
-        maxLeadsPerMonth: 500,
-        maxEmailsPerDay: 50,
+        maxLeadsPerMonth: 300,
+        maxEmailsPerDay: 30,
         maxSequenceSteps: 4,
-        maxKeywordSearches: 50,
+        maxKeywordSearches: 25,
         maxEmailTemplates: 6,
+        maxVoiceCallsPerMonth: 0,
         trialMaxLeads: 0,
         trialMaxEmails: 0,
         trialMaxVoiceCalls: 0,
@@ -76,12 +79,13 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         trialMaxCampaigns: 0,
     },
     pro: {
-        maxCampaigns: Infinity,
-        maxLeadsPerMonth: Infinity,
-        maxEmailsPerDay: 200,
+        maxCampaigns: 10,
+        maxLeadsPerMonth: 2000,
+        maxEmailsPerDay: 100,
         maxSequenceSteps: Infinity,
-        maxKeywordSearches: Infinity,
+        maxKeywordSearches: 75,
         maxEmailTemplates: Infinity,
+        maxVoiceCallsPerMonth: 50,
         trialMaxLeads: 0,
         trialMaxEmails: 0,
         trialMaxVoiceCalls: 0,
@@ -122,7 +126,7 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
     },
     starter: {
         dashboard: true,
-        globalDemand: true,
+        globalDemand: false,
         newCampaign: true,
         activeCampaigns: true,
         leadDatabase: true,
@@ -138,7 +142,7 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
         csvExport: true,
         aiEmailGeneration: false,
         aiVoiceAgent: false,
-        linkedinAutomation: true,
+        linkedinAutomation: false,
         spintax: false,
         advancedAnalytics: false,
         inboxWarmup: false,

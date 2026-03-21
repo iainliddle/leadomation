@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
+import type { FeatureAccess } from '../lib/planLimits';
 
 interface LinkedInEnrollment {
     id: string;
@@ -71,9 +72,11 @@ interface Sequence {
 
 interface SequenceBuilderProps {
     onPageChange?: (page: string) => void;
+    canAccess?: (feature: keyof FeatureAccess) => boolean;
+    triggerUpgrade?: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
 
-const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
+const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAccess, triggerUpgrade }) => {
     const [sequences, setSequences] = useState<Sequence[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingSequence, setEditingSequence] = useState<Sequence | null>(null);
@@ -410,7 +413,13 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                             Email Sequences
                         </button>
                         <button
-                            onClick={() => setActiveTab('linkedin')}
+                            onClick={() => {
+                                if (canAccess && !canAccess('linkedinAutomation')) {
+                                    triggerUpgrade?.('LinkedIn Relationship Sequencer', 'pro');
+                                    return;
+                                }
+                                setActiveTab('linkedin');
+                            }}
                             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium cursor-pointer transition-colors ${
                                 activeTab === 'linkedin'
                                     ? 'text-[#4F46E5] border-b-2 border-[#4F46E5] -mb-px'
@@ -419,7 +428,9 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                         >
                             <Linkedin size={16} />
                             LinkedIn Sequences
-                            {linkedinEnrollments.filter(e => e.status === 'active').length > 0 && (
+                            {canAccess && !canAccess('linkedinAutomation') ? (
+                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-1 font-bold">PRO</span>
+                            ) : linkedinEnrollments.filter(e => e.status === 'active').length > 0 && (
                                 <span className="bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-[#C7D2FE]">
                                     {linkedinEnrollments.filter(e => e.status === 'active').length}
                                 </span>
@@ -504,6 +515,25 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                     ) : (
                         /* LinkedIn Sequences Tab */
                         <>
+                            {canAccess && !canAccess('linkedinAutomation') ? (
+                                /* Locked State for Starter users */
+                                <div className="text-center py-20">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <Linkedin className="w-8 h-8 text-gray-400" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">LinkedIn Relationship Sequencer is a Pro feature</h3>
+                                    <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                                        Upgrade to Pro to unlock our 35-day LinkedIn nurturing sequence that builds genuine trust with prospects before making any ask.
+                                    </p>
+                                    <button
+                                        onClick={() => triggerUpgrade?.('LinkedIn Relationship Sequencer', 'pro')}
+                                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold rounded-lg px-5 py-2.5 shadow-sm transition-all duration-150 inline-flex items-center gap-2"
+                                    >
+                                        Upgrade to Pro
+                                    </button>
+                                </div>
+                            ) : (
+                            <>
                             {/* Recommendation Banner */}
                             <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl mb-4">
                                 <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
@@ -687,6 +717,8 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange }) => {
                                         );
                                     })}
                                 </div>
+                            )}
+                            </>
                             )}
                         </>
                     )}

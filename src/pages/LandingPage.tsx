@@ -1104,11 +1104,12 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                 <p className="lp-price-annual">or £566/year (save 20%)</p>
               </div>
               <ul className="lp-price-features">
-                <li>3 active campaigns</li><li>500 leads per month</li><li>50 emails per day</li>
-                <li>Email sequences up to 4 steps</li><li>LinkedIn automation</li>
+                <li>3 active campaigns</li><li>300 leads per month</li><li>30 emails per day</li>
+                <li>Email sequences up to 4 steps</li><li>25 keyword searches/month</li>
                 <li>Lead database with search &amp; filters</li><li>6 pre-built email templates</li>
                 <li>Email signature builder</li><li>Basic dashboard &amp; analytics</li>
-                <li>CSV export</li><li>Integrations panel</li><li>Email config &amp; compliance tools</li>
+                <li>CSV export</li><li>Spam checker</li><li>Intent scoring (basic)</li>
+                <li>Integrations panel</li><li>Email config &amp; compliance tools</li>
               </ul>
               <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-outline lp-btn-full">Start Free Trial</button>
             </div>
@@ -1122,12 +1123,13 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
               </div>
               <p className="lp-price-includes">Everything in Starter, plus:</p>
               <ul className="lp-price-features">
-                <li><strong>🤖 AI Voice Call Agent</strong></li><li>Unlimited campaigns</li>
-                <li>5,000+ leads per month</li><li>200 emails per day</li><li>Unlimited sequence steps</li>
+                <li>10 active campaigns</li><li>2,000 leads per month</li><li>100 emails per day</li>
+                <li>Unlimited sequence steps</li><li>75 keyword searches/month</li>
+                <li><strong>🤖 50 AI voice calls/month</strong></li><li>LinkedIn Relationship Sequencer</li>
                 <li>Global Demand Intelligence</li><li>Deal Pipeline / Kanban CRM</li><li>Unified Inbox</li>
-                <li>AI email generation</li><li>Multi-channel sequence builder</li><li>Spintax support</li>
-                <li>Advanced analytics</li><li>Inbox warm-up tools</li><li>Inbox rotation</li>
-                <li>Decision Maker enrichment</li><li>Priority support</li>
+                <li>AI email generation</li><li>A/B testing</li><li>Full intent scoring &amp; smart filters</li>
+                <li>All 25 email templates</li><li>Advanced campaign analytics</li>
+                <li>Multi-channel sequences</li><li>Spintax support</li><li>Priority support</li>
               </ul>
               <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-primary lp-btn-full">Start Free Trial</button>
             </div>

@@ -68,6 +68,7 @@ interface Lead {
 }
 
 import type { FeatureAccess } from '../lib/planLimits';
+import { getPlanLimits } from '../lib/planLimits';
 
 interface LeadDatabaseProps {
     canAccess?: (feature: keyof FeatureAccess) => boolean;
@@ -1161,6 +1162,47 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         setCallStatus('calling');
 
         try {
+            // Check voice call limits
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('plan')
+                    .eq('id', user.id)
+                    .single();
+
+                const plan = profile?.plan || 'trial';
+                const limits = getPlanLimits(plan);
+
+                // Count calls made this month
+                const now = new Date();
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+                const { count: callsThisMonth } = await supabase
+                    .from('call_logs')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', user.id)
+                    .gte('created_at', monthStart);
+
+                const usedCalls = callsThisMonth || 0;
+                const maxCalls = limits.maxVoiceCallsPerMonth;
+
+                if (maxCalls === 0) {
+                    setCallInProgress(false);
+                    setCallStatus('idle');
+                    triggerUpgrade?.('AI Voice Calls', 'pro');
+                    setShowCallModal(false);
+                    return;
+                }
+
+                if (usedCalls >= maxCalls) {
+                    setCallInProgress(false);
+                    setCallStatus('idle');
+                    triggerUpgrade?.('AI Voice Calls (limit reached)', 'pro');
+                    setShowCallModal(false);
+                    return;
+                }
+            }
+
             const apiKey = import.meta.env.VITE_VAPI_API_KEY;
             const phoneNumberId = import.meta.env.VITE_VAPI_PHONE_NUMBER_ID;
 
