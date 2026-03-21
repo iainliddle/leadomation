@@ -336,6 +336,75 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick,
                     <Plus size={18} />
                 </button>
             </div>
+
+            {/* Search Modal */}
+            {showSearch && (
+                <>
+                    <div
+                        className="fixed inset-0 bg-black/50 z-50 animate-in fade-in duration-150"
+                        onClick={() => { setShowSearch(false); setSearchQuery(''); setSearchResults([]); }}
+                    />
+                    <div className="fixed top-20 left-1/2 -translate-x-1/2 w-full max-w-xl bg-white rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+                            <Search size={20} className="text-gray-400 shrink-0" />
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => handleSearch(e.target.value)}
+                                placeholder="Search leads, campaigns, deals..."
+                                className="flex-1 text-sm text-gray-900 placeholder-gray-400 outline-none"
+                            />
+                            {isSearching && <Loader2 size={16} className="text-gray-400 animate-spin" />}
+                            <button
+                                onClick={() => { setShowSearch(false); setSearchQuery(''); setSearchResults([]); }}
+                                className="p-1 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className="max-h-80 overflow-y-auto">
+                            {searchResults.length > 0 ? (
+                                <div className="py-2">
+                                    {searchResults.map((result) => (
+                                        <button
+                                            key={`${result.type}-${result.id}`}
+                                            onClick={() => handleSearchResultClick(result)}
+                                            className="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                        >
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                                                result.type === 'lead' ? 'bg-blue-50 text-blue-600' :
+                                                result.type === 'campaign' ? 'bg-purple-50 text-purple-600' :
+                                                'bg-emerald-50 text-emerald-600'
+                                            }`}>
+                                                {result.type === 'lead' ? <User size={16} /> :
+                                                 result.type === 'campaign' ? <Settings size={16} /> :
+                                                 <CreditCard size={16} />}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 truncate">{result.title}</p>
+                                                <p className="text-xs text-gray-400">{result.subtitle}</p>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : searchQuery.trim() && !isSearching ? (
+                                <div className="py-8 text-center">
+                                    <Search size={32} className="mx-auto text-gray-200 mb-3" />
+                                    <p className="text-sm font-medium text-gray-500">No results found</p>
+                                    <p className="text-xs text-gray-400 mt-1">Try a different search term</p>
+                                </div>
+                            ) : !searchQuery.trim() ? (
+                                <div className="py-8 text-center">
+                                    <Search size={32} className="mx-auto text-gray-200 mb-3" />
+                                    <p className="text-sm font-medium text-gray-500">Search across your data</p>
+                                    <p className="text-xs text-gray-400 mt-1">Find leads, campaigns, and deals by name or company</p>
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </>
+            )}
         </header>
     );
 };
