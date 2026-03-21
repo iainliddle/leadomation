@@ -1215,8 +1215,6 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 phoneNumber = '+' + phoneNumber;
             }
 
-            const { data: { user } } = await supabase.auth.getUser();
-
             const response = await fetch('https://api.vapi.ai/call/phone', {
                 method: 'POST',
                 headers: {
