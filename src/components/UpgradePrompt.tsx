@@ -67,7 +67,7 @@ const UpgradePrompt = ({ message, onClose }: UpgradePromptProps) => {
                         disabled={loading}
                         className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
                     >
-                        {loading ? 'Loading...' : 'Upgrade to Pro at £149/month'}
+                        {loading ? 'Loading...' : 'Upgrade to Pro at £159/month'}
                     </button>
                 </div>
             </div>

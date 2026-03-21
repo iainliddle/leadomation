@@ -41,7 +41,7 @@ const ExpiredOverlay: React.FC<ExpiredOverlayProps> = ({ type, onViewPlans }) =>
                     {/* Starter Card */}
                     <div className="border border-[#E2E4ED] rounded-xl p-4 text-left">
                         <div className="text-xs font-black text-[#6B7280] uppercase tracking-widest mb-1">Starter</div>
-                        <div className="text-xl font-black text-[#111827] mb-3">£49<span className="text-sm font-bold text-[#6B7280]">/mo</span></div>
+                        <div className="text-xl font-black text-[#111827] mb-3">£59<span className="text-sm font-bold text-[#6B7280]">/mo</span></div>
                         <div className="space-y-1.5">
                             {['3 campaigns', '500 leads/mo', '50 emails/day', 'LinkedIn automation', 'CSV export'].map((f, i) => (
                                 <div key={i} className="flex items-center gap-2">
@@ -56,7 +56,7 @@ const ExpiredOverlay: React.FC<ExpiredOverlayProps> = ({ type, onViewPlans }) =>
                     <div className="border-2 border-[#4F46E5] rounded-xl p-4 text-left relative overflow-hidden">
                         <div className="absolute top-0 right-0 bg-[#4F46E5] text-white text-[7px] font-black px-2 py-0.5 rounded-bl-lg uppercase">Popular</div>
                         <div className="text-xs font-black text-[#4F46E5] uppercase tracking-widest mb-1">Pro</div>
-                        <div className="text-xl font-black text-[#111827] mb-3">£149<span className="text-sm font-bold text-[#6B7280]">/mo</span></div>
+                        <div className="text-xl font-black text-[#111827] mb-3">£159<span className="text-sm font-bold text-[#6B7280]">/mo</span></div>
                         <div className="space-y-1.5">
                             {['Unlimited campaigns', '5,000+ leads/mo', 'AI Voice Agent', 'Deal Pipeline CRM', 'Unified Inbox'].map((f, i) => (
                                 <div key={i} className="flex items-center gap-2">

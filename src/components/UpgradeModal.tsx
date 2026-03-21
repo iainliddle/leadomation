@@ -43,7 +43,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, t
     ];
 
     const features = targetPlan === 'pro' ? proFeatures : starterFeatures;
-    const price = targetPlan === 'pro' ? '£149' : '£49';
+    const price = targetPlan === 'pro' ? '£159' : '£59';
     const planName = targetPlan === 'pro' ? 'Pro' : 'Starter';
 
     const handleUpgrade = async () => {

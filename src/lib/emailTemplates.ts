@@ -210,15 +210,15 @@ export const TRIAL_ENDING_EMAIL_BODY = `
   <tr>
     <td width="48%" style="padding:20px;background:#F8F9FF;border-radius:12px;border:1px solid #E5E7EB;vertical-align:top;">
       <div style="font-size:13px;font-weight:700;color:#6B7280;margin-bottom:8px;">STARTER</div>
-      <div style="font-size:28px;font-weight:900;color:#111827;">£49<span style="font-size:14px;font-weight:400;color:#6B7280;">/mo</span></div>
-      <div style="font-size:12px;color:#6B7280;margin-bottom:12px;">or £490/year</div>
+      <div style="font-size:28px;font-weight:900;color:#111827;">£59<span style="font-size:14px;font-weight:400;color:#6B7280;">/mo</span></div>
+      <div style="font-size:12px;color:#6B7280;margin-bottom:12px;">or £566/year</div>
       <div style="font-size:13px;color:#374151;line-height:1.8;">✓ 3 campaigns<br>✓ 500 leads/mo<br>✓ 50 emails/day</div>
     </td>
     <td width="4%"></td>
     <td width="48%" style="padding:20px;background:linear-gradient(135deg,#4F46E5,#06B6D4);border-radius:12px;vertical-align:top;">
       <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:8px;">PRO</div>
-      <div style="font-size:28px;font-weight:900;color:white;">£149<span style="font-size:14px;font-weight:400;color:rgba(255,255,255,0.7);">/mo</span></div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:12px;">or £1,430/year</div>
+      <div style="font-size:28px;font-weight:900;color:white;">£159<span style="font-size:14px;font-weight:400;color:rgba(255,255,255,0.7);">/mo</span></div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:12px;">or £1,526/year</div>
       <div style="font-size:13px;color:white;line-height:1.8;">✓ Unlimited campaigns<br>✓ 5,000+ leads/mo<br>✓ AI Voice Agent</div>
     </td>
   </tr>

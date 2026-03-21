@@ -1100,8 +1100,8 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             {/* STARTER */}
             <div className="lp-price-card">
               <div className="lp-price-header"><h3>Starter</h3>
-                <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">49</span><span className="lp-price-period">/month</span></div>
-                <p className="lp-price-annual">or £490/year (save 20%)</p>
+                <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">59</span><span className="lp-price-period">/month</span></div>
+                <p className="lp-price-annual">or £566/year (save 20%)</p>
               </div>
               <ul className="lp-price-features">
                 <li>3 active campaigns</li><li>500 leads per month</li><li>50 emails per day</li>
@@ -1117,8 +1117,8 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <div className="lp-price-card lp-price-featured">
               <div className="lp-price-badge">Most Popular</div>
               <div className="lp-price-header"><h3>Pro</h3>
-                <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">149</span><span className="lp-price-period">/month</span></div>
-                <p className="lp-price-annual">or £1,490/year (save 20%)</p>
+                <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">159</span><span className="lp-price-period">/month</span></div>
+                <p className="lp-price-annual">or £1,526/year (save 20%)</p>
               </div>
               <p className="lp-price-includes">Everything in Starter, plus:</p>
               <ul className="lp-price-features">
