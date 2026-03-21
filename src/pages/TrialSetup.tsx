@@ -85,7 +85,7 @@ const TrialSetup: React.FC = () => {
                     >
                         <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Starter</div>
                         <div className="text-xl font-black text-gray-900 mb-3 block">
-                            £{billingCycle === 'monthly' ? '49' : '490'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                            £{billingCycle === 'monthly' ? '59' : '590'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                         </div>
                         <ul className="space-y-2 mt-auto">
                             {['50 keyword searches/mo', '3 campaigns', '500 leads/mo', 'Email sequences'].map((f, i) => (
@@ -107,7 +107,7 @@ const TrialSetup: React.FC = () => {
                         <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg uppercase">Popular</div>
                         <div className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Pro</div>
                         <div className="text-xl font-black text-gray-900 mb-3 block">
-                            £{billingCycle === 'monthly' ? '149' : '1,490'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                            £{billingCycle === 'monthly' ? '159' : '1,590'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                         </div>
                         <ul className="space-y-2 mt-auto">
                             {['Unlimited keyword searches', 'Unlimited campaigns', '5,000+ leads/mo', 'AI Voice Call Agent', 'Multi-channel sequences'].map((f, i) => (
