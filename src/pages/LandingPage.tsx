@@ -1104,7 +1104,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                 <p className="lp-price-annual">or £566/year (save 20%)</p>
               </div>
               <ul className="lp-price-features">
-                <li>3 active campaigns</li><li>300 leads per month</li><li>30 emails per day</li>
+                <li>Unlimited campaigns</li><li>300 leads per month</li><li>30 emails per day</li>
                 <li>Email sequences up to 4 steps</li><li>25 keyword searches/month</li>
                 <li>Lead database with search &amp; filters</li><li>6 pre-built email templates</li>
                 <li>Email signature builder</li><li>Basic dashboard &amp; analytics</li>
@@ -1123,7 +1123,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
               </div>
               <p className="lp-price-includes">Everything in Starter, plus:</p>
               <ul className="lp-price-features">
-                <li>10 active campaigns</li><li>2,000 leads per month</li><li>100 emails per day</li>
+                <li>Unlimited campaigns</li><li>2,000 leads per month</li><li>100 emails per day</li>
                 <li>Unlimited sequence steps</li><li>75 keyword searches/month</li>
                 <li><strong>🤖 50 AI voice calls/month</strong></li><li>LinkedIn Relationship Sequencer</li>
                 <li>Global Demand Intelligence</li><li>Deal Pipeline / Kanban CRM</li><li>Unified Inbox</li>

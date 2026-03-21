@@ -88,7 +88,7 @@ const TrialSetup: React.FC = () => {
                             £{billingCycle === 'monthly' ? '59' : '590'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                         </div>
                         <ul className="space-y-2 mt-auto">
-                            {['25 keyword searches/mo', '3 campaigns', '300 leads/mo', '30 emails/day', 'Email sequences'].map((f, i) => (
+                            {['25 keyword searches/mo', 'Unlimited campaigns', '300 leads/mo', '30 emails/day', 'Email sequences'].map((f, i) => (
                                 <li key={i} className="flex items-start gap-2">
                                     <div className="mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600">
                                         <Check size={10} strokeWidth={3} />
@@ -110,7 +110,7 @@ const TrialSetup: React.FC = () => {
                             £{billingCycle === 'monthly' ? '159' : '1,590'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                         </div>
                         <ul className="space-y-2 mt-auto">
-                            {['75 keyword searches/mo', '10 campaigns', '2,000 leads/mo', '50 AI voice calls/mo', 'LinkedIn Sequencer', 'Multi-channel sequences'].map((f, i) => (
+                            {['75 keyword searches/mo', 'Unlimited campaigns', '2,000 leads/mo', '50 AI voice calls/mo', 'LinkedIn Sequencer', 'Multi-channel sequences'].map((f, i) => (
                                 <li key={i} className="flex items-start gap-2">
                                     <div className="mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600">
                                         <Check size={10} strokeWidth={3} />
