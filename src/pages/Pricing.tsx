@@ -27,6 +27,7 @@ interface PricingCardProps {
     savingsBadge?: string;
     onCheckout: (plan: string) => void;
     isComingSoon?: boolean;
+    includesText?: string;
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({
@@ -42,7 +43,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
     buttonText,
     savingsBadge,
     onCheckout,
-    isComingSoon
+    isComingSoon,
+    includesText
 }) => (
     <div className={`relative bg-white rounded-xl p-8 ${isPopular
         ? 'border-2 border-[#4F46E5] shadow-xl'
@@ -89,6 +91,12 @@ const PricingCard: React.FC<PricingCardProps> = ({
         {isPopular && (
             <p className="text-xs font-semibold text-[#4F46E5] mb-3">
                 Everything in Starter, plus:
+            </p>
+        )}
+
+        {includesText && (
+            <p className="text-xs font-semibold text-[#4F46E5] mb-3">
+                {includesText}
             </p>
         )}
 
@@ -323,6 +331,7 @@ const Pricing: React.FC = () => {
                         icon={<ShieldCheck size={24} />}
                         buttonText="Coming Soon"
                         onCheckout={() => {}}
+                        includesText="Everything in Pro, plus:"
                         features={[
                             "3,000 leads per month",
                             "250 emails per day",
@@ -331,8 +340,7 @@ const Pricing: React.FC = () => {
                             "SMS Outreach (Twilio)",
                             "WhatsApp Outreach",
                             "LinkedIn Sequencer",
-                            "AI Video Prospecting (30/month) — NEW",
-                            "Everything in Pro, plus:"
+                            "AI Video Prospecting (30/month) — NEW"
                         ]}
                     />
                 </div>
