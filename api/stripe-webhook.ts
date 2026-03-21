@@ -134,7 +134,7 @@ export default async function handler(req: any, res: any) {
         switch (event.type) {
 
             // ─────────────────────────────────────────────────────────────
-            // New payment completed — activate the plan
+            // New payment completed — start trial with full Pro access
             // ─────────────────────────────────────────────────────────────
             case 'checkout.session.completed': {
                 const session = event.data.object as Stripe.Checkout.Session;
@@ -145,6 +145,11 @@ export default async function handler(req: any, res: any) {
                 const customerId = session.customer as string;
                 const subscriptionId = session.subscription as string;
 
+                // Retrieve the subscription to get trial_end date and status
+                const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+                const subscriptionStatus = subscription.status; // 'trialing', 'active', etc.
+                const trialEndTimestamp = subscription.trial_end;
+
                 const expandedSession = await stripe.checkout.sessions.retrieve(session.id, {
                     expand: ['line_items']
                 });
@@ -154,34 +159,32 @@ export default async function handler(req: any, res: any) {
                 const priceId = typeof rawPriceId === 'string' ? rawPriceId.trim() : '';
 
                 console.log('Price ID from session:', priceId);
-                console.log('Pro monthly:', process.env.STRIPE_PRICE_PRO_MONTHLY);
-                console.log('Pro annual:', process.env.STRIPE_PRICE_PRO_ANNUAL);
-                console.log('Starter monthly:', process.env.STRIPE_PRICE_STARTER_MONTHLY);
-                console.log('Starter annual:', process.env.STRIPE_PRICE_STARTER_ANNUAL);
+                console.log('Subscription status:', subscriptionStatus);
+                console.log('Trial end:', trialEndTimestamp ? new Date(trialEndTimestamp * 1000).toISOString() : 'none');
 
-                let plan: 'starter' | 'pro' | undefined;
+                let selectedPlan: 'starter' | 'pro' | undefined;
 
                 if (priceId) {
                     if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY?.trim() || priceId === process.env.STRIPE_PRICE_PRO_ANNUAL?.trim()) {
-                        plan = 'pro';
+                        selectedPlan = 'pro';
                     } else if (priceId === process.env.STRIPE_PRICE_STARTER_MONTHLY?.trim() || priceId === process.env.STRIPE_PRICE_STARTER_ANNUAL?.trim()) {
-                        plan = 'starter';
+                        selectedPlan = 'starter';
                     }
                 }
 
                 // Fallback plan detection
-                if (!plan) {
+                if (!selectedPlan) {
                     console.log('Price ID exact match failed. Falling back to amount_total or metadata check. Session amount_total:', session.amount_total, 'Metadata:', session.metadata);
                     const amount = session.amount_total || expandedSession.amount_total;
 
                     if (session.metadata?.plan === 'pro') {
-                        plan = 'pro';
+                        selectedPlan = 'pro';
                     } else if (session.metadata?.plan === 'starter') {
-                        plan = 'starter';
+                        selectedPlan = 'starter';
                     } else if (amount && amount >= 14900) {
-                        plan = 'pro';
+                        selectedPlan = 'pro';
                     } else if (amount && amount >= 4900) {
-                        plan = 'starter';
+                        selectedPlan = 'starter';
                     } else {
                         console.error('Unrecognised price ID:', priceId, 'and all fallbacks failed.');
                         break;
@@ -213,19 +216,27 @@ export default async function handler(req: any, res: any) {
                     break;
                 }
 
-                // Update the user's plan and store their Stripe customer ID for future lookups
+                // During trial: set plan to 'trialing' so user gets FULL PRO access
+                // Store selected_plan for when trial ends
+                // After trial: customer.subscription.updated will set plan to selected_plan
+                const isTrialing = subscriptionStatus === 'trialing';
+                const trialEndDate = trialEndTimestamp ? new Date(trialEndTimestamp * 1000).toISOString() : null;
+
                 const { error } = await supabase
                     .from('profiles')
                     .update({
-                        plan: plan,
+                        plan: isTrialing ? 'trialing' : selectedPlan,
+                        selected_plan: selectedPlan,
                         stripe_customer_id: customerId,
+                        stripe_subscription_status: subscriptionStatus,
+                        trial_end: trialEndDate,
                     })
                     .eq('id', profile.id);
 
                 if (error) {
-                    console.error('Failed to activate plan:', error);
+                    console.error('Failed to activate trial:', error);
                 } else {
-                    console.log(`✅ Plan activated: user ${profile.id} → ${plan}`);
+                    console.log(`✅ Trial activated: user ${profile.id} → trialing (selected: ${selectedPlan}), ends: ${trialEndDate}`);
 
                     // Trigger n8n welcome email webhook
                     try {
@@ -252,28 +263,76 @@ export default async function handler(req: any, res: any) {
             }
 
             // ─────────────────────────────────────────────────────────────
-            // Subscription changed — handle upgrades and downgrades
+            // Subscription changed — handle trial end, upgrades, downgrades
             // ─────────────────────────────────────────────────────────────
             case 'customer.subscription.updated': {
                 const subscription = event.data.object as Stripe.Subscription;
                 const customerId = subscription.customer as string;
+                const subscriptionStatus = subscription.status;
                 const priceId = subscription.items.data[0]?.price?.id;
-                const plan = PRICE_TO_PLAN[priceId];
+                const planFromPrice = PRICE_TO_PLAN[priceId];
 
-                if (!plan) {
-                    console.error('Unrecognised price ID on update:', priceId);
+                console.log(`Subscription updated: customer=${customerId}, status=${subscriptionStatus}, priceId=${priceId}`);
+
+                // Get the user's profile to check current state
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('id, plan, selected_plan, stripe_subscription_status')
+                    .eq('stripe_customer_id', customerId)
+                    .single();
+
+                if (!profile) {
+                    console.error('No profile found for Stripe customer:', customerId);
                     break;
                 }
 
-                const { error } = await supabase
-                    .from('profiles')
-                    .update({ plan: plan })
-                    .eq('stripe_customer_id', customerId);
+                const previousStatus = profile.stripe_subscription_status;
 
-                if (error) {
-                    console.error('Failed to update plan:', error);
+                // CRITICAL: Handle trial end → activate selected plan
+                // When status changes from 'trialing' to 'active', trial has ended
+                if (previousStatus === 'trialing' && subscriptionStatus === 'active') {
+                    const activePlan = profile.selected_plan || planFromPrice || 'starter';
+
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update({
+                            plan: activePlan,
+                            stripe_subscription_status: 'active',
+                        })
+                        .eq('stripe_customer_id', customerId);
+
+                    if (error) {
+                        console.error('Failed to activate plan after trial:', error);
+                    } else {
+                        console.log(`✅ Trial ended: user ${profile.id} → ${activePlan} (was trialing)`);
+                    }
+                    break;
+                }
+
+                // Handle plan changes (upgrades/downgrades) for active subscriptions
+                if (subscriptionStatus === 'active' && planFromPrice) {
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update({
+                            plan: planFromPrice,
+                            selected_plan: planFromPrice,
+                            stripe_subscription_status: subscriptionStatus,
+                        })
+                        .eq('stripe_customer_id', customerId);
+
+                    if (error) {
+                        console.error('Failed to update plan:', error);
+                    } else {
+                        console.log(`✅ Plan updated → ${planFromPrice} for customer ${customerId}`);
+                    }
                 } else {
-                    console.log(`✅ Plan updated → ${plan} for customer ${customerId}`);
+                    // Just update the subscription status for other state changes
+                    await supabase
+                        .from('profiles')
+                        .update({ stripe_subscription_status: subscriptionStatus })
+                        .eq('stripe_customer_id', customerId);
+
+                    console.log(`✅ Subscription status updated → ${subscriptionStatus} for customer ${customerId}`);
                 }
 
                 break;

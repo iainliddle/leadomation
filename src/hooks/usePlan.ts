@@ -15,6 +15,7 @@ import {
 interface UsePlanReturn {
     plan: PlanType;
     rawPlan: string;
+    selectedPlan: string | null; // Plan user will convert to after trial
     isLoading: boolean;
     trialDaysRemaining: number;
     isTrialActive: boolean;
@@ -46,6 +47,7 @@ interface UsePlanReturn {
 
 export const usePlan = (): UsePlanReturn => {
     const [rawPlan, setRawPlan] = useState<string>('trial');
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [trialEnd, setTrialEnd] = useState<string | null>(null);
     const [billingInterval, setBillingInterval] = useState<string | null>(null);
     const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
@@ -69,12 +71,13 @@ export const usePlan = (): UsePlanReturn => {
 
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('plan, trial_end, billing_interval, stripe_customer_id, trial_leads_used, trial_emails_used, trial_voice_calls_used, trial_ai_emails_used, trial_keyword_searches_used, trial_campaigns_used, monthly_leads_used, monthly_emails_used, monthly_keyword_searches_used, monthly_reset_date')
+                .select('plan, trial_end, billing_interval, stripe_customer_id, stripe_subscription_status, selected_plan, trial_leads_used, trial_emails_used, trial_voice_calls_used, trial_ai_emails_used, trial_keyword_searches_used, trial_campaigns_used, monthly_leads_used, monthly_emails_used, monthly_keyword_searches_used, monthly_reset_date')
                 .eq('id', user.id)
                 .single();
 
             if (profile) {
                 setRawPlan(profile.plan || 'trial');
+                setSelectedPlan(profile.selected_plan || null);
                 setTrialEnd(profile.trial_end);
                 setBillingInterval(profile.billing_interval);
                 setStripeCustomerId(profile.stripe_customer_id);
@@ -132,7 +135,8 @@ export const usePlan = (): UsePlanReturn => {
     const limits = getPlanLimits(effectivePlan);
     const features = getFeatureAccess(effectivePlan);
     const trialDaysRemaining = getTrialDaysRemaining(trialEnd);
-    const isTrialActiveNow = effectivePlan === 'trial';
+    // User is in trial if they have 'trialing' (card on file) OR legacy 'trial'
+    const isTrialActiveNow = effectivePlan === 'trial' || effectivePlan === 'trialing';
 
     const canAccess = (feature: keyof FeatureAccess): boolean => {
         return features[feature] === true;
@@ -145,7 +149,8 @@ export const usePlan = (): UsePlanReturn => {
         if (effectivePlan === 'starter') {
             return usage.monthlyLeadsUsed + count <= limits.maxLeadsPerMonth;
         }
-        if (effectivePlan === 'pro') return true;
+        // 'trialing' gets full Pro access
+        if (effectivePlan === 'pro' || effectivePlan === 'trialing') return true;
         return false;
     };
 
@@ -161,7 +166,8 @@ export const usePlan = (): UsePlanReturn => {
         if (effectivePlan === 'trial') {
             return usage.voiceCallsUsed < limits.trialMaxVoiceCalls;
         }
-        return effectivePlan === 'pro';
+        // 'trialing' gets full Pro access
+        return effectivePlan === 'pro' || effectivePlan === 'trialing';
     };
 
     const canGenerateAiEmail = (): boolean => {
@@ -169,7 +175,8 @@ export const usePlan = (): UsePlanReturn => {
         if (effectivePlan === 'trial') {
             return usage.aiEmailsUsed < limits.trialMaxAiEmails;
         }
-        return effectivePlan === 'pro';
+        // 'trialing' gets full Pro access
+        return effectivePlan === 'pro' || effectivePlan === 'trialing';
     };
 
     const canSearchKeywords = (): boolean => {
@@ -179,7 +186,8 @@ export const usePlan = (): UsePlanReturn => {
         if (effectivePlan === 'starter') {
             return usage.monthlyKeywordSearchesUsed < limits.maxKeywordSearches;
         }
-        if (effectivePlan === 'pro') return true;
+        // 'trialing' gets full Pro access
+        if (effectivePlan === 'pro' || effectivePlan === 'trialing') return true;
         return false;
     };
 
@@ -244,6 +252,7 @@ export const usePlan = (): UsePlanReturn => {
     return {
         plan: effectivePlan,
         rawPlan,
+        selectedPlan,
         isLoading,
         trialDaysRemaining,
         isTrialActive: isTrialActiveNow,

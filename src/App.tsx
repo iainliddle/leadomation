@@ -42,6 +42,7 @@ const App: React.FC = () => {
 
   const {
     plan,
+    selectedPlan,
     isLoading: planLoading,
     trialDaysRemaining,
     canAccess,
@@ -68,6 +69,8 @@ const App: React.FC = () => {
       const profilePromise = supabase.from('profiles').select('stripe_customer_id, plan').eq('id', user.id).single();
       const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
       const { data } = await Promise.race([profilePromise, timeoutPromise]) as any;
+      // Users with a valid subscription (including 'trialing' with card on file) go to Dashboard
+      // Users without a Stripe customer ID or with 'free'/'trial' plan need to set up trial
       if (data && (!data.stripe_customer_id || data.stripe_customer_id.trim() === '') && (!data.plan || data.plan === 'free' || data.plan === 'trial')) {
         return 'TrialSetup';
       }
@@ -174,7 +177,11 @@ const App: React.FC = () => {
       case 'Sequence Builder':
         return <SequenceBuilder onPageChange={setActivePage} />;
       case 'Call Agent':
-        return <CallScriptBuilder />;
+        return (
+          <FeatureGate feature="AI Voice Agent" hasAccess={canAccess('aiVoiceAgent')} targetPlan="pro">
+            <CallScriptBuilder />
+          </FeatureGate>
+        );
       case 'Inbox':
         return (
           <FeatureGate feature="Unified Inbox" hasAccess={canAccess('inbox')} targetPlan="pro">
@@ -303,6 +310,7 @@ const App: React.FC = () => {
             <TrialBanner
               daysRemaining={trialDaysRemaining}
               plan={plan}
+              selectedPlan={selectedPlan}
               onUpgradeClick={goToPricing}
             />
             {renderPage(page)}
@@ -310,7 +318,7 @@ const App: React.FC = () => {
         )}
       </Layout>
 
-      {(plan === 'expired' || plan === 'cancelled') && activePage !== 'Pricing' && (
+      {(plan === 'expired' || plan === 'cancelled') && activePage !== 'Pricing' && activePage !== 'Settings' && (
         <ExpiredOverlay
           type={plan as 'expired' | 'cancelled'}
           onViewPlans={goToPricing}
