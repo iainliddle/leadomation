@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 import logo from '../assets/logo-full.png';
 
 const CancellationFeedback: React.FC = () => {
@@ -10,21 +9,21 @@ const CancellationFeedback: React.FC = () => {
         const userId = params.get('userId');
 
         if (reason && userId && userId !== 'test') {
-            supabase
-                .from('cancellation_reasons')
-                .insert({ user_id: userId, reason: reason })
-                .then(({ error }) => {
-                    if (error) console.error('Failed to save cancellation reason:', error);
-                });
+            fetch('/api/cancellation-reason', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, reason }),
+            }).catch((err) => {
+                console.error('Failed to save cancellation reason:', err);
+            });
         }
     }, []);
 
     const reasonLabels: Record<string, string> = {
         too_expensive: 'Too expensive',
-        not_enough_features: 'Not enough features',
-        found_alternative: 'Found an alternative',
-        not_using: 'Not using it enough',
-        other: 'Other',
+        missing_features: 'Missing features I needed',
+        too_complicated: 'Too complicated to use',
+        no_longer_needed: 'No longer needed',
     };
 
     const params = new URLSearchParams(window.location.search);
