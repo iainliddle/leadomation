@@ -68,6 +68,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                         <TopBar
                             activePage={activePage}
                             onNewCampaign={() => onPageChange('New Campaign')}
+                            onPageChange={onPageChange}
                         />
                     </div>
                 </div>
