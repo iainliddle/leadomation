@@ -349,7 +349,7 @@ export default async function handler(req: any, res: any) {
                         });
                         const priceId = subscription.items.data[0]?.price?.id;
                         const plan = PRICE_TO_PLAN[priceId || ''];
-                        const amount = plan === 'pro' ? '£149' : '£49';
+                        const amount = plan === 'pro' ? '£159' : '£59';
                         const planName = plan === 'pro' ? 'Pro' : 'Starter';
 
                         const subject = `Your free trial ends in 2 days — here's what happens next`;

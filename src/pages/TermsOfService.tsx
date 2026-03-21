@@ -46,7 +46,7 @@ const TermsOfService: React.FC<TermsOfServiceProps> = ({ onBack, onNavigate }) =
                     <p>We offer a 7-day free trial requiring a valid credit card. Your card will be automatically billed at the end of the trial unless cancelled prior. A reminder email will be sent 2 days before the trial ends. CSV exporting is restricted during the trial period.</p>
 
                     <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">5. Subscriptions and Billing</h3>
-                    <p>Subscriptions are billed automatically (e.g., Starter £49/mo for 50 searches, Pro £149/mo for unlimited). Subscriptions auto-renew until cancelled. We will provide 30 days notice for any price changes. Failed payments may result in immediate account suspension.</p>
+                    <p>Subscriptions are billed automatically (e.g., Starter £59/mo for 50 searches, Pro £159/mo for unlimited). Subscriptions auto-renew until cancelled. We will provide 30 days notice for any price changes. Failed payments may result in immediate account suspension.</p>
 
                     <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">6. Cancellation</h3>
                     <p>You may cancel your subscription at any time. You will retain access to the platform until the end of your current billing period. We do not provide partial refunds for unused days. Your data will be retained for 30 days following cancellation before permanent deletion.</p>

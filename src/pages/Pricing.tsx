@@ -143,8 +143,8 @@ const Pricing: React.FC = () => {
             }
 
             const correctPriceId = plan === 'Starter'
-                ? (isAnnual ? 'price_1T1nCe2LCoJYV9n6X6dU6Ybe' : 'price_1T1nCe2LCoJYV9n6l20Wnd9Y')
-                : (isAnnual ? 'price_1T1nFP2LCoJYV9n6CyKYDjKE' : 'price_1T1nFP2LCoJYV9n6iKcaO1ZY');
+                ? (isAnnual ? 'price_1TDOup2LCoJYV9n63trbI9Ma' : 'price_1TDOsn2LCoJYV9n6gOvnD106')
+                : (isAnnual ? 'price_1TDOvz2LCoJYV9n6mN8itZQe' : 'price_1TDOvT2LCoJYV9n60fKRQSig');
 
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
@@ -253,11 +253,11 @@ const Pricing: React.FC = () => {
                     <PricingCard
                         title="Starter"
                         description="Everything to start generating leads"
-                        monthlyPrice="£49"
-                        annualPrice="£490"
-                        annualMonthlyRate="£40.83"
+                        monthlyPrice="£59"
+                        annualPrice="£566"
+                        annualMonthlyRate="£47.17"
                         isAnnual={isAnnual}
-                        savingsBadge="Save £98"
+                        savingsBadge="Save £142"
                         icon={<Zap size={24} />}
                         buttonText={isLoading ? "Loading..." : "Start Free Trial"}
                         onCheckout={() => handleCheckout('Starter')}
@@ -280,11 +280,11 @@ const Pricing: React.FC = () => {
                     <PricingCard
                         title="Pro"
                         description="Full arsenal for serious teams"
-                        monthlyPrice="£149"
-                        annualPrice="£1,430"
-                        annualMonthlyRate="£119.17"
+                        monthlyPrice="£159"
+                        annualPrice="£1,526"
+                        annualMonthlyRate="£127.17"
                         isAnnual={isAnnual}
-                        savingsBadge="Save £358"
+                        savingsBadge="Save £382"
                         isPopular={true}
                         icon={<Sparkles size={24} />}
                         buttonText={isLoading ? "Loading..." : "Start Free Trial"}

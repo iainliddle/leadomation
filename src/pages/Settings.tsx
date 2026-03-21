@@ -471,7 +471,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                                     <div>
                                         <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide">Current plan</p>
                                         <p className="text-2xl font-bold text-[#111827] mt-1">Pro</p>
-                                        <p className="text-sm text-[#6B7280]">£149 / month</p>
+                                        <p className="text-sm text-[#6B7280]">£159 / month</p>
                                     </div>
                                     <button className="px-4 py-2 border border-[#4F46E5] text-[#4F46E5] rounded-lg text-sm font-medium hover:bg-[#EEF2FF]">
                                         Change plan
