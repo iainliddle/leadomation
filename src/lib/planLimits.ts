@@ -1,6 +1,6 @@
 // ===== PLAN LIMITS & FEATURE GATES =====
 
-export type PlanType = 'trial' | 'starter' | 'pro' | 'cancelled' | 'expired';
+export type PlanType = 'trial' | 'starter' | 'pro' | 'scale' | 'cancelled' | 'expired';
 
 export interface PlanLimits {
     maxCampaigns: number;
@@ -45,6 +45,9 @@ export interface FeatureAccess {
     multiChannelSequences: boolean;
     prioritySupport: boolean;
     unlimitedKeywordSearches: boolean;
+    smsOutreach: boolean;
+    whatsappOutreach: boolean;
+    aiVideoProspecting: boolean;
 }
 
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
@@ -93,6 +96,21 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         trialMaxKeywordSearches: 0,
         trialMaxCampaigns: 0,
     },
+    scale: {
+        maxCampaigns: Infinity,
+        maxLeadsPerMonth: 3000,
+        maxEmailsPerDay: 250,
+        maxSequenceSteps: Infinity,
+        maxKeywordSearches: 150,
+        maxEmailTemplates: Infinity,
+        maxVoiceCallsPerMonth: 150,
+        trialMaxLeads: 0,
+        trialMaxEmails: 0,
+        trialMaxVoiceCalls: 0,
+        trialMaxAiEmails: 0,
+        trialMaxKeywordSearches: 0,
+        trialMaxCampaigns: 0,
+    },
 };
 
 export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
@@ -123,6 +141,9 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
         multiChannelSequences: true,
         prioritySupport: false,
         unlimitedKeywordSearches: false,
+        smsOutreach: false,
+        whatsappOutreach: false,
+        aiVideoProspecting: false,
     },
     starter: {
         dashboard: true,
@@ -151,6 +172,9 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
         multiChannelSequences: false,
         prioritySupport: false,
         unlimitedKeywordSearches: false,
+        smsOutreach: false,
+        whatsappOutreach: false,
+        aiVideoProspecting: false,
     },
     pro: {
         dashboard: true,
@@ -179,6 +203,40 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
         multiChannelSequences: true,
         prioritySupport: true,
         unlimitedKeywordSearches: true,
+        smsOutreach: false,
+        whatsappOutreach: false,
+        aiVideoProspecting: false,
+    },
+    scale: {
+        dashboard: true,
+        globalDemand: true,
+        newCampaign: true,
+        activeCampaigns: true,
+        leadDatabase: true,
+        dealPipeline: true,
+        sequenceBuilder: true,
+        inbox: true,
+        emailTemplates: true,
+        integrations: true,
+        emailConfig: true,
+        compliance: true,
+        settings: true,
+        pricingPage: true,
+        csvExport: true,
+        aiEmailGeneration: true,
+        aiVoiceAgent: true,
+        linkedinAutomation: true,
+        spintax: true,
+        advancedAnalytics: true,
+        inboxWarmup: true,
+        inboxRotation: true,
+        decisionMakerEnrichment: true,
+        multiChannelSequences: true,
+        prioritySupport: true,
+        unlimitedKeywordSearches: true,
+        smsOutreach: true,
+        whatsappOutreach: true,
+        aiVideoProspecting: true,
     },
     cancelled: {
         dashboard: true,
@@ -207,6 +265,9 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
         multiChannelSequences: false,
         prioritySupport: false,
         unlimitedKeywordSearches: false,
+        smsOutreach: false,
+        whatsappOutreach: false,
+        aiVideoProspecting: false,
     },
     expired: {
         dashboard: true,
@@ -235,6 +296,9 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
         multiChannelSequences: false,
         prioritySupport: false,
         unlimitedKeywordSearches: false,
+        smsOutreach: false,
+        whatsappOutreach: false,
+        aiVideoProspecting: false,
     },
 };
 
@@ -267,6 +331,6 @@ export const getEffectivePlan = (
         return isTrialActive(trialEnd) ? 'trial' : 'expired';
     }
     if (plan === 'cancelled') return 'cancelled';
-    if (plan === 'starter' || plan === 'pro') return plan as PlanType;
+    if (plan === 'starter' || plan === 'pro' || plan === 'scale') return plan as PlanType;
     return 'expired';
 };

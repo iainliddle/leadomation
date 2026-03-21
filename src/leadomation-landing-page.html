@@ -392,10 +392,10 @@
         /* ========== PRICING ========== */
         .pricing-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 32px;
             margin-top: 64px;
-            max-width: 800px;
+            max-width: 1100px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -653,7 +653,7 @@
             .hero { padding: 120px 20px 60px; }
             .hero-stats { gap: 32px; }
             .steps, .features { grid-template-columns: 1fr; }
-            .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
             .testimonials { grid-template-columns: 1fr; }
             .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
             .footer-links { justify-content: center; }
@@ -818,6 +818,23 @@
                         <li><span class="check">✓</span> LinkedIn Sequencer</li>
                     </ul>
                     <button class="price-btn primary" onclick="window.location.href='https://www.leadomation.co.uk'">Start Free Trial</button>
+                </div>
+                <div class="price-card fade-in" style="border-color: var(--accent); position: relative;">
+                    <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 6px 16px; background: linear-gradient(135deg, #06D6A0, #059669); border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: white;">COMING SOON</div>
+                    <div class="price-name">Scale</div>
+                    <div class="price-amount">£359<span>/mo</span></div>
+                    <div class="price-desc">or £3,446/year (save 20%)</div>
+                    <p style="font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 12px;">Everything in Pro, plus:</p>
+                    <ul class="price-features">
+                        <li><span class="check">✓</span> 3,000 leads per month</li>
+                        <li><span class="check">✓</span> 250 emails per day</li>
+                        <li><span class="check">✓</span> 150 AI voice calls/month</li>
+                        <li><span class="check">✓</span> 150 keyword searches/month</li>
+                        <li><span class="check">✓</span> SMS Outreach (Twilio)</li>
+                        <li><span class="check">✓</span> WhatsApp Outreach</li>
+                        <li><span class="check">✓</span> AI Video Prospecting (30/mo) <span style="background: var(--accent); color: white; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">NEW</span></li>
+                    </ul>
+                    <button class="price-btn outline" style="border-color: var(--accent); color: var(--accent);" disabled>Coming Soon</button>
                 </div>
             </div>
         </div>
