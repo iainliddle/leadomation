@@ -1,6 +1,6 @@
 // ===== PLAN LIMITS & FEATURE GATES =====
 
-export type PlanType = 'trial' | 'starter' | 'pro' | 'scale' | 'cancelled' | 'expired';
+export type PlanType = 'trial' | 'trialing' | 'starter' | 'pro' | 'scale' | 'cancelled' | 'expired';
 
 export interface PlanLimits {
     maxCampaigns: number;
@@ -65,6 +65,22 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         trialMaxAiEmails: 5,
         trialMaxKeywordSearches: 5,
         trialMaxCampaigns: 1,
+    },
+    // 'trialing' = 7-day trial with FULL PRO ACCESS (card on file, will convert to selected plan)
+    trialing: {
+        maxCampaigns: Infinity,
+        maxLeadsPerMonth: 2000,
+        maxEmailsPerDay: 100,
+        maxSequenceSteps: Infinity,
+        maxKeywordSearches: 75,
+        maxEmailTemplates: Infinity,
+        maxVoiceCallsPerMonth: 50,
+        trialMaxLeads: 0,
+        trialMaxEmails: 0,
+        trialMaxVoiceCalls: 0,
+        trialMaxAiEmails: 0,
+        trialMaxKeywordSearches: 0,
+        trialMaxCampaigns: 0,
     },
     starter: {
         maxCampaigns: Infinity,
@@ -141,6 +157,38 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
         multiChannelSequences: true,
         prioritySupport: false,
         unlimitedKeywordSearches: false,
+        smsOutreach: false,
+        whatsappOutreach: false,
+        aiVideoProspecting: false,
+    },
+    // 'trialing' = 7-day trial with FULL PRO ACCESS (card on file)
+    trialing: {
+        dashboard: true,
+        globalDemand: true,
+        newCampaign: true,
+        activeCampaigns: true,
+        leadDatabase: true,
+        dealPipeline: true,
+        sequenceBuilder: true,
+        inbox: true,
+        emailTemplates: true,
+        integrations: true,
+        emailConfig: true,
+        compliance: true,
+        settings: true,
+        pricingPage: true,
+        csvExport: true,
+        aiEmailGeneration: true,
+        aiVoiceAgent: true,
+        linkedinAutomation: true,
+        spintax: true,
+        advancedAnalytics: true,
+        inboxWarmup: true,
+        inboxRotation: true,
+        decisionMakerEnrichment: true,
+        multiChannelSequences: true,
+        prioritySupport: true,
+        unlimitedKeywordSearches: true,
         smsOutreach: false,
         whatsappOutreach: false,
         aiVideoProspecting: false,
@@ -327,10 +375,16 @@ export const getEffectivePlan = (
     plan: string,
     trialEnd: string | null
 ): PlanType => {
+    // 'trialing' = card on file, 7-day trial with full Pro access
+    if (plan === 'trialing') {
+        return isTrialActive(trialEnd) ? 'trialing' : 'expired';
+    }
+    // Legacy 'trial' without card (should redirect to TrialSetup)
     if (plan === 'trial') {
         return isTrialActive(trialEnd) ? 'trial' : 'expired';
     }
     if (plan === 'cancelled') return 'cancelled';
+    if (plan === 'payment_failed') return 'cancelled';
     if (plan === 'starter' || plan === 'pro' || plan === 'scale') return plan as PlanType;
     return 'expired';
 };

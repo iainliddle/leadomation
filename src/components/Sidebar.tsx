@@ -339,13 +339,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 onClick={() => { onPageChange('Sequence Builder'); setIsOpen?.(false); }}
                                 isCollapsed={isCollapsed}
                             />
-                            <NavItem
-                                icon={Phone}
-                                label="Call Agent"
-                                active={activePage === 'Call Agent'}
-                                onClick={() => { onPageChange('Call Agent'); setIsOpen?.(false); }}
-                                isCollapsed={isCollapsed}
-                            />
+                            <SidebarLock
+                                hasAccess={canAccess('aiVoiceAgent')}
+                                onClick={() => triggerUpgrade('AI Voice Agent', 'pro')}
+                                tooltipText="Pro feature. Upgrade to unlock AI Voice Agent."
+                            >
+                                <NavItem
+                                    icon={Phone}
+                                    label="Call Agent"
+                                    active={activePage === 'Call Agent'}
+                                    onClick={() => { onPageChange('Call Agent'); setIsOpen?.(false); }}
+                                    isCollapsed={isCollapsed}
+                                />
+                            </SidebarLock>
                             <SidebarLock
                                 hasAccess={canAccess('inbox')}
                                 onClick={() => triggerUpgrade('Unified Inbox', 'pro')}
