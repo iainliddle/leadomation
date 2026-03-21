@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Bell, Plus, Search, Calendar, ChevronDown, Menu, User, Settings, LogOut } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Bell, Plus, Search, ChevronDown, Menu, User, Settings, LogOut, X, CreditCard, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { signOut } from '../lib/auth';
 
@@ -7,6 +7,14 @@ interface TopBarProps {
     activePage: string;
     onNewCampaign?: () => void;
     onMenuClick?: () => void;
+    onPageChange?: (page: string) => void;
+}
+
+interface SearchResult {
+    id: string;
+    type: 'lead' | 'campaign' | 'deal';
+    title: string;
+    subtitle: string;
 }
 
 // Page subtitle mapping
@@ -28,17 +36,26 @@ const PAGE_SUBTITLES: Record<string, string> = {
     'Pricing': 'Manage your subscription plan',
 };
 
-const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick }) => {
+const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick, onPageChange }) => {
     const [userName, setUserName] = useState('');
+    const [userEmail, setUserEmail] = useState('');
     const [userInitials, setUserInitials] = useState('');
     const [headerAvatarUrl, setHeaderAvatarUrl] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const loadAvatar = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
+
+            // Set user email
+            setUserEmail(user.email || '');
 
             // Set display name from user metadata as fallback
             const fullName = user.user_metadata?.full_name || user.email || '';
@@ -73,6 +90,101 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick 
         window.addEventListener('avatarUpdated', handler);
         return () => window.removeEventListener('avatarUpdated', handler);
     }, []);
+
+    // Focus search input when modal opens
+    useEffect(() => {
+        if (showSearch && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [showSearch]);
+
+    // Handle search
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const searchTerm = `%${query.toLowerCase()}%`;
+
+            // Search leads
+            const { data: leads } = await supabase
+                .from('leads')
+                .select('id, company, first_name, last_name')
+                .eq('user_id', user.id)
+                .or(`company.ilike.${searchTerm},first_name.ilike.${searchTerm},last_name.ilike.${searchTerm}`)
+                .limit(5);
+
+            // Search campaigns
+            const { data: campaigns } = await supabase
+                .from('campaigns')
+                .select('id, name, status')
+                .eq('user_id', user.id)
+                .ilike('name', searchTerm)
+                .limit(5);
+
+            // Search deals
+            const { data: deals } = await supabase
+                .from('deals')
+                .select('id, name, company')
+                .eq('user_id', user.id)
+                .or(`name.ilike.${searchTerm},company.ilike.${searchTerm}`)
+                .limit(5);
+
+            const results: SearchResult[] = [
+                ...(leads || []).map(l => ({
+                    id: l.id,
+                    type: 'lead' as const,
+                    title: l.company || `${l.first_name || ''} ${l.last_name || ''}`.trim() || 'Unknown Lead',
+                    subtitle: 'Lead'
+                })),
+                ...(campaigns || []).map(c => ({
+                    id: c.id,
+                    type: 'campaign' as const,
+                    title: c.name || 'Unnamed Campaign',
+                    subtitle: `Campaign · ${c.status || 'Draft'}`
+                })),
+                ...(deals || []).map(d => ({
+                    id: d.id,
+                    type: 'deal' as const,
+                    title: d.name || d.company || 'Unnamed Deal',
+                    subtitle: 'Deal'
+                }))
+            ];
+
+            setSearchResults(results);
+        } catch (error) {
+            console.error('Search error:', error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSearchResultClick = (result: SearchResult) => {
+        setShowSearch(false);
+        setSearchQuery('');
+        setSearchResults([]);
+
+        if (onPageChange) {
+            switch (result.type) {
+                case 'lead':
+                    onPageChange('Lead Database');
+                    break;
+                case 'campaign':
+                    onPageChange('Active Campaigns');
+                    break;
+                case 'deal':
+                    onPageChange('Deal Pipeline');
+                    break;
+            }
+        }
+    };
 
     const handleSignOut = async () => {
         try {
@@ -111,17 +223,11 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick 
 
                 {/* Search button */}
                 <button
+                    onClick={() => setShowSearch(true)}
                     className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
                     title="Search"
                 >
                     <Search size={20} />
-                </button>
-
-                {/* Date range button - hidden on small screens */}
-                <button className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                    <Calendar size={14} className="text-gray-400" />
-                    <span className="text-gray-700">Last 30 days</span>
-                    <ChevronDown size={14} className="text-gray-400" />
                 </button>
 
                 {/* Notifications */}
@@ -178,24 +284,24 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick 
                     {showUserMenu && (
                         <>
                             <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                            <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                                 <div className="px-4 py-3 border-b border-gray-100">
                                     <p className="text-sm font-medium text-gray-900">{userName || 'User'}</p>
-                                    <p className="text-xs text-gray-400">Admin</p>
+                                    <p className="text-xs text-gray-400 truncate">{userEmail || 'No email'}</p>
                                 </div>
                                 <button
-                                    onClick={() => { setShowUserMenu(false); }}
+                                    onClick={() => { setShowUserMenu(false); onPageChange?.('Settings'); }}
                                     className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2.5"
                                 >
                                     <User size={16} className="text-gray-400" />
-                                    Profile
+                                    My Profile
                                 </button>
                                 <button
-                                    onClick={() => { setShowUserMenu(false); }}
+                                    onClick={() => { setShowUserMenu(false); onPageChange?.('Pricing'); }}
                                     className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2.5"
                                 >
-                                    <Settings size={16} className="text-gray-400" />
-                                    Settings
+                                    <CreditCard size={16} className="text-gray-400" />
+                                    Pricing & Plans
                                 </button>
                                 <div className="border-t border-gray-100 mt-1 pt-1">
                                     <button

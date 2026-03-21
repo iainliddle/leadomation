@@ -241,6 +241,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [leads, setLeads] = useState<Lead[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [activeIntentFilters, setActiveIntentFilters] = useState<string[]>([]);
     const [intentScoreSort, setIntentScoreSort] = useState<'none' | 'desc' | 'asc'>('none');
@@ -463,6 +464,12 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
             if (campaignFilter) {
                 query = query.eq('campaign_id', campaignFilter);
+            }
+
+            // Apply search filter at the query level (server-side)
+            if (debouncedSearchQuery.trim()) {
+                const searchTerm = `%${debouncedSearchQuery.trim()}%`;
+                query = query.or(`company.ilike.${searchTerm},first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},email.ilike.${searchTerm}`);
             }
 
             // Apply intent score filters at the query level
@@ -764,18 +771,24 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         fetchActivity();
     }, [selectedLead?.id]);
 
+    // Debounce search query to avoid excessive Supabase queries
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     useEffect(() => {
         fetchLeads();
         fetchCallScripts();
         fetchSequences();
-    }, [campaignFilter, intentScoreSort, intentScoreFilters]);
+    }, [campaignFilter, intentScoreSort, intentScoreFilters, debouncedSearchQuery]);
 
     const filteredLeads = useMemo(() => {
+        // Search is now handled server-side via Supabase ilike query
+        // Only apply client-side filters for status, intent, and intent score
         return leads.filter(lead => {
-            const matchesSearch = lead.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.location?.toLowerCase().includes(searchQuery.toLowerCase());
-
             const matchesStatus = statusFilter === 'All'
                 ? true
                 : statusFilter === 'Lost'
@@ -825,23 +838,21 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 );
             }
 
-            return matchesSearch && matchesStatus && matchesIntent && matchesIntentScore;
+            return matchesStatus && matchesIntent && matchesIntentScore;
         });
-    }, [leads, searchQuery, statusFilter, activeIntentFilters, intentScoreFilters]);
+    }, [leads, statusFilter, activeIntentFilters, intentScoreFilters]);
 
     // Derived counts for the smart filters to show in the badges
+    // Search is now handled server-side, so leads array is already filtered by search
     const intentCounts = useMemo(() => {
         const counts = { new_business: 0, low_rating: 0, no_photos: 0, no_reviews: 0, incomplete: 0 };
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        // Count how many of the *currently search and status filtered* leads match each intent filter
+        // Count how many of the *currently status filtered* leads match each intent filter
         const baseFilteredLeads = leads.filter(lead => {
-            const matchesSearch = lead.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.location?.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesStatus = statusFilter === 'All' ? true : statusFilter === 'Lost' ? (lead.status === 'Lost' || lead.status === 'Not Interested') : lead.status === statusFilter;
-            return matchesSearch && matchesStatus;
+            return matchesStatus;
         });
 
         baseFilteredLeads.forEach(lead => {
@@ -858,17 +869,15 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         });
 
         return counts;
-    }, [leads, searchQuery, statusFilter]);
+    }, [leads, statusFilter]);
 
     // Intent score counts for filter badges
+    // Search is now handled server-side, so leads array is already filtered by search
     const intentScoreCounts = useMemo(() => {
         const counts = { hot: 0, warm: 0, cool: 0, unscored: 0 };
         const baseFilteredLeads = leads.filter(lead => {
-            const matchesSearch = lead.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.location?.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesStatus = statusFilter === 'All' ? true : statusFilter === 'Lost' ? (lead.status === 'Lost' || lead.status === 'Not Interested') : lead.status === statusFilter;
-            return matchesSearch && matchesStatus;
+            return matchesStatus;
         });
 
         baseFilteredLeads.forEach(lead => {
@@ -880,7 +889,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         });
 
         return counts;
-    }, [leads, searchQuery, statusFilter]);
+    }, [leads, statusFilter]);
 
     const toggleIntentFilter = (filter: string) => {
         setActiveIntentFilters(prev =>
