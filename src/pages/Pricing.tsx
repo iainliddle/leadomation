@@ -311,9 +311,9 @@ const Pricing: React.FC = () => {
                     <PricingCard
                         title="Scale"
                         description="Enterprise-grade features"
-                        monthlyPrice="£349"
-                        annualPrice="£3,490"
-                        annualMonthlyRate="£290.83"
+                        monthlyPrice="£359"
+                        annualPrice="£3,446"
+                        annualMonthlyRate="£287.17"
                         isAnnual={isAnnual}
                         isComingSoon={true}
                         icon={<ShieldCheck size={24} />}
