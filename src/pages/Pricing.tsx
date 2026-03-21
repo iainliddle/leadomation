@@ -324,16 +324,14 @@ const Pricing: React.FC = () => {
                         buttonText="Coming Soon"
                         onCheckout={() => {}}
                         features={[
-                            "AI Video Prospecting (NEW)",
-                            "30 AI-generated videos/month",
+                            "3,000 leads per month",
+                            "250 emails per day",
+                            "150 AI voice calls/month",
+                            "150 keyword searches/month",
                             "SMS Outreach (Twilio)",
                             "WhatsApp Outreach",
-                            "LinkedIn Video Messages",
-                            "10,000+ leads per month",
-                            "500 emails per day",
-                            "Advanced Smart Intent Filters",
-                            "API Access + CSV Export",
-                            "Priority Support",
+                            "LinkedIn Sequencer",
+                            "AI Video Prospecting (30/month) — NEW",
                             "Everything in Pro, plus:"
                         ]}
                     />

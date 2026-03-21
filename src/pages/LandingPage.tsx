@@ -1144,16 +1144,15 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
               </div>
               <p className="lp-price-includes">Everything in Pro, plus:</p>
               <ul className="lp-price-features">
-                <li><strong>🎥 AI Video Prospecting</strong> <span className="lp-scale-new-badge">NEW</span></li>
-                <li>30 AI-generated videos/month</li>
+                <li>3,000 leads per month</li>
+                <li>250 emails per day</li>
+                <li>150 AI voice calls/month</li>
+                <li>150 keyword searches/month</li>
                 <li>💬 SMS Outreach (Twilio)</li>
                 <li>📱 WhatsApp Outreach</li>
-                <li>🎬 LinkedIn Video Messages</li>
-                <li>10,000+ leads per month</li>
-                <li>500 emails per day</li>
-                <li>Advanced Smart Intent Filters</li>
-                <li>API Access + CSV Export</li>
-                <li>Priority Support</li>
+                <li>🔗 LinkedIn Sequencer</li>
+                <li><strong>🎥 AI Video Prospecting</strong> <span className="lp-scale-new-badge">NEW</span></li>
+                <li>30 AI-generated videos/month</li>
               </ul>
               <button onClick={() => setShowWaitlistModal(true)} className="lp-btn lp-btn-scale-notify lp-btn-full">
                 🔔 Notify Me When Available
