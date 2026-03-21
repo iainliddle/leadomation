@@ -64,7 +64,7 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         trialMaxCampaigns: 1,
     },
     starter: {
-        maxCampaigns: 3,
+        maxCampaigns: Infinity,
         maxLeadsPerMonth: 300,
         maxEmailsPerDay: 30,
         maxSequenceSteps: 4,
@@ -79,7 +79,7 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         trialMaxCampaigns: 0,
     },
     pro: {
-        maxCampaigns: 10,
+        maxCampaigns: Infinity,
         maxLeadsPerMonth: 2000,
         maxEmailsPerDay: 100,
         maxSequenceSteps: Infinity,

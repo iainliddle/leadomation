@@ -191,7 +191,7 @@ const Pricing: React.FC = () => {
 
     const comparisonData = [
         { name: "Keyword searches", starter: "25/month", pro: "75/month" },
-        { name: "Active campaigns", starter: "3", pro: "10" },
+        { name: "Active campaigns", starter: "Unlimited", pro: "Unlimited" },
         { name: "Leads per month", starter: "300", pro: "2,000" },
         { name: "Emails per day", starter: "30", pro: "100" },
         { name: "AI voice calls", starter: false, pro: "50/month" },
@@ -263,7 +263,7 @@ const Pricing: React.FC = () => {
                         buttonText={isLoading ? "Loading..." : "Start Free Trial"}
                         onCheckout={() => handleCheckout('Starter')}
                         features={[
-                            "3 active campaigns",
+                            "Unlimited campaigns",
                             "300 leads per month",
                             "30 emails per day",
                             "Email sequences up to 4 steps",
@@ -292,7 +292,7 @@ const Pricing: React.FC = () => {
                         buttonText={isLoading ? "Loading..." : "Start Free Trial"}
                         onCheckout={() => handleCheckout('Pro')}
                         features={[
-                            "10 active campaigns",
+                            "Unlimited campaigns",
                             "2,000 leads per month",
                             "100 emails per day",
                             "Unlimited sequence steps",
