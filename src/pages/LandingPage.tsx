@@ -1137,8 +1137,8 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
               <div className="lp-price-coming-soon-ribbon">Coming Soon</div>
               <div className="lp-price-header">
                 <h3>Scale <span className="lp-scale-icon">✦</span></h3>
-                <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">349</span><span className="lp-price-period">/month</span></div>
-                <p className="lp-price-annual">or £3,490/year (save £698)</p>
+                <div className="lp-price-amount"><span className="lp-price-currency">£</span><span className="lp-price-value">359</span><span className="lp-price-period">/month</span></div>
+                <p className="lp-price-annual">or £3,446/year (save 20%)</p>
               </div>
               <p className="lp-price-includes">Everything in Pro, plus:</p>
               <ul className="lp-price-features">
