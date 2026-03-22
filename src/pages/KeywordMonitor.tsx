@@ -10,7 +10,6 @@ import {
     ChevronDown
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import type { FeatureAccess } from '../lib/planLimits';
 
 interface KeywordMonitor {
     id: string;
@@ -49,9 +48,7 @@ interface Campaign {
 }
 
 interface KeywordMonitorProps {
-    onPageChange?: (page: string) => void;
-    canAccess?: (feature: keyof FeatureAccess) => boolean;
-    triggerUpgrade?: (feature: string, targetPlan?: 'starter' | 'pro') => void;
+    // Props can be added here when needed
 }
 
 const KeywordMonitor: React.FC<KeywordMonitorProps> = () => {
