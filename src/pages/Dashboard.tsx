@@ -47,19 +47,77 @@ function formatDateLabel(preset: DatePreset): string {
     return `${fmt(fromDate)} - ${fmt(toDate)}`;
 }
 
-const getLast7Days = () => {
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date();
+const getDateRangeDays = (preset: DatePreset): string[] => {
+    const days: string[] = [];
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+
+    let numDays = 7;
+    if (preset === '14d') numDays = 14;
+    else if (preset === '30d') numDays = 30;
+    else if (preset === '90d') numDays = 90;
+    else if (preset === 'year') numDays = 365;
+    else if (preset === 'all') numDays = 90; // Default to 90 days for all time sparklines
+
+    for (let i = numDays - 1; i >= 0; i--) {
+        const d = new Date(now);
         d.setDate(d.getDate() - i);
         days.push(d.toISOString().split('T')[0]);
     }
     return days;
 };
 
-const bucketByDay = (rows: { day: string; count: number }[], days: string[]) => {
+const bucketByDay = (rows: { day: string; count: number }[], days: string[]): { day: string; value: number }[] => {
     const map = Object.fromEntries(rows.map(r => [r.day, r.count]));
     return days.map(day => ({ day, value: map[day] || 0 }));
+};
+
+// Aggregate data into 7 buckets for sparkline display
+const aggregateToSparkline = (data: { day: string; value: number }[]): { day: string; value: number }[] => {
+    if (data.length <= 7) return data;
+
+    const bucketSize = Math.ceil(data.length / 7);
+    const result: { day: string; value: number }[] = [];
+
+    for (let i = 0; i < 7; i++) {
+        const start = i * bucketSize;
+        const end = Math.min(start + bucketSize, data.length);
+        const slice = data.slice(start, end);
+        const total = slice.reduce((sum, d) => sum + d.value, 0);
+        if (slice.length > 0) {
+            result.push({ day: slice[Math.floor(slice.length / 2)].day, value: total });
+        }
+    }
+
+    return result;
+};
+
+// Ensure sparkline data renders visibly even with sparse data
+const ensureRenderableSparkline = (data: { day: string; value: number }[]): { day: string; value: number }[] => {
+    if (data.length === 0) return data;
+
+    const total = data.reduce((sum, d) => sum + d.value, 0);
+    if (total === 0) return data; // No data to show
+
+    // Find non-zero buckets
+    const nonZeroIndices = data.map((d, i) => d.value > 0 ? i : -1).filter(i => i >= 0);
+
+    // If data is concentrated in 1-2 buckets, spread minimally to create visible shape
+    if (nonZeroIndices.length <= 2 && data.length >= 3) {
+        const result = [...data];
+        nonZeroIndices.forEach(idx => {
+            // Add small adjacent values to create visible area/bar shape
+            if (idx > 0 && result[idx - 1].value === 0) {
+                result[idx - 1] = { ...result[idx - 1], value: Math.max(1, Math.floor(result[idx].value * 0.1)) };
+            }
+            if (idx < result.length - 1 && result[idx + 1].value === 0) {
+                result[idx + 1] = { ...result[idx + 1], value: Math.max(1, Math.floor(result[idx].value * 0.1)) };
+            }
+        });
+        return result;
+    }
+
+    return data;
 };
 
 // Stat Card Component
@@ -192,14 +250,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         if (!user) return;
 
         // Fetch profile for first name
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('first_name')
             .eq('id', user.id)
             .single();
 
-        if (profile?.first_name) {
-            setFirstName(profile.first_name);
+        if (profileError) {
+            console.error('Error fetching profile:', profileError);
+        }
+
+        if (profile && profile.first_name && profile.first_name.trim()) {
+            setFirstName(profile.first_name.trim());
         }
 
         const { from: dateFrom } = getDateRange(datePreset);
@@ -237,18 +299,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         });
         setRecentLeads(recentLeadsData || []);
 
-        // Fetch sparkline chart data (last 7 days)
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const sevenDaysAgoISO = sevenDaysAgo.toISOString();
-        const days = getLast7Days();
+        // Fetch sparkline chart data based on date range
+        const days = getDateRangeDays(datePreset);
+        const sparklineStartDate = days[0] + 'T00:00:00.000Z';
 
         // Total leads per day
         const { data: leadsDaily } = await supabase
             .from('leads')
             .select('created_at')
             .eq('user_id', user.id)
-            .gte('created_at', sevenDaysAgoISO);
+            .gte('created_at', sparklineStartDate);
 
         const leadsBucketed = bucketByDay(
             Object.entries(
@@ -260,7 +320,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             ).map(([day, count]) => ({ day, count: count as number })),
             days
         );
-        setLeadsChartData(leadsBucketed);
+        setLeadsChartData(ensureRenderableSparkline(aggregateToSparkline(leadsBucketed)));
 
         // Leads with emails per day
         const { data: emailsDaily } = await supabase
@@ -268,7 +328,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             .select('created_at')
             .eq('user_id', user.id)
             .not('email', 'is', null)
-            .gte('created_at', sevenDaysAgoISO);
+            .gte('created_at', sparklineStartDate);
 
         const emailsBucketed = bucketByDay(
             Object.entries(
@@ -280,14 +340,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             ).map(([day, count]) => ({ day, count: count as number })),
             days
         );
-        setEmailsChartData(emailsBucketed);
+        setEmailsChartData(ensureRenderableSparkline(aggregateToSparkline(emailsBucketed)));
 
         // Leads contacted (sequence enrollments) per day
         const { data: contactedDaily } = await supabase
             .from('sequence_enrollments')
             .select('enrolled_at')
             .eq('user_id', user.id)
-            .gte('enrolled_at', sevenDaysAgoISO);
+            .gte('enrolled_at', sparklineStartDate);
 
         const contactedBucketed = bucketByDay(
             Object.entries(
@@ -299,14 +359,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             ).map(([day, count]) => ({ day, count: count as number })),
             days
         );
-        setContactedChartData(contactedBucketed);
+        setContactedChartData(ensureRenderableSparkline(aggregateToSparkline(contactedBucketed)));
 
         // Deals per day
         const { data: dealsDaily } = await supabase
             .from('deals')
             .select('created_at')
             .eq('user_id', user.id)
-            .gte('created_at', sevenDaysAgoISO);
+            .gte('created_at', sparklineStartDate);
 
         const dealsBucketed = bucketByDay(
             Object.entries(
@@ -318,7 +378,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             ).map(([day, count]) => ({ day, count: count as number })),
             days
         );
-        setDealsChartData(dealsBucketed);
+        setDealsChartData(ensureRenderableSparkline(aggregateToSparkline(dealsBucketed)));
 
         const activityItems: any[] = [];
 
@@ -621,6 +681,42 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                             <span className="text-xs font-semibold text-[#4F46E5] uppercase tracking-wide">
                                 Current Plan
                             </span>
+                        </div>
+                        {/* Usage ring indicator */}
+                        <div className="relative w-10 h-10">
+                            {(() => {
+                                // For trial, use trial counters. For paid plans, use actual totalLeads from stats
+                                const usedLeads = plan === 'trial' ? usage.leadsUsed : (stats.totalLeads || usage.monthlyLeadsUsed);
+                                const maxLeads = plan === 'trial' ? limits.trialMaxLeads : limits.maxLeadsPerMonth;
+                                const percentage = maxLeads > 0 ? Math.min(100, Math.round((usedLeads / maxLeads) * 100)) : 0;
+                                return (
+                                    <>
+                                        <svg className="w-10 h-10 transform -rotate-90">
+                                            <circle
+                                                cx="20"
+                                                cy="20"
+                                                r="16"
+                                                fill="none"
+                                                stroke="#E0E7FF"
+                                                strokeWidth="3"
+                                            />
+                                            <circle
+                                                cx="20"
+                                                cy="20"
+                                                r="16"
+                                                fill="none"
+                                                stroke="#4F46E5"
+                                                strokeWidth="3"
+                                                strokeLinecap="round"
+                                                strokeDasharray={`${percentage} 100`}
+                                            />
+                                        </svg>
+                                        <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-[#4F46E5]">
+                                            {percentage}%
+                                        </span>
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
                     <div>

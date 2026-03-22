@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 interface ChartDay {
     date: string;
     label: string;
+    'New Leads': number;
     'AI Calls': number;
     'Emails': number;
 }
@@ -57,18 +58,26 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                 d.setDate(fourteenDaysAgo.getDate() + i);
                 const dateStr = d.toISOString().split('T')[0];
                 const label = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
-                days.push({ date: dateStr, label, 'AI Calls': 0, 'Emails': 0 });
+                days.push({ date: dateStr, label, 'New Leads': 0, 'AI Calls': 0, 'Emails': 0 });
             }
 
-            // Fetch call_logs + contacted leads (for chart) + funnel counts
-            const [callRes, contactedLeadsRes, totalRes, contactedRes, qualifiedRes, dealsRes] = await Promise.all([
+            // Fetch call_logs + new leads + contacted leads (for chart) + funnel counts
+            const [callRes, newLeadsRes, contactedLeadsRes, totalRes, contactedRes, qualifiedRes, dealsRes] = await Promise.all([
                 supabase.from('call_logs').select('created_at').eq('user_id', user.id).gte('created_at', sinceISO),
+                supabase.from('leads').select('created_at').eq('user_id', user.id).gte('created_at', sinceISO),
                 supabase.from('leads').select('created_at').eq('user_id', user.id).in('status', ['Contacted', 'Replied']).gte('created_at', sinceISO),
                 supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
                 supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('status', ['Contacted', 'Replied', 'Qualified']),
                 supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'Qualified'),
                 supabase.from('deals').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
             ]);
+
+            // Group new leads by day
+            (newLeadsRes.data || []).forEach((row: any) => {
+                const dayKey = new Date(row.created_at).toISOString().split('T')[0];
+                const match = days.find(d => d.date === dayKey);
+                if (match) match['New Leads']++;
+            });
 
             // Group calls by day
             (callRes.data || []).forEach((row: any) => {
@@ -84,7 +93,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                 if (match) match['Emails']++;
             });
 
-            const hasActivity = days.some(d => d['AI Calls'] > 0 || d['Emails'] > 0);
+            const hasActivity = days.some(d => d['New Leads'] > 0 || d['AI Calls'] > 0 || d['Emails'] > 0);
             setIsEmpty(!hasActivity);
             setChartData(days);
             setFunnel({
@@ -138,6 +147,10 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                     <ResponsiveContainer width="100%" height={200}>
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
+                                <linearGradient id="fillLeads" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.15} />
+                                    <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                                </linearGradient>
                                 <linearGradient id="fillCalls" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%" stopColor="#6366f1" stopOpacity={0.15} />
                                     <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
@@ -167,6 +180,13 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                                 iconType="circle"
                                 iconSize={8}
                                 wrapperStyle={{ fontSize: '11px', fontWeight: 700, paddingTop: '8px' }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="New Leads"
+                                stroke="#10b981"
+                                strokeWidth={2}
+                                fill="url(#fillLeads)"
                             />
                             <Area
                                 type="monotone"
