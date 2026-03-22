@@ -15,7 +15,8 @@ import {
     Users,
     Calendar,
     Phone,
-    Info
+    Info,
+    Target
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -434,6 +435,22 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                 <span className="bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-[#C7D2FE]">
                                     {linkedinEnrollments.filter(e => e.status === 'active').length}
                                 </span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (canAccess && !canAccess('keywordMonitor')) {
+                                    triggerUpgrade?.('LinkedIn Keyword Monitor', 'pro');
+                                    return;
+                                }
+                                onPageChange?.('Keyword Monitor');
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium cursor-pointer transition-colors text-gray-500 hover:text-gray-700"
+                        >
+                            <Target size={16} />
+                            Keyword Monitor
+                            {canAccess && !canAccess('keywordMonitor') && (
+                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-1 font-bold">PRO</span>
                             )}
                         </button>
                     </div>

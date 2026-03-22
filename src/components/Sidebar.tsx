@@ -20,7 +20,8 @@ import {
     CreditCard,
     ChevronLeft,
     ChevronRight,
-    CalendarDays
+    CalendarDays,
+    Target
 } from 'lucide-react';
 import { signOut } from '../lib/auth';
 import logoFull from '../assets/logo-full.png';
@@ -339,6 +340,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 onClick={() => { onPageChange('Sequence Builder'); setIsOpen?.(false); }}
                                 isCollapsed={isCollapsed}
                             />
+                            <SidebarLock
+                                hasAccess={canAccess('keywordMonitor')}
+                                onClick={() => triggerUpgrade('LinkedIn Keyword Monitor', 'pro')}
+                                tooltipText="Pro feature. Upgrade to unlock Keyword Monitor."
+                            >
+                                <NavItem
+                                    icon={Target}
+                                    label="Keyword Monitor"
+                                    active={activePage === 'Keyword Monitor'}
+                                    onClick={() => { onPageChange('Keyword Monitor'); setIsOpen?.(false); }}
+                                    isCollapsed={isCollapsed}
+                                />
+                            </SidebarLock>
                             <SidebarLock
                                 hasAccess={canAccess('aiVoiceAgent')}
                                 onClick={() => triggerUpgrade('AI Voice Agent', 'pro')}

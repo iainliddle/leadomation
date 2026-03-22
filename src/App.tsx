@@ -22,6 +22,7 @@ import RefundPolicy from './pages/RefundPolicy';
 import GlobalDemand from './pages/GlobalDemand';
 import CallScriptBuilder from './pages/CallScriptBuilder';
 import Calendar from './pages/Calendar';
+import KeywordMonitor from './pages/KeywordMonitor';
 import { supabase } from './lib/supabase';
 import { usePlan } from './hooks/usePlan';
 import TrialBanner from './components/TrialBanner';
@@ -172,6 +173,12 @@ const App: React.FC = () => {
         return (
           <FeatureGate feature="Calendar" hasAccess={canAccess('dealPipeline')} targetPlan="pro">
             <Calendar />
+          </FeatureGate>
+        );
+      case 'Keyword Monitor':
+        return (
+          <FeatureGate feature="LinkedIn Keyword Monitor" hasAccess={canAccess('keywordMonitor')} targetPlan="pro">
+            <KeywordMonitor onPageChange={setActivePage} canAccess={canAccess} triggerUpgrade={triggerUpgrade} />
           </FeatureGate>
         );
       case 'Sequence Builder':
