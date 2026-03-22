@@ -7,7 +7,9 @@ import {
     X,
     Mail,
     Search,
-    Info
+    Info,
+    Eye,
+    Copy
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -35,10 +37,14 @@ const EmailTemplates: React.FC = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
+            setCurrentUserId(user.id);
+
+            // Fetch all templates: system templates (is_system = true) OR user's own templates
             const { data, error } = await supabase
                 .from('email_templates')
                 .select('*')
-                .eq('user_id', user.id)
+                .or(`is_system.eq.true,user_id.eq.${user.id}`)
+                .order('industry', { ascending: true })
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -120,10 +126,20 @@ const EmailTemplates: React.FC = () => {
         setShowCreateModal(true);
     };
 
-    const filtered = templates.filter(t =>
-        t.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.subject?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Filter templates based on active tab and search query
+    const filtered = templates.filter(t => {
+        // Tab filter: "all" shows system + user templates, "mine" shows only user's non-system templates
+        if (activeTab === 'mine') {
+            if (t.is_system || t.user_id !== currentUserId) return false;
+        }
+
+        // Search filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            return t.name?.toLowerCase().includes(query) || t.subject?.toLowerCase().includes(query);
+        }
+        return true;
+    });
 
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
@@ -203,31 +219,135 @@ const EmailTemplates: React.FC = () => {
                             key={template.id}
                             className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:border-[#4F46E5] hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col"
                         >
-                            <span className="inline-flex self-start bg-[#EEF2FF] text-[#4F46E5] text-xs font-medium px-2.5 py-0.5 rounded-full mb-2">
-                                Template
-                            </span>
+                            {/* Tags Row */}
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                                {template.is_system && (
+                                    <span className="inline-flex bg-blue-50 text-blue-600 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
+                                        System
+                                    </span>
+                                )}
+                                {template.industry && (
+                                    <span className="inline-flex bg-purple-50 text-purple-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        {template.industry}
+                                    </span>
+                                )}
+                                {!template.is_system && !template.industry && (
+                                    <span className="inline-flex bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        Custom
+                                    </span>
+                                )}
+                            </div>
                             <h3 className="text-sm font-semibold text-gray-900 mt-1">{template.name}</h3>
+                            {template.use_case && (
+                                <p className="text-xs text-indigo-600 mt-1">{template.use_case}</p>
+                            )}
                             <p className="text-xs text-gray-500 mt-1 truncate">{template.subject}</p>
                             <p className="text-xs text-gray-400 mt-2 line-clamp-2 flex-1">
-                                {template.body?.substring(0, 100) || 'No preview available'}
+                                {(template.body_html || template.body)?.replace(/<[^>]*>/g, '').substring(0, 100) || 'No preview available'}
                             </p>
                             <div className="border-t border-gray-100 mt-4 pt-4 flex gap-2">
                                 <button
-                                    onClick={() => startEdit(template)}
+                                    onClick={() => setPreviewTemplate(template)}
                                     className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm font-medium rounded-lg transition-all"
                                 >
-                                    <Edit3 size={13} />
-                                    Edit
+                                    <Eye size={13} />
+                                    Preview
                                 </button>
-                                <button
-                                    onClick={() => deleteTemplate(template.id)}
-                                    className="flex items-center justify-center p-2 border border-gray-200 bg-white rounded-lg text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
+                                {!template.is_system ? (
+                                    <>
+                                        <button
+                                            onClick={() => startEdit(template)}
+                                            className="flex items-center justify-center p-2 border border-gray-200 bg-white rounded-lg text-gray-400 hover:text-[#4F46E5] hover:border-[#4F46E5]/30 hover:bg-[#EEF2FF] transition-all"
+                                        >
+                                            <Edit3 size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => deleteTemplate(template.id)}
+                                            className="flex items-center justify-center p-2 border border-gray-200 bg-white rounded-lg text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(template.body_html || template.body || '');
+                                        }}
+                                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#4F46E5] text-white hover:bg-[#4338CA] text-sm font-medium rounded-lg transition-all"
+                                    >
+                                        <Copy size={13} />
+                                        Use
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Preview Modal */}
+            {previewTemplate && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">{previewTemplate.name}</h3>
+                                <div className="flex gap-1.5 mt-2">
+                                    {previewTemplate.is_system && (
+                                        <span className="inline-flex bg-blue-50 text-blue-600 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
+                                            System
+                                        </span>
+                                    )}
+                                    {previewTemplate.industry && (
+                                        <span className="inline-flex bg-purple-50 text-purple-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                            {previewTemplate.industry}
+                                        </span>
+                                    )}
+                                    {previewTemplate.use_case && (
+                                        <span className="inline-flex bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                            {previewTemplate.use_case}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <button onClick={() => setPreviewTemplate(null)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-all">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Subject Line</label>
+                                <p className="text-sm font-medium text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    {previewTemplate.subject}
+                                </p>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Email Body</label>
+                                <div
+                                    className="text-sm text-gray-700 p-4 bg-gray-50 rounded-lg border border-gray-200 leading-relaxed whitespace-pre-wrap"
+                                    dangerouslySetInnerHTML={{ __html: previewTemplate.body_html || previewTemplate.body || '' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+                            <button
+                                onClick={() => setPreviewTemplate(null)}
+                                className="flex-1 px-5 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-white transition-all"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(previewTemplate.body_html || previewTemplate.body || '');
+                                    setPreviewTemplate(null);
+                                }}
+                                className="flex-1 px-5 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-semibold hover:bg-[#4338CA] transition-all flex items-center justify-center gap-2 shadow-sm"
+                            >
+                                <Copy size={16} />
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
