@@ -249,10 +249,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch profile for first name
+        // Fetch profile for first name (and last_name as fallback)
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('first_name')
+            .select('first_name, last_name')
             .eq('id', user.id)
             .single();
 
@@ -260,13 +260,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             console.error('Error fetching profile:', profileError);
         }
 
-        if (profile && profile.first_name && profile.first_name.trim()) {
+        if (profile?.first_name?.trim()) {
             setFirstName(profile.first_name.trim());
-        } else if (user.email) {
-            // Fallback to email prefix (everything before @), capitalized
-            const emailPrefix = user.email.split('@')[0];
-            const capitalized = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1).toLowerCase();
-            setFirstName(capitalized);
+        } else if (profile?.last_name?.trim()) {
+            setFirstName(profile.last_name.trim());
+        } else {
+            // No name set - leave empty to trigger profile prompt
+            setFirstName('');
         }
 
         const { from: dateFrom } = getDateRange(datePreset);
@@ -571,9 +571,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             {/* Welcome Message */}
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-[#111827]">
-                    {greeting}, {firstName || 'there'} 👋
+                    {greeting}{firstName ? `, ${firstName}` : ''} 👋
                 </h2>
-                <p className="text-sm text-[#6B7280] mt-1">{formattedDate} · Let's make today count.</p>
+                <p className="text-sm text-[#6B7280] mt-1">
+                    {formattedDate} · Let's make today count.
+                    {!firstName && (
+                        <button
+                            onClick={() => onPageChange('Settings')}
+                            className="ml-2 text-[#4F46E5] hover:underline font-medium"
+                        >
+                            Add your name to personalise your dashboard →
+                        </button>
+                    )}
+                </p>
             </div>
 
             {/* Trial Usage Summary */}
