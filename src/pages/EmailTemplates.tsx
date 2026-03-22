@@ -23,6 +23,8 @@ const EmailTemplates: React.FC = () => {
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'all' | 'mine'>('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [previewTemplate, setPreviewTemplate] = useState<any>(null);
 
     useEffect(() => {
         loadTemplates();
