@@ -16,7 +16,10 @@ import {
     Calendar,
     Phone,
     Info,
-    Target
+    Target,
+    Trophy,
+    XCircle,
+    MessageSquare
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -32,6 +35,7 @@ interface LinkedInEnrollment {
     current_phase: number;
     current_day: number;
     status: 'active' | 'paused' | 'completed' | 'failed' | 'connected';
+    paused_reason?: 'reply_received' | 'manual' | null;
     connected_at: string | null;
     last_action_at: string | null;
     next_action_at: string | null;
@@ -43,6 +47,7 @@ interface LinkedInEnrollment {
         first_name: string;
         last_name: string;
     };
+    reply_message?: string | null;
 }
 
 const LINKEDIN_PHASES = [
@@ -153,9 +158,35 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
 
         if (error) {
             console.error('Error fetching LinkedIn enrollments:', error);
-        } else {
-            setLinkedinEnrollments(data || []);
+            setLinkedinLoading(false);
+            return;
         }
+
+        // Fetch reply messages for paused enrollments
+        const enrollments = data || [];
+        const pausedIds = enrollments
+            .filter(e => e.status === 'paused' && e.paused_reason === 'reply_received')
+            .map(e => e.id);
+
+        if (pausedIds.length > 0) {
+            const { data: replies } = await supabase
+                .from('inbound_emails')
+                .select('linkedin_enrollment_id, body_text')
+                .in('linkedin_enrollment_id', pausedIds)
+                .eq('source', 'linkedin')
+                .order('received_at', { ascending: false });
+
+            if (replies) {
+                const replyMap = new Map(replies.map(r => [r.linkedin_enrollment_id, r.body_text]));
+                enrollments.forEach(e => {
+                    if (replyMap.has(e.id)) {
+                        e.reply_message = replyMap.get(e.id);
+                    }
+                });
+            }
+        }
+
+        setLinkedinEnrollments(enrollments);
         setLinkedinLoading(false);
     };
 
@@ -222,6 +253,86 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
             fetchLinkedinEnrollments();
             alert('✓ Running now. The next action for this lead will execute within 60 seconds.');
         }
+    };
+
+    const handleMarkAsWon = async (enrollment: LinkedInEnrollment) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Complete the enrollment
+        await supabase
+            .from('linkedin_enrollments')
+            .update({
+                status: 'completed',
+                paused_reason: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', enrollment.id);
+
+        // Update lead status to qualified
+        await supabase
+            .from('leads')
+            .update({ status: 'qualified' })
+            .eq('id', enrollment.lead_id);
+
+        // Check if deal exists, if not create one
+        const { data: existingDeal } = await supabase
+            .from('deals')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('lead_id', enrollment.lead_id)
+            .single();
+
+        if (!existingDeal) {
+            await supabase
+                .from('deals')
+                .insert({
+                    user_id: user.id,
+                    lead_id: enrollment.lead_id,
+                    title: enrollment.leads?.company || `${enrollment.leads?.first_name || ''} ${enrollment.leads?.last_name || ''}`.trim(),
+                    value: 0,
+                    currency: '£',
+                    stage: 'qualified',
+                    stage_entered_at: new Date().toISOString(),
+                    source: 'linkedin',
+                    probability: 40,
+                    notes: 'Deal created from LinkedIn sequence (marked as won)'
+                });
+        }
+
+        fetchLinkedinEnrollments();
+    };
+
+    const handleMarkAsLost = async (enrollment: LinkedInEnrollment) => {
+        // Complete the enrollment
+        await supabase
+            .from('linkedin_enrollments')
+            .update({
+                status: 'completed',
+                paused_reason: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', enrollment.id);
+
+        // Update lead status to not_interested
+        await supabase
+            .from('leads')
+            .update({ status: 'not_interested' })
+            .eq('id', enrollment.lead_id);
+
+        fetchLinkedinEnrollments();
+    };
+
+    const handleResumeSequence = async (enrollment: LinkedInEnrollment) => {
+        const { error } = await supabase
+            .from('linkedin_enrollments')
+            .update({
+                status: 'active',
+                paused_reason: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', enrollment.id);
+        if (!error) fetchLinkedinEnrollments();
     };
 
     const getPhaseInfo = (phase: number) => {
@@ -637,9 +748,12 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                                             enrollment.status === 'active' ? 'bg-green-50 text-green-700 border-green-200' :
                                                             enrollment.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                                                             enrollment.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
-                                                            'bg-amber-50 text-amber-700 border-amber-200'
+                                                            enrollment.status === 'paused' && enrollment.paused_reason === 'reply_received' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                                            'bg-gray-100 text-gray-600 border-gray-200'
                                                         }`}>
-                                                            {enrollment.status.toUpperCase()}
+                                                            {enrollment.status === 'paused' && enrollment.paused_reason === 'reply_received'
+                                                                ? 'Paused - reply received'
+                                                                : enrollment.status.toUpperCase()}
                                                         </span>
                                                         <div className="flex gap-2">
                                                             {/* Run Now button */}
@@ -696,7 +810,34 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                                                 )}
                                                             </div>
 
-                                                            {enrollment.status !== 'completed' && enrollment.status !== 'failed' && (
+                                                            {/* Paused due to reply - show action buttons */}
+                                                            {enrollment.status === 'paused' && enrollment.paused_reason === 'reply_received' && (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => handleResumeSequence(enrollment)}
+                                                                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4F46E5] hover:bg-[#EEF2FF] border border-indigo-200 transition-colors flex items-center gap-1"
+                                                                    >
+                                                                        <Play size={12} />
+                                                                        Resume sequence
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleMarkAsWon(enrollment)}
+                                                                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-600 hover:bg-emerald-50 border border-emerald-200 transition-colors flex items-center gap-1"
+                                                                    >
+                                                                        <Trophy size={12} />
+                                                                        Mark as won
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleMarkAsLost(enrollment)}
+                                                                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 border border-red-200 transition-colors flex items-center gap-1"
+                                                                    >
+                                                                        <XCircle size={12} />
+                                                                        Mark as lost
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                            {/* Normal pause/resume for non-reply paused */}
+                                                            {enrollment.status !== 'completed' && enrollment.status !== 'failed' && !(enrollment.status === 'paused' && enrollment.paused_reason === 'reply_received') && (
                                                                 <button
                                                                     onClick={() => handleToggleLinkedInStatus(enrollment)}
                                                                     className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 border border-gray-200 transition-colors"
@@ -713,6 +854,21 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {/* Reply message preview for paused enrollments */}
+                                                {enrollment.status === 'paused' && enrollment.paused_reason === 'reply_received' && (
+                                                    <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-100 rounded-lg mt-3">
+                                                        <MessageSquare size={14} className="text-amber-600 mt-0.5 shrink-0" />
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-xs font-medium text-amber-700 mb-1">Reply received</p>
+                                                            {enrollment.reply_message ? (
+                                                                <p className="text-xs text-amber-800 line-clamp-2">{enrollment.reply_message}</p>
+                                                            ) : (
+                                                                <p className="text-xs text-amber-600 italic">View in Inbox for full message</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                 <div className="flex items-center gap-4 pt-3 border-t border-gray-100">
                                                     <div className="flex-1 flex items-center gap-3">
