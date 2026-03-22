@@ -37,6 +37,7 @@ export interface FeatureAccess {
     aiEmailGeneration: boolean;
     aiVoiceAgent: boolean;
     linkedinAutomation: boolean;
+    keywordMonitor: boolean;
     spintax: boolean;
     advancedAnalytics: boolean;
     inboxWarmup: boolean;

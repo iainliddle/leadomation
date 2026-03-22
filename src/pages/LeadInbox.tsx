@@ -15,7 +15,9 @@ import {
     Building,
     RefreshCw,
     TrendingUp,
-    CheckCircle
+    CheckCircle,
+    Linkedin,
+    Play
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -34,11 +36,15 @@ interface InboundEmail {
     is_read: boolean;
     replied: boolean;
     reply_body: string | null;
+    source?: 'email' | 'linkedin';
+    linkedin_enrollment_id?: string | null;
+    sender_linkedin_id?: string | null;
     lead?: {
         id: string;
         company: string | null;
         first_name: string | null;
         last_name: string | null;
+        linkedin_url?: string | null;
     };
     campaign?: {
         id: string;
