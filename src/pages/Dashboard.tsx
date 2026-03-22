@@ -262,6 +262,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
 
         if (profile && profile.first_name && profile.first_name.trim()) {
             setFirstName(profile.first_name.trim());
+        } else if (user.email) {
+            // Fallback to email prefix (everything before @), capitalized
+            const emailPrefix = user.email.split('@')[0];
+            const capitalized = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1).toLowerCase();
+            setFirstName(capitalized);
         }
 
         const { from: dateFrom } = getDateRange(datePreset);
