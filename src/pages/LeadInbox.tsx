@@ -65,10 +65,11 @@ interface LeadInboxProps {
 const AI_LABELS = ['Interested', 'Not Interested', 'Out of Office', 'Unsubscribe', 'Question', 'Referral'] as const;
 type AILabel = typeof AI_LABELS[number];
 
-const LABEL_STYLES: Record<AILabel, { bg: string; text: string }> = {
+const LABEL_STYLES: Record<string, { bg: string; text: string }> = {
     'Interested': { bg: 'bg-green-50', text: 'text-green-700' },
     'Not Interested': { bg: 'bg-gray-100', text: 'text-gray-600' },
     'Out of Office': { bg: 'bg-amber-50', text: 'text-amber-700' },
+    'OOO': { bg: 'bg-amber-50', text: 'text-amber-700' },
     'Unsubscribe': { bg: 'bg-red-50', text: 'text-red-600' },
     'Question': { bg: 'bg-blue-50', text: 'text-blue-700' },
     'Referral': { bg: 'bg-purple-50', text: 'text-purple-700' }
@@ -89,6 +90,7 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
     const [unreadCount, setUnreadCount] = useState(0);
     const [pushedToCrm, setPushedToCrm] = useState<Set<string>>(new Set());
     const [crmToast, setCrmToast] = useState<{ type: 'success' | 'exists' | 'error'; emailId: string } | null>(null);
+    const [resumingSequence, setResumingSequence] = useState<string | null>(null);
 
     const loadEmails = useCallback(async () => {
         try {
@@ -99,7 +101,7 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                 .from('inbound_emails')
                 .select(`
                     *,
-                    lead:leads(id, company, first_name, last_name),
+                    lead:leads(id, company, first_name, last_name, linkedin_url),
                     campaign:campaigns(id, name)
                 `)
                 .eq('user_id', user.id)
@@ -379,6 +381,30 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
         }
     };
 
+    const resumeSequence = async (enrollmentId: string) => {
+        if (!enrollmentId) return;
+        setResumingSequence(enrollmentId);
+        try {
+            const { error } = await supabase
+                .from('linkedin_enrollments')
+                .update({
+                    status: 'active',
+                    paused_reason: null,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', enrollmentId);
+
+            if (error) throw error;
+
+            setCrmToast({ type: 'success', emailId: selectedEmail?.id || '' });
+            setTimeout(() => setCrmToast(null), 3000);
+        } catch (error) {
+            console.error('Error resuming sequence:', error);
+        } finally {
+            setResumingSequence(null);
+        }
+    };
+
     const filteredEmails = emails.filter(email => {
         const matchesSearch =
             email.from_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -562,9 +588,14 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                                 >
                                     {/* Top row: Company + time */}
                                     <div className="flex items-center justify-between mb-1">
-                                        <span className={`text-sm ${!email.is_read ? 'font-semibold text-[#111827]' : 'font-medium text-[#111827]'}`}>
-                                            {getSenderCompany(email) || getSenderName(email)}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            {email.source === 'linkedin' && (
+                                                <Linkedin size={14} className="text-[#0077B5] shrink-0" />
+                                            )}
+                                            <span className={`text-sm ${!email.is_read ? 'font-semibold text-[#111827]' : 'font-medium text-[#111827]'}`}>
+                                                {getSenderCompany(email) || getSenderName(email)}
+                                            </span>
+                                        </div>
                                         <span className="text-xs text-gray-400">
                                             {formatDate(email.received_at)}
                                         </span>
@@ -621,6 +652,12 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                                 {selectedEmail.subject || '(No subject)'}
                             </h2>
                             <div className="flex items-center gap-4 mt-2 text-sm text-[#6B7280]">
+                                {selectedEmail.source === 'linkedin' && (
+                                    <div className="flex items-center gap-1.5 text-[#0077B5]">
+                                        <Linkedin size={14} />
+                                        <span className="text-xs font-medium">LinkedIn</span>
+                                    </div>
+                                )}
                                 <div className="flex items-center gap-1.5">
                                     <User size={14} />
                                     <span>{getSenderName(selectedEmail)}</span>
@@ -631,10 +668,12 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                                         <span>{getSenderCompany(selectedEmail)}</span>
                                     </div>
                                 )}
-                                <div className="flex items-center gap-1.5">
-                                    <Mail size={14} />
-                                    <span className="text-xs">{selectedEmail.from_email}</span>
-                                </div>
+                                {selectedEmail.source !== 'linkedin' && (
+                                    <div className="flex items-center gap-1.5">
+                                        <Mail size={14} />
+                                        <span className="text-xs">{selectedEmail.from_email}</span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Action Links */}
@@ -653,6 +692,27 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                                         <ExternalLink size={12} />
                                         View Lead
                                     </button>
+                                )}
+                                {selectedEmail.source === 'linkedin' && selectedEmail.linkedin_enrollment_id && (
+                                    <button
+                                        onClick={() => resumeSequence(selectedEmail.linkedin_enrollment_id!)}
+                                        disabled={resumingSequence === selectedEmail.linkedin_enrollment_id}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-all disabled:opacity-50"
+                                    >
+                                        <Play size={12} />
+                                        {resumingSequence === selectedEmail.linkedin_enrollment_id ? 'Resuming...' : 'Resume sequence'}
+                                    </button>
+                                )}
+                                {selectedEmail.source === 'linkedin' && selectedEmail.lead?.linkedin_url && (
+                                    <a
+                                        href={selectedEmail.lead.linkedin_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-[#0077B5] hover:bg-blue-50 rounded-lg transition-all"
+                                    >
+                                        <Linkedin size={12} />
+                                        View on LinkedIn
+                                    </a>
                                 )}
                                 {selectedEmail.ai_label === 'Interested' && !pushedToCrm.has(selectedEmail.id) && (
                                     <button
