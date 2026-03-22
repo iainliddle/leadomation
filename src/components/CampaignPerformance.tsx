@@ -110,14 +110,14 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
 
     if (isLoading) {
         return (
-            <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl h-full flex flex-col shadow-sm">
+            <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl flex flex-col shadow-sm">
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h3 className="text-lg font-bold text-[#111827]">Campaign Performance</h3>
                         <p className="text-xs text-[#9CA3AF]">Last 14 days</p>
                     </div>
                 </div>
-                <div className="flex-1 flex items-center justify-center min-h-[220px]">
+                <div className="flex items-center justify-center min-h-[220px]">
                     <div className="w-6 h-6 border-2 border-[#4F46E5] border-t-transparent rounded-full animate-spin" />
                 </div>
             </div>
@@ -125,7 +125,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
     }
 
     return (
-        <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl flex flex-col shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="text-lg font-bold text-[#111827]">Campaign Performance</h3>
