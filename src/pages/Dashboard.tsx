@@ -249,10 +249,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch profile for first name (and last_name as fallback)
+        // Fetch profile for full_name and extract first word
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('first_name, last_name')
+            .select('full_name')
             .eq('id', user.id)
             .single();
 
@@ -260,12 +260,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             console.error('Error fetching profile:', profileError);
         }
 
-        if (profile?.first_name?.trim()) {
-            setFirstName(profile.first_name.trim());
-        } else if (profile?.last_name?.trim()) {
-            setFirstName(profile.last_name.trim());
+        // Extract first word from full_name and capitalize
+        const extractFirstName = (fullName: string | null | undefined): string => {
+            if (!fullName?.trim()) return '';
+            const firstWord = fullName.trim().split(/\s+/)[0];
+            return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+        };
+
+        if (profile?.full_name?.trim()) {
+            setFirstName(extractFirstName(profile.full_name));
+        } else if (user.email) {
+            // Fallback: extract first word from email prefix
+            const emailPrefix = user.email.split('@')[0];
+            const firstWord = emailPrefix.split(/[._-]/)[0];
+            setFirstName(firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase());
         } else {
-            // No name set - leave empty to trigger profile prompt
             setFirstName('');
         }
 

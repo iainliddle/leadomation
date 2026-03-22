@@ -62,19 +62,27 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                 .single();
 
             if (error && error.code === 'PGRST116') {
+                // Build full_name from metadata or email prefix
+                const metaFirstName = user.user_metadata?.first_name || user.user_metadata?.full_name?.split(/\s+/)[0] || '';
+                const metaLastName = user.user_metadata?.last_name || user.user_metadata?.full_name?.split(/\s+/).slice(1).join(' ') || '';
+                const fullName = metaFirstName || metaLastName
+                    ? `${metaFirstName} ${metaLastName}`.trim()
+                    : user.email?.split('@')[0] || '';
                 await supabase.from('profiles').insert({
                     id: user.id,
-                    first_name: user.user_metadata?.first_name || user.email?.split('@')[0] || '',
-                    last_name: user.user_metadata?.last_name || '',
+                    full_name: fullName,
                 });
-                setFirstName(user.user_metadata?.first_name || user.email?.split('@')[0] || '');
-                setLastName(user.user_metadata?.last_name || '');
+                setFirstName(metaFirstName || user.email?.split('@')[0] || '');
+                setLastName(metaLastName);
                 return;
             }
 
             if (data) {
-                setFirstName(data.first_name || '');
-                setLastName(data.last_name || '');
+                // Split full_name into first and last name for display
+                const fullName = data.full_name || '';
+                const parts = fullName.trim().split(/\s+/);
+                setFirstName(parts[0] || '');
+                setLastName(parts.slice(1).join(' ') || '');
                 setPhone(data.phone || '');
                 setCompany(data.company || '');
                 setJobTitle(data.job_title || '');
@@ -152,10 +160,11 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
     const handleSaveProfile = async () => {
         if (!userId) return;
         try {
+            // Combine firstName and lastName into full_name
+            const fullName = `${firstName} ${lastName}`.trim();
             await supabase.from('profiles').upsert({
                 id: userId,
-                first_name: firstName,
-                last_name: lastName,
+                full_name: fullName,
                 phone,
                 company,
                 job_title: jobTitle,
