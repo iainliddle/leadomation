@@ -178,7 +178,7 @@ const App: React.FC = () => {
       case 'Keyword Monitor':
         return (
           <FeatureGate feature="LinkedIn Keyword Monitor" hasAccess={canAccess('keywordMonitor')} targetPlan="pro">
-            <KeywordMonitor onPageChange={setActivePage} canAccess={canAccess} triggerUpgrade={triggerUpgrade} />
+            <KeywordMonitor />
           </FeatureGate>
         );
       case 'Sequence Builder':
