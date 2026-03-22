@@ -143,7 +143,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                     </p>
                 </div>
             ) : (
-                <div className="flex-1">
+                <div>
                     <ResponsiveContainer width="100%" height={200}>
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
