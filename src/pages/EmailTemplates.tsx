@@ -14,6 +14,14 @@ import {
 import { supabase } from '../lib/supabase';
 
 
+// Convert slug to readable label (e.g., "auto_service_outreach" → "Auto Service Outreach")
+const formatUseCase = (slug: string): string => {
+    return slug
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
 const EmailTemplates: React.FC = () => {
     const [templates, setTemplates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -239,7 +247,7 @@ const EmailTemplates: React.FC = () => {
                             </div>
                             <h3 className="text-sm font-semibold text-gray-900 mt-1">{template.name}</h3>
                             {template.use_case && (
-                                <p className="text-xs text-indigo-600 mt-1">{template.use_case}</p>
+                                <p className="text-xs text-indigo-600 mt-1">{formatUseCase(template.use_case)}</p>
                             )}
                             <p className="text-xs text-gray-500 mt-1 truncate">{template.subject}</p>
                             <p className="text-xs text-gray-400 mt-2 line-clamp-2 flex-1">
@@ -273,7 +281,7 @@ const EmailTemplates: React.FC = () => {
                                         onClick={() => {
                                             navigator.clipboard.writeText(template.body_html || template.body || '');
                                         }}
-                                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#4F46E5] text-white hover:bg-[#4338CA] text-sm font-medium rounded-lg transition-all"
+                                        className="bg-[#22D3EE] hover:bg-[#06B6D4] text-[#0F172A] text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2"
                                     >
                                         <Copy size={13} />
                                         Use
@@ -305,7 +313,7 @@ const EmailTemplates: React.FC = () => {
                                     )}
                                     {previewTemplate.use_case && (
                                         <span className="inline-flex bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                            {previewTemplate.use_case}
+                                            {formatUseCase(previewTemplate.use_case)}
                                         </span>
                                     )}
                                 </div>
@@ -341,7 +349,7 @@ const EmailTemplates: React.FC = () => {
                                     navigator.clipboard.writeText(previewTemplate.body_html || previewTemplate.body || '');
                                     setPreviewTemplate(null);
                                 }}
-                                className="flex-1 px-5 py-2.5 bg-[#4F46E5] text-white rounded-lg text-sm font-semibold hover:bg-[#4338CA] transition-all flex items-center justify-center gap-2 shadow-sm"
+                                className="bg-[#22D3EE] hover:bg-[#06B6D4] text-[#0F172A] text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 flex-1 justify-center"
                             >
                                 <Copy size={16} />
                                 Use Template

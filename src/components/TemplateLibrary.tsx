@@ -32,6 +32,14 @@ interface TemplateLibraryProps {
     onNavigateToSequenceBuilder?: (template: EmailTemplate) => void;
 }
 
+// Convert slug to readable label (e.g., "auto_service_outreach" → "Auto Service Outreach")
+const formatUseCase = (slug: string): string => {
+    return slug
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
 const INDUSTRIES = [
     'Restaurants',
     'Trades and Contractors',
@@ -322,7 +330,7 @@ const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
                                         )}
                                         {template.use_case && (
                                             <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-full">
-                                                {template.use_case}
+                                                {formatUseCase(template.use_case)}
                                             </span>
                                         )}
                                     </div>
@@ -361,7 +369,7 @@ const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
                                 )}
                                 {previewTemplate.use_case && (
                                     <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-full">
-                                        {previewTemplate.use_case}
+                                        {formatUseCase(previewTemplate.use_case)}
                                     </span>
                                 )}
                                 {previewTemplate.is_system && (
@@ -396,7 +404,7 @@ const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
                         <div className="p-4 border-t border-gray-200 bg-white space-y-2">
                             <button
                                 onClick={() => handleUseTemplate(previewTemplate)}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-bold hover:from-indigo-700 hover:to-purple-700 transition-all"
+                                className="bg-[#22D3EE] hover:bg-[#06B6D4] text-[#0F172A] text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 w-full justify-center"
                             >
                                 <Check size={16} />
                                 Use This Template
