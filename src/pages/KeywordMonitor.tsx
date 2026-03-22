@@ -54,7 +54,7 @@ interface KeywordMonitorProps {
     triggerUpgrade?: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
 
-const KeywordMonitor: React.FC<KeywordMonitorProps> = ({ onPageChange, canAccess, triggerUpgrade }) => {
+const KeywordMonitor: React.FC<KeywordMonitorProps> = () => {
     const [monitors, setMonitors] = useState<KeywordMonitor[]>([]);
     const [hits, setHits] = useState<KeywordHit[]>([]);
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
