@@ -132,7 +132,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <div className="flex items-center gap-2">
-                        <BarChart2 size={16} className="text-gray-500" />
+                        <BarChart2 size={16} className="text-[#4F46E5]" />
                         <h3 className="text-lg font-bold text-[#111827]">Campaign Performance</h3>
                     </div>
                     <p className="text-xs text-[#9CA3AF]">Last 14 days</p>

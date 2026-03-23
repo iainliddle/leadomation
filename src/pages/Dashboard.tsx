@@ -135,6 +135,7 @@ interface StatCardProps {
     chartColor?: string;
     chartGradientId?: string;
     tooltipLabel?: string;
+    infoTooltip?: string;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -150,72 +151,88 @@ const StatCard: React.FC<StatCardProps> = ({
     chartType = 'bar',
     chartColor = '#22D3EE',
     chartGradientId,
-    tooltipLabel = 'Count'
-}) => (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow duration-200 relative">
-        <div className="flex justify-between items-start mb-3">
-            <div className="flex items-center gap-1.5">
-                <p className="text-xs font-medium text-[#9CA3AF]">{label}</p>
-                <Info size={14} className="text-gray-300 cursor-help" />
+    tooltipLabel = 'Count',
+    infoTooltip
+}) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+
+    return (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow duration-200 relative">
+            <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-1.5 relative">
+                    <p className="text-xs font-medium text-[#9CA3AF]">{label}</p>
+                    <div
+                        className="relative"
+                        onMouseEnter={() => setShowTooltip(true)}
+                        onMouseLeave={() => setShowTooltip(false)}
+                    >
+                        <Info size={14} className="text-gray-300 cursor-help" />
+                        {showTooltip && infoTooltip && (
+                            <span className="absolute top-full left-0 mt-2 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 max-w-xs z-50 whitespace-normal">
+                                {infoTooltip}
+                            </span>
+                        )}
+                    </div>
+                </div>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
+                    <Icon size={18} className={iconColor} />
+                </div>
             </div>
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
-                <Icon size={18} className={iconColor} />
+            <div>
+                <h3 className="text-2xl font-bold text-[#111827] mb-1">{value}</h3>
+                <div className="flex items-center gap-1.5 text-xs font-medium">
+                    <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                        <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />
+                        {change}
+                    </span>
+                    <span className="text-gray-400">{subtitle}</span>
+                </div>
             </div>
+            {chartData && (
+                <div className="absolute bottom-4 right-4 w-20 h-10 opacity-80">
+                    {chartType === 'bar' ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={chartData} barSize={4}>
+                                <Bar dataKey="value" fill={chartColor} radius={[2, 2, 0, 0]} />
+                                <Tooltip
+                                    contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
+                                    formatter={(v) => [v, tooltipLabel]}
+                                    labelFormatter={(l) => String(l)}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData}>
+                                {chartGradientId && (
+                                    <defs>
+                                        <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                )}
+                                <Area
+                                    type="monotone"
+                                    dataKey="value"
+                                    stroke={chartColor}
+                                    strokeWidth={1.5}
+                                    fill={chartGradientId ? `url(#${chartGradientId})` : chartColor}
+                                    dot={false}
+                                />
+                                <Tooltip
+                                    contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
+                                    formatter={(v) => [v, tooltipLabel]}
+                                    labelFormatter={(l) => String(l)}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    )}
+                </div>
+            )}
         </div>
-        <div>
-            <h3 className="text-2xl font-bold text-[#111827] mb-1">{value}</h3>
-            <div className="flex items-center gap-1.5 text-xs font-medium">
-                <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                    <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />
-                    {change}
-                </span>
-                <span className="text-gray-400">{subtitle}</span>
-            </div>
-        </div>
-        {chartData && (
-            <div className="absolute bottom-4 right-4 w-20 h-10 opacity-80">
-                {chartType === 'bar' ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} barSize={4}>
-                            <Bar dataKey="value" fill={chartColor} radius={[2, 2, 0, 0]} />
-                            <Tooltip
-                                contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
-                                formatter={(v) => [v, tooltipLabel]}
-                                labelFormatter={(l) => String(l)}
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
-                ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData}>
-                            {chartGradientId && (
-                                <defs>
-                                    <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                            )}
-                            <Area
-                                type="monotone"
-                                dataKey="value"
-                                stroke={chartColor}
-                                strokeWidth={1.5}
-                                fill={chartGradientId ? `url(#${chartGradientId})` : chartColor}
-                                dot={false}
-                            />
-                            <Tooltip
-                                contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
-                                formatter={(v) => [v, tooltipLabel]}
-                                labelFormatter={(l) => String(l)}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                )}
-            </div>
-        )}
-    </div>
-);
+    );
+};
 
 const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const { plan, usage, limits, trialDaysRemaining } = usePlan();
@@ -669,6 +686,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     chartType="bar"
                     chartColor="#22D3EE"
                     tooltipLabel="Leads"
+                    infoTooltip="Total number of leads scraped across all your campaigns"
                 />
                 <StatCard
                     label="Leads with Emails"
@@ -684,6 +702,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     chartColor="#10B981"
                     chartGradientId="emailGrad"
                     tooltipLabel="With email"
+                    infoTooltip="Leads where a verified email address was found"
                 />
                 <StatCard
                     label="Leads Contacted"
@@ -699,6 +718,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     chartColor="#8B5CF6"
                     chartGradientId="contactGrad"
                     tooltipLabel="Contacted"
+                    infoTooltip="Leads who have received at least one outreach email or call"
                 />
                 <StatCard
                     label="Total Deals"
@@ -713,6 +733,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     chartType="bar"
                     chartColor="#F43F5E"
                     tooltipLabel="Deals"
+                    infoTooltip="Active deals in your pipeline across all stages"
                 />
                 <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-5 shadow-sm flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-3">
