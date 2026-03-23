@@ -821,7 +821,7 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                             >
                                 <Info className="w-3.5 h-3.5 text-gray-400 cursor-help inline-block" />
                                 {showWeightedTooltip && (
-                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 max-w-xs z-50 whitespace-normal">
+                                    <span className="absolute top-full left-0 mt-2 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 max-w-xs z-50 whitespace-normal">
                                         Your total deal value adjusted by each deal's win probability. A £50,000 deal at 20% probability contributes £10,000 to your weighted pipeline.
                                     </span>
                                 )}
