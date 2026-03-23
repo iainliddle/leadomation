@@ -147,7 +147,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
             className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${getButtonClasses()}`}
         >
             {buttonText}
-            {!isButtonDisabled && buttonVariant !== 'disabled' && <ArrowRight size={16} />}
+            {!isButtonDisabled && <ArrowRight size={16} />}
         </button>
     </div>
 );};
