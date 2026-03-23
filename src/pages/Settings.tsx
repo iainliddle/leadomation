@@ -30,6 +30,8 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+    const [saveMessage, setSaveMessage] = useState('');
 
     // Security state
     const [currentPassword, setCurrentPassword] = useState('');
@@ -78,11 +80,17 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
             }
 
             if (data) {
-                // Split full_name into first and last name for display
-                const fullName = data.full_name || '';
-                const parts = fullName.trim().split(/\s+/);
-                setFirstName(parts[0] || '');
-                setLastName(parts.slice(1).join(' ') || '');
+                // Use first_name/last_name columns if available, otherwise split full_name
+                if (data.first_name !== undefined && data.first_name !== null) {
+                    setFirstName(data.first_name || '');
+                    setLastName(data.last_name || '');
+                } else {
+                    // Fallback: split full_name into first and last name for display
+                    const fullName = data.full_name || '';
+                    const parts = fullName.trim().split(/\s+/);
+                    setFirstName(parts[0] || '');
+                    setLastName(parts.slice(1).join(' ') || '');
+                }
                 setPhone(data.phone || '');
                 setCompany(data.company || '');
                 setJobTitle(data.job_title || '');
@@ -158,21 +166,52 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
     };
 
     const handleSaveProfile = async () => {
-        if (!userId) return;
+        if (!userId) {
+            setSaveStatus('error');
+            setSaveMessage('Not authenticated. Please sign in again.');
+            return;
+        }
+
+        setSaveStatus('saving');
+        setSaveMessage('');
+
         try {
-            // Combine firstName and lastName into full_name
+            // Combine firstName and lastName into full_name for backward compatibility
             const fullName = `${firstName} ${lastName}`.trim();
-            await supabase.from('profiles').upsert({
+
+            const { error } = await supabase.from('profiles').upsert({
                 id: userId,
                 full_name: fullName,
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
                 phone,
                 company,
                 job_title: jobTitle,
                 avatar_url: profileImageUrl,
                 updated_at: new Date().toISOString(),
             });
-        } catch (err) {
+
+            if (error) {
+                throw error;
+            }
+
+            setSaveStatus('success');
+            setSaveMessage('Profile saved successfully!');
+
+            // Dispatch event to update TopBar with new name
+            window.dispatchEvent(new CustomEvent('profileUpdated', {
+                detail: { firstName: firstName.trim(), lastName: lastName.trim(), fullName }
+            }));
+
+            // Clear success message after 3 seconds
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage('');
+            }, 3000);
+        } catch (err: any) {
             console.error('Save failed:', err);
+            setSaveStatus('error');
+            setSaveMessage(err.message || 'Failed to save profile. Please try again.');
         }
     };
 
@@ -338,13 +377,28 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end">
+                            <div className="flex items-center justify-end gap-3">
+                                {saveMessage && (
+                                    <span className={`text-sm font-medium ${saveStatus === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
+                                        {saveMessage}
+                                    </span>
+                                )}
                                 <button
                                     onClick={handleSaveProfile}
-                                    className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] flex items-center gap-2"
+                                    disabled={saveStatus === 'saving'}
+                                    className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    <Save size={14} />
-                                    Save changes
+                                    {saveStatus === 'saving' ? (
+                                        <>
+                                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save size={14} />
+                                            Save changes
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>

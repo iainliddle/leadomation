@@ -137,7 +137,7 @@ const MapChart = memo(({
         <ComposableMap
             projectionConfig={{
                 rotate: [-10, 0, 0],
-                scale: 147
+                scale: 180
             }}
             style={{ width: '100%', height: '100%' }}
         >
@@ -264,8 +264,8 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
     const [countrySearchQuery, setCountrySearchQuery] = useState('');
     const [position, setPosition] = useState<{ coordinates: [number, number]; zoom: number }>({
-        coordinates: [0, 20],
-        zoom: 1
+        coordinates: [10, 30],
+        zoom: 1.8
     });
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 

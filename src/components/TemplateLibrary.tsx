@@ -404,7 +404,7 @@ const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
                         <div className="p-4 border-t border-gray-200 bg-white space-y-2">
                             <button
                                 onClick={() => handleUseTemplate(previewTemplate)}
-                                className="bg-[#22D3EE] hover:bg-[#06B6D4] text-[#0F172A] text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 w-full justify-center"
+                                className="flex items-center gap-2 px-4 py-2 bg-cyan-50 text-cyan-600 border border-cyan-200 rounded-lg text-sm font-medium hover:bg-cyan-100 transition-all w-full justify-center"
                             >
                                 <Check size={16} />
                                 Use This Template

@@ -66,29 +66,48 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick,
             const initials = (first[0] || '') + (parts[1] ? parts[1][0] : '');
             setUserInitials(initials.toUpperCase() || '?');
 
-            // Load profile data
+            // Load profile data including avatar_url
             const { data } = await supabase
                 .from('profiles')
-                .select('full_name')
+                .select('full_name, first_name, last_name, avatar_url')
                 .eq('id', user.id)
                 .single();
 
-            if (data?.full_name) {
-                const nameParts = data.full_name.split(' ');
-                const fn = nameParts[0] || '';
-                const ln = nameParts.slice(1).join(' ') || '';
+            if (data) {
+                // Use first_name/last_name if available, otherwise parse full_name
+                const fn = data.first_name || (data.full_name ? data.full_name.split(' ')[0] : '') || '';
+                const ln = data.last_name || (data.full_name ? data.full_name.split(' ').slice(1).join(' ') : '') || '';
                 const displayName = fn + (ln ? ' ' + ln[0] + '.' : '');
                 setUserName(displayName || userName);
                 const newInitials = (fn[0] || '') + (ln[0] || '');
                 setUserInitials(newInitials.toUpperCase() || '?');
+
+                // Load avatar_url from profile
+                if (data.avatar_url) {
+                    setHeaderAvatarUrl(data.avatar_url);
+                }
             }
         };
         loadAvatar();
 
         // Listen for avatar updates from Settings page
-        const handler = (e: any) => setHeaderAvatarUrl(e.detail.url);
-        window.addEventListener('avatarUpdated', handler);
-        return () => window.removeEventListener('avatarUpdated', handler);
+        const avatarHandler = (e: any) => setHeaderAvatarUrl(e.detail.url);
+        window.addEventListener('avatarUpdated', avatarHandler);
+
+        // Listen for profile name updates from Settings page
+        const profileHandler = (e: any) => {
+            const { firstName, lastName } = e.detail;
+            const displayName = firstName + (lastName ? ' ' + lastName[0] + '.' : '');
+            setUserName(displayName);
+            const newInitials = (firstName[0] || '') + (lastName[0] || '');
+            setUserInitials(newInitials.toUpperCase() || '?');
+        };
+        window.addEventListener('profileUpdated', profileHandler);
+
+        return () => {
+            window.removeEventListener('avatarUpdated', avatarHandler);
+            window.removeEventListener('profileUpdated', profileHandler);
+        };
     }, []);
 
     // Focus search input when modal opens

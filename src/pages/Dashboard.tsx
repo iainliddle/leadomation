@@ -249,10 +249,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch profile for full_name and extract first word
+        // Fetch profile - use first_name column directly if available
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('full_name')
+            .select('first_name, full_name')
             .eq('id', user.id)
             .single();
 
@@ -260,20 +260,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             console.error('Error fetching profile:', profileError);
         }
 
-        // Extract first word from full_name and capitalize
-        const extractFirstName = (fullName: string | null | undefined): string => {
-            if (!fullName?.trim()) return '';
-            const firstWord = fullName.trim().split(/\s+/)[0];
-            return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+        // Helper to capitalize first letter
+        const capitalize = (str: string): string => {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
         };
 
-        if (profile?.full_name?.trim()) {
-            setFirstName(extractFirstName(profile.full_name));
+        // Use first_name column directly if available, otherwise extract from full_name
+        if (profile?.first_name?.trim()) {
+            setFirstName(capitalize(profile.first_name.trim()));
+        } else if (profile?.full_name?.trim()) {
+            const firstWord = profile.full_name.trim().split(/\s+/)[0];
+            setFirstName(capitalize(firstWord));
         } else if (user.email) {
             // Fallback: extract first word from email prefix
             const emailPrefix = user.email.split('@')[0];
             const firstWord = emailPrefix.split(/[._-]/)[0];
-            setFirstName(firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase());
+            setFirstName(capitalize(firstWord));
         } else {
             setFirstName('');
         }
@@ -761,7 +764,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 items-start">
                 <div className="lg:col-span-6">
                     <CampaignPerformance dateFrom={dateFrom || undefined} />
                 </div>

@@ -1,18 +1,47 @@
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-// We now construct price IDs dynamically using environment variables
+const supabase = createClient(
+    process.env.VITE_SUPABASE_URL!,
+    process.env.VITE_SUPABASE_ANON_KEY!
+);
 
 export default async function handler(req: any, res: any) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { plan, billingCycle, userId, userEmail } = req.body;
+    // Authentication check
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-    if (!plan || !billingCycle || !userId || !userEmail) {
-        return res.status(400).json({ error: 'Missing required fields: plan, billingCycle, userId, userEmail' });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { plan, billingCycle } = req.body;
+
+    // Input validation
+    if (!plan || !billingCycle) {
+        return res.status(400).json({ error: 'Missing required fields: plan, billingCycle' });
+    }
+
+    const validPlans = ['starter', 'pro'];
+    const validCycles = ['monthly', 'annual'];
+
+    if (!validPlans.includes(plan)) {
+        return res.status(400).json({ error: 'Invalid plan. Must be starter or pro' });
+    }
+
+    if (!validCycles.includes(billingCycle)) {
+        return res.status(400).json({ error: 'Invalid billing cycle. Must be monthly or annual' });
     }
 
     let priceId = '';
@@ -28,6 +57,7 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
+        // Use authenticated user's ID and email
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
             payment_method_types: ['card'],
@@ -40,16 +70,16 @@ export default async function handler(req: any, res: any) {
             subscription_data: {
                 trial_period_days: 7,
                 metadata: {
-                    userId: userId,
+                    userId: user.id,
                     plan: plan,
                 },
             },
             payment_method_collection: 'always',
-            customer_email: userEmail,
+            customer_email: user.email,
             success_url: 'https://www.leadomation.co.uk?checkout=success',
             cancel_url: 'https://www.leadomation.co.uk/trial-setup',
             metadata: {
-                userId: userId,
+                userId: user.id,
                 plan: plan,
             },
             allow_promotion_codes: true,
