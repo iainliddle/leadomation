@@ -544,6 +544,7 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
     const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
     const [dealActivity, setDealActivity] = useState<ActivityItem[]>([]);
     const [lostReasonDeal, setLostReasonDeal] = useState<{ deal: Deal; targetStage: string } | null>(null);
+    const [showWeightedTooltip, setShowWeightedTooltip] = useState(false);
 
     // Add modal form state
     const [newDealTitle, setNewDealTitle] = useState('');
@@ -626,6 +627,11 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
             .filter(d => d.stage !== 'lost' && d.stage !== 'won')
             .reduce((sum, d) => sum + Math.round((d.value || 0) * ((d.probability ?? 50) / 100)), 0);
     }, [deals]);
+
+    const avgDealValue = useMemo(() => {
+        if (deals.length === 0) return 0;
+        return Math.round(totalPipelineValue / deals.length);
+    }, [deals.length, totalPipelineValue]);
 
     const addDeal = async () => {
         if (!newDealTitle.trim()) {
@@ -785,7 +791,7 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {/* Stats Bar */}
-            <div className="grid grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-6 gap-4 mb-6">
                 <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-xs font-medium text-[#9CA3AF]">Total deals</p>
@@ -806,7 +812,21 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                 </div>
                 <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-medium text-[#9CA3AF]">Weighted pipeline</p>
+                        <p className="text-xs font-medium text-[#9CA3AF] relative">
+                            Weighted pipeline
+                            <span
+                                className="relative inline-block ml-1"
+                                onMouseEnter={() => setShowWeightedTooltip(true)}
+                                onMouseLeave={() => setShowWeightedTooltip(false)}
+                            >
+                                <Info className="w-3.5 h-3.5 text-gray-400 cursor-help inline-block" />
+                                {showWeightedTooltip && (
+                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 max-w-xs z-50 whitespace-normal">
+                                        Your total deal value adjusted by each deal's win probability. A £50,000 deal at 20% probability contributes £10,000 to your weighted pipeline.
+                                    </span>
+                                )}
+                            </span>
+                        </p>
                         <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
                             <Target size={16} className="text-purple-600" />
                         </div>
@@ -830,6 +850,15 @@ const DealPipeline: React.FC<DealPipelineProps> = () => {
                         </div>
                     </div>
                     <p className="text-2xl font-bold text-[#111827]">£{wonValue.toLocaleString()}</p>
+                </div>
+                <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-[#9CA3AF]">Avg deal value</p>
+                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                            <TrendingUp size={16} style={{ color: '#6B7280' }} />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold text-[#111827]">£{avgDealValue.toLocaleString()}</p>
                 </div>
             </div>
 
