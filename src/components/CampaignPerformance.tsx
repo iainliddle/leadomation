@@ -117,7 +117,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                         <p className="text-xs text-[#9CA3AF]">Last 14 days</p>
                     </div>
                 </div>
-                <div className="flex items-center justify-center min-h-[220px]">
+                <div className="flex items-center justify-center min-h-[280px]">
                     <div className="w-6 h-6 border-2 border-[#4F46E5] border-t-transparent rounded-full animate-spin" />
                 </div>
             </div>
@@ -134,7 +134,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
             </div>
 
             {isEmpty ? (
-                <div className="flex-1 flex flex-col items-center justify-center min-h-[220px]">
+                <div className="flex-1 flex flex-col items-center justify-center min-h-[280px]">
                     <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300 mb-4">
                         <BarChart3 size={28} />
                     </div>
@@ -144,7 +144,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                 </div>
             ) : (
                 <div>
-                    <ResponsiveContainer width="100%" height={220}>
+                    <ResponsiveContainer width="100%" height={280}>
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="fillLeads" x1="0" y1="0" x2="0" y2="1">
