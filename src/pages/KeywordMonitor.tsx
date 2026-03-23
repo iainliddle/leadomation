@@ -236,7 +236,7 @@ const KeywordMonitor: React.FC<KeywordMonitorProps> = () => {
             <div className="flex items-start justify-between mb-6">
                 <div>
                     <h1 className="text-xl font-semibold text-[#111827]">LinkedIn Keyword Monitor</h1>
-                    <p className="text-sm text-[#6B7280] mt-1">Find people actively looking for what your customers sell</p>
+                    <p className="text-sm text-[#6B7280] mt-1">Find prospects actively searching for your services</p>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
