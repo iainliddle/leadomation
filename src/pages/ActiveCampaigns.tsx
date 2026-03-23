@@ -309,7 +309,7 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                                             window.history.pushState({}, '', `/leads?campaign=${campaign.id}`);
                                             onPageChange?.('Lead Database');
                                         }}
-                                        className="flex items-center gap-2 px-4 py-2 bg-cyan-50 text-cyan-600 border border-cyan-200 rounded-lg text-sm font-medium hover:bg-cyan-100 transition-all"
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#22D3EE] text-white rounded-lg text-sm font-medium hover:bg-[#06B6D4] transition-all"
                                     >
                                         <Eye size={14} />
                                         View Leads

@@ -279,7 +279,7 @@ const Integrations: React.FC = () => {
                             {linkedinStatus.connected ? (
                                 <button
                                     onClick={() => {}}
-                                    className="flex items-center justify-center gap-2 w-full border border-red-300 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium px-4 py-2"
+                                    className="flex items-center justify-center gap-2 w-full bg-red-50 border border-red-300 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium px-4 py-2"
                                 >
                                     <Linkedin size={16} />
                                     Disconnect account

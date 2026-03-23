@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import {
     Clock,
     ShieldCheck,
@@ -18,23 +19,51 @@ import StarterKit from '@tiptap/starter-kit';
 import LinkExtension from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 
-const EmailConfig: React.FC = () => {
-    const { plan, limits } = usePlan();
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [dailyEmailLimit, setDailyEmailLimit] = useState(50);
-    const [emailSendDelay, setEmailSendDelay] = useState(30);
-    const [autoDetectTimezone, setAutoDetectTimezone] = useState(true);
-    const [fromName, setFromName] = useState('');
-    const [fromEmail, setFromEmail] = useState('');
-    const [replyToEmail, setReplyToEmail] = useState('');
-    const [emailSignature, setEmailSignature] = useState('');
-    const [showSignaturePreview, setShowSignaturePreview] = useState(false);
-    const [fullOutgoingSequence, setFullOutgoingSequence] = useState(true);
-    const [inboxRepliesOnly, setInboxRepliesOnly] = useState(true);
-    const [activeSection, setActiveSection] = useState('sending');
+// Error boundary for TipTap editor
+interface EditorErrorBoundaryProps {
+    children: ReactNode;
+    fallback: ReactNode;
+}
+
+interface EditorErrorBoundaryState {
+    hasError: boolean;
+}
+
+class EditorErrorBoundary extends Component<EditorErrorBoundaryProps, EditorErrorBoundaryState> {
+    constructor(props: EditorErrorBoundaryProps) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(_: Error): EditorErrorBoundaryState {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        console.error('TipTap Editor Error:', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return this.props.fallback;
+        }
+        return this.props.children;
+    }
+}
+
+// Separate component for the TipTap editor to isolate initialization
+interface SignatureEditorProps {
+    initialContent: string;
+    onUpdate: (html: string) => void;
+    onImageUploadError: () => void;
+}
+
+const SignatureEditor: React.FC<SignatureEditorProps> = ({
+    initialContent,
+    onUpdate,
+    onImageUploadError,
+}) => {
     const [uploadingImage, setUploadingImage] = useState(false);
-    const [imageUploadError, setImageUploadError] = useState(false);
     const imageInputRef = useRef<HTMLInputElement>(null);
 
     const editor = useEditor({
@@ -45,7 +74,7 @@ const EmailConfig: React.FC = () => {
             }),
             Image,
         ],
-        content: emailSignature,
+        content: initialContent,
         editorProps: {
             attributes: {
                 class: 'min-h-[120px] p-3 focus:outline-none text-sm',
@@ -54,19 +83,19 @@ const EmailConfig: React.FC = () => {
             },
         },
         onUpdate: ({ editor }) => {
-            setEmailSignature(editor.getHTML());
+            onUpdate(editor.getHTML());
         },
     });
 
     // Update editor content when signature loads from database
     useEffect(() => {
-        if (editor && emailSignature && !editor.isFocused) {
+        if (editor && initialContent && !editor.isFocused) {
             const currentContent = editor.getHTML();
-            if (currentContent === '<p></p>' && emailSignature !== '<p></p>') {
-                editor.commands.setContent(emailSignature);
+            if (currentContent === '<p></p>' && initialContent !== '<p></p>') {
+                editor.commands.setContent(initialContent);
             }
         }
-    }, [editor, emailSignature]);
+    }, [editor, initialContent]);
 
     const handleBold = () => {
         editor?.chain().focus().toggleBold().run();
@@ -89,10 +118,9 @@ const EmailConfig: React.FC = () => {
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file || !editor) return;
 
         setUploadingImage(true);
-        setImageUploadError(false);
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -112,19 +140,71 @@ const EmailConfig: React.FC = () => {
                 .from('signature-images')
                 .getPublicUrl(filePath);
 
-            const publicUrl = urlData.publicUrl;
-
-            editor?.chain().focus().setImage({ src: publicUrl }).run();
+            editor.chain().focus().setImage({ src: urlData.publicUrl }).run();
         } catch (err) {
             console.error('Image upload failed:', err);
-            setImageUploadError(true);
-            setTimeout(() => setImageUploadError(false), 3000);
+            onImageUploadError();
         } finally {
             setUploadingImage(false);
             if (imageInputRef.current) {
                 imageInputRef.current.value = '';
             }
         }
+    };
+
+    if (!editor) {
+        return (
+            <div className="border border-[#E5E7EB] rounded-xl p-5 mb-6 bg-gray-50 min-h-[120px] flex items-center justify-center">
+                <Loader2 size={20} className="animate-spin text-gray-400" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-6">
+            <div className="flex items-center gap-1 p-2 bg-gray-50 border-b border-[#E5E7EB]">
+                <button onClick={handleBold} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Bold size={14} /></button>
+                <button onClick={handleItalic} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Italic size={14} /></button>
+                <button onClick={handleLink} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Link size={14} /></button>
+                <button onClick={handleImageClick} disabled={uploadingImage} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all disabled:opacity-50">
+                    {uploadingImage ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
+                </button>
+                <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                />
+            </div>
+            <EditorContent
+                editor={editor}
+                className="w-full text-[#374151] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:p-3 [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:text-sm"
+            />
+        </div>
+    );
+};
+
+const EmailConfig: React.FC = () => {
+    const { plan, limits } = usePlan();
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [dailyEmailLimit, setDailyEmailLimit] = useState(50);
+    const [emailSendDelay, setEmailSendDelay] = useState(30);
+    const [autoDetectTimezone, setAutoDetectTimezone] = useState(true);
+    const [fromName, setFromName] = useState('');
+    const [fromEmail, setFromEmail] = useState('');
+    const [replyToEmail, setReplyToEmail] = useState('');
+    const [emailSignature, setEmailSignature] = useState('');
+    const [showSignaturePreview, setShowSignaturePreview] = useState(false);
+    const [fullOutgoingSequence, setFullOutgoingSequence] = useState(true);
+    const [inboxRepliesOnly, setInboxRepliesOnly] = useState(true);
+    const [activeSection, setActiveSection] = useState('sending');
+    const [imageUploadError, setImageUploadError] = useState(false);
+
+    const handleImageUploadError = () => {
+        setImageUploadError(true);
+        setTimeout(() => setImageUploadError(false), 3000);
     };
 
     useEffect(() => {
@@ -388,27 +468,20 @@ const EmailConfig: React.FC = () => {
                                     )}
                                 </div>
                             ) : (
-                                <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-6">
-                                    <div className="flex items-center gap-1 p-2 bg-gray-50 border-b border-[#E5E7EB]">
-                                        <button onClick={handleBold} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Bold size={14} /></button>
-                                        <button onClick={handleItalic} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Italic size={14} /></button>
-                                        <button onClick={handleLink} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Link size={14} /></button>
-                                        <button onClick={handleImageClick} disabled={uploadingImage} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all disabled:opacity-50">
-                                            {uploadingImage ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
-                                        </button>
-                                        <input
-                                            ref={imageInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleImageUpload}
-                                            className="hidden"
-                                        />
-                                    </div>
-                                    <EditorContent
-                                        editor={editor}
-                                        className="w-full text-[#374151] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:p-3 [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:text-sm"
+                                <EditorErrorBoundary
+                                    fallback={
+                                        <div className="border border-red-200 rounded-xl p-5 mb-6 bg-red-50 text-sm text-red-700 min-h-[120px]">
+                                            <p className="font-medium mb-1">Editor failed to load</p>
+                                            <p className="text-xs text-red-600">Please refresh the page. If the issue persists, contact support.</p>
+                                        </div>
+                                    }
+                                >
+                                    <SignatureEditor
+                                        initialContent={emailSignature}
+                                        onUpdate={setEmailSignature}
+                                        onImageUploadError={handleImageUploadError}
                                     />
-                                </div>
+                                </EditorErrorBoundary>
                             )}
 
                             {imageUploadError && (
