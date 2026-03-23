@@ -27,7 +27,10 @@ const EmailConfig: React.FC = () => {
     const [fullOutgoingSequence, setFullOutgoingSequence] = useState(true);
     const [inboxRepliesOnly, setInboxRepliesOnly] = useState(true);
     const [activeSection, setActiveSection] = useState('sending');
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [imageUploadError, setImageUploadError] = useState(false);
     const editorRef = useRef<HTMLDivElement>(null);
+    const imageInputRef = useRef<HTMLInputElement>(null);
 
     const handleBold = () => {
         document.execCommand('bold', false);
@@ -47,12 +50,50 @@ const EmailConfig: React.FC = () => {
         editorRef.current?.focus();
     };
 
-    const handleImage = () => {
-        const url = window.prompt('Enter image URL:');
-        if (url) {
-            document.execCommand('insertImage', false, url);
+    const handleImageClick = () => {
+        imageInputRef.current?.click();
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingImage(true);
+        setImageUploadError(false);
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('Not authenticated');
+
+            const ext = file.name.split('.').pop() || 'png';
+            const timestamp = Date.now();
+            const filePath = `${user.id}/signature-${timestamp}.${ext}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('signature-images')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: urlData } = supabase.storage
+                .from('signature-images')
+                .getPublicUrl(filePath);
+
+            const publicUrl = urlData.publicUrl;
+
+            editorRef.current?.focus();
+            document.execCommand('insertImage', false, publicUrl);
+            setEmailSignature(editorRef.current?.innerHTML || '');
+        } catch (err) {
+            console.error('Image upload failed:', err);
+            setImageUploadError(true);
+            setTimeout(() => setImageUploadError(false), 3000);
+        } finally {
+            setUploadingImage(false);
+            if (imageInputRef.current) {
+                imageInputRef.current.value = '';
+            }
         }
-        editorRef.current?.focus();
     };
 
     useEffect(() => {
@@ -310,16 +351,31 @@ const EmailConfig: React.FC = () => {
                                         <button onClick={handleBold} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Bold size={14} /></button>
                                         <button onClick={handleItalic} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Italic size={14} /></button>
                                         <button onClick={handleLink} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Link size={14} /></button>
-                                        <button onClick={handleImage} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><ImageIcon size={14} /></button>
+                                        <button onClick={handleImageClick} disabled={uploadingImage} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all disabled:opacity-50">
+                                            {uploadingImage ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
+                                        </button>
+                                        <input
+                                            ref={imageInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="hidden"
+                                        />
                                     </div>
                                     <div
                                         ref={editorRef}
                                         contentEditable
-                                        className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed"
+                                        className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto"
                                         dangerouslySetInnerHTML={{ __html: emailSignature }}
                                         onInput={e => setEmailSignature((e.target as HTMLDivElement).innerHTML)}
                                         data-placeholder="Kind regards,&#10;Iain Liddle"
                                     />
+                                </div>
+                            )}
+
+                            {imageUploadError && (
+                                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                                    Image upload failed. Please try again.
                                 </div>
                             )}
 
