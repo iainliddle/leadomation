@@ -115,7 +115,12 @@ const EmailConfig: React.FC = () => {
                     setFromName(data.email_from_name || '');
                     setFromEmail(data.email_from_address || '');
                     setReplyToEmail(data.email_reply_to || '');
-                    setEmailSignature(data.email_signature || '');
+                    // Sanitize signature to force LTR direction
+                    const rawSignature = data.email_signature || '';
+                    const sanitizedSignature = rawSignature
+                        .replace(/dir\s*=\s*["']rtl["']/gi, 'dir="ltr"')
+                        .replace(/direction\s*:\s*rtl/gi, 'direction: ltr');
+                    setEmailSignature(sanitizedSignature);
                     setFullOutgoingSequence(data.full_outgoing_sequence ?? true);
                     setInboxRepliesOnly(data.inbox_replies_only ?? true);
                 }
@@ -366,8 +371,12 @@ const EmailConfig: React.FC = () => {
                                         ref={editorRef}
                                         contentEditable
                                         className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto text-left [direction:ltr]"
+                                        style={{ direction: 'ltr', textAlign: 'left', unicodeBidi: 'plaintext' }}
                                         dangerouslySetInnerHTML={{ __html: emailSignature }}
-                                        onInput={e => setEmailSignature((e.target as HTMLDivElement).innerHTML)}
+                                        onInput={e => {
+                                            e.currentTarget.style.direction = 'ltr';
+                                            setEmailSignature((e.target as HTMLDivElement).innerHTML);
+                                        }}
                                         data-placeholder="Kind regards,&#10;Iain Liddle"
                                     />
                                 </div>
