@@ -365,7 +365,7 @@ const EmailConfig: React.FC = () => {
                                     <div
                                         ref={editorRef}
                                         contentEditable
-                                        className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto"
+                                        className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto text-left [direction:ltr]"
                                         dangerouslySetInnerHTML={{ __html: emailSignature }}
                                         onInput={e => setEmailSignature((e.target as HTMLDivElement).innerHTML)}
                                         data-placeholder="Kind regards,&#10;Iain Liddle"
