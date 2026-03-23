@@ -587,7 +587,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             )}
 
             {/* Welcome Message */}
-            <div className="mb-6">
+            <div>
                 <h2 className="text-2xl font-bold text-[#111827]">
                     {greeting}{firstName ? `, ${firstName}` : ''} 👋
                 </h2>
@@ -797,7 +797,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             {/* Charts Row */}
-            <div className="flex flex-col lg:flex-row gap-6 items-start mb-6">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
                 <div className="w-full lg:w-3/5 overflow-hidden">
                     <CampaignPerformance dateFrom={dateFrom || undefined} />
                 </div>
