@@ -879,7 +879,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                     <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
                         <div className="flex justify-between items-center mb-5">
                             <div className="flex items-center gap-2">
-                                <Users size={16} className="text-gray-500" />
+                                <Users size={16} className="text-[#4F46E5]" />
                                 <h3 className="text-base font-semibold text-gray-900">Recent leads</h3>
                             </div>
                             <button onClick={() => onPageChange('Lead Database')} className="text-xs font-semibold text-[#4F46E5] hover:underline uppercase tracking-wide">View all</button>

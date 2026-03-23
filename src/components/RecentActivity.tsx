@@ -21,7 +21,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
-                    <Activity size={16} className="text-gray-500" />
+                    <Activity size={16} className="text-[#4F46E5]" />
                     <h3 className="text-base font-semibold text-gray-900">Recent Activity</h3>
                 </div>
                 <div className="flex items-center gap-2 px-2.5 py-1 bg-green-50 text-emerald-600 text-xs font-medium rounded-full">
