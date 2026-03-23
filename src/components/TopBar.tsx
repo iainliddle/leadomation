@@ -25,7 +25,7 @@ const PAGE_SUBTITLES: Record<string, string> = {
     'Active Campaigns': 'Monitor and manage your campaigns',
     'Lead Database': 'Manage and track all your leads',
     'Deal Pipeline': 'Track deals through your sales funnel',
-    'Sequence Builder': 'Build automated email sequences',
+    'Sequence Builder': 'Build automated outreach sequences',
     'Call Agent': 'AI-powered voice calling',
     'Inbox': 'Manage all your conversations',
     'Email Templates': 'Create reusable email templates',

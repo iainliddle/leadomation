@@ -273,7 +273,10 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                                 <div className="flex justify-end">
                                     <button
                                         onClick={goToNextSection}
-                                        className="px-5 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA]"
+                                        disabled={!selectedTrack}
+                                        className={`px-5 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium ${
+                                            selectedTrack ? 'hover:bg-[#4338CA]' : 'opacity-50 cursor-not-allowed'
+                                        }`}
                                     >
                                         Next
                                     </button>
@@ -607,14 +610,14 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                                     <div className="grid grid-cols-3 gap-3">
                                         <div
                                             onClick={() => setSelectedOutreachStrategy('cold_email')}
-                                            className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                                            className={`rounded-xl p-4 cursor-pointer transition-all ${
                                                 selectedOutreachStrategy === 'cold_email'
-                                                    ? 'border-[#4F46E5] bg-[#EEF2FF]'
-                                                    : 'border-[#E5E7EB] hover:border-[#4F46E5] hover:bg-[#EEF2FF]'
+                                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                                    : 'border border-[#E5E7EB] hover:border-[#4F46E5] hover:bg-[#EEF2FF]'
                                             }`}
                                         >
                                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
-                                                selectedOutreachStrategy === 'cold_email' ? 'bg-[#4F46E5] text-white' : 'bg-[#EEF2FF] text-[#4F46E5]'
+                                                selectedOutreachStrategy === 'cold_email' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-[#EEF2FF] text-[#4F46E5]'
                                             }`}>
                                                 <Mail size={18} />
                                             </div>
@@ -624,15 +627,15 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
 
                                         <div
                                             onClick={() => setSelectedOutreachStrategy('linkedin')}
-                                            className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                                            className={`rounded-xl p-4 cursor-pointer transition-all ${
                                                 selectedOutreachStrategy === 'linkedin'
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-[#E5E7EB] hover:border-blue-500 hover:bg-blue-50'
+                                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                                    : 'border border-[#E5E7EB] hover:border-[#4F46E5] hover:bg-[#EEF2FF]'
                                             }`}
                                         >
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                                                    selectedOutreachStrategy === 'linkedin' ? 'bg-blue-500 text-white' : 'bg-blue-50 text-blue-500'
+                                                    selectedOutreachStrategy === 'linkedin' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-[#EEF2FF] text-[#4F46E5]'
                                                 }`}>
                                                     <Linkedin size={18} />
                                                 </div>
@@ -644,15 +647,15 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
 
                                         <div
                                             onClick={() => setSelectedOutreachStrategy('full_pipeline')}
-                                            className={`border rounded-xl p-4 cursor-pointer transition-all ${
+                                            className={`rounded-xl p-4 cursor-pointer transition-all ${
                                                 selectedOutreachStrategy === 'full_pipeline'
-                                                    ? 'border-purple-500 bg-purple-50'
-                                                    : 'border-[#E5E7EB] hover:border-purple-500 hover:bg-purple-50'
+                                                    ? 'bg-[#EEF2FF] border-2 border-[#4F46E5]'
+                                                    : 'border border-[#E5E7EB] hover:border-[#4F46E5] hover:bg-[#EEF2FF]'
                                             }`}
                                         >
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                                                    selectedOutreachStrategy === 'full_pipeline' ? 'bg-purple-500 text-white' : 'bg-purple-50 text-purple-500'
+                                                    selectedOutreachStrategy === 'full_pipeline' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'bg-[#EEF2FF] text-[#4F46E5]'
                                                 }`}>
                                                     <Sparkles size={18} />
                                                 </div>

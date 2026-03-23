@@ -279,7 +279,7 @@ const Integrations: React.FC = () => {
                             {linkedinStatus.connected ? (
                                 <button
                                     onClick={() => {}}
-                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                                    className="flex items-center justify-center gap-2 w-full border border-red-300 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium px-4 py-2"
                                 >
                                     <Linkedin size={16} />
                                     Disconnect account
@@ -333,7 +333,7 @@ const Integrations: React.FC = () => {
                             </ul>
                             <button
                                 onClick={handleConnectEmail}
-                                className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                                className="flex items-center justify-center gap-2 w-full bg-[#22D3EE] text-white rounded-lg text-sm font-medium px-4 py-2 hover:bg-[#06B6D4]"
                             >
                                 <Mail size={16} />
                                 Connect email account

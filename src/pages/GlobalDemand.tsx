@@ -798,7 +798,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                     {/* Info Banner */}
                     <div className="flex items-start gap-3 px-4 py-3 bg-[#EEF2FF] border border-indigo-100 rounded-xl">
                         <Info size={16} className="text-[#4F46E5] mt-0.5 shrink-0" />
-                        <p className="text-xs font-medium text-[#374151] leading-relaxed">Select your target industry, explore demand hotspots across the globe, then click "Launch Campaign" to start scraping leads and building your outreach sequence for that market. Data is sourced from Google Places, company registries, and aggregated platform intelligence.</p>
+                        <p className="text-xs font-medium text-[#374151] leading-relaxed">Select an industry above, then click a country in the Top Markets list to explore demand and launch a campaign.</p>
                     </div>
                 </>
             )}

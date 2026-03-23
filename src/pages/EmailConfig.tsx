@@ -12,12 +12,14 @@ import {
     Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePlan } from '../hooks/usePlan';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import LinkExtension from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 
 const EmailConfig: React.FC = () => {
+    const { plan, limits } = usePlan();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [dailyEmailLimit, setDailyEmailLimit] = useState(50);
@@ -157,6 +159,14 @@ const EmailConfig: React.FC = () => {
         loadSettings();
     }, []);
 
+    // Clamp daily email limit to plan maximum if it exceeds
+    useEffect(() => {
+        if (limits.maxEmailsPerDay && dailyEmailLimit > limits.maxEmailsPerDay) {
+            setDailyEmailLimit(limits.maxEmailsPerDay);
+            saveSettings({ daily_email_limit: limits.maxEmailsPerDay });
+        }
+    }, [limits.maxEmailsPerDay]);
+
     const saveSettings = async (fields: Record<string, any>) => {
         setSaving(true);
         try {
@@ -235,7 +245,7 @@ const EmailConfig: React.FC = () => {
                                 <div>
                                     <label className="text-xs font-medium text-[#6B7280] mb-3 block">Daily email limit</label>
                                     <div className="flex gap-2">
-                                        {[25, 50, 100, 200].map(limit => (
+                                        {(plan === 'starter' || plan === 'trial' ? [10, 20, 30] : [25, 50, 100]).map(limit => (
                                             <button
                                                 key={limit}
                                                 onClick={() => { setDailyEmailLimit(limit); saveSettings({ daily_email_limit: limit }); }}
@@ -249,6 +259,9 @@ const EmailConfig: React.FC = () => {
                                             </button>
                                         ))}
                                     </div>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        Daily limit helps protect your sender reputation. Your plan allows up to {limits.maxEmailsPerDay} emails per day.
+                                    </p>
                                 </div>
 
                                 <div className="max-w-xs">
@@ -406,18 +419,24 @@ const EmailConfig: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                    <p className="text-sm font-medium text-[#111827]">Full Outgoing Sequence</p>
+                                    <div>
+                                        <p className="text-sm font-medium text-[#111827]">Full Outgoing Sequence</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">Append your signature to all outbound sequence emails</p>
+                                    </div>
                                     <div
-                                        className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer ${fullOutgoingSequence ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
+                                        className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer shrink-0 ${fullOutgoingSequence ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
                                         onClick={() => { const v = !fullOutgoingSequence; setFullOutgoingSequence(v); saveSettings({ full_outgoing_sequence: v }); }}
                                     >
                                         <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${fullOutgoingSequence ? 'translate-x-5' : ''}`} />
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                    <p className="text-sm font-medium text-[#111827]">Inbox Replies Only</p>
+                                    <div>
+                                        <p className="text-sm font-medium text-[#111827]">Inbox Replies Only</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">Also append your signature when replying from your inbox</p>
+                                    </div>
                                     <div
-                                        className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer ${inboxRepliesOnly ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
+                                        className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer shrink-0 ${inboxRepliesOnly ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}
                                         onClick={() => { const v = !inboxRepliesOnly; setInboxRepliesOnly(v); saveSettings({ inbox_replies_only: v }); }}
                                     >
                                         <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${inboxRepliesOnly ? 'translate-x-5' : ''}`} />

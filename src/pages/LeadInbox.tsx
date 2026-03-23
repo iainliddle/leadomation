@@ -442,7 +442,7 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                     <div className="flex items-center justify-between mb-3">
                         <div>
                             <h2 className="text-base font-semibold text-[#111827]">Inbox</h2>
-                            <p className="text-xs text-gray-400 mt-0.5">AI-classified email replies</p>
+                            <p className="text-xs text-gray-400 mt-0.5">AI-classified email and LinkedIn replies</p>
                         </div>
                         <div className="flex items-center gap-2">
                             {unreadCount > 0 && (
