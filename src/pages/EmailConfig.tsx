@@ -12,6 +12,10 @@ import {
     Info
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import LinkExtension from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 
 const EmailConfig: React.FC = () => {
     const [loading, setLoading] = useState(true);
@@ -29,25 +33,52 @@ const EmailConfig: React.FC = () => {
     const [activeSection, setActiveSection] = useState('sending');
     const [uploadingImage, setUploadingImage] = useState(false);
     const [imageUploadError, setImageUploadError] = useState(false);
-    const editorRef = useRef<HTMLDivElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
 
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            LinkExtension.configure({
+                openOnClick: false,
+            }),
+            Image,
+        ],
+        content: emailSignature,
+        editorProps: {
+            attributes: {
+                class: 'min-h-[120px] p-3 focus:outline-none text-sm',
+                dir: 'ltr',
+                style: 'direction: ltr; text-align: left;',
+            },
+        },
+        onUpdate: ({ editor }) => {
+            setEmailSignature(editor.getHTML());
+        },
+    });
+
+    // Update editor content when signature loads from database
+    useEffect(() => {
+        if (editor && emailSignature && !editor.isFocused) {
+            const currentContent = editor.getHTML();
+            if (currentContent === '<p></p>' && emailSignature !== '<p></p>') {
+                editor.commands.setContent(emailSignature);
+            }
+        }
+    }, [editor, emailSignature]);
+
     const handleBold = () => {
-        document.execCommand('bold', false);
-        editorRef.current?.focus();
+        editor?.chain().focus().toggleBold().run();
     };
 
     const handleItalic = () => {
-        document.execCommand('italic', false);
-        editorRef.current?.focus();
+        editor?.chain().focus().toggleItalic().run();
     };
 
     const handleLink = () => {
         const url = window.prompt('Enter URL:');
         if (url) {
-            document.execCommand('createLink', false, url);
+            editor?.chain().focus().setLink({ href: url }).run();
         }
-        editorRef.current?.focus();
     };
 
     const handleImageClick = () => {
@@ -81,9 +112,7 @@ const EmailConfig: React.FC = () => {
 
             const publicUrl = urlData.publicUrl;
 
-            editorRef.current?.focus();
-            document.execCommand('insertImage', false, publicUrl);
-            setEmailSignature(editorRef.current?.innerHTML || '');
+            editor?.chain().focus().setImage({ src: publicUrl }).run();
         } catch (err) {
             console.error('Image upload failed:', err);
             setImageUploadError(true);
@@ -115,12 +144,7 @@ const EmailConfig: React.FC = () => {
                     setFromName(data.email_from_name || '');
                     setFromEmail(data.email_from_address || '');
                     setReplyToEmail(data.email_reply_to || '');
-                    // Sanitize signature to force LTR direction
-                    const rawSignature = data.email_signature || '';
-                    const sanitizedSignature = rawSignature
-                        .replace(/dir\s*=\s*["']rtl["']/gi, 'dir="ltr"')
-                        .replace(/direction\s*:\s*rtl/gi, 'direction: ltr');
-                    setEmailSignature(sanitizedSignature);
+                    setEmailSignature(data.email_signature || '');
                     setFullOutgoingSequence(data.full_outgoing_sequence ?? true);
                     setInboxRepliesOnly(data.inbox_replies_only ?? true);
                 }
@@ -367,17 +391,9 @@ const EmailConfig: React.FC = () => {
                                             className="hidden"
                                         />
                                     </div>
-                                    <div
-                                        ref={editorRef}
-                                        contentEditable
-                                        className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto text-left [direction:ltr]"
-                                        style={{ direction: 'ltr', textAlign: 'left', unicodeBidi: 'plaintext' }}
-                                        dangerouslySetInnerHTML={{ __html: emailSignature }}
-                                        onInput={e => {
-                                            e.currentTarget.style.direction = 'ltr';
-                                            setEmailSignature((e.target as HTMLDivElement).innerHTML);
-                                        }}
-                                        data-placeholder="Kind regards,&#10;Iain Liddle"
+                                    <EditorContent
+                                        editor={editor}
+                                        className="w-full text-[#374151] bg-white leading-relaxed [&_img]:max-w-[200px] [&_img]:h-auto [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:p-3 [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:text-sm"
                                     />
                                 </div>
                             )}
