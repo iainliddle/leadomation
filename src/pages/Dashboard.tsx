@@ -812,18 +812,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                         </div>
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-[#111827] capitalize">{plan === 'trial' ? 'Pro Trial' : plan || 'Starter'}</p>
+                        <p className="text-2xl font-bold text-[#111827] capitalize">{plan === 'trial' || plan === 'trialing' ? 'Pro Trial' : plan || 'Starter'}</p>
                         <p className="text-xs text-[#6B7280] mt-1">
-                            {plan === 'trial'
-                                ? `${trialDaysRemaining} days remaining`
-                                : 'Upgrade to unlock all features'}
+                            {plan === 'trial' || plan === 'trialing'
+                                ? '7-day free trial active'
+                                : plan === 'starter'
+                                    ? 'Starter plan active'
+                                    : plan === 'pro'
+                                        ? 'Pro plan active'
+                                        : 'Upgrade to unlock all features'}
                         </p>
                     </div>
                     <button
                         onClick={() => onPageChange('Pricing')}
                         className="mt-3 w-full py-1.5 bg-[#4F46E5] text-white text-xs font-medium rounded-lg hover:bg-[#4338CA] transition-all"
                     >
-                        {plan === 'trial' ? 'View plans' : 'Upgrade now'}
+                        {plan === 'trial' || plan === 'trialing'
+                            ? 'Choose a plan'
+                            : plan === 'starter'
+                                ? 'Upgrade to Pro'
+                                : plan === 'pro'
+                                    ? 'Manage plan'
+                                    : 'Upgrade now'}
                     </button>
                 </div>
             </div>

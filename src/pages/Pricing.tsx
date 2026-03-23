@@ -12,6 +12,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePlan } from '../hooks/usePlan';
 
 interface PricingCardProps {
     title: string;
@@ -28,6 +29,8 @@ interface PricingCardProps {
     onCheckout: (plan: string) => void;
     isComingSoon?: boolean;
     includesText?: string;
+    buttonVariant?: 'filled' | 'outline-indigo' | 'outline-gray' | 'disabled';
+    buttonDisabled?: boolean;
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({
@@ -44,8 +47,36 @@ const PricingCard: React.FC<PricingCardProps> = ({
     savingsBadge,
     onCheckout,
     isComingSoon,
-    includesText
-}) => (
+    includesText,
+    buttonVariant,
+    buttonDisabled
+}) => {
+    const getButtonClasses = () => {
+        if (buttonVariant === 'disabled') {
+            return 'bg-gray-100 text-gray-400 cursor-not-allowed';
+        }
+        if (buttonVariant === 'outline-gray') {
+            return 'border border-gray-300 text-gray-500 hover:bg-gray-50';
+        }
+        if (buttonVariant === 'outline-indigo') {
+            return 'border border-[#4F46E5] text-[#4F46E5] hover:bg-[#EEF2FF]';
+        }
+        if (buttonVariant === 'filled') {
+            return 'bg-[#4F46E5] text-white hover:bg-[#4338CA]';
+        }
+        // Default behavior (original logic)
+        if (isComingSoon) {
+            return 'bg-gray-200 text-gray-400 cursor-not-allowed';
+        }
+        if (isPopular) {
+            return 'bg-[#4F46E5] text-white hover:bg-[#4338CA]';
+        }
+        return 'border border-[#4F46E5] text-[#4F46E5] hover:bg-[#EEF2FF]';
+    };
+
+    const isButtonDisabled = buttonDisabled || isComingSoon || buttonVariant === 'disabled';
+
+    return (
     <div className={`relative bg-white rounded-xl p-8 ${isPopular
         ? 'border-2 border-[#4F46E5] shadow-xl'
         : isComingSoon
@@ -110,20 +141,15 @@ const PricingCard: React.FC<PricingCardProps> = ({
         </ul>
 
         <button
-            onClick={() => !isComingSoon && onCheckout(title)}
-            disabled={isComingSoon}
-            className={`w-full py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${isComingSoon
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : isPopular
-                    ? 'bg-[#4F46E5] text-white hover:bg-[#4338CA]'
-                    : 'border border-[#4F46E5] text-[#4F46E5] hover:bg-[#EEF2FF]'
-                }`}
+            onClick={() => !isButtonDisabled && onCheckout(title)}
+            disabled={isButtonDisabled}
+            className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${getButtonClasses()}`}
         >
             {buttonText}
-            {!isComingSoon && <ArrowRight size={16} />}
+            {!isButtonDisabled && buttonVariant !== 'disabled' && <ArrowRight size={16} />}
         </button>
     </div>
-);
+);};
 
 const Pricing: React.FC = () => {
     const [isAnnual, setIsAnnual] = useState(false);
@@ -131,6 +157,11 @@ const Pricing: React.FC = () => {
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [cancelled, setCancelled] = useState(false);
+    const [showNotifyToast, setShowNotifyToast] = useState(false);
+    const { plan } = usePlan();
+
+    // Determine user's plan state: 'trialing', 'starter', or 'pro'
+    const userPlanState = plan === 'trial' || plan === 'trialing' ? 'trialing' : plan;
 
     React.useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -140,6 +171,105 @@ const Pricing: React.FC = () => {
             window.history.replaceState({}, '', newUrl);
         }
     }, []);
+
+    // Auto-hide toast after 3 seconds
+    React.useEffect(() => {
+        if (showNotifyToast) {
+            const timer = setTimeout(() => setShowNotifyToast(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showNotifyToast]);
+
+    // Get button props for Starter card based on user's plan
+    const getStarterButtonProps = () => {
+        if (userPlanState === 'trialing') {
+            return {
+                buttonText: isLoading ? 'Loading...' : 'Upgrade to Starter',
+                buttonVariant: 'outline-indigo' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Starter')
+            };
+        }
+        if (userPlanState === 'starter') {
+            return {
+                buttonText: 'Current plan',
+                buttonVariant: 'disabled' as const,
+                buttonDisabled: true,
+                onCheckout: () => {}
+            };
+        }
+        if (userPlanState === 'pro') {
+            return {
+                buttonText: 'Downgrade',
+                buttonVariant: 'outline-gray' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Starter')
+            };
+        }
+        // Default fallback
+        return {
+            buttonText: isLoading ? 'Loading...' : 'Start Free Trial',
+            buttonVariant: undefined,
+            buttonDisabled: false,
+            onCheckout: () => handleCheckout('Starter')
+        };
+    };
+
+    // Get button props for Pro card based on user's plan
+    const getProButtonProps = () => {
+        if (userPlanState === 'trialing') {
+            return {
+                buttonText: isLoading ? 'Loading...' : 'Upgrade to Pro',
+                buttonVariant: 'filled' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Pro')
+            };
+        }
+        if (userPlanState === 'starter') {
+            return {
+                buttonText: isLoading ? 'Loading...' : 'Upgrade to Pro',
+                buttonVariant: 'filled' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Pro')
+            };
+        }
+        if (userPlanState === 'pro') {
+            return {
+                buttonText: 'Current plan',
+                buttonVariant: 'disabled' as const,
+                buttonDisabled: true,
+                onCheckout: () => {}
+            };
+        }
+        // Default fallback
+        return {
+            buttonText: isLoading ? 'Loading...' : 'Start Free Trial',
+            buttonVariant: undefined,
+            buttonDisabled: false,
+            onCheckout: () => handleCheckout('Pro')
+        };
+    };
+
+    // Get button props for Scale card based on user's plan
+    const getScaleButtonProps = () => {
+        if (userPlanState === 'pro') {
+            return {
+                buttonText: 'Notify me',
+                buttonVariant: 'outline-indigo' as const,
+                buttonDisabled: false,
+                isComingSoon: false,
+                onCheckout: () => setShowNotifyToast(true)
+            };
+        }
+        // For trialing and starter, keep as Coming Soon
+        return {
+            buttonText: 'Coming Soon',
+            buttonVariant: undefined,
+            buttonDisabled: false,
+            isComingSoon: true,
+            onCheckout: () => {}
+        };
+    };
 
     const handleCheckout = async (plan: string) => {
         setIsLoading(true);
@@ -268,8 +398,10 @@ const Pricing: React.FC = () => {
                         isAnnual={isAnnual}
                         savingsBadge="Save £142"
                         icon={<Zap size={24} />}
-                        buttonText={isLoading ? "Loading..." : "Start Free Trial"}
-                        onCheckout={() => handleCheckout('Starter')}
+                        buttonText={getStarterButtonProps().buttonText}
+                        buttonVariant={getStarterButtonProps().buttonVariant}
+                        buttonDisabled={getStarterButtonProps().buttonDisabled}
+                        onCheckout={getStarterButtonProps().onCheckout}
                         features={[
                             "Unlimited campaigns",
                             "300 leads per month",
@@ -297,8 +429,10 @@ const Pricing: React.FC = () => {
                         savingsBadge="Save £382"
                         isPopular={true}
                         icon={<Sparkles size={24} />}
-                        buttonText={isLoading ? "Loading..." : "Start Free Trial"}
-                        onCheckout={() => handleCheckout('Pro')}
+                        buttonText={getProButtonProps().buttonText}
+                        buttonVariant={getProButtonProps().buttonVariant}
+                        buttonDisabled={getProButtonProps().buttonDisabled}
+                        onCheckout={getProButtonProps().onCheckout}
                         features={[
                             "Unlimited campaigns",
                             "2,000 leads per month",
@@ -327,10 +461,12 @@ const Pricing: React.FC = () => {
                         annualPrice="£3,446"
                         annualMonthlyRate="£287.17"
                         isAnnual={isAnnual}
-                        isComingSoon={true}
+                        isComingSoon={getScaleButtonProps().isComingSoon}
                         icon={<ShieldCheck size={24} />}
-                        buttonText="Coming Soon"
-                        onCheckout={() => {}}
+                        buttonText={getScaleButtonProps().buttonText}
+                        buttonVariant={getScaleButtonProps().buttonVariant}
+                        buttonDisabled={getScaleButtonProps().buttonDisabled}
+                        onCheckout={getScaleButtonProps().onCheckout}
                         includesText="Everything in Pro, plus:"
                         features={[
                             "3,000 leads per month",
@@ -340,7 +476,7 @@ const Pricing: React.FC = () => {
                             "SMS Outreach (Twilio)",
                             "WhatsApp Outreach",
                             "LinkedIn Sequencer",
-                            "AI Video Prospecting (30/month) — NEW"
+                            "AI Video Prospecting (30/month) - NEW"
                         ]}
                     />
                 </div>
@@ -463,6 +599,13 @@ const Pricing: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Notify Toast */}
+            {showNotifyToast && (
+                <div className="fixed bottom-6 right-6 bg-[#111827] text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium animate-in fade-in slide-in-from-bottom-4 duration-200 z-50">
+                    We'll notify you when Scale launches.
+                </div>
+            )}
         </div>
     );
 };
