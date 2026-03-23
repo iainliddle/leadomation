@@ -152,75 +152,68 @@ const StatCard: React.FC<StatCardProps> = ({
     chartGradientId,
     tooltipLabel = 'Count'
 }) => (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow duration-200 h-full">
-        <div className="flex flex-col justify-between h-full">
-            {/* Top section: title with info icon and colored icon */}
-            <div className="flex justify-between items-start">
-                <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-medium text-[#9CA3AF]">{label}</p>
-                    <Info size={14} className="text-gray-300 cursor-help" />
-                </div>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
-                    <Icon size={18} className={iconColor} />
-                </div>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow duration-200 relative">
+        <div className="flex justify-between items-start mb-3">
+            <div className="flex items-center gap-1.5">
+                <p className="text-xs font-medium text-[#9CA3AF]">{label}</p>
+                <Info size={14} className="text-gray-300 cursor-help" />
             </div>
-            {/* Middle section: value and subtitle (vertically centered) */}
-            <div className="flex-1 flex items-center">
-                <div>
-                    <h3 className="text-2xl font-bold text-[#111827]">{value}</h3>
-                    <div className="flex items-center gap-1.5 text-xs font-medium mt-1">
-                        <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-                            <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />
-                            {change}
-                        </span>
-                        <span className="text-gray-400">{subtitle}</span>
-                    </div>
-                </div>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
+                <Icon size={18} className={iconColor} />
             </div>
-            {/* Bottom section: sparkline chart */}
-            {chartData && (
-                <div className="w-full h-10 opacity-80">
-                    {chartType === 'bar' ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={chartData} barSize={4}>
-                                <Bar dataKey="value" fill={chartColor} radius={[2, 2, 0, 0]} />
-                                <Tooltip
-                                    contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
-                                    formatter={(v) => [v, tooltipLabel]}
-                                    labelFormatter={(l) => String(l)}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData}>
-                                {chartGradientId && (
-                                    <defs>
-                                        <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
-                                            <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                )}
-                                <Area
-                                    type="monotone"
-                                    dataKey="value"
-                                    stroke={chartColor}
-                                    strokeWidth={1.5}
-                                    fill={chartGradientId ? `url(#${chartGradientId})` : chartColor}
-                                    dot={false}
-                                />
-                                <Tooltip
-                                    contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
-                                    formatter={(v) => [v, tooltipLabel]}
-                                    labelFormatter={(l) => String(l)}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    )}
-                </div>
-            )}
         </div>
+        <div>
+            <h3 className="text-2xl font-bold text-[#111827] mb-1">{value}</h3>
+            <div className="flex items-center gap-1.5 text-xs font-medium">
+                <span className={`flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                    <ArrowUpRight size={14} className={isPositive ? '' : 'rotate-90'} />
+                    {change}
+                </span>
+                <span className="text-gray-400">{subtitle}</span>
+            </div>
+        </div>
+        {chartData && (
+            <div className="absolute bottom-4 right-4 w-20 h-10 opacity-80">
+                {chartType === 'bar' ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} barSize={4}>
+                            <Bar dataKey="value" fill={chartColor} radius={[2, 2, 0, 0]} />
+                            <Tooltip
+                                contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
+                                formatter={(v) => [v, tooltipLabel]}
+                                labelFormatter={(l) => String(l)}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                            {chartGradientId && (
+                                <defs>
+                                    <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                            )}
+                            <Area
+                                type="monotone"
+                                dataKey="value"
+                                stroke={chartColor}
+                                strokeWidth={1.5}
+                                fill={chartGradientId ? `url(#${chartGradientId})` : chartColor}
+                                dot={false}
+                            />
+                            <Tooltip
+                                contentStyle={{ fontSize: '10px', padding: '2px 6px', borderRadius: '6px', border: '1px solid #E5E7EB' }}
+                                formatter={(v) => [v, tooltipLabel]}
+                                labelFormatter={(l) => String(l)}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                )}
+            </div>
+        )}
     </div>
 );
 
