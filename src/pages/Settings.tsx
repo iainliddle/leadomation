@@ -92,7 +92,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                     setLastName(parts.slice(1).join(' ') || '');
                 }
                 setPhone(data.phone || '');
-                setCompany(data.company || '');
+                setCompany(data.company_name || '');
                 setJobTitle(data.job_title || '');
                 setProfileImageUrl(data.avatar_url || null);
             }
@@ -184,8 +184,9 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                 full_name: fullName,
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
-                phone,
-                job_title: jobTitle,
+                phone: phone.trim(),
+                company_name: company.trim(),
+                job_title: jobTitle.trim(),
                 avatar_url: profileImageUrl,
                 updated_at: new Date().toISOString(),
             });
