@@ -19,7 +19,8 @@ import {
     Target,
     Trophy,
     XCircle,
-    MessageSquare
+    MessageSquare,
+    Copy
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -88,6 +89,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
     const [editingSequence, setEditingSequence] = useState<Sequence | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [upgradeModal, setUpgradeModal] = useState({ show: false, message: '' });
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Tab State
     const [activeTab, setActiveTab] = useState<'email' | 'linkedin'>('email');
@@ -400,6 +402,33 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
         if (!error) fetchSequences();
     };
 
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 4000);
+    };
+
+    const handleDuplicate = async (e: React.MouseEvent, seq: Sequence) => {
+        e.stopPropagation();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { error } = await supabase.from('sequences').insert({
+            user_id: user.id,
+            name: `${seq.name} (Copy)`,
+            status: 'paused',
+            steps: seq.steps,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
+        if (error) {
+            showToast('Failed to duplicate sequence. Please try again.', 'error');
+        } else {
+            showToast('Sequence duplicated successfully', 'success');
+            fetchSequences();
+        }
+    };
+
     const checkSequenceStepLimit = async (): Promise<boolean> => {
         if (!editingSequence) return false;
         const { data: { user } } = await supabase.auth.getUser();
@@ -627,6 +656,18 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                                 >
                                                     {seq.status === 'active' ? 'Pause' : 'Activate'}
                                                 </button>
+                                                <div className="relative group/dup">
+                                                    <button
+                                                        onClick={(e) => handleDuplicate(e, seq)}
+                                                        className="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                                        aria-label="Duplicate sequence"
+                                                    >
+                                                        <Copy size={15} />
+                                                    </button>
+                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover/dup:opacity-100 transition-opacity pointer-events-none z-10">
+                                                        Duplicate sequence.
+                                                    </div>
+                                                </div>
                                                 <ChevronRight className="text-gray-400 group-hover:text-[#4F46E5] transition-colors" size={20} />
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleDelete(seq.id); }}
@@ -1089,6 +1130,20 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                         if (onPageChange) onPageChange('Pricing');
                     }}
                 />
+            )}
+
+            {/* Toast Notification */}
+            {toast && (
+                <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium animate-fade-in ${
+                    toast.type === 'success'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-red-600 text-white'
+                }`}>
+                    <span>{toast.message}</span>
+                    <button onClick={() => setToast(null)} className="ml-1 opacity-80 hover:opacity-100 transition-opacity">
+                        <X size={14} />
+                    </button>
+                </div>
             )}
         </div>
     );
