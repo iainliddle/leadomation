@@ -468,8 +468,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
 
             // Apply search filter at the query level (server-side)
             if (debouncedSearchQuery.trim()) {
-                const searchTerm = `%${debouncedSearchQuery.trim()}%`;
-                query = query.or(`company.ilike.${searchTerm},first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},email.ilike.${searchTerm}`);
+                const searchTerm = debouncedSearchQuery.trim();
+                query = query.or(`company.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`);
             }
 
             // Apply intent score filters at the query level
