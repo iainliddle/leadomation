@@ -14,6 +14,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { usePlan } from '../hooks/usePlan';
 
+
 interface PricingCardProps {
     title: string;
     description: string;
