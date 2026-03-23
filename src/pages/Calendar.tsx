@@ -177,16 +177,18 @@ function EventTypeDropdown({ value, onChange }: EventTypeDropdownProps) {
 
 interface AddEventModalProps {
   defaultDate: Date | null;
+  defaultStartTime?: string;
+  defaultEndTime?: string;
   onClose: () => void;
   onSave: (event: Omit<CalendarEvent, 'id' | 'user_id' | 'created_at' | 'source'>) => Promise<void>;
 }
 
-function AddEventModal({ defaultDate, onClose, onSave }: AddEventModalProps) {
+function AddEventModal({ defaultDate, defaultStartTime, defaultEndTime, onClose, onSave }: AddEventModalProps) {
   const [title, setTitle] = useState('');
   const [eventType, setEventType] = useState<string>('discovery_call');
   const [date, setDate] = useState(defaultDate ? defaultDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('10:00');
+  const [startTime, setStartTime] = useState(defaultStartTime || '09:00');
+  const [endTime, setEndTime] = useState(defaultEndTime || '10:00');
   const [attendeeName, setAttendeeName] = useState('');
   const [attendeeEmail, setAttendeeEmail] = useState('');
   const [meetingLink, setMeetingLink] = useState('');
@@ -568,6 +570,8 @@ const Calendar: React.FC = () => {
   const [view, setView] = useState<'week' | 'month'>('week');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedStartTime, setSelectedStartTime] = useState<string | undefined>(undefined);
+  const [selectedEndTime, setSelectedEndTime] = useState<string | undefined>(undefined);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const loadEvents = async () => {
@@ -678,6 +682,17 @@ const Calendar: React.FC = () => {
 
   const handleDayClick = (day: Date) => {
     setSelectedDate(day);
+    setSelectedStartTime(undefined);
+    setSelectedEndTime(undefined);
+    setShowAddModal(true);
+  };
+
+  const handleTimeSlotClick = (day: Date, hour: number) => {
+    setSelectedDate(day);
+    const startHour = hour.toString().padStart(2, '0');
+    const endHour = (hour + 1).toString().padStart(2, '0');
+    setSelectedStartTime(`${startHour}:00`);
+    setSelectedEndTime(`${endHour}:00`);
     setShowAddModal(true);
   };
 
@@ -744,6 +759,8 @@ const Calendar: React.FC = () => {
             <button
               onClick={() => {
                 setSelectedDate(new Date());
+                setSelectedStartTime(undefined);
+                setSelectedEndTime(undefined);
                 setShowAddModal(true);
               }}
               className="flex items-center gap-2 px-3 py-1.5 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA]"
@@ -798,8 +815,8 @@ const Calendar: React.FC = () => {
                     return (
                       <div
                         key={idx}
-                        className={`h-14 border-b border-gray-50 relative cursor-pointer hover:bg-gray-50/50 transition-colors border-r border-gray-100 ${isLastColumn ? 'border-r-0' : ''}`}
-                        onClick={() => handleDayClick(day)}
+                        className={`h-14 border-b border-gray-50 relative cursor-pointer hover:bg-indigo-50 transition-colors border-r border-gray-100 ${isLastColumn ? 'border-r-0' : ''}`}
+                        onClick={() => handleTimeSlotClick(day, hour)}
                       />
                     );
                   })}
@@ -951,9 +968,13 @@ const Calendar: React.FC = () => {
       {showAddModal && (
         <AddEventModal
           defaultDate={selectedDate}
+          defaultStartTime={selectedStartTime}
+          defaultEndTime={selectedEndTime}
           onClose={() => {
             setShowAddModal(false);
             setSelectedDate(null);
+            setSelectedStartTime(undefined);
+            setSelectedEndTime(undefined);
           }}
           onSave={addEvent}
         />
