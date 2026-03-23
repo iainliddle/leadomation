@@ -1,18 +1,35 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { createClient } from '@supabase/supabase-js'
 
-const UNIPILE_API_KEY = 'vLurcq/9.sCRBpfP5sOzvEW/RFqTk+63rALEGbcYaut2LabBa5zc='
-const UNIPILE_DSN = 'https://api4.unipile.com:13458'
+// Use environment variables - NEVER hardcode API keys
+const UNIPILE_API_KEY = process.env.UNIPILE_API_KEY!
+const UNIPILE_DSN = process.env.UNIPILE_BASE_URL || 'https://api4.unipile.com:13458'
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+)
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { user_id } = req.body
-
-  if (!user_id) {
-    return res.status(400).json({ error: 'user_id is required' })
+  // Authentication check
+  const authHeader = req.headers.authorization
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Unauthorized' })
   }
+
+  const token = authHeader.replace('Bearer ', '')
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
+  if (authError || !user) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  // Use authenticated user's ID instead of trusting body
+  const user_id = user.id
 
   try {
     const response = await fetch(`${UNIPILE_DSN}/api/v1/hosted/accounts/link`, {

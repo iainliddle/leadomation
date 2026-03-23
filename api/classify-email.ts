@@ -7,14 +7,14 @@ const anthropic = new Anthropic({
 
 // Auth client for user verification
 const supabaseAuth = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.VITE_SUPABASE_URL!,
+    process.env.VITE_SUPABASE_ANON_KEY!
 );
 
 // Service client for database operations
 const supabase = createClient(
-    process.env.SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    process.env.VITE_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 // Rate limiting
@@ -118,6 +118,7 @@ Return ONLY a valid JSON object with no additional text: { "label": string, "con
         }
 
         // Update the inbound_email record if ID provided
+        // Security: Include user_id filter to prevent modifying other users' data
         if (inbound_email_id) {
             await supabase
                 .from('inbound_emails')
@@ -125,7 +126,8 @@ Return ONLY a valid JSON object with no additional text: { "label": string, "con
                     ai_label: classification.label,
                     ai_confidence: classification.confidence
                 })
-                .eq('id', inbound_email_id);
+                .eq('id', inbound_email_id)
+                .eq('user_id', user.id);
 
             // If Unsubscribe, update lead status and stop sequences
             if (classification.label === 'Unsubscribe') {
@@ -133,20 +135,23 @@ Return ONLY a valid JSON object with no additional text: { "label": string, "con
                     .from('inbound_emails')
                     .select('lead_id')
                     .eq('id', inbound_email_id)
+                    .eq('user_id', user.id)
                     .single();
 
                 if (email?.lead_id) {
-                    // Update lead status
+                    // Update lead status - filtered by user_id
                     await supabase
                         .from('leads')
                         .update({ status: 'unsubscribed' })
-                        .eq('id', email.lead_id);
+                        .eq('id', email.lead_id)
+                        .eq('user_id', user.id);
 
-                    // Stop all active sequence enrollments
+                    // Stop all active sequence enrollments - filtered by user_id
                     await supabase
                         .from('sequence_enrollments')
                         .update({ status: 'completed' })
                         .eq('lead_id', email.lead_id)
+                        .eq('user_id', user.id)
                         .eq('status', 'active');
                 }
             }

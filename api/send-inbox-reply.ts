@@ -5,14 +5,14 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Auth client for user verification
 const supabaseAuth = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.VITE_SUPABASE_URL!,
+    process.env.VITE_SUPABASE_ANON_KEY!
 );
 
 // Service client for database operations
 const supabase = createClient(
-    process.env.SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    process.env.VITE_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 // UUID validation regex
@@ -82,6 +82,7 @@ export default async function handler(req: any, res: any) {
         });
 
         // Update the inbound_email record to mark as replied
+        // Security: Include user_id filter to prevent modifying other users' data
         if (inbound_email_id) {
             await supabase
                 .from('inbound_emails')
@@ -89,7 +90,8 @@ export default async function handler(req: any, res: any) {
                     replied: true,
                     reply_body: body
                 })
-                .eq('id', inbound_email_id);
+                .eq('id', inbound_email_id)
+                .eq('user_id', user.id);
         }
 
         return res.status(200).json({ success: true, data });

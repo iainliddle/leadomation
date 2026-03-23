@@ -8,7 +8,24 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Security: Verify internal request with secret (for Supabase triggers)
+    const internalSecret = req.headers['x-internal-secret'] || req.headers['authorization']?.replace('Bearer ', '');
+    if (internalSecret !== process.env.INTERNAL_API_SECRET) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     let { to, subject, html, type, firstName } = req.body;
+
+    // Input validation
+    if (!to || typeof to !== 'string') {
+        return res.status(400).json({ error: 'Missing or invalid "to" field' });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(to)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
 
     // Handle server-side triggers from Supabase (type: 'welcome')
     if (type === 'welcome') {
@@ -18,8 +35,8 @@ export default async function handler(req: any, res: any) {
         html = BASE_LAYOUT(subject, bodyContent);
     }
 
-    if (!to || !subject || !html) {
-        return res.status(400).json({ error: 'Missing required fields (to, subject, html)' });
+    if (!subject || !html) {
+        return res.status(400).json({ error: 'Missing required fields (subject, html)' });
     }
 
     try {

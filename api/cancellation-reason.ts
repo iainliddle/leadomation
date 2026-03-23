@@ -4,27 +4,53 @@ export const config = {
     api: { bodyParser: true },
 };
 
+// Auth client for user verification
+const supabaseAuth = createClient(
+    process.env.VITE_SUPABASE_URL!,
+    process.env.VITE_SUPABASE_ANON_KEY!
+);
+
+// Service client for database operations
+const supabaseAdmin = createClient(
+    process.env.VITE_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
 export default async function handler(req: any, res: any) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { userId, reason } = req.body;
-
-    if (!userId || !reason) {
-        return res.status(400).json({ error: 'userId and reason are required' });
+    // Authentication check
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const supabase = createClient(
-        process.env.VITE_SUPABASE_URL || '',
-        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-    );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+
+    if (authError || !user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { reason } = req.body;
+
+    // Input validation
+    if (!reason || typeof reason !== 'string') {
+        return res.status(400).json({ error: 'reason is required and must be a string' });
+    }
+
+    if (reason.length > 1000) {
+        return res.status(400).json({ error: 'reason must be 1000 characters or less' });
+    }
 
     try {
-        const { error } = await supabase
+        // Use authenticated user's ID, not from body
+        const { error } = await supabaseAdmin
             .from('cancellation_reasons')
             .insert({
-                user_id: userId,
+                user_id: user.id,
                 reason: reason,
             });
 
