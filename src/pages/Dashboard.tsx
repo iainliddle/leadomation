@@ -797,11 +797,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 items-start">
-                <div className="lg:col-span-6">
+            <div className="flex flex-col lg:flex-row gap-6 items-start mb-6">
+                <div className="w-full lg:w-3/5">
                     <CampaignPerformance dateFrom={dateFrom || undefined} />
                 </div>
-                <div className="lg:col-span-4">
+                <div className="w-full lg:w-2/5">
                     <TopCampaigns dateFrom={dateFrom || undefined} />
                 </div>
             </div>
