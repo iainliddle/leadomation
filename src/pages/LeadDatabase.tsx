@@ -76,6 +76,7 @@ interface LeadDatabaseProps {
 }
 
 const cityToTimezone: Record<string, string> = {
+    // United Kingdom
     'london': 'Europe/London', 'manchester': 'Europe/London', 'birmingham': 'Europe/London',
     'liverpool': 'Europe/London', 'leeds': 'Europe/London', 'bristol': 'Europe/London',
     'edinburgh': 'Europe/London', 'glasgow': 'Europe/London', 'cardiff': 'Europe/London',
@@ -83,36 +84,52 @@ const cityToTimezone: Record<string, string> = {
     'nottingham': 'Europe/London', 'england': 'Europe/London', 'scotland': 'Europe/London',
     'wales': 'Europe/London', 'uk': 'Europe/London', 'gb': 'Europe/London',
     'united kingdom': 'Europe/London',
+    // UAE
     'dubai': 'Asia/Dubai', 'abu dhabi': 'Asia/Dubai', 'sharjah': 'Asia/Dubai',
     'uae': 'Asia/Dubai', 'united arab emirates': 'Asia/Dubai', 'ae': 'Asia/Dubai',
+    // USA
     'new york': 'America/New_York', 'boston': 'America/New_York', 'miami': 'America/New_York',
     'atlanta': 'America/New_York', 'philadelphia': 'America/New_York', 'washington': 'America/New_York',
+    'us east': 'America/New_York',
     'chicago': 'America/Chicago', 'dallas': 'America/Chicago', 'houston': 'America/Chicago',
     'austin': 'America/Chicago', 'denver': 'America/Denver', 'phoenix': 'America/Phoenix',
     'los angeles': 'America/Los_Angeles', 'san francisco': 'America/Los_Angeles',
     'seattle': 'America/Los_Angeles', 'las vegas': 'America/Los_Angeles',
-    'paris': 'Europe/Paris', 'berlin': 'Europe/Berlin', 'madrid': 'Europe/Madrid',
-    'rome': 'Europe/Rome', 'amsterdam': 'Europe/Amsterdam', 'brussels': 'Europe/Brussels',
-    'vienna': 'Europe/Vienna', 'zurich': 'Europe/Zurich', 'munich': 'Europe/Berlin',
-    'barcelona': 'Europe/Madrid', 'milan': 'Europe/Rome', 'dublin': 'Europe/Dublin',
-    'ireland': 'Europe/Dublin', 'france': 'Europe/Paris', 'germany': 'Europe/Berlin',
-    'spain': 'Europe/Madrid', 'italy': 'Europe/Rome', 'netherlands': 'Europe/Amsterdam',
+    // Europe
+    'paris': 'Europe/Paris', 'france': 'Europe/Paris', 'fr': 'Europe/Paris',
+    'berlin': 'Europe/Berlin', 'germany': 'Europe/Berlin', 'de': 'Europe/Berlin', 'munich': 'Europe/Berlin',
+    'madrid': 'Europe/Madrid', 'spain': 'Europe/Madrid', 'es': 'Europe/Madrid', 'barcelona': 'Europe/Madrid',
+    'rome': 'Europe/Rome', 'italy': 'Europe/Rome', 'it': 'Europe/Rome', 'milan': 'Europe/Rome',
+    'amsterdam': 'Europe/Amsterdam', 'netherlands': 'Europe/Amsterdam', 'nl': 'Europe/Amsterdam',
+    'stockholm': 'Europe/Stockholm', 'sweden': 'Europe/Stockholm', 'se': 'Europe/Stockholm',
+    'brussels': 'Europe/Brussels', 'vienna': 'Europe/Vienna', 'zurich': 'Europe/Zurich',
+    'dublin': 'Europe/Dublin', 'ireland': 'Europe/Dublin',
+    // Australia
     'sydney': 'Australia/Sydney', 'melbourne': 'Australia/Melbourne',
     'brisbane': 'Australia/Brisbane', 'perth': 'Australia/Perth',
     'adelaide': 'Australia/Adelaide', 'australia': 'Australia/Sydney',
     'au': 'Australia/Sydney', 'nsw': 'Australia/Sydney', 'victoria': 'Australia/Melbourne',
     'new south wales': 'Australia/Sydney',
+    // Asia
     'singapore': 'Asia/Singapore', 'sg': 'Asia/Singapore',
-    'hong kong': 'Asia/Hong_Kong', 'tokyo': 'Asia/Tokyo', 'japan': 'Asia/Tokyo',
+    'hong kong': 'Asia/Hong_Kong', 'tokyo': 'Asia/Tokyo', 'japan': 'Asia/Tokyo', 'jp': 'Asia/Tokyo',
     'beijing': 'Asia/Shanghai', 'shanghai': 'Asia/Shanghai', 'china': 'Asia/Shanghai',
     'bangkok': 'Asia/Bangkok', 'thailand': 'Asia/Bangkok',
-    'jakarta': 'Asia/Jakarta', 'india': 'Asia/Kolkata', 'mumbai': 'Asia/Kolkata',
+    'jakarta': 'Asia/Jakarta',
+    'india': 'Asia/Kolkata', 'in': 'Asia/Kolkata', 'mumbai': 'Asia/Kolkata',
     'delhi': 'Asia/Kolkata', 'bangalore': 'Asia/Kolkata',
+    // Middle East
     'riyadh': 'Asia/Riyadh', 'jeddah': 'Asia/Riyadh', 'saudi': 'Asia/Riyadh',
     'doha': 'Asia/Qatar', 'qatar': 'Asia/Qatar', 'kuwait': 'Asia/Kuwait',
     'bahrain': 'Asia/Bahrain', 'muscat': 'Asia/Muscat', 'oman': 'Asia/Muscat',
+    // Canada
     'toronto': 'America/Toronto', 'montreal': 'America/Toronto', 'ottawa': 'America/Toronto',
+    'canada': 'America/Toronto', 'ca': 'America/Toronto',
     'vancouver': 'America/Vancouver', 'calgary': 'America/Edmonton',
+    // Brazil
+    'sao paulo': 'America/Sao_Paulo', 'brazil': 'America/Sao_Paulo', 'br': 'America/Sao_Paulo',
+    'rio de janeiro': 'America/Sao_Paulo',
+    // Other
     'auckland': 'Pacific/Auckland', 'new zealand': 'Pacific/Auckland', 'nz': 'Pacific/Auckland',
     'johannesburg': 'Africa/Johannesburg', 'cape town': 'Africa/Johannesburg',
     'south africa': 'Africa/Johannesburg',
