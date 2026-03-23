@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Clock,
     ShieldCheck,
@@ -27,6 +27,33 @@ const EmailConfig: React.FC = () => {
     const [fullOutgoingSequence, setFullOutgoingSequence] = useState(true);
     const [inboxRepliesOnly, setInboxRepliesOnly] = useState(true);
     const [activeSection, setActiveSection] = useState('sending');
+    const editorRef = useRef<HTMLDivElement>(null);
+
+    const handleBold = () => {
+        document.execCommand('bold', false);
+        editorRef.current?.focus();
+    };
+
+    const handleItalic = () => {
+        document.execCommand('italic', false);
+        editorRef.current?.focus();
+    };
+
+    const handleLink = () => {
+        const url = window.prompt('Enter URL:');
+        if (url) {
+            document.execCommand('createLink', false, url);
+        }
+        editorRef.current?.focus();
+    };
+
+    const handleImage = () => {
+        const url = window.prompt('Enter image URL:');
+        if (url) {
+            document.execCommand('insertImage', false, url);
+        }
+        editorRef.current?.focus();
+    };
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -270,22 +297,28 @@ const EmailConfig: React.FC = () => {
                             </div>
 
                             {showSignaturePreview ? (
-                                <div className="border border-[#E5E7EB] rounded-xl p-5 mb-6 bg-gray-50 text-sm text-[#4B5563] whitespace-pre-wrap leading-relaxed min-h-[120px]">
-                                    {emailSignature || <span className="text-gray-400 italic">No signature set</span>}
+                                <div className="border border-[#E5E7EB] rounded-xl p-5 mb-6 bg-gray-50 text-sm text-[#4B5563] leading-relaxed min-h-[120px]">
+                                    {emailSignature ? (
+                                        <div dangerouslySetInnerHTML={{ __html: emailSignature }} />
+                                    ) : (
+                                        <span className="text-gray-400 italic">No signature set</span>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="border border-[#E5E7EB] rounded-xl overflow-hidden mb-6">
                                     <div className="flex items-center gap-1 p-2 bg-gray-50 border-b border-[#E5E7EB]">
-                                        <button className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Bold size={14} /></button>
-                                        <button className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Italic size={14} /></button>
-                                        <button className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Link size={14} /></button>
-                                        <button className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><ImageIcon size={14} /></button>
+                                        <button onClick={handleBold} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Bold size={14} /></button>
+                                        <button onClick={handleItalic} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Italic size={14} /></button>
+                                        <button onClick={handleLink} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><Link size={14} /></button>
+                                        <button onClick={handleImage} className="p-1.5 text-gray-400 hover:text-[#4F46E5] hover:bg-white rounded-lg transition-all"><ImageIcon size={14} /></button>
                                     </div>
-                                    <textarea
-                                        className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed resize-none"
-                                        value={emailSignature}
-                                        onChange={e => setEmailSignature(e.target.value)}
-                                        placeholder="Kind regards,&#10;Iain Liddle"
+                                    <div
+                                        ref={editorRef}
+                                        contentEditable
+                                        className="w-full p-4 text-sm text-[#374151] focus:outline-none min-h-[140px] bg-white leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: emailSignature }}
+                                        onInput={e => setEmailSignature((e.target as HTMLDivElement).innerHTML)}
+                                        data-placeholder="Kind regards,&#10;Iain Liddle"
                                     />
                                 </div>
                             )}
