@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone } from 'lucide-react';
+import { Phone, Activity } from 'lucide-react';
 
 interface ActivityItem {
     id: string;
@@ -20,7 +20,10 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-base font-semibold text-gray-900">Recent Activity</h3>
+                <div className="flex items-center gap-2">
+                    <Activity size={16} className="text-gray-500" />
+                    <h3 className="text-base font-semibold text-gray-900">Recent Activity</h3>
+                </div>
                 <div className="flex items-center gap-2 px-2.5 py-1 bg-green-50 text-emerald-600 text-xs font-medium rounded-full">
                     <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

@@ -68,6 +68,11 @@ interface Step {
     delay_days: number;
 }
 
+interface SequenceStats {
+    openRate: number | null;
+    replyRate: number | null;
+}
+
 interface Sequence {
     id: string;
     name: string;
@@ -75,6 +80,7 @@ interface Sequence {
     steps: Step[];
     created_at: string;
     user_id: string;
+    stats?: SequenceStats;
 }
 
 interface SequenceBuilderProps {
@@ -131,9 +137,51 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
 
         if (error) {
             console.error('Error fetching sequences:', error);
-        } else {
-            setSequences(data || []);
+            setIsLoading(false);
+            return;
         }
+
+        const sequencesList = data || [];
+        const sequenceIds = sequencesList.map(s => s.id);
+
+        if (sequenceIds.length > 0) {
+            // Fetch open rate stats from sequence_step_logs
+            const { data: stepLogs } = await supabase
+                .from('sequence_step_logs')
+                .select('sequence_id, opened')
+                .in('sequence_id', sequenceIds);
+
+            // Fetch reply rate stats from sequence_enrollments
+            const { data: enrollments } = await supabase
+                .from('sequence_enrollments')
+                .select('sequence_id, status')
+                .in('sequence_id', sequenceIds);
+
+            // Calculate stats per sequence
+            const statsMap: Record<string, SequenceStats> = {};
+
+            sequenceIds.forEach(seqId => {
+                const seqLogs = (stepLogs || []).filter(log => log.sequence_id === seqId);
+                const seqEnrollments = (enrollments || []).filter(e => e.sequence_id === seqId);
+
+                const totalLogs = seqLogs.length;
+                const openedLogs = seqLogs.filter(log => log.opened === true).length;
+                const openRate = totalLogs > 0 ? Math.round((openedLogs / totalLogs) * 100) : null;
+
+                const totalEnrollments = seqEnrollments.length;
+                const repliedEnrollments = seqEnrollments.filter(e => e.status === 'replied').length;
+                const replyRate = totalEnrollments > 0 ? Math.round((repliedEnrollments / totalEnrollments) * 100) : null;
+
+                statsMap[seqId] = { openRate, replyRate };
+            });
+
+            // Attach stats to sequences
+            sequencesList.forEach(seq => {
+                seq.stats = statsMap[seq.id] || { openRate: null, replyRate: null };
+            });
+        }
+
+        setSequences(sequencesList);
         setIsLoading(false);
     };
 
@@ -639,6 +687,14 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                                         <span>{(seq as any).sequence_enrollments?.[0]?.count || 0} enrolled lead{(seq as any).sequence_enrollments?.[0]?.count !== 1 ? 's' : ''}</span>
                                                         <span className="text-gray-300">·</span>
                                                         <span>Created {new Date(seq.created_at).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className="bg-gray-100 text-gray-600 text-xs rounded-full px-2 py-0.5">
+                                                            Open rate: {seq.stats?.openRate !== null ? `${seq.stats.openRate}%` : '-'}
+                                                        </span>
+                                                        <span className="bg-gray-100 text-gray-600 text-xs rounded-full px-2 py-0.5">
+                                                            Reply rate: {seq.stats?.replyRate !== null ? `${seq.stats.replyRate}%` : '-'}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>

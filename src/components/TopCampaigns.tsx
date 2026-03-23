@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trophy } from 'lucide-react';
 
 interface Campaign {
     name: string;
@@ -72,7 +72,10 @@ const TopCampaigns: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
     return (
         <div className="card p-6 bg-white border border-[#E5E7EB] rounded-xl h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex justify-between items-center mb-8">
-                <h3 className="text-lg font-bold text-[#111827]">Top Performing Campaigns</h3>
+                <div className="flex items-center gap-2">
+                    <Trophy size={16} className="text-gray-500" />
+                    <h3 className="text-lg font-bold text-[#111827]">Top Performing Campaigns</h3>
+                </div>
             </div>
 
             <div className="flex-1 space-y-6">
