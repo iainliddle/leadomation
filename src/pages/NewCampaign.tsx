@@ -4,17 +4,22 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import UpgradePrompt from '../components/UpgradePrompt';
+import { usePlan } from '../hooks/usePlan';
 
 interface NewCampaignProps {
     onBack: () => void;
 }
 
 const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
+    const { plan } = usePlan();
     const [campaignName, setCampaignName] = useState('');
     const [selectedTrack, setSelectedTrack] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
     const [upgradeMessage] = useState('');
+
+    // Calculate max leads based on plan: Starter = 300, Pro/trialing = 2000
+    const maxLeadsLimit = plan === 'starter' ? 300 : 2000;
 
     // Advanced Targeting State
     const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>([]);
@@ -545,15 +550,15 @@ const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
                                     <input
                                         type="range"
                                         min="10"
-                                        max="1000"
+                                        max={maxLeadsLimit}
                                         step="10"
-                                        value={maxLeadsTarget}
+                                        value={Math.min(maxLeadsTarget, maxLeadsLimit)}
                                         onChange={(e) => setMaxLeadsTarget(parseInt(e.target.value))}
                                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#4F46E5]"
                                     />
                                     <div className="flex justify-between text-xs text-[#6B7280] mt-1">
                                         <span>10</span>
-                                        <span>1,000</span>
+                                        <span>{maxLeadsLimit.toLocaleString()}</span>
                                     </div>
                                 </div>
 

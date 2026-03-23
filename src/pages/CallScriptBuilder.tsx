@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Phone,
     Save,
@@ -16,9 +17,11 @@ import {
     Volume2,
     CheckCircle2,
     AlertCircle,
-    Sparkles
+    Sparkles,
+    Lock
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePlan } from '../hooks/usePlan';
 
 interface CallScript {
     id?: string;
@@ -90,6 +93,7 @@ interface CallScriptBuilderProps {
 }
 
 const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
+    const { plan, isLoading: planLoading } = usePlan();
     const [script, setScript] = useState<CallScript>(defaultScript);
     const [savedScripts, setSavedScripts] = useState<any[]>([]);
     const [saving, setSaving] = useState(false);
@@ -102,6 +106,16 @@ const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
     const [enhancedPrompt, setEnhancedPrompt] = useState('');
     const [showEnhancedPreview, setShowEnhancedPreview] = useState(false);
     const [activeStep, setActiveStep] = useState(1);
+    const [scriptDropdownOpen, setScriptDropdownOpen] = useState(false);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setScriptDropdownOpen(false);
+        if (scriptDropdownOpen) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [scriptDropdownOpen]);
 
     const insertVariable = (variable: string) => {
         const textarea = document.getElementById('voicemail_script') as HTMLTextAreaElement;
@@ -381,6 +395,38 @@ IMPORTANT RULES:
         setSelectedScriptId('');
     };
 
+    // Show loading state while checking plan
+    if (planLoading) {
+        return (
+            <div className="p-6 bg-[#F8F9FA] min-h-screen flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-[#4F46E5] animate-spin" />
+            </div>
+        );
+    }
+
+    // Pro gate for Starter users
+    if (plan === 'starter') {
+        return (
+            <div className="p-6 bg-[#F8F9FA] min-h-screen flex items-center justify-center">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 max-w-md text-center">
+                    <div className="w-14 h-14 bg-[#EEF2FF] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Lock className="w-7 h-7 text-[#4F46E5]" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-[#111827] mb-2">AI voice calling is a Pro feature</h2>
+                    <p className="text-sm text-[#6B7280] mb-6">
+                        Upgrade to Pro to access AI-powered outbound calling, voicemail scripts and call analytics.
+                    </p>
+                    <Link
+                        to="/pricing"
+                        className="inline-block bg-[#4F46E5] text-white text-sm font-medium px-6 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors"
+                    >
+                        Upgrade to Pro
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="p-6 bg-[#F8F9FA] min-h-screen">
             {/* Hero Header Card */}
@@ -394,24 +440,52 @@ IMPORTANT RULES:
                 </div>
                 <div className="flex gap-3">
                     <div className="relative">
-                        <select
-                            value={selectedScriptId}
-                            onChange={(e) => {
-                                if (e.target.value === '') {
-                                    handleNewScript();
-                                } else {
-                                    loadScript(e.target.value);
-                                }
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setScriptDropdownOpen(!scriptDropdownOpen);
                             }}
-                            className="appearance-none bg-white border border-gray-200 text-[#111827] text-sm font-medium px-4 py-2 pr-8 rounded-lg hover:border-[#4F46E5] transition-all cursor-pointer focus:outline-none"
+                            className="bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-medium px-4 py-2 pr-8 flex items-center gap-2 hover:border-[#4F46E5] transition-all min-w-[180px]"
                         >
-                            <option value="">+ New Call Script</option>
-                            {savedScripts.map(s => (
-                                <option key={s.id} value={s.id}>{s.name}</option>
-                            ))}
-                        </select>
+                            <span className="text-[#111827] truncate">
+                                {selectedScriptId ? savedScripts.find(s => s.id === selectedScriptId)?.name : '+ New call script'}
+                            </span>
+                            {loadingScripts && <Loader2 size={14} className="animate-spin text-[#4F46E5]" />}
+                        </button>
                         <ChevronDown size={16} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        {loadingScripts && <Loader2 size={14} className="absolute right-8 top-1/2 -translate-y-1/2 animate-spin text-[#4F46E5]" />}
+                        {scriptDropdownOpen && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-sm z-50 overflow-hidden max-h-60 overflow-y-auto">
+                                <button
+                                    onClick={() => {
+                                        handleNewScript();
+                                        setScriptDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-4 py-2.5 text-left text-sm transition-all ${
+                                        selectedScriptId === ''
+                                            ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                            : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                    }`}
+                                >
+                                    + New call script
+                                </button>
+                                {savedScripts.map(s => (
+                                    <button
+                                        key={s.id}
+                                        onClick={() => {
+                                            loadScript(s.id);
+                                            setScriptDropdownOpen(false);
+                                        }}
+                                        className={`w-full px-4 py-2.5 text-left text-sm transition-all ${
+                                            selectedScriptId === s.id
+                                                ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                                                : 'text-[#374151] hover:bg-gray-50 font-medium'
+                                        }`}
+                                    >
+                                        {s.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <button
                         onClick={() => {
