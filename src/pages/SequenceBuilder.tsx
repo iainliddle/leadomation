@@ -690,10 +690,10 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                                     </div>
                                                     <div className="flex items-center gap-2 mt-2">
                                                         <span className="bg-gray-100 text-gray-600 text-xs rounded-full px-2 py-0.5">
-                                                            Open rate: {seq.stats?.openRate !== null ? `${seq.stats.openRate}%` : '-'}
+                                                            Open rate: {seq.stats?.openRate != null ? `${seq.stats.openRate}%` : '-'}
                                                         </span>
                                                         <span className="bg-gray-100 text-gray-600 text-xs rounded-full px-2 py-0.5">
-                                                            Reply rate: {seq.stats?.replyRate !== null ? `${seq.stats.replyRate}%` : '-'}
+                                                            Reply rate: {seq.stats?.replyRate != null ? `${seq.stats.replyRate}%` : '-'}
                                                         </span>
                                                     </div>
                                                 </div>
