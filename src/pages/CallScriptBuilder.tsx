@@ -544,7 +544,7 @@ IMPORTANT RULES:
                                 <textarea
                                     value={script.opening_line}
                                     onChange={(e) => setScript(prev => ({ ...prev, opening_line: e.target.value }))}
-                                    placeholder={`e.g., Hi, I'm calling from ${script.company_name || '[Your Company]'}. We work with hotels and spas on cold water therapy installations. Do you have a moment for a quick chat?`}
+                                    placeholder={`e.g., Hi, I'm calling from ${script.company_name?.trim() || '[Your Company]'}. We work with hotels and spas on cold water therapy installations. Do you have a moment for a quick chat?`}
                                     rows={3}
                                     className="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EEF2FF] focus:border-[#4F46E5] transition-all text-sm resize-none"
                                 />
