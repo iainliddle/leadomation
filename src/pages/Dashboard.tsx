@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Mail, MessageCircle, TrendingUp, Loader2, Phone, UserPlus, Star, Download, Calendar, ChevronDown, ArrowUpRight, Info } from 'lucide-react';
+import { Users, Mail, MessageCircle, TrendingUp, Loader2, Phone, UserPlus, Star, Download, Calendar, ChevronDown, ArrowUpRight, Info, CalendarDays } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
 import CampaignPerformance from '../components/CampaignPerformance';
@@ -230,6 +230,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [recentLeads, setRecentLeads] = useState<any[]>([]);
     const [activities, setActivities] = useState<any[]>([]);
+    const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [datePreset, setDatePreset] = useState<DatePreset>('30d');
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -319,6 +320,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             dealsCount: dealsCount || 0
         });
         setRecentLeads(recentLeadsData || []);
+
+        // Fetch upcoming calendar events (next 5, today or future)
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const { data: upcomingEventsData } = await supabase
+            .from('calendar_events')
+            .select('id, title, start_time, end_time, event_type')
+            .eq('user_id', user.id)
+            .gte('start_time', todayStart.toISOString())
+            .order('start_time', { ascending: true })
+            .limit(5);
+        setUpcomingEvents(upcomingEventsData || []);
 
         // Fetch sparkline chart data based on date range
         const days = getDateRangeDays(datePreset);
@@ -809,11 +822,64 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                 <div className="w-full lg:w-3/5">
                     <RecentActivity activities={activities} />
                 </div>
-                <div className="w-full lg:w-2/5">
+                <div className="w-full lg:w-2/5 space-y-6">
+                    {/* Upcoming Events Card */}
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                        <div className="flex justify-between items-center mb-5">
+                            <div className="flex items-center gap-2">
+                                <Calendar size={16} className="text-[#4F46E5]" />
+                                <h3 className="text-base font-semibold text-gray-900">Upcoming events</h3>
+                            </div>
+                            <button onClick={() => onPageChange('Calendar')} className="text-xs font-semibold text-[#4F46E5] hover:underline uppercase tracking-wide">View calendar</button>
+                        </div>
+                        <div className="space-y-2">
+                            {upcomingEvents.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-8 text-center">
+                                    <CalendarDays size={32} className="text-gray-300 mb-3" />
+                                    <p className="text-sm text-gray-400">No upcoming events. Click a time slot on your calendar to add one.</p>
+                                </div>
+                            ) : (
+                                upcomingEvents.map((event) => {
+                                    const eventDate = new Date(event.start_time);
+                                    const endDate = new Date(event.end_time);
+                                    const dateStr = eventDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+                                    const startTimeStr = eventDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                                    const endTimeStr = endDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+                                    // Event type border colors
+                                    const borderColors: Record<string, string> = {
+                                        discovery_call: 'border-l-indigo-500',
+                                        follow_up: 'border-l-amber-400',
+                                        personal: 'border-l-emerald-500',
+                                        manual: 'border-l-cyan-500',
+                                    };
+                                    const borderColor = borderColors[event.event_type] || 'border-l-gray-300';
+
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className={`flex items-center justify-between p-3 rounded-lg bg-gray-50 border-l-4 ${borderColor} hover:bg-gray-100 transition-colors cursor-pointer`}
+                                            onClick={() => onPageChange('Calendar')}
+                                        >
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-sm font-semibold text-gray-900 truncate">{event.title}</p>
+                                                <p className="text-xs text-gray-500">{dateStr}</p>
+                                            </div>
+                                            <div className="text-right ml-3 shrink-0">
+                                                <p className="text-xs font-medium text-gray-600">{startTimeStr} - {endTimeStr}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Recent Leads Card */}
                     <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
                         <div className="flex justify-between items-center mb-5">
-                            <h3 className="text-base font-semibold text-gray-900">Recent Leads</h3>
-                            <button onClick={() => onPageChange('Lead Database')} className="text-xs font-semibold text-[#4F46E5] hover:underline uppercase tracking-wide">View All</button>
+                            <h3 className="text-base font-semibold text-gray-900">Recent leads</h3>
+                            <button onClick={() => onPageChange('Lead Database')} className="text-xs font-semibold text-[#4F46E5] hover:underline uppercase tracking-wide">View all</button>
                         </div>
                         <div className="flex-1 space-y-1">
                             {recentLeads.length === 0 ? (
@@ -841,7 +907,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                             onClick={() => window.location.reload()}
                             className="mt-4 w-full py-2.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-[#4F46E5] transition-all"
                         >
-                            Refresh Dashboard
+                            Refresh dashboard
                         </button>
                     </div>
                 </div>
