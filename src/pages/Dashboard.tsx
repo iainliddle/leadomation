@@ -764,11 +764,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 items-start">
-                <div className="lg:col-span-6">
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                <div className="lg:col-span-6 self-start">
                     <CampaignPerformance dateFrom={dateFrom || undefined} />
                 </div>
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-4 self-start">
                     <TopCampaigns dateFrom={dateFrom || undefined} />
                 </div>
             </div>

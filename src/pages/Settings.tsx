@@ -185,7 +185,6 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
                 phone,
-                company,
                 job_title: jobTitle,
                 avatar_url: profileImageUrl,
                 updated_at: new Date().toISOString(),
