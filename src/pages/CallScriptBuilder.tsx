@@ -138,6 +138,16 @@ const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
 
     const vmStats = getWordCountStats(script.voicemail_script || '');
 
+    const getVoicemailPreview = (text: string) => {
+        if (!text) return '';
+        const companyName = script.company_name?.trim() || 'your company';
+        const bookingLink = script.booking_url?.trim() || 'your booking link';
+        return text
+            .replace(/\[company_name\]/gi, companyName)
+            .replace(/\[first_name\]/gi, 'John')
+            .replace(/\[booking_link\]/gi, bookingLink);
+    };
+
     useEffect(() => {
         loadScripts();
     }, []);
@@ -192,11 +202,13 @@ const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
         const questions = script.qualifying_questions.filter(q => q.trim()).map((q, i) => `${i + 1}. ${q}`).join('\n');
         const objections = script.objection_responses.filter(o => o.objection.trim()).map(o => `- If they say "${o.objection}", respond with: "${o.response}"`).join('\n');
 
-        let prompt = `You are a ${toneObj?.label?.toLowerCase() || 'professional'} AI sales assistant calling on behalf of ${script.company_name || '[Company Name]'}.
+        const companyName = script.company_name?.trim() || 'your company';
+
+        let prompt = `You are a ${toneObj?.label?.toLowerCase() || 'professional'} AI sales assistant calling on behalf of ${companyName}.
 
 OBJECTIVE: ${objectiveText || 'Book a discovery call'}
 
-OPENING: ${script.opening_line || `Hi, I'm calling from ${script.company_name || '[Company Name]'}. Is now a good time for a quick chat?`}
+OPENING: ${script.opening_line || `Hi, I'm calling from ${companyName}. Is now a good time for a quick chat?`}
 
 QUALIFYING QUESTIONS:
 ${questions || '1. Are you the person who handles this area?\n2. Is this something you\'re currently looking into?'}
@@ -714,6 +726,16 @@ IMPORTANT RULES:
                             <p className={`text-xs text-right mt-2 ${vmStats.colorClass}`}>
                                 {vmStats.words} words · ~{vmStats.seconds} seconds
                             </p>
+
+                            {/* Voicemail Preview */}
+                            {script.voicemail_script && (
+                                <div className="mt-4 p-4 bg-[#F8F9FA] rounded-xl border border-[#E5E7EB]">
+                                    <p className="text-xs font-medium text-[#6B7280] mb-2">Preview (with variables replaced):</p>
+                                    <p className="text-sm text-[#111827] leading-relaxed">
+                                        {getVoicemailPreview(script.voicemail_script)}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     )}
 
