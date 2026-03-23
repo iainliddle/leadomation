@@ -185,8 +185,14 @@ const SignatureEditor: React.FC<SignatureEditorProps> = ({
     );
 };
 
+// Default limits for Starter plan (used as fallback when plan data is loading)
+const DEFAULT_LIMITS = {
+    maxEmailsPerDay: 30,
+};
+
 const EmailConfig: React.FC = () => {
     const { plan, limits } = usePlan();
+    const planLimits = limits ?? DEFAULT_LIMITS;
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [dailyEmailLimit, setDailyEmailLimit] = useState(50);
@@ -241,11 +247,11 @@ const EmailConfig: React.FC = () => {
 
     // Clamp daily email limit to plan maximum if it exceeds
     useEffect(() => {
-        if (limits.maxEmailsPerDay && dailyEmailLimit > limits.maxEmailsPerDay) {
+        if (limits?.maxEmailsPerDay && dailyEmailLimit > limits.maxEmailsPerDay) {
             setDailyEmailLimit(limits.maxEmailsPerDay);
             saveSettings({ daily_email_limit: limits.maxEmailsPerDay });
         }
-    }, [limits.maxEmailsPerDay]);
+    }, [limits?.maxEmailsPerDay]);
 
     const saveSettings = async (fields: Record<string, any>) => {
         setSaving(true);
@@ -340,7 +346,7 @@ const EmailConfig: React.FC = () => {
                                         ))}
                                     </div>
                                     <p className="text-xs text-gray-500 mt-2">
-                                        Daily limit helps protect your sender reputation. Your plan allows up to {limits.maxEmailsPerDay} emails per day.
+                                        Daily limit helps protect your sender reputation. Your plan allows up to {planLimits.maxEmailsPerDay} emails per day.
                                     </p>
                                 </div>
 
