@@ -644,7 +644,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             )}
 
             {/* Stats Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatCard
                     label="Total Leads"
                     value={stats.totalLeads.toLocaleString()}
@@ -797,7 +797,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             {/* Charts Row */}
-            <div className="flex flex-col lg:flex-row gap-6 items-start">
+            <div className="flex flex-col lg:flex-row gap-6">
                 <div className="w-full lg:w-3/5 overflow-hidden">
                     <CampaignPerformance dateFrom={dateFrom || undefined} />
                 </div>
