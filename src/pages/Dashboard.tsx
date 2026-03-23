@@ -222,6 +222,7 @@ const StatCard: React.FC<StatCardProps> = ({
 const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     const { plan, usage, limits, trialDaysRemaining } = usePlan();
     const [firstName, setFirstName] = useState<string>('');
+    const [monthlyResetDate, setMonthlyResetDate] = useState<string | null>(null);
     const [stats, setStats] = useState({
         totalLeads: 0,
         leadsWithEmails: 0,
@@ -252,7 +253,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         // Fetch profile - use first_name column directly if available
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('first_name, full_name')
+            .select('first_name, full_name, monthly_reset_date')
             .eq('id', user.id)
             .single();
 
@@ -279,6 +280,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             setFirstName(capitalize(firstWord));
         } else {
             setFirstName('');
+        }
+
+        // Set monthly reset date
+        if (profile?.monthly_reset_date) {
+            setMonthlyResetDate(profile.monthly_reset_date);
         }
 
         const { from: dateFrom } = getDateRange(datePreset);
@@ -709,38 +715,65 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
                                 Current Plan
                             </span>
                         </div>
-                        {/* Usage ring indicator */}
-                        <div className="relative w-10 h-10">
+                        {/* Usage ring indicator with tooltip */}
+                        <div className="relative group">
                             {(() => {
                                 // For trial, use trial counters. For paid plans, use actual totalLeads from stats
                                 const usedLeads = plan === 'trial' ? usage.leadsUsed : (stats.totalLeads || usage.monthlyLeadsUsed);
                                 const maxLeads = plan === 'trial' ? limits.trialMaxLeads : limits.maxLeadsPerMonth;
                                 const percentage = maxLeads > 0 ? Math.min(100, Math.round((usedLeads / maxLeads) * 100)) : 0;
+
+                                // Calculate reset date
+                                const getResetDateFormatted = () => {
+                                    if (monthlyResetDate) {
+                                        const resetDate = new Date(monthlyResetDate);
+                                        return resetDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                                    }
+                                    // Default to first day of next month
+                                    const nextMonth = new Date();
+                                    nextMonth.setMonth(nextMonth.getMonth() + 1);
+                                    nextMonth.setDate(1);
+                                    return nextMonth.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                                };
+
                                 return (
                                     <>
-                                        <svg className="w-10 h-10 transform -rotate-90">
-                                            <circle
-                                                cx="20"
-                                                cy="20"
-                                                r="16"
-                                                fill="none"
-                                                stroke="#E0E7FF"
-                                                strokeWidth="3"
-                                            />
-                                            <circle
-                                                cx="20"
-                                                cy="20"
-                                                r="16"
-                                                fill="none"
-                                                stroke="#4F46E5"
-                                                strokeWidth="3"
-                                                strokeLinecap="round"
-                                                strokeDasharray={`${percentage} 100`}
-                                            />
-                                        </svg>
-                                        <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-[#4F46E5]">
-                                            {percentage}%
-                                        </span>
+                                        {/* Tooltip */}
+                                        <div className="absolute hidden group-hover:block bg-gray-900 text-white text-xs rounded-lg px-3 py-2 w-48 z-50 bottom-full left-1/2 -translate-x-1/2 mb-2">
+                                            <p className="font-semibold mb-1">{usedLeads.toLocaleString()} of {maxLeads.toLocaleString()} leads</p>
+                                            <p className="text-gray-300">You've used {percentage}% of your {maxLeads.toLocaleString()} leads this month.</p>
+                                            <p className="text-gray-400 mt-1">Resets on {getResetDateFormatted()}.</p>
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                        {/* Ring container */}
+                                        <div className="flex flex-col items-center">
+                                            <div className="relative w-14 h-14">
+                                                <svg className="w-14 h-14 transform -rotate-90">
+                                                    <circle
+                                                        cx="28"
+                                                        cy="28"
+                                                        r="22"
+                                                        fill="none"
+                                                        stroke="#EEF2FF"
+                                                        strokeWidth="4"
+                                                    />
+                                                    <circle
+                                                        cx="28"
+                                                        cy="28"
+                                                        r="22"
+                                                        fill="none"
+                                                        stroke="#4F46E5"
+                                                        strokeWidth="4"
+                                                        strokeLinecap="round"
+                                                        strokeDasharray={`${percentage * 1.38} 138`}
+                                                    />
+                                                </svg>
+                                                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#4F46E5]">
+                                                    {percentage}%
+                                                </span>
+                                            </div>
+                                            <span className="text-[9px] text-gray-500 mt-0.5">Leads used</span>
+                                        </div>
                                     </>
                                 );
                             })()}
