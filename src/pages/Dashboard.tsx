@@ -807,12 +807,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
             </div>
 
             {/* Activity Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-                <div className="lg:col-span-6">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
+                <div className="w-full lg:w-3/5">
                     <RecentActivity activities={activities} />
                 </div>
-                <div className="lg:col-span-4">
-                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 h-full flex flex-col">
+                <div className="w-full lg:w-2/5">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col">
                         <div className="flex justify-between items-center mb-5">
                             <h3 className="text-base font-semibold text-gray-900">Recent Leads</h3>
                             <button onClick={() => onPageChange('Lead Database')} className="text-xs font-semibold text-[#4F46E5] hover:underline uppercase tracking-wide">View All</button>
