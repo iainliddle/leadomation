@@ -272,6 +272,8 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [editLeadForm, setEditLeadForm] = useState<Partial<Lead>>({});
     const [isSavingLead, setIsSavingLead] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+    const statusDropdownRef = useRef<HTMLDivElement>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -452,6 +454,21 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
         return () => clearInterval(interval);
     }, []);
     void currentTime; // Used to trigger re-renders for live time display
+
+    // Close status dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+                setIsStatusDropdownOpen(false);
+            }
+        };
+        if (isStatusDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isStatusDropdownOpen]);
 
     // Add Lead Form State
     const [newLead, setNewLead] = useState({
@@ -1861,22 +1878,40 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                             {/* Status Section */}
                             <div className="space-y-2">
                                 <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest block pl-1">Lead Status</label>
-                                <div className="relative">
-                                    <select
-                                        className="w-full pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all appearance-none cursor-pointer shadow-sm"
-                                        value={selectedLead.status}
-                                        onChange={(e) => handleUpdateStatus(selectedLead.id, e.target.value)}
+                                <div className="relative" ref={statusDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => !isUpdatingStatus && setIsStatusDropdownOpen(!isStatusDropdownOpen)}
                                         disabled={isUpdatingStatus}
+                                        className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#111827] cursor-pointer flex items-center justify-between hover:border-[#4F46E5] transition-colors w-full"
                                     >
-                                        <option value="New">New</option>
-                                        <option value="Contacted">Contacted</option>
-                                        <option value="Replied">Replied</option>
-                                        <option value="Qualified">Qualified</option>
-                                        <option value="Not Interested">Not Interested</option>
-                                    </select>
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                        {isUpdatingStatus ? <Loader2 size={14} className="animate-spin text-[#4F46E5]" /> : <ChevronDown size={14} />}
-                                    </div>
+                                        <span className="font-semibold">{selectedLead.status}</span>
+                                        {isUpdatingStatus ? (
+                                            <Loader2 size={14} className="animate-spin text-[#4F46E5]" />
+                                        ) : (
+                                            <ChevronDown size={14} className={`text-gray-400 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                                        )}
+                                    </button>
+                                    {isStatusDropdownOpen && (
+                                        <div className="absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1 w-full overflow-hidden">
+                                            {['New', 'Contacted', 'Replied', 'Qualified', 'Not Interested'].map((status) => (
+                                                <div
+                                                    key={status}
+                                                    onClick={() => {
+                                                        handleUpdateStatus(selectedLead.id, status);
+                                                        setIsStatusDropdownOpen(false);
+                                                    }}
+                                                    className={`px-3 py-2 text-sm cursor-pointer ${
+                                                        selectedLead.status === status
+                                                            ? 'bg-[#EEF2FF] text-[#4F46E5] font-medium'
+                                                            : 'text-[#111827] hover:bg-[#EEF2FF]'
+                                                    }`}
+                                                >
+                                                    {status}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
