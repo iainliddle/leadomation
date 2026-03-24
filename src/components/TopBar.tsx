@@ -34,6 +34,7 @@ const PAGE_SUBTITLES: Record<string, string> = {
     'Email Config': 'Configure email sending settings',
     'Compliance': 'Data privacy and compliance settings',
     'Pricing': 'Manage your subscription plan',
+    'Performance': 'Your AI-powered campaign analysis and recommendations',
 };
 
 const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick, onPageChange }) => {
