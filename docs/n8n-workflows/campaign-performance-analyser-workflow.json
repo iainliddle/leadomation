@@ -1,4 +1,5 @@
 {
+  "_setup_instructions": "Before importing this workflow into N8N, replace all placeholder values: YOUR_SUPABASE_SERVICE_ROLE_KEY, YOUR_ANTHROPIC_API_KEY, YOUR_RESEND_API_KEY with your actual credentials. Do not commit real API keys to git.",
   "name": "Campaign Performance Analyser",
   "nodes": [
     {
@@ -70,52 +71,45 @@
     },
     {
       "parameters": {
-        "batchSize": 1,
-        "options": {}
+        "jsCode": "// Process All Users - filter to users with 50+ unanalysed emails\nconst supabaseUrl = 'https://rmcyfrqgmpnkvrgzeyxq.supabase.co';\nconst supabaseKey = 'YOUR_SUPABASE_SERVICE_ROLE_KEY';\n\nconst headers = {\n  'apikey': supabaseKey,\n  'Authorization': `Bearer ${supabaseKey}`\n};\n\nconst users = $input.all();\nconst qualifying = [];\n\nfor (const userItem of users) {\n  const user = userItem.json;\n\n  // Count unanalysed emails for this user via Supabase REST API\n  const emailIds = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `${supabaseUrl}/rest/v1/email_events?user_id=eq.${user.id}&analysed=eq.false&select=id`,\n    headers\n  });\n\n  const emailCount = Array.isArray(emailIds) ? emailIds.length : 0;\n\n  if (emailCount >= 50) {\n    qualifying.push({\n      id: user.id,\n      email: user.email,\n      first_name: user.first_name,\n      plan: user.plan,\n      industry: user.industry,\n      email_count: emailCount\n    });\n  }\n}\n\nreturn [{\n  json: {\n    qualifying_users: qualifying,\n    qualifying_count: qualifying.length\n  }\n}];"
       },
       "id": "node-5",
-      "name": "Split Into Batches1",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
+      "name": "Process All Users1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [1120, 200]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT COUNT(*) as email_count FROM email_events WHERE user_id = '{{ $('Split Into Batches1').item.json.id }}' AND analysed = false"
-      },
-      "id": "node-6",
-      "name": "Count Unanalysed Emails1",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.5,
-      "position": [1340, 200],
-      "credentials": {
-        "postgres": {
-          "name": "Supabase DB"
-        }
-      }
     },
     {
       "parameters": {
         "conditions": {
           "number": [
             {
-              "value1": "={{ $json.email_count }}",
+              "value1": "={{ $json.qualifying_count }}",
               "operation": "largerEqual",
-              "value2": 50
+              "value2": 1
             }
           ]
         }
       },
-      "id": "node-7",
-      "name": "Email Threshold Check1",
+      "id": "node-6",
+      "name": "Check Has Users1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split qualifying users array into individual items for per-user processing\nconst data = $input.first().json;\nconst users = data.qualifying_users || [];\n\nif (users.length === 0) {\n  return [{ json: { empty: true } }];\n}\n\nreturn users.map(user => ({ json: user }));"
+      },
+      "id": "node-7",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [1560, 200]
     },
     {
       "parameters": {
-        "jsCode": "// IMPORTANT: Paste your Supabase service role key below before activating this workflow.\n// Find it in Supabase Dashboard > Settings > API > service_role key.\nconst supabaseUrl = 'https://rmcyfrqgmpnkvrgzeyxq.supabase.co';\nconst supabaseKey = 'PASTE_YOUR_SUPABASE_SERVICE_ROLE_KEY_HERE';\n\nconst userId = $('Split Into Batches1').item.json.id;\nconst userInfo = $('Split Into Batches1').item.json;\n\nconst headers = {\n  'apikey': supabaseKey,\n  'Authorization': `Bearer ${supabaseKey}`\n};\n\n// Query A: Campaign metrics via RPC\nlet campaignMetrics = [];\ntry {\n  campaignMetrics = await this.helpers.httpRequest({\n    method: 'POST',\n    url: `${supabaseUrl}/rest/v1/rpc/get_campaign_metrics`,\n    headers: { ...headers, 'Content-Type': 'application/json' },\n    body: JSON.stringify({ p_user_id: userId })\n  });\n} catch (e) {\n  // RPC function may not exist yet - continue with empty metrics\n}\n\n// Query B: Email events\nconst events = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${supabaseUrl}/rest/v1/email_events?user_id=eq.${userId}&analysed=eq.false&select=event_type,occurred_at,campaign_id,step_index,metadata`,\n  headers\n});\n\n// Aggregate event types\nconst eventCounts = events.reduce((acc, e) => {\n  acc[e.event_type] = (acc[e.event_type] || 0) + 1;\n  return acc;\n}, {});\n\nconst totalSent = eventCounts['sent'] || 0;\nconst openRate = totalSent > 0 ? ((eventCounts['opened'] || 0) / totalSent * 100).toFixed(2) : 0;\nconst clickRate = totalSent > 0 ? ((eventCounts['clicked'] || 0) / totalSent * 100).toFixed(2) : 0;\nconst replyRate = totalSent > 0 ? ((eventCounts['replied'] || 0) / totalSent * 100).toFixed(2) : 0;\nconst bounceRate = totalSent > 0 ? ((eventCounts['bounced'] || 0) / totalSent * 100).toFixed(2) : 0;\n\n// Query C: Sequence step performance\nlet stepPerf = [];\ntry {\n  stepPerf = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `${supabaseUrl}/rest/v1/sequence_step_logs?user_id=eq.${userId}&select=step_index,event_type,ab_variant`,\n    headers\n  });\n} catch (e) {\n  // Table may not exist yet\n}\n\n// Query D: Intent accuracy (limit 100 leads)\nconst leads = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${supabaseUrl}/rest/v1/leads?user_id=eq.${userId}&select=intent_score,id&limit=100`,\n  headers\n});\n\nconst periodStart = events.length > 0\n  ? events.reduce((min, e) => e.occurred_at < min ? e.occurred_at : min, events[0].occurred_at)\n  : new Date().toISOString();\n\nconst periodEnd = new Date().toISOString();\n\nreturn [{\n  json: {\n    user_id: userId,\n    user_email: userInfo.email,\n    user_first_name: userInfo.first_name || 'there',\n    user_industry: userInfo.industry || 'general',\n    email_count: events.length,\n    period_start: periodStart,\n    period_end: periodEnd,\n    performance_data: {\n      total_sent: totalSent,\n      open_rate: parseFloat(openRate),\n      click_rate: parseFloat(clickRate),\n      reply_rate: parseFloat(replyRate),\n      bounce_rate: parseFloat(bounceRate),\n      event_breakdown: eventCounts,\n      campaign_metrics: campaignMetrics,\n      step_performance: stepPerf,\n      intent_data: leads\n    }\n  }\n}];"
+        "jsCode": "// Collect full performance data for each qualifying user\nconst supabaseUrl = 'https://rmcyfrqgmpnkvrgzeyxq.supabase.co';\nconst supabaseKey = 'YOUR_SUPABASE_SERVICE_ROLE_KEY';\n\nconst headers = {\n  'apikey': supabaseKey,\n  'Authorization': `Bearer ${supabaseKey}`\n};\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const userId = item.json.id;\n  const userInfo = item.json;\n\n  // Query A: Campaign metrics via RPC\n  let campaignMetrics = [];\n  try {\n    campaignMetrics = await this.helpers.httpRequest({\n      method: 'POST',\n      url: `${supabaseUrl}/rest/v1/rpc/get_campaign_metrics`,\n      headers: { ...headers, 'Content-Type': 'application/json' },\n      body: JSON.stringify({ p_user_id: userId })\n    });\n  } catch (e) {\n    // RPC function may not exist yet - continue with empty metrics\n  }\n\n  // Query B: Email events\n  const events = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `${supabaseUrl}/rest/v1/email_events?user_id=eq.${userId}&analysed=eq.false&select=event_type,occurred_at,campaign_id,step_index,metadata`,\n    headers\n  });\n\n  // Aggregate event types\n  const eventCounts = events.reduce((acc, e) => {\n    acc[e.event_type] = (acc[e.event_type] || 0) + 1;\n    return acc;\n  }, {});\n\n  const totalSent = eventCounts['sent'] || 0;\n  const openRate = totalSent > 0 ? ((eventCounts['opened'] || 0) / totalSent * 100).toFixed(2) : 0;\n  const clickRate = totalSent > 0 ? ((eventCounts['clicked'] || 0) / totalSent * 100).toFixed(2) : 0;\n  const replyRate = totalSent > 0 ? ((eventCounts['replied'] || 0) / totalSent * 100).toFixed(2) : 0;\n  const bounceRate = totalSent > 0 ? ((eventCounts['bounced'] || 0) / totalSent * 100).toFixed(2) : 0;\n\n  // Query C: Sequence step performance\n  let stepPerf = [];\n  try {\n    stepPerf = await this.helpers.httpRequest({\n      method: 'GET',\n      url: `${supabaseUrl}/rest/v1/sequence_step_logs?user_id=eq.${userId}&select=step_index,event_type,ab_variant`,\n      headers\n    });\n  } catch (e) {\n    // Table may not exist yet\n  }\n\n  // Query D: Intent accuracy (limit 100 leads)\n  const leads = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `${supabaseUrl}/rest/v1/leads?user_id=eq.${userId}&select=intent_score,id&limit=100`,\n    headers\n  });\n\n  const periodStart = events.length > 0\n    ? events.reduce((min, e) => e.occurred_at < min ? e.occurred_at : min, events[0].occurred_at)\n    : new Date().toISOString();\n\n  const periodEnd = new Date().toISOString();\n\n  results.push({\n    json: {\n      user_id: userId,\n      user_email: userInfo.email,\n      user_first_name: userInfo.first_name || 'there',\n      user_industry: userInfo.industry || 'general',\n      email_count: events.length,\n      period_start: periodStart,\n      period_end: periodEnd,\n      performance_data: {\n        total_sent: totalSent,\n        open_rate: parseFloat(openRate),\n        click_rate: parseFloat(clickRate),\n        reply_rate: parseFloat(replyRate),\n        bounce_rate: parseFloat(bounceRate),\n        event_breakdown: eventCounts,\n        campaign_metrics: campaignMetrics,\n        step_performance: stepPerf,\n        intent_data: leads\n      }\n    }\n  });\n}\n\nreturn results;"
       },
       "id": "node-8",
       "name": "Collect Performance Data1",
@@ -137,7 +131,7 @@
             },
             {
               "name": "x-api-key",
-              "value": "={{ $env.ANTHROPIC_API_KEY }}"
+              "value": "YOUR_ANTHROPIC_API_KEY"
             },
             {
               "name": "Content-Type",
@@ -147,7 +141,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 2000,\n  \"system\": \"You are a B2B outreach performance analyst. You receive campaign performance data for a single user of Leadomation, a lead generation and outreach automation platform. Analyse the data and return your response as valid JSON only, with no preamble or markdown. Structure: {\\\"summary\\\": \\\"2-3 sentence executive summary\\\", \\\"open_rate_avg\\\": number, \\\"click_rate_avg\\\": number, \\\"reply_rate_avg\\\": number, \\\"bounce_rate_avg\\\": number, \\\"top_subject_patterns\\\": [\\\"pattern1\\\", \\\"pattern2\\\", \\\"pattern3\\\"], \\\"worst_subject_patterns\\\": [\\\"pattern1\\\", \\\"pattern2\\\", \\\"pattern3\\\"], \\\"best_send_window\\\": \\\"e.g. Tuesday-Thursday 9am-11am\\\", \\\"sequence_insights\\\": \\\"Which steps perform best/worst\\\", \\\"intent_accuracy\\\": number, \\\"spam_accuracy\\\": {\\\"false_positive\\\": number, \\\"false_negative\\\": number}, \\\"recommendations\\\": [{\\\"priority\\\": 1, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 2, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 3, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 4, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 5, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}]}\",\n  \"messages\": [{\n    \"role\": \"user\",\n    \"content\": \"Analyse this outreach performance data for a {{ $('Collect Performance Data1').item.json.user_industry }} business and provide actionable recommendations. Data: {{ JSON.stringify($('Collect Performance Data1').item.json.performance_data) }}\"\n  }]\n}",
+        "jsonBody": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, system: 'You are a B2B outreach performance analyst. You receive campaign performance data for a single user of Leadomation, a lead generation and outreach automation platform. Analyse the data and return your response as valid JSON only, with no preamble or markdown. Structure: {\"summary\": \"2-3 sentence executive summary\", \"open_rate_avg\": number, \"click_rate_avg\": number, \"reply_rate_avg\": number, \"bounce_rate_avg\": number, \"top_subject_patterns\": [\"pattern1\", \"pattern2\", \"pattern3\"], \"worst_subject_patterns\": [\"pattern1\", \"pattern2\", \"pattern3\"], \"best_send_window\": \"e.g. Tuesday-Thursday 9am-11am\", \"sequence_insights\": \"Which steps perform best/worst\", \"intent_accuracy\": number, \"spam_accuracy\": {\"false_positive\": number, \"false_negative\": number}, \"recommendations\": [{\"priority\": 1, \"action\": \"...\", \"expected_impact\": \"...\"}, {\"priority\": 2, \"action\": \"...\", \"expected_impact\": \"...\"}, {\"priority\": 3, \"action\": \"...\", \"expected_impact\": \"...\"}, {\"priority\": 4, \"action\": \"...\", \"expected_impact\": \"...\"}, {\"priority\": 5, \"action\": \"...\", \"expected_impact\": \"...\"}]}', messages: [{ role: 'user', content: 'Analyse this outreach performance data for a ' + $('Collect Performance Data1').item.json.user_industry + ' business and provide actionable recommendations. Data: ' + JSON.stringify($('Collect Performance Data1').item.json.performance_data) }] }) }}",
         "options": {
           "timeout": 30000
         }
@@ -160,10 +154,20 @@
     },
     {
       "parameters": {
+        "jsCode": "const claudeText = $input.first().json.content[0].text;\nconst cleaned = claudeText.replace(/^```json\\n?/, '').replace(/\\n?```$/, '').trim();\nconst parsed = JSON.parse(cleaned);\nreturn [{\n  json: {\n    ...$input.first().json,\n    clean_report: parsed,\n    clean_report_string: JSON.stringify(parsed)\n  }\n}];"
+      },
+      "id": "node-9b",
+      "name": "Clean Claude Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2110, 100]
+    },
+    {
+      "parameters": {
         "operation": "executeQuery",
         "query": "INSERT INTO performance_reports (user_id, report_type, report_data, emails_analysed, period_start, period_end) VALUES ($1, 'user', $2::jsonb, $3::int, $4::timestamptz, $5::timestamptz) RETURNING id",
         "options": {
-          "queryReplacement": "={{ [$('Collect Performance Data1').item.json.user_id, $json.content[0].text, $('Collect Performance Data1').item.json.email_count, $('Collect Performance Data1').item.json.period_start, $('Collect Performance Data1').item.json.period_end] }}"
+          "queryReplacement": "={{ [$('Collect Performance Data1').item.json.user_id, $json.clean_report_string, $('Collect Performance Data1').item.json.email_count, $('Collect Performance Data1').item.json.period_start, $('Collect Performance Data1').item.json.period_end] }}"
         }
       },
       "id": "node-10",
@@ -187,7 +191,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.RESEND_API_KEY }}"
+              "value": "Bearer YOUR_RESEND_API_KEY"
             },
             {
               "name": "Content-Type",
@@ -197,7 +201,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"Leadomation <iainliddle@leadomation.co.uk>\",\n  \"to\": [\"{{ $('Collect Performance Data1').item.json.user_email }}\"],\n  \"subject\": \"Your Leadomation Performance Report is ready\",\n  \"html\": \"<!DOCTYPE html><html><head><meta charset='utf-8'><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F8F9FA;margin:0;padding:0}.container{max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #E5E7EB}.header{background:#4F46E5;padding:32px;text-align:center}.header h1{color:#ffffff;margin:0;font-size:24px;font-weight:600}.content{padding:32px}.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}.metric-card{background:#F8F9FA;border-radius:8px;padding:16px;border:1px solid #E5E7EB}.metric-label{font-size:12px;color:#6B7280;margin-bottom:4px}.metric-value{font-size:24px;font-weight:700;color:#111827}.rec-item{background:#EEF2FF;border-left:4px solid #4F46E5;border-radius:0 8px 8px 0;padding:16px;margin-bottom:12px}.rec-priority{font-size:11px;font-weight:600;color:#4F46E5;text-transform:uppercase;margin-bottom:4px}.rec-action{font-size:14px;color:#111827;font-weight:500}.rec-impact{font-size:12px;color:#6B7280;margin-top:4px}.cta{text-align:center;margin:32px 0}.cta a{background:#4F46E5;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px}.footer{padding:24px;text-align:center;border-top:1px solid #E5E7EB}.footer p{font-size:12px;color:#9CA3AF;margin:4px 0}</style></head><body><div class='container'><div class='header'><h1>Your Performance Report is Ready</h1></div><div class='content'><p style='font-size:16px;color:#111827'>Hi {{ $('Collect Performance Data1').item.json.user_first_name }},</p><p style='color:#6B7280'>We analysed your last {{ $('Collect Performance Data1').item.json.email_count }} emails. Here is what we found.</p><div class='metric-grid'><div class='metric-card'><div class='metric-label'>Open Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.open_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Reply Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.reply_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Click Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.click_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Bounce Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.bounce_rate }}%</div></div></div><h3 style='color:#111827;margin-bottom:16px'>Top Recommendations</h3><div class='rec-item'><div class='rec-priority'>Priority 1</div><div class='rec-action'>View full report for all 5 recommendations</div><div class='rec-impact'>Log in to see your complete analysis</div></div><div class='cta'><a href='https://www.leadomation.co.uk/performance'>View Your Full Report</a></div><p style='color:#6B7280;font-size:14px'>This report updates automatically after every 50 emails. The longer you use Leadomation, the more accurate the recommendations become.</p></div><div class='footer'><p>Iain, Founder at Leadomation</p><p>Lumarr Ltd, Dubai, United Arab Emirates</p><p><a href='https://www.leadomation.co.uk/unsubscribe' style='color:#6B7280'>Unsubscribe</a></p></div></div></body></html>\"\n}",
+        "jsonBody": "={\n  \"from\": \"Leadomation <iainliddle@leadomation.co.uk>\",\n  \"to\": [\"{{ $('Collect Performance Data1').item.json.user_email }}\"],\n  \"subject\": \"Your Leadomation Performance Report is ready\",\n  \"html\": \"<!DOCTYPE html><html><head><meta charset='utf-8'><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F8F9FA;margin:0;padding:0}.container{max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #E5E7EB}.header{background:#4F46E5;padding:32px;text-align:center}.header h1{color:#ffffff;margin:0;font-size:24px;font-weight:600}.content{padding:32px}.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}.metric-card{background:#F8F9FA;border-radius:8px;padding:16px;border:1px solid #E5E7EB}.metric-label{font-size:12px;color:#6B7280;margin-bottom:4px}.metric-value{font-size:24px;font-weight:700;color:#111827}.rec-item{background:#EEF2FF;border-left:4px solid #4F46E5;border-radius:0 8px 8px 0;padding:16px;margin-bottom:12px}.rec-priority{font-size:11px;font-weight:600;color:#4F46E5;text-transform:uppercase;margin-bottom:4px}.rec-action{font-size:14px;color:#111827;font-weight:500}.rec-impact{font-size:12px;color:#6B7280;margin-top:4px}.cta{text-align:center;margin:32px 0}.cta a{background:#4F46E5;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px}.footer{padding:24px;text-align:center;border-top:1px solid #E5E7EB}.footer p{font-size:12px;color:#9CA3AF;margin:4px 0}</style></head><body><div class='container'><div class='header'><img src='https://www.leadomation.co.uk/leadomation-logo.png' alt='Leadomation' style='height:36px;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;' onerror=\\\"this.style.display='none'\\\"/><h1 style='color:#ffffff;margin:0;font-size:22px;font-weight:600;'>Your Performance Report is Ready</h1></div><div class='content'><p style='font-size:16px;color:#111827'>Hi {{ $('Collect Performance Data1').item.json.user_first_name }},</p><p style='color:#6B7280'>We analysed your last {{ $('Collect Performance Data1').item.json.email_count }} emails. Here is what we found.</p><div class='metric-grid'><div class='metric-card'><div class='metric-label'>Open Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.open_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Reply Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.reply_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Click Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.click_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Bounce Rate</div><div class='metric-value'>{{ $('Collect Performance Data1').item.json.performance_data.bounce_rate }}%</div></div></div><h3 style='color:#111827;margin-bottom:16px'>Top Recommendations</h3><div class='rec-item'><div class='rec-priority'>Priority 1</div><div class='rec-action'>View full report for all 5 recommendations</div><div class='rec-impact'>Log in to see your complete analysis</div></div><div class='cta'><a href='https://www.leadomation.co.uk/performance'>View Your Full Report</a></div><p style='color:#6B7280;font-size:14px'>This report updates automatically after every 50 emails. The longer you use Leadomation, the more accurate the recommendations become.</p></div><div class='footer'><p>Iain, Founder at Leadomation</p><p>Lumarr Ltd, Dubai, United Arab Emirates</p><p><a href='https://www.leadomation.co.uk/unsubscribe' style='color:#6B7280'>Unsubscribe</a></p></div></div></body></html>\"\n}",
         "options": {
           "timeout": 15000
         }
@@ -232,7 +236,7 @@
       "name": "Log Aggregate Metrics1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1340, 500]
+      "position": [2880, 100]
     },
     {
       "parameters": {
@@ -246,7 +250,7 @@
       "name": "Store Aggregate1",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1560, 500],
+      "position": [3100, 100],
       "credentials": {
         "postgres": {
           "name": "Supabase DB"
@@ -268,27 +272,27 @@
       ]
     },
     "Fetch Active Users1": {
-      "main": [[{ "node": "Split Into Batches1", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Process All Users1", "type": "main", "index": 0 }]]
     },
-    "Split Into Batches1": {
+    "Process All Users1": {
+      "main": [[{ "node": "Check Has Users1", "type": "main", "index": 0 }]]
+    },
+    "Check Has Users1": {
       "main": [
-        [{ "node": "Count Unanalysed Emails1", "type": "main", "index": 0 }],
-        [{ "node": "Log Aggregate Metrics1", "type": "main", "index": 0 }]
+        [{ "node": "Loop Over Items1", "type": "main", "index": 0 }],
+        []
       ]
     },
-    "Count Unanalysed Emails1": {
-      "main": [[{ "node": "Email Threshold Check1", "type": "main", "index": 0 }]]
-    },
-    "Email Threshold Check1": {
-      "main": [
-        [{ "node": "Collect Performance Data1", "type": "main", "index": 0 }],
-        [{ "node": "Split Into Batches1", "type": "main", "index": 0 }]
-      ]
+    "Loop Over Items1": {
+      "main": [[{ "node": "Collect Performance Data1", "type": "main", "index": 0 }]]
     },
     "Collect Performance Data1": {
       "main": [[{ "node": "Claude Analysis1", "type": "main", "index": 0 }]]
     },
     "Claude Analysis1": {
+      "main": [[{ "node": "Clean Claude Response1", "type": "main", "index": 0 }]]
+    },
+    "Clean Claude Response1": {
       "main": [[{ "node": "Store Report in Supabase1", "type": "main", "index": 0 }]]
     },
     "Store Report in Supabase1": {
@@ -298,7 +302,7 @@
       "main": [[{ "node": "Mark Emails Analysed1", "type": "main", "index": 0 }]]
     },
     "Mark Emails Analysed1": {
-      "main": [[{ "node": "Split Into Batches1", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Log Aggregate Metrics1", "type": "main", "index": 0 }]]
     },
     "Log Aggregate Metrics1": {
       "main": [[{ "node": "Store Aggregate1", "type": "main", "index": 0 }]]
