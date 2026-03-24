@@ -1,0 +1,310 @@
+{
+  "name": "Campaign Performance Analyser",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "node-1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(DISTINCT id) as active_count FROM profiles WHERE subscription_status = 'active'"
+      },
+      "id": "node-2",
+      "name": "Check Active User Count",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "name": "Supabase DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.active_count }}",
+              "operation": "largerEqual",
+              "value2": 5
+            }
+          ]
+        }
+      },
+      "id": "node-3",
+      "name": "Activation Gate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, email, first_name, plan_type, industry FROM profiles WHERE subscription_status = 'active'"
+      },
+      "id": "node-4",
+      "name": "Fetch Active Users",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [900, 200],
+      "credentials": {
+        "postgres": {
+          "name": "Supabase DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "node-5",
+      "name": "Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as email_count FROM email_events WHERE user_id = '{{ $json.id }}' AND analysed = false"
+      },
+      "id": "node-6",
+      "name": "Count Unanalysed Emails",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1340, 200],
+      "credentials": {
+        "postgres": {
+          "name": "Supabase DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.email_count }}",
+              "operation": "largerEqual",
+              "value2": 50
+            }
+          ]
+        }
+      },
+      "id": "node-7",
+      "name": "Email Threshold Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const userId = $('Split Into Batches').item.json.id;\nconst userInfo = $('Split Into Batches').item.json;\n\nconst supabaseUrl = $env.SUPABASE_URL;\nconst supabaseKey = $env.SUPABASE_SERVICE_KEY;\n\nconst headers = {\n  'apikey': supabaseKey,\n  'Authorization': `Bearer ${supabaseKey}`\n};\n\n// Query A: Campaign metrics via RPC\nlet campaignMetrics = [];\ntry {\n  campaignMetrics = await this.helpers.httpRequest({\n    method: 'POST',\n    url: `${supabaseUrl}/rest/v1/rpc/get_campaign_metrics`,\n    headers: { ...headers, 'Content-Type': 'application/json' },\n    body: JSON.stringify({ p_user_id: userId })\n  });\n} catch (e) {\n  // RPC function may not exist yet - continue with empty metrics\n}\n\n// Query B: Email events\nconst events = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${supabaseUrl}/rest/v1/email_events?user_id=eq.${userId}&analysed=eq.false&select=event_type,occurred_at,campaign_id,step_index,metadata`,\n  headers\n});\n\n// Aggregate event types\nconst eventCounts = events.reduce((acc, e) => {\n  acc[e.event_type] = (acc[e.event_type] || 0) + 1;\n  return acc;\n}, {});\n\nconst totalSent = eventCounts['sent'] || 0;\nconst openRate = totalSent > 0 ? ((eventCounts['opened'] || 0) / totalSent * 100).toFixed(2) : 0;\nconst clickRate = totalSent > 0 ? ((eventCounts['clicked'] || 0) / totalSent * 100).toFixed(2) : 0;\nconst replyRate = totalSent > 0 ? ((eventCounts['replied'] || 0) / totalSent * 100).toFixed(2) : 0;\nconst bounceRate = totalSent > 0 ? ((eventCounts['bounced'] || 0) / totalSent * 100).toFixed(2) : 0;\n\n// Query C: Sequence step performance\nlet stepPerf = [];\ntry {\n  stepPerf = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `${supabaseUrl}/rest/v1/sequence_step_logs?user_id=eq.${userId}&select=step_index,event_type,ab_variant`,\n    headers\n  });\n} catch (e) {\n  // Table may not exist yet\n}\n\n// Query D: Intent accuracy (limit 100 leads)\nconst leads = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${supabaseUrl}/rest/v1/leads?user_id=eq.${userId}&select=intent_score,id&limit=100`,\n  headers\n});\n\nconst periodStart = events.length > 0\n  ? events.reduce((min, e) => e.occurred_at < min ? e.occurred_at : min, events[0].occurred_at)\n  : new Date().toISOString();\n\nconst periodEnd = new Date().toISOString();\n\nreturn [{\n  json: {\n    user_id: userId,\n    user_email: userInfo.email,\n    user_first_name: userInfo.first_name || 'there',\n    user_industry: userInfo.industry || 'general',\n    email_count: events.length,\n    period_start: periodStart,\n    period_end: periodEnd,\n    performance_data: {\n      total_sent: totalSent,\n      open_rate: parseFloat(openRate),\n      click_rate: parseFloat(clickRate),\n      reply_rate: parseFloat(replyRate),\n      bounce_rate: parseFloat(bounceRate),\n      event_breakdown: eventCounts,\n      campaign_metrics: campaignMetrics,\n      step_performance: stepPerf,\n      intent_data: leads\n    }\n  }\n}];"
+      },
+      "id": "node-8",
+      "name": "Collect Performance Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.ANTHROPIC_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 2000,\n  \"system\": \"You are a B2B outreach performance analyst. You receive campaign performance data for a single user of Leadomation, a lead generation and outreach automation platform. Analyse the data and return your response as valid JSON only, with no preamble or markdown. Structure: {\\\"summary\\\": \\\"2-3 sentence executive summary\\\", \\\"open_rate_avg\\\": number, \\\"click_rate_avg\\\": number, \\\"reply_rate_avg\\\": number, \\\"bounce_rate_avg\\\": number, \\\"top_subject_patterns\\\": [\\\"pattern1\\\", \\\"pattern2\\\", \\\"pattern3\\\"], \\\"worst_subject_patterns\\\": [\\\"pattern1\\\", \\\"pattern2\\\", \\\"pattern3\\\"], \\\"best_send_window\\\": \\\"e.g. Tuesday-Thursday 9am-11am\\\", \\\"sequence_insights\\\": \\\"Which steps perform best/worst\\\", \\\"intent_accuracy\\\": number, \\\"spam_accuracy\\\": {\\\"false_positive\\\": number, \\\"false_negative\\\": number}, \\\"recommendations\\\": [{\\\"priority\\\": 1, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 2, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 3, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 4, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}, {\\\"priority\\\": 5, \\\"action\\\": \\\"...\\\", \\\"expected_impact\\\": \\\"...\\\"}]}\",\n  \"messages\": [{\n    \"role\": \"user\",\n    \"content\": \"Analyse this outreach performance data for a {{ $('Collect Performance Data').item.json.user_industry }} business and provide actionable recommendations. Data: {{ JSON.stringify($('Collect Performance Data').item.json.performance_data) }}\"\n  }]\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "node-9",
+      "name": "Claude Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 100]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO performance_reports (user_id, report_type, report_data, emails_analysed, period_start, period_end) VALUES ($1, 'user', $2::jsonb, $3::int, $4::timestamptz, $5::timestamptz) RETURNING id",
+        "options": {
+          "queryReplacement": "={{ [$('Collect Performance Data').item.json.user_id, $json.content[0].text, $('Collect Performance Data').item.json.email_count, $('Collect Performance Data').item.json.period_start, $('Collect Performance Data').item.json.period_end] }}"
+        }
+      },
+      "id": "node-10",
+      "name": "Store Report in Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [2220, 100],
+      "credentials": {
+        "postgres": {
+          "name": "Supabase DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.RESEND_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"Leadomation <iainliddle@leadomation.co.uk>\",\n  \"to\": [\"{{ $('Collect Performance Data').item.json.user_email }}\"],\n  \"subject\": \"Your Leadomation Performance Report is ready\",\n  \"html\": \"<!DOCTYPE html><html><head><meta charset='utf-8'><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F8F9FA;margin:0;padding:0}.container{max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #E5E7EB}.header{background:#4F46E5;padding:32px;text-align:center}.header h1{color:#ffffff;margin:0;font-size:24px;font-weight:600}.content{padding:32px}.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}.metric-card{background:#F8F9FA;border-radius:8px;padding:16px;border:1px solid #E5E7EB}.metric-label{font-size:12px;color:#6B7280;margin-bottom:4px}.metric-value{font-size:24px;font-weight:700;color:#111827}.rec-item{background:#EEF2FF;border-left:4px solid #4F46E5;border-radius:0 8px 8px 0;padding:16px;margin-bottom:12px}.rec-priority{font-size:11px;font-weight:600;color:#4F46E5;text-transform:uppercase;margin-bottom:4px}.rec-action{font-size:14px;color:#111827;font-weight:500}.rec-impact{font-size:12px;color:#6B7280;margin-top:4px}.cta{text-align:center;margin:32px 0}.cta a{background:#4F46E5;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px}.footer{padding:24px;text-align:center;border-top:1px solid #E5E7EB}.footer p{font-size:12px;color:#9CA3AF;margin:4px 0}</style></head><body><div class='container'><div class='header'><h1>Your Performance Report is Ready</h1></div><div class='content'><p style='font-size:16px;color:#111827'>Hi {{ $('Collect Performance Data').item.json.user_first_name }},</p><p style='color:#6B7280'>We analysed your last {{ $('Collect Performance Data').item.json.email_count }} emails. Here is what we found.</p><div class='metric-grid'><div class='metric-card'><div class='metric-label'>Open Rate</div><div class='metric-value'>{{ $('Collect Performance Data').item.json.performance_data.open_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Reply Rate</div><div class='metric-value'>{{ $('Collect Performance Data').item.json.performance_data.reply_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Click Rate</div><div class='metric-value'>{{ $('Collect Performance Data').item.json.performance_data.click_rate }}%</div></div><div class='metric-card'><div class='metric-label'>Bounce Rate</div><div class='metric-value'>{{ $('Collect Performance Data').item.json.performance_data.bounce_rate }}%</div></div></div><h3 style='color:#111827;margin-bottom:16px'>Top Recommendations</h3><div class='rec-item'><div class='rec-priority'>Priority 1</div><div class='rec-action'>View full report for all 5 recommendations</div><div class='rec-impact'>Log in to see your complete analysis</div></div><div class='cta'><a href='https://www.leadomation.co.uk/performance'>View Your Full Report</a></div><p style='color:#6B7280;font-size:14px'>This report updates automatically after every 50 emails. The longer you use Leadomation, the more accurate the recommendations become.</p></div><div class='footer'><p>Iain, Founder at Leadomation</p><p>Lumarr Ltd, Dubai, United Arab Emirates</p><p><a href='https://www.leadomation.co.uk/unsubscribe' style='color:#6B7280'>Unsubscribe</a></p></div></div></body></html>\"\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "node-11",
+      "name": "Send Report Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2440, 100]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE email_events SET analysed = true, analysed_at = NOW() WHERE user_id = '{{ $('Collect Performance Data').item.json.user_id }}' AND analysed = false"
+      },
+      "id": "node-12",
+      "name": "Mark Emails Analysed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [2660, 100],
+      "credentials": {
+        "postgres": {
+          "name": "Supabase DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\n\nif (!allItems || allItems.length === 0) {\n  return [{ json: { skipped: true, reason: 'No users processed this cycle' } }];\n}\n\nconst totalUsers = allItems.length;\nconst totalEmails = allItems.reduce((sum, item) => sum + (item.json.email_count || 0), 0);\n\nconst avgOpenRate = allItems.reduce((sum, item) => sum + (item.json.performance_data?.open_rate || 0), 0) / totalUsers;\nconst avgClickRate = allItems.reduce((sum, item) => sum + (item.json.performance_data?.click_rate || 0), 0) / totalUsers;\nconst avgReplyRate = allItems.reduce((sum, item) => sum + (item.json.performance_data?.reply_rate || 0), 0) / totalUsers;\nconst avgBounceRate = allItems.reduce((sum, item) => sum + (item.json.performance_data?.bounce_rate || 0), 0) / totalUsers;\n\nreturn [{\n  json: {\n    total_users: totalUsers,\n    total_emails: totalEmails,\n    avg_open_rate: parseFloat(avgOpenRate.toFixed(2)),\n    avg_click_rate: parseFloat(avgClickRate.toFixed(2)),\n    avg_reply_rate: parseFloat(avgReplyRate.toFixed(2)),\n    avg_bounce_rate: parseFloat(avgBounceRate.toFixed(2)),\n    top_subject_patterns: [],\n    worst_subject_patterns: [],\n    intent_accuracy: 0,\n    spam_false_positive_rate: 0,\n    spam_false_negative_rate: 0,\n    recommendations: []\n  }\n}];"
+      },
+      "id": "node-13",
+      "name": "Log Aggregate Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 500]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO aggregate_performance (total_users, total_emails, avg_open_rate, avg_click_rate, avg_reply_rate, avg_bounce_rate, top_subject_patterns, worst_subject_patterns, intent_accuracy, spam_false_positive_rate, spam_false_negative_rate, recommendations) VALUES ($1::int, $2::int, $3::numeric, $4::numeric, $5::numeric, $6::numeric, $7::jsonb, $8::jsonb, $9::numeric, $10::numeric, $11::numeric, $12::jsonb)",
+        "options": {
+          "queryReplacement": "={{ [$json.total_users, $json.total_emails, $json.avg_open_rate, $json.avg_click_rate, $json.avg_reply_rate, $json.avg_bounce_rate, JSON.stringify($json.top_subject_patterns), JSON.stringify($json.worst_subject_patterns), $json.intent_accuracy, $json.spam_false_positive_rate, $json.spam_false_negative_rate, JSON.stringify($json.recommendations)] }}"
+        }
+      },
+      "id": "node-14",
+      "name": "Store Aggregate",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1560, 500],
+      "credentials": {
+        "postgres": {
+          "name": "Supabase DB"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "Check Active User Count", "type": "main", "index": 0 }]]
+    },
+    "Check Active User Count": {
+      "main": [[{ "node": "Activation Gate", "type": "main", "index": 0 }]]
+    },
+    "Activation Gate": {
+      "main": [
+        [{ "node": "Fetch Active Users", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Fetch Active Users": {
+      "main": [[{ "node": "Split Into Batches", "type": "main", "index": 0 }]]
+    },
+    "Split Into Batches": {
+      "main": [
+        [{ "node": "Count Unanalysed Emails", "type": "main", "index": 0 }],
+        [{ "node": "Log Aggregate Metrics", "type": "main", "index": 0 }]
+      ]
+    },
+    "Count Unanalysed Emails": {
+      "main": [[{ "node": "Email Threshold Check", "type": "main", "index": 0 }]]
+    },
+    "Email Threshold Check": {
+      "main": [
+        [{ "node": "Collect Performance Data", "type": "main", "index": 0 }],
+        [{ "node": "Split Into Batches", "type": "main", "index": 0 }]
+      ]
+    },
+    "Collect Performance Data": {
+      "main": [[{ "node": "Claude Analysis", "type": "main", "index": 0 }]]
+    },
+    "Claude Analysis": {
+      "main": [[{ "node": "Store Report in Supabase", "type": "main", "index": 0 }]]
+    },
+    "Store Report in Supabase": {
+      "main": [[{ "node": "Send Report Email", "type": "main", "index": 0 }]]
+    },
+    "Send Report Email": {
+      "main": [[{ "node": "Mark Emails Analysed", "type": "main", "index": 0 }]]
+    },
+    "Mark Emails Analysed": {
+      "main": [[{ "node": "Split Into Batches", "type": "main", "index": 0 }]]
+    },
+    "Log Aggregate Metrics": {
+      "main": [[{ "node": "Store Aggregate", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

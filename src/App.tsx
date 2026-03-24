@@ -23,6 +23,7 @@ import GlobalDemand from './pages/GlobalDemand';
 import CallScriptBuilder from './pages/CallScriptBuilder';
 import Calendar from './pages/Calendar';
 import KeywordMonitor from './pages/KeywordMonitor';
+import PerformanceInsights from './pages/PerformanceInsights';
 import { supabase } from './lib/supabase';
 import { usePlan } from './hooks/usePlan';
 import TrialBanner from './components/TrialBanner';
@@ -207,6 +208,8 @@ const App: React.FC = () => {
         return <Pricing />;
       case 'Settings':
         return <Settings onPageChange={setActivePage} />;
+      case 'Performance':
+        return <PerformanceInsights />;
       default:
         return (
           <div className="h-[60vh] flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">

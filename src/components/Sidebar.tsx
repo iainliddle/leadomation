@@ -389,6 +389,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                             />
                         </NavSection>
 
+                        <NavSection title="ANALYTICS" isCollapsed={isCollapsed}>
+                            <SidebarLock
+                                hasAccess={canAccess('advancedAnalytics')}
+                                onClick={() => triggerUpgrade('Performance Insights', 'pro')}
+                                tooltipText="Pro feature. Upgrade to unlock Performance Insights."
+                            >
+                                <NavItem
+                                    icon={TrendingUp}
+                                    label="Performance"
+                                    active={activePage === 'Performance'}
+                                    onClick={() => { onPageChange('Performance'); setIsOpen?.(false); }}
+                                    isCollapsed={isCollapsed}
+                                />
+                            </SidebarLock>
+                        </NavSection>
+
                         <NavSection title="SETTINGS" isCollapsed={isCollapsed}>
                             <NavItem
                                 icon={User}
