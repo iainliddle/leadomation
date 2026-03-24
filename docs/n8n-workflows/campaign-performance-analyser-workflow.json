@@ -21,7 +21,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT COUNT(DISTINCT id) as active_count FROM profiles WHERE subscription_status = 'active'"
+        "query": "SELECT COUNT(DISTINCT id) as active_count FROM profiles WHERE stripe_subscription_status = 'active'"
       },
       "id": "node-2",
       "name": "Check Active User Count",
@@ -55,7 +55,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT id, email, first_name, plan_type, industry FROM profiles WHERE subscription_status = 'active'"
+        "query": "SELECT id, email, first_name, plan, industry FROM profiles WHERE stripe_subscription_status = 'active'"
       },
       "id": "node-4",
       "name": "Fetch Active Users",
@@ -82,7 +82,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT COUNT(*) as email_count FROM email_events WHERE user_id = '{{ $json.id }}' AND analysed = false"
+        "query": "SELECT COUNT(*) as email_count FROM email_events WHERE user_id = '{{ $('Split Into Batches').item.json.id }}' AND analysed = false"
       },
       "id": "node-6",
       "name": "Count Unanalysed Emails",
