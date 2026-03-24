@@ -106,7 +106,7 @@ const PerformanceInsights: React.FC = () => {
     };
 
     const formatPercentage = (value: number) => {
-        return `${(value * 100).toFixed(1)}%`;
+        return `${Number(value).toFixed(2)}%`;
     };
 
     // Skeleton loader component
