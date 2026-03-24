@@ -187,17 +187,14 @@ const PerformanceInsights: React.FC = () => {
 
         return (
             <div className="p-6 bg-[#F8F9FA] min-h-screen">
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-6">
-                    <TrendingUp size={24} className="text-[#4F46E5]" />
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#111827]">Performance Insights</h1>
-                        <p className="text-sm text-[#6B7280]">AI-powered analysis of your outreach campaigns</p>
-                    </div>
-                </div>
+                <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
+                    <div className="max-w-md w-full bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
+                        {/* Card heading */}
+                        <h1 className="text-xl font-semibold text-[#111827]">Performance Insights</h1>
+                        <p className="text-sm text-[#6B7280] mt-1">AI-powered analysis of your outreach campaigns</p>
+                        <div className="border-b border-gray-200 my-6" />
 
-                <div className="flex items-center justify-center mt-16">
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 max-w-md mx-auto text-center">
+                        {/* Empty state content */}
                         <div className="flex justify-center mb-4">
                             <BarChart2 size={48} className="text-[#4F46E5]" />
                         </div>
