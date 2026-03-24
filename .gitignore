@@ -38,3 +38,6 @@ n8nac-skills.cmd
 .vercel
 workflows/
 n8nac-instance.json.env.production
+
+# N8N workflow with hardcoded secrets - never commit
+docs/n8n-workflows/campaign-performance-analyser-workflow.json

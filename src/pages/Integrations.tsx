@@ -333,7 +333,7 @@ const Integrations: React.FC = () => {
                             </ul>
                             <button
                                 onClick={handleConnectEmail}
-                                className="flex items-center justify-center gap-2 w-full bg-[#22D3EE] text-white rounded-lg text-sm font-medium px-4 py-2 hover:bg-[#06B6D4]"
+                                className="flex items-center justify-center gap-2 w-full bg-[#ECFEFF] text-[#06B6D4] border border-[#22D3EE] rounded-lg text-sm font-medium px-4 py-2 hover:bg-[#CFFAFE]"
                             >
                                 <Mail size={16} />
                                 Connect email account
