@@ -303,6 +303,12 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     // Toast State
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
 
+    // Custom Dropdown States
+    const [isCallScriptDropdownOpen, setIsCallScriptDropdownOpen] = useState(false);
+    const callScriptDropdownRef = useRef<HTMLDivElement>(null);
+    const [isNewLeadStatusDropdownOpen, setIsNewLeadStatusDropdownOpen] = useState(false);
+    const newLeadStatusDropdownRef = useRef<HTMLDivElement>(null);
+
     // LinkedIn Enrollment State
     const [showLinkedInModal, setShowLinkedInModal] = useState(false);
     const [linkedInEnrollLead, setLinkedInEnrollLead] = useState<Lead | null>(null);
@@ -469,6 +475,36 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isStatusDropdownOpen]);
+
+    // Close call script dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (callScriptDropdownRef.current && !callScriptDropdownRef.current.contains(event.target as Node)) {
+                setIsCallScriptDropdownOpen(false);
+            }
+        };
+        if (isCallScriptDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isCallScriptDropdownOpen]);
+
+    // Close new lead status dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (newLeadStatusDropdownRef.current && !newLeadStatusDropdownRef.current.contains(event.target as Node)) {
+                setIsNewLeadStatusDropdownOpen(false);
+            }
+        };
+        if (isNewLeadStatusDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isNewLeadStatusDropdownOpen]);
 
     // Add Lead Form State
     const [newLead, setNewLead] = useState({
@@ -2283,17 +2319,35 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                             {/* Script Selector */}
                             <div>
                                 <label className="block text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-2">Call Script</label>
-                                <div className="relative">
-                                    <select
-                                        value={selectedScriptId}
-                                        onChange={(e) => setSelectedScriptId(e.target.value)}
-                                        className="w-full appearance-none px-4 py-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm font-bold text-[#374151] focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                <div className="relative" ref={callScriptDropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCallScriptDropdownOpen(!isCallScriptDropdownOpen)}
+                                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#111827] cursor-pointer flex items-center justify-between hover:border-[#4F46E5] transition-colors"
                                     >
-                                        {callScripts.map(s => (
-                                            <option key={s.id} value={s.id}>{s.name}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                                        <span className="font-semibold">{callScripts.find(s => s.id === selectedScriptId)?.name || 'Select script'}</span>
+                                        <ChevronDown size={14} className={`text-gray-400 transition-transform ${isCallScriptDropdownOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    {isCallScriptDropdownOpen && (
+                                        <div className="absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1 w-full overflow-hidden">
+                                            {callScripts.map(s => (
+                                                <div
+                                                    key={s.id}
+                                                    onClick={() => {
+                                                        setSelectedScriptId(s.id);
+                                                        setIsCallScriptDropdownOpen(false);
+                                                    }}
+                                                    className={`px-3 py-2 text-sm cursor-pointer ${
+                                                        selectedScriptId === s.id
+                                                            ? 'bg-[#EEF2FF] text-[#4F46E5] font-medium'
+                                                            : 'text-[#111827] hover:bg-[#EEF2FF]'
+                                                    }`}
+                                                >
+                                                    {s.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -2372,16 +2426,36 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest pl-1">Lead Status</label>
-                                    <select
-                                        className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
-                                        value={newLead.status}
-                                        onChange={(e) => setNewLead({ ...newLead, status: e.target.value })}
-                                    >
-                                        <option value="New">New</option>
-                                        <option value="Contacted">Contacted</option>
-                                        <option value="Replied">Replied</option>
-                                        <option value="Qualified">Qualified</option>
-                                    </select>
+                                    <div className="relative" ref={newLeadStatusDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsNewLeadStatusDropdownOpen(!isNewLeadStatusDropdownOpen)}
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#111827] cursor-pointer flex items-center justify-between hover:border-[#4F46E5] transition-colors"
+                                        >
+                                            <span className="font-semibold">{newLead.status}</span>
+                                            <ChevronDown size={14} className={`text-gray-400 transition-transform ${isNewLeadStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                                        </button>
+                                        {isNewLeadStatusDropdownOpen && (
+                                            <div className="absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1 w-full overflow-hidden">
+                                                {['New', 'Contacted', 'Replied', 'Qualified'].map((status) => (
+                                                    <div
+                                                        key={status}
+                                                        onClick={() => {
+                                                            setNewLead({ ...newLead, status });
+                                                            setIsNewLeadStatusDropdownOpen(false);
+                                                        }}
+                                                        className={`px-3 py-2 text-sm cursor-pointer ${
+                                                            newLead.status === status
+                                                                ? 'bg-[#EEF2FF] text-[#4F46E5] font-medium'
+                                                                : 'text-[#111827] hover:bg-[#EEF2FF]'
+                                                        }`}
+                                                    >
+                                                        {status}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest pl-1">Job Title</label>
@@ -2764,7 +2838,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 <span role="img" aria-label="email">📧</span> Start Email Sequence
                             </button>
                             <button
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-transparent border border-white/20 text-white hover:bg-white/10 active:scale-95"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white hover:from-[#16A34A] hover:to-[#15803D] active:scale-95"
                                 onClick={() => { fetchCallScripts(); setShowBatchCallModal(true); setBatchCallScriptId(callScripts[0]?.id || ''); }}
                             >
                                 <span role="img" aria-label="phone">📞</span> Start AI Calling
