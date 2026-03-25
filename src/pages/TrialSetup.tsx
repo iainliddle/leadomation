@@ -53,9 +53,9 @@ const TrialSetup: React.FC = () => {
 
             <div className="register-card" style={{ maxWidth: '440px', width: '100%', padding: '2.5rem 2rem', backgroundColor: 'white', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
                 <div className="text-center mb-8">
-                    <h1 className="text-2xl font-black text-gray-900 mb-2">One last step to secure your free trial</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Your trial has ended. Choose a plan to continue.</h1>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                        Enter your card details to activate your 7-day Pro trial. You won't be charged until day 7. Cancel anytime before then.
+                        Select a plan below to continue using Leadomation. Your data and campaigns are saved and ready when you upgrade.
                     </p>
                 </div>
 
