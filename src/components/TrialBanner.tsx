@@ -9,28 +9,9 @@ interface TrialBannerProps {
 }
 
 const TrialBanner: React.FC<TrialBannerProps> = ({ daysRemaining, plan, selectedPlan, onUpgradeClick }) => {
-    // Don't show for paid plans
+    // Don't show for paid plans or expired/cancelled (they get redirected to /pricing)
     if (plan === 'starter' || plan === 'pro' || plan === 'scale') return null;
-
-    // Expired trial or cancelled
-    if (plan === 'expired' || plan === 'cancelled') {
-        return (
-            <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 flex items-center justify-between gap-4 rounded-xl mt-3 shadow-sm">
-                <div className="flex items-center gap-3">
-                    <AlertTriangle size={18} />
-                    <span className="text-sm font-bold">
-                        {plan === 'expired' ? 'Your free trial has expired.' : 'Your subscription has been cancelled.'} Upgrade now to continue using Leadomation.
-                    </span>
-                </div>
-                <button
-                    onClick={onUpgradeClick}
-                    className="px-5 py-1.5 bg-white text-red-600 rounded-lg text-xs font-black hover:bg-red-50 transition-all whitespace-nowrap shadow-sm"
-                >
-                    View Plans
-                </button>
-            </div>
-        );
-    }
+    if (plan === 'expired' || plan === 'cancelled') return null;
 
     // 'trialing' = card on file, 7-day trial with full Pro access
     if (plan === 'trialing') {

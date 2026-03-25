@@ -29,7 +29,6 @@ import { supabase } from './lib/supabase';
 import { usePlan } from './hooks/usePlan';
 import TrialBanner from './components/TrialBanner';
 import FeatureGate from './components/FeatureGate';
-import ExpiredOverlay from './components/ExpiredOverlay';
 import UpgradeModal from './components/UpgradeModal';
 import AuthCallback from './pages/AuthCallback';
 import TrialSetup from './pages/TrialSetup';
@@ -105,6 +104,7 @@ const App: React.FC = () => {
     isLoading: planLoading,
     trialDaysRemaining,
     canAccess,
+    stripeSubscriptionStatus,
   } = usePlan();
 
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -236,6 +236,22 @@ const App: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [activePage]);
+
+  // Redirect expired trial users to pricing page
+  useEffect(() => {
+    if (planLoading || !session) return;
+
+    // Only redirect if trial/subscription is expired/cancelled
+    // and user doesn't have an active subscription
+    const isExpiredOrCancelled = plan === 'expired' || plan === 'cancelled';
+    const hasActiveSubscription = stripeSubscriptionStatus === 'active' || stripeSubscriptionStatus === 'trialing';
+    const isOnAllowedPage = activePage === 'Pricing' || activePage === 'Settings';
+
+    if (isExpiredOrCancelled && !hasActiveSubscription && !isOnAllowedPage) {
+      navigate('/pricing', { replace: true });
+      setActivePage('Pricing');
+    }
+  }, [plan, stripeSubscriptionStatus, planLoading, session, activePage, navigate]);
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
@@ -416,6 +432,7 @@ const App: React.FC = () => {
         activePage={activePage}
         onPageChange={setActivePage}
         userPlan={plan || undefined}
+        stripeSubscriptionStatus={stripeSubscriptionStatus}
         canAccess={canAccess}
         triggerUpgrade={triggerUpgrade}
       >
@@ -432,13 +449,7 @@ const App: React.FC = () => {
         )}
       </Layout>
 
-      {(plan === 'expired' || plan === 'cancelled') && activePage !== 'Pricing' && activePage !== 'Settings' && (
-        <ExpiredOverlay
-          type={plan as 'expired' | 'cancelled'}
-          onViewPlans={goToPricing}
-        />
-      )}
-
+      
       <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}

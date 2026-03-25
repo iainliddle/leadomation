@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
+import PaymentFailedBar from '../components/PaymentFailedBar';
 import { Menu } from 'lucide-react';
 
 interface LayoutProps {
@@ -8,6 +9,7 @@ interface LayoutProps {
     activePage: string;
     onPageChange: (page: string) => void;
     userPlan?: string;
+    stripeSubscriptionStatus?: string | null;
     canAccess: (feature: any) => boolean;
     triggerUpgrade: (feature: string, targetPlan?: 'starter' | 'pro') => void;
 }
@@ -15,7 +17,7 @@ interface LayoutProps {
 const SIDEBAR_WIDTH_EXPANDED = 240;
 const SIDEBAR_WIDTH_COLLAPSED = 64;
 
-const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free', canAccess, triggerUpgrade }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free', stripeSubscriptionStatus, canAccess, triggerUpgrade }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsedState] = useState(() => {
         try {
@@ -57,20 +59,23 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                     transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
             >
-                <div className="flex items-center lg:sticky lg:top-0 z-30 bg-[#F8F9FA]">
-                    <button
-                        className="lg:hidden p-4 text-[#9CA3AF] hover:text-[#111827] transition-colors"
-                        onClick={() => setIsSidebarOpen(true)}
-                    >
-                        <Menu size={24} />
-                    </button>
-                    <div className="flex-1">
-                        <TopBar
-                            activePage={activePage}
-                            onNewCampaign={() => onPageChange('New Campaign')}
-                            onPageChange={onPageChange}
-                        />
+                <div className="lg:sticky lg:top-0 z-30 bg-[#F8F9FA]">
+                    <div className="flex items-center">
+                        <button
+                            className="lg:hidden p-4 text-[#9CA3AF] hover:text-[#111827] transition-colors"
+                            onClick={() => setIsSidebarOpen(true)}
+                        >
+                            <Menu size={24} />
+                        </button>
+                        <div className="flex-1">
+                            <TopBar
+                                activePage={activePage}
+                                onNewCampaign={() => onPageChange('New Campaign')}
+                                onPageChange={onPageChange}
+                            />
+                        </div>
                     </div>
+                    <PaymentFailedBar stripeSubscriptionStatus={stripeSubscriptionStatus || null} />
                 </div>
 
                 <main className="flex-1 overflow-y-auto">

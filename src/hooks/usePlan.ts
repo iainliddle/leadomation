@@ -21,6 +21,7 @@ interface UsePlanReturn {
     isTrialActive: boolean;
     billingInterval: string | null;
     stripeCustomerId: string | null;
+    stripeSubscriptionStatus: string | null;
     limits: PlanLimits;
     features: FeatureAccess;
     canAccess: (feature: keyof FeatureAccess) => boolean;
@@ -51,6 +52,7 @@ export const usePlan = (): UsePlanReturn => {
     const [trialEnd, setTrialEnd] = useState<string | null>(null);
     const [billingInterval, setBillingInterval] = useState<string | null>(null);
     const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
+    const [stripeSubscriptionStatus, setStripeSubscriptionStatus] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [usage, setUsage] = useState({
         leadsUsed: 0,
@@ -81,6 +83,7 @@ export const usePlan = (): UsePlanReturn => {
                 setTrialEnd(profile.trial_end);
                 setBillingInterval(profile.billing_interval);
                 setStripeCustomerId(profile.stripe_customer_id);
+                setStripeSubscriptionStatus(profile.stripe_subscription_status || null);
                 setUsage({
                     leadsUsed: profile.trial_leads_used || 0,
                     emailsUsed: profile.trial_emails_used || 0,
@@ -258,6 +261,7 @@ export const usePlan = (): UsePlanReturn => {
         isTrialActive: isTrialActiveNow,
         billingInterval,
         stripeCustomerId,
+        stripeSubscriptionStatus,
         limits,
         features,
         canAccess,
