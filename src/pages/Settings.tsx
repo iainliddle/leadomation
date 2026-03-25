@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     User,
     Lock,
@@ -9,15 +10,31 @@ import {
     Save,
     Eye,
     EyeOff,
-    Info
+    Info,
+    X,
+    Download,
+    ExternalLink,
+    Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+interface Invoice {
+    id: string;
+    number: string | null;
+    date: number;
+    amount: number;
+    currency: string;
+    status: string | null;
+    pdfUrl: string | null;
+}
 
 interface SettingsProps {
   onPageChange?: (page: string) => void;
 }
 
 const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
+    const navigate = useNavigate();
+
     useEffect(() => {
         document.title = 'Settings | Leadomation';
         return () => { document.title = 'Leadomation'; };
@@ -54,6 +71,14 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
         weeklyReport: true,
         productUpdates: false,
     });
+    const [notificationSaveStatus, setNotificationSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+
+    // Billing state
+    const [invoicesModalOpen, setInvoicesModalOpen] = useState(false);
+    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [invoicesLoading, setInvoicesLoading] = useState(false);
+    const [invoicesError, setInvoicesError] = useState<string | null>(null);
+    const [portalLoading, setPortalLoading] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -100,6 +125,14 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                 setCompany(data.company_name || '');
                 setJobTitle(data.job_title || '');
                 setProfileImageUrl(data.avatar_url || null);
+
+                // Load notification preferences if they exist
+                if (data.notification_preferences) {
+                    setNotifications(prev => ({
+                        ...prev,
+                        ...data.notification_preferences
+                    }));
+                }
             }
         };
         loadProfile();
@@ -237,6 +270,110 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
 
     const handleToggleNotification = (key: keyof typeof notifications) => {
         setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const handleSaveNotifications = async () => {
+        if (!userId) return;
+
+        setNotificationSaveStatus('saving');
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    notification_preferences: notifications,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', userId);
+
+            if (error) throw error;
+
+            setNotificationSaveStatus('success');
+            setTimeout(() => setNotificationSaveStatus('idle'), 3000);
+        } catch (err: any) {
+            console.error('Failed to save notifications:', err);
+            setNotificationSaveStatus('error');
+            setTimeout(() => setNotificationSaveStatus('idle'), 3000);
+        }
+    };
+
+    const handleOpenPortal = async () => {
+        setPortalLoading(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                alert('Please sign in again to access billing settings.');
+                return;
+            }
+
+            const response = await fetch('/api/create-portal-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to open billing portal');
+            }
+
+            window.location.href = data.url;
+        } catch (err: any) {
+            console.error('Portal error:', err);
+            alert(err.message || 'Failed to open billing portal');
+        } finally {
+            setPortalLoading(false);
+        }
+    };
+
+    const handleFetchInvoices = async () => {
+        setInvoicesModalOpen(true);
+        setInvoicesLoading(true);
+        setInvoicesError(null);
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                throw new Error('Please sign in again to view invoices.');
+            }
+
+            const response = await fetch('/api/get-invoices', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch invoices');
+            }
+
+            setInvoices(data.invoices || []);
+        } catch (err: any) {
+            console.error('Invoices error:', err);
+            setInvoicesError(err.message || 'Failed to load invoices');
+        } finally {
+            setInvoicesLoading(false);
+        }
+    };
+
+    const formatInvoiceDate = (timestamp: number) => {
+        return new Date(timestamp * 1000).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    const formatAmount = (amount: number, currency: string) => {
+        return new Intl.NumberFormat('en-GB', {
+            style: 'currency',
+            currency: currency.toUpperCase(),
+        }).format(amount / 100);
     };
 
     const tabs = [
@@ -519,12 +656,33 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                                 ))}
                             </div>
 
-                            <div className="flex justify-end mt-6">
+                            <div className="flex items-center justify-end gap-3 mt-6">
+                                {notificationSaveStatus === 'success' && (
+                                    <span className="text-sm font-medium text-emerald-600">
+                                        Preferences saved!
+                                    </span>
+                                )}
+                                {notificationSaveStatus === 'error' && (
+                                    <span className="text-sm font-medium text-red-500">
+                                        Failed to save
+                                    </span>
+                                )}
                                 <button
-                                    className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] flex items-center gap-2"
+                                    onClick={handleSaveNotifications}
+                                    disabled={notificationSaveStatus === 'saving'}
+                                    className="px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-medium hover:bg-[#4338CA] flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    <Save size={14} />
-                                    Save preferences
+                                    {notificationSaveStatus === 'saving' ? (
+                                        <>
+                                            <Loader2 size={14} className="animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save size={14} />
+                                            Save preferences
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -541,7 +699,10 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                                         <p className="text-2xl font-bold text-[#111827] mt-1">Pro</p>
                                         <p className="text-sm text-[#6B7280]">£159 / month</p>
                                     </div>
-                                    <button className="px-4 py-2 border border-[#4F46E5] text-[#4F46E5] rounded-lg text-sm font-medium hover:bg-[#EEF2FF]">
+                                    <button
+                                        onClick={() => navigate('/pricing')}
+                                        className="px-4 py-2 border border-[#4F46E5] text-[#4F46E5] rounded-lg text-sm font-medium hover:bg-[#EEF2FF]"
+                                    >
                                         Change plan
                                     </button>
                                 </div>
@@ -565,10 +726,28 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                                 </div>
 
                                 <div className="flex gap-3 mt-6">
-                                    <button className="px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50">
-                                        Update payment method
+                                    <button
+                                        onClick={handleOpenPortal}
+                                        disabled={portalLoading}
+                                        className="px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {portalLoading ? (
+                                            <>
+                                                <Loader2 size={14} className="animate-spin" />
+                                                Opening...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ExternalLink size={14} />
+                                                Update payment method
+                                            </>
+                                        )}
                                     </button>
-                                    <button className="px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50">
+                                    <button
+                                        onClick={handleFetchInvoices}
+                                        className="px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2"
+                                    >
+                                        <Download size={14} />
                                         Download invoices
                                     </button>
                                 </div>
@@ -585,6 +764,91 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Invoices Modal */}
+            {invoicesModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                            <h3 className="text-base font-semibold text-[#111827]">Invoices</h3>
+                            <button
+                                onClick={() => setInvoicesModalOpen(false)}
+                                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <X size={18} className="text-[#6B7280]" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="flex-1 overflow-y-auto px-6 py-4">
+                            {invoicesLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 size={24} className="animate-spin text-[#4F46E5]" />
+                                </div>
+                            ) : invoicesError ? (
+                                <div className="text-center py-12">
+                                    <p className="text-sm text-red-500">{invoicesError}</p>
+                                </div>
+                            ) : invoices.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-sm text-[#6B7280]">No invoices found</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {invoices.map((invoice) => (
+                                        <div key={invoice.id} className="py-3 flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-[#111827]">
+                                                    {invoice.number || 'Draft'}
+                                                </p>
+                                                <p className="text-xs text-[#6B7280]">
+                                                    {formatInvoiceDate(invoice.date)}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-sm font-medium text-[#111827]">
+                                                    {formatAmount(invoice.amount, invoice.currency)}
+                                                </span>
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                    invoice.status === 'paid'
+                                                        ? 'bg-emerald-100 text-emerald-700'
+                                                        : invoice.status === 'open'
+                                                        ? 'bg-amber-100 text-amber-700'
+                                                        : 'bg-gray-100 text-gray-600'
+                                                }`}>
+                                                    {invoice.status === 'paid' ? 'Paid' : invoice.status === 'open' ? 'Open' : invoice.status || 'Draft'}
+                                                </span>
+                                                {invoice.pdfUrl && (
+                                                    <a
+                                                        href={invoice.pdfUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                                                        title="Download PDF"
+                                                    >
+                                                        <Download size={14} className="text-[#4F46E5]" />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
+                            <button
+                                onClick={() => setInvoicesModalOpen(false)}
+                                className="px-4 py-2 border border-[#E5E7EB] bg-white text-[#374151] rounded-lg text-sm font-medium hover:bg-gray-50"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
