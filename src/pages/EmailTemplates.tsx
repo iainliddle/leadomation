@@ -135,12 +135,10 @@ const EmailTemplates: React.FC = () => {
     };
 
     const handleUseTemplate = (template: any) => {
-        localStorage.setItem('selected_template', JSON.stringify({
-            subject: template.subject,
-            body: template.body_html || template.body,
-            name: template.name
-        }));
-        navigate('/sequence-builder');
+        const subject = encodeURIComponent(template.subject || '');
+        const body = encodeURIComponent(template.body_html || template.body || '');
+        const name = encodeURIComponent(template.name || '');
+        navigate(`/sequence-builder?template_subject=${subject}&template_body=${body}&template_name=${name}`);
     };
 
     const openCreate = () => {
@@ -299,7 +297,7 @@ const EmailTemplates: React.FC = () => {
                                             e.stopPropagation();
                                             handleUseTemplate(template);
                                         }}
-                                        className="flex items-center gap-2 px-4 py-2 bg-[#22D3EE] text-white rounded-lg text-sm font-medium hover:bg-[#06B6D4] transition-all"
+                                        className="bg-[#ECFEFF] text-[#06B6D4] border border-[#22D3EE] rounded-lg text-sm font-medium hover:bg-[#CFFAFE] px-4 py-2 flex items-center gap-2 transition-all"
                                     >
                                         <Copy size={13} />
                                         Use
@@ -367,7 +365,7 @@ const EmailTemplates: React.FC = () => {
                                     e.stopPropagation();
                                     handleUseTemplate(previewTemplate);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-[#22D3EE] text-white rounded-lg text-sm font-medium hover:bg-[#06B6D4] transition-all flex-1 justify-center"
+                                className="bg-[#ECFEFF] text-[#06B6D4] border border-[#22D3EE] rounded-lg text-sm font-medium hover:bg-[#CFFAFE] px-4 py-2 flex items-center gap-2 flex-1 justify-center transition-all"
                             >
                                 <Copy size={16} />
                                 Use Template
