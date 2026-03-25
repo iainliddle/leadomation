@@ -377,16 +377,18 @@ const Pricing: React.FC = () => {
                     </div>
                 )}
 
-                {/* Free Trial Banner */}
-                <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-5 mb-8 flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#4F46E5] rounded-xl flex items-center justify-center">
-                        <Zap size={20} className="text-white" />
+                {/* Free Trial Banner - only show for non-subscribers */}
+                {userPlanState !== 'starter' && userPlanState !== 'pro' && (
+                    <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-xl p-5 mb-8 flex items-center gap-4">
+                        <div className="w-10 h-10 bg-[#4F46E5] rounded-xl flex items-center justify-center">
+                            <Zap size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <span className="font-bold text-[#111827]">Start with a 7-day free trial</span>
+                            <span className="text-[#6B7280] ml-2">Full Pro access, no restrictions on features.</span>
+                        </div>
                     </div>
-                    <div>
-                        <span className="font-bold text-[#111827]">Start with a 7-day free trial</span>
-                        <span className="text-[#6B7280] ml-2">Full Pro access, no restrictions on features.</span>
-                    </div>
-                </div>
+                )}
 
                 {/* Pricing Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -519,37 +521,39 @@ const Pricing: React.FC = () => {
                     </table>
                 </div>
 
-                {/* Free Trial Terms */}
-                <div className="border-t border-gray-100 pt-8 mt-8">
-                    <button
-                        onClick={() => setExpandedTerms(!expandedTerms)}
-                        className="flex items-center gap-2 text-sm font-medium text-[#6B7280] hover:text-[#111827] transition-all mx-auto"
-                    >
-                        Free trial terms
-                        {expandedTerms ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </button>
-                    {expandedTerms && (
-                        <div className="mt-6 bg-gray-50 rounded-xl p-6 border border-gray-100">
-                            <ul className="space-y-2 text-sm text-[#6B7280]">
-                                <li className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                                    No CSV export during trial
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                                    No bulk email actions during trial
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                                    5-lead sample export maximum
-                                </li>
-                            </ul>
-                            <p className="text-sm text-[#6B7280] mt-4">
-                                Full feature access otherwise. Leads generated during trial are retained.
-                            </p>
-                        </div>
-                    )}
-                </div>
+                {/* Free Trial Terms - only show for non-subscribers */}
+                {userPlanState !== 'starter' && userPlanState !== 'pro' && (
+                    <div className="border-t border-gray-100 pt-8 mt-8">
+                        <button
+                            onClick={() => setExpandedTerms(!expandedTerms)}
+                            className="flex items-center gap-2 text-sm font-medium text-[#6B7280] hover:text-[#111827] transition-all mx-auto"
+                        >
+                            Free trial terms
+                            {expandedTerms ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                        {expandedTerms && (
+                            <div className="mt-6 bg-gray-50 rounded-xl p-6 border border-gray-100">
+                                <ul className="space-y-2 text-sm text-[#6B7280]">
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                        No CSV export during trial
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                        No bulk email actions during trial
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                                        5-lead sample export maximum
+                                    </li>
+                                </ul>
+                                <p className="text-sm text-[#6B7280] mt-4">
+                                    Full feature access otherwise. Leads generated during trial are retained.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* FAQ Section */}
                 <div className="mt-12 mb-12">
@@ -576,28 +580,46 @@ const Pricing: React.FC = () => {
 
                 {/* Bottom CTA */}
                 <div className="bg-gradient-to-br from-[#EEF2FF] via-[#E0E7FF] to-[#F0F4FF] border border-indigo-100 rounded-2xl p-8 text-center">
-                    <h2 className="text-2xl font-bold text-[#111827] mb-3">Still not sure?</h2>
-                    <p className="text-[#6B7280] mb-6 max-w-lg mx-auto">
-                        Start your free trial and see the results for yourself.
-                    </p>
-                    <button
-                        onClick={() => handleCheckout('Pro')}
-                        disabled={isLoading}
-                        className="px-8 py-3 bg-[#4F46E5] text-white font-semibold rounded-xl hover:bg-[#4338CA] transition-all shadow-lg flex items-center gap-2 mx-auto"
-                    >
-                        {isLoading && <Loader2 size={20} className="animate-spin" />}
-                        Start 7-Day Free Trial
-                    </button>
-                    <div className="mt-6 flex items-center justify-center gap-6 text-xs text-[#6B7280]">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck size={14} className="text-[#4F46E5]" />
-                            Card required to activate trial
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <CreditCard size={14} className="text-[#4F46E5]" />
-                            Secure processing via Stripe
-                        </div>
-                    </div>
+                    {userPlanState === 'starter' || userPlanState === 'pro' ? (
+                        <>
+                            <h2 className="text-2xl font-bold text-[#111827] mb-3">You're all set!</h2>
+                            <p className="text-[#6B7280] mb-6 max-w-lg mx-auto">
+                                You're on the {userPlanState === 'pro' ? 'Pro' : 'Starter'} plan. Head to your dashboard to start generating leads.
+                            </p>
+                            <button
+                                onClick={() => window.location.href = '/dashboard'}
+                                className="px-8 py-3 bg-[#4F46E5] text-white font-semibold rounded-xl hover:bg-[#4338CA] transition-all shadow-lg flex items-center gap-2 mx-auto"
+                            >
+                                Go to Dashboard
+                                <ArrowRight size={16} />
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <h2 className="text-2xl font-bold text-[#111827] mb-3">Still not sure?</h2>
+                            <p className="text-[#6B7280] mb-6 max-w-lg mx-auto">
+                                Start your free trial and see the results for yourself.
+                            </p>
+                            <button
+                                onClick={() => handleCheckout('Pro')}
+                                disabled={isLoading}
+                                className="px-8 py-3 bg-[#4F46E5] text-white font-semibold rounded-xl hover:bg-[#4338CA] transition-all shadow-lg flex items-center gap-2 mx-auto"
+                            >
+                                {isLoading && <Loader2 size={20} className="animate-spin" />}
+                                Start 7-Day Free Trial
+                            </button>
+                            <div className="mt-6 flex items-center justify-center gap-6 text-xs text-[#6B7280]">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck size={14} className="text-[#4F46E5]" />
+                                    Card required to activate trial
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CreditCard size={14} className="text-[#4F46E5]" />
+                                    Secure processing via Stripe
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 

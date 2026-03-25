@@ -34,10 +34,47 @@ import AuthCallback from './pages/AuthCallback';
 import TrialSetup from './pages/TrialSetup';
 import CancellationFeedback from './pages/CancellationFeedback';
 
+// Map URL paths to page names
+const urlToPage: Record<string, string> = {
+  '/dashboard': 'Dashboard',
+  '/global-demand': 'Global Demand',
+  '/new-campaign': 'New Campaign',
+  '/active-campaigns': 'Active Campaigns',
+  '/lead-database': 'Lead Database',
+  '/deal-pipeline': 'Deal Pipeline',
+  '/calendar': 'Calendar',
+  '/keyword-monitor': 'Keyword Monitor',
+  '/sequence-builder': 'Sequence Builder',
+  '/call-agent': 'Call Agent',
+  '/inbox': 'Inbox',
+  '/email-templates': 'Email Templates',
+  '/integrations': 'Integrations',
+  '/email-config': 'Email Config',
+  '/compliance': 'Compliance',
+  '/pricing': 'Pricing',
+  '/settings': 'Settings',
+  '/performance': 'Performance',
+  '/login': 'Login',
+  '/register': 'Register',
+  '/terms': 'Terms',
+  '/privacy': 'Privacy',
+  '/refund': 'Refund',
+};
+
+// Pages that don't require authentication
+const publicPages = ['Landing', 'Login', 'Register', 'Terms', 'Privacy', 'Refund', 'Pricing'];
+
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState(() => {
     const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    return params.get('checkout') === 'success' ? 'CheckoutSuccess' : 'Landing';
+    if (params.get('checkout') === 'success') return 'CheckoutSuccess';
+
+    // Check URL path for deep linking
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/';
+    const pageFromUrl = urlToPage[path];
+    if (pageFromUrl) return pageFromUrl;
+
+    return 'Landing';
   });
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -88,10 +125,34 @@ const App: React.FC = () => {
         setSession(session);
 
         if (!session) {
+          // If user is trying to access a protected page, redirect to login with return path
+          if (!publicPages.includes(activePage)) {
+            const currentPath = window.location.pathname;
+            // Store the intended destination and redirect to login
+            window.history.replaceState({}, '', `/login?redirect=${encodeURIComponent(currentPath)}`);
+            setActivePage('Login');
+          }
           return;
         }
 
         if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
+          // Check for redirect parameter in URL (user just logged in)
+          const params = new URLSearchParams(window.location.search);
+          const redirectPath = params.get('redirect');
+
+          if (redirectPath) {
+            // Clear the URL params
+            window.history.replaceState({}, '', redirectPath);
+            // Map the redirect path to a page name
+            const redirectPage = urlToPage[redirectPath];
+            if (redirectPage && !publicPages.includes(redirectPage)) {
+              setActivePage(redirectPage);
+              setLoading(false);
+              setSessionChecked(true);
+              return;
+            }
+          }
+
           const nextPage = await checkTrialStatus(session.user);
           setActivePage(nextPage);
         }
@@ -114,6 +175,22 @@ const App: React.FC = () => {
 
         if (session && (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register')) {
           setLoading(true);
+
+          // Check for redirect parameter in URL
+          const params = new URLSearchParams(window.location.search);
+          const redirectPath = params.get('redirect');
+
+          if (redirectPath) {
+            // Clear the URL params
+            window.history.replaceState({}, '', redirectPath);
+            // Map the redirect path to a page name
+            const redirectPage = urlToPage[redirectPath];
+            if (redirectPage && !publicPages.includes(redirectPage)) {
+              setActivePage(redirectPage);
+              return;
+            }
+          }
+
           const nextPage = await checkTrialStatus(session.user);
           setActivePage(nextPage);
         }
