@@ -295,8 +295,11 @@ const EmailTemplates: React.FC = () => {
                                     </>
                                 ) : (
                                     <button
-                                        onClick={() => handleUseTemplate(template)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-[#ECFEFF] text-[#06B6D4] border border-[#22D3EE] rounded-lg text-sm font-medium hover:bg-[#CFFAFE] transition-all"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleUseTemplate(template);
+                                        }}
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#22D3EE] text-white rounded-lg text-sm font-medium hover:bg-[#06B6D4] transition-all"
                                     >
                                         <Copy size={13} />
                                         Use
@@ -360,10 +363,11 @@ const EmailTemplates: React.FC = () => {
                                 Close
                             </button>
                             <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     handleUseTemplate(previewTemplate);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-[#ECFEFF] text-[#06B6D4] border border-[#22D3EE] rounded-lg text-sm font-medium hover:bg-[#CFFAFE] transition-all flex-1 justify-center"
+                                className="flex items-center gap-2 px-4 py-2 bg-[#22D3EE] text-white rounded-lg text-sm font-medium hover:bg-[#06B6D4] transition-all flex-1 justify-center"
                             >
                                 <Copy size={16} />
                                 Use Template
