@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
     User,
     Lock,
@@ -33,8 +32,6 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
-    const navigate = useNavigate();
-
     useEffect(() => {
         document.title = 'Settings | Leadomation';
         return () => { document.title = 'Leadomation'; };
