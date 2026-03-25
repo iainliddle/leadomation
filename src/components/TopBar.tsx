@@ -44,6 +44,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick,
     const [headerAvatarUrl, setHeaderAvatarUrl] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
     const [showSearch, setShowSearch] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -257,7 +258,9 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, onNewCampaign, onMenuClick,
                         className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 relative transition-colors"
                     >
                         <Bell size={20} />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                        {unreadNotificationCount > 0 && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                        )}
                     </button>
 
                     {showNotifications && (
