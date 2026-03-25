@@ -15,6 +15,11 @@ import {
 import { supabase } from '../lib/supabase';
 
 const Compliance: React.FC = () => {
+    useEffect(() => {
+        document.title = 'Compliance | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [_includeUnsubscribe, setIncludeUnsubscribe] = useState(true);

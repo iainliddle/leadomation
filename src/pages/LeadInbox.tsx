@@ -76,6 +76,11 @@ const LABEL_STYLES: Record<string, { bg: string; text: string }> = {
 };
 
 const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer }) => {
+    useEffect(() => {
+        document.title = 'Inbox | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [emails, setEmails] = useState<InboundEmail[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedEmail, setSelectedEmail] = useState<InboundEmail | null>(null);

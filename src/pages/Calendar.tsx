@@ -564,6 +564,11 @@ function EditEventModal({ event, onClose, onSave, onDelete }: EditEventModalProp
 // ============================================================================
 
 const Calendar: React.FC = () => {
+  useEffect(() => {
+    document.title = 'Calendar | Leadomation';
+    return () => { document.title = 'Leadomation'; };
+  }, []);
+
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(() => new Date());

@@ -9,6 +9,11 @@ interface LinkedInStatus {
 }
 
 const Integrations: React.FC = () => {
+    useEffect(() => {
+        document.title = 'Integrations | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [linkedinStatus, setLinkedinStatus] = useState<LinkedInStatus>({
         connected: false,
         account_id: null,

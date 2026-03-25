@@ -191,6 +191,11 @@ const DEFAULT_LIMITS = {
 };
 
 const EmailConfig: React.FC = () => {
+    useEffect(() => {
+        document.title = 'Email Config | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const { plan, limits } = usePlan();
     const planLimits = limits ?? DEFAULT_LIMITS;
     const [loading, setLoading] = useState(true);

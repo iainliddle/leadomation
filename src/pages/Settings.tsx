@@ -18,6 +18,11 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
+    useEffect(() => {
+        document.title = 'Settings | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [activeTab, setActiveTab] = useState('account');
 
     // Account state

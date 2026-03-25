@@ -11,6 +11,11 @@ interface NewCampaignProps {
 }
 
 const NewCampaign: React.FC<NewCampaignProps> = ({ onBack }) => {
+    useEffect(() => {
+        document.title = 'New Campaign | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const { plan } = usePlan();
     const [campaignName, setCampaignName] = useState('');
     const [selectedTrack, setSelectedTrack] = useState<number | null>(null);

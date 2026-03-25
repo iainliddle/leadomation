@@ -90,6 +90,11 @@ interface SequenceBuilderProps {
 }
 
 const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAccess, triggerUpgrade }) => {
+    useEffect(() => {
+        document.title = 'Sequence Builder | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [sequences, setSequences] = useState<Sequence[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingSequence, setEditingSequence] = useState<Sequence | null>(null);

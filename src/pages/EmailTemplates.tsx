@@ -23,6 +23,11 @@ const formatUseCase = (slug: string): string => {
 };
 
 const EmailTemplates: React.FC = () => {
+    useEffect(() => {
+        document.title = 'Email Templates | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [templates, setTemplates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);

@@ -235,6 +235,11 @@ const StatCard: React.FC<StatCardProps> = ({
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
+    useEffect(() => {
+        document.title = 'Dashboard | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const { plan, usage, limits, trialDaysRemaining } = usePlan();
     const [firstName, setFirstName] = useState<string>('');
     const [monthlyResetDate, setMonthlyResetDate] = useState<string | null>(null);

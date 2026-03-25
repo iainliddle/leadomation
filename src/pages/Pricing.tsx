@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Check,
     Sparkles,
@@ -153,6 +153,11 @@ const PricingCard: React.FC<PricingCardProps> = ({
 );};
 
 const Pricing: React.FC = () => {
+    useEffect(() => {
+        document.title = 'Pricing & Plans | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [isAnnual, setIsAnnual] = useState(false);
     const [expandedTerms, setExpandedTerms] = useState(false);
     const [activeFaq, setActiveFaq] = useState<number | null>(null);

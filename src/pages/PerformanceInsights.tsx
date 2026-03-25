@@ -50,6 +50,11 @@ interface PerformanceReport {
 }
 
 const PerformanceInsights: React.FC = () => {
+    useEffect(() => {
+        document.title = 'Performance Insights | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const { canAccess } = usePlan();
     const hasAccess = canAccess('advancedAnalytics');
 

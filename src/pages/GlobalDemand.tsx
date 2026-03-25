@@ -249,6 +249,11 @@ const MapChart = memo(({
 });
 
 const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
+    useEffect(() => {
+        document.title = 'Global Demand | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [activeTab, setActiveTab] = useState<'density' | 'search'>('density');
     const [selectedIndustry, setSelectedIndustry] = useState('Restaurants & Cafes');
     const [searchQuery, setSearchQuery] = useState('');

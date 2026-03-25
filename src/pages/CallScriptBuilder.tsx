@@ -93,6 +93,11 @@ interface CallScriptBuilderProps {
 }
 
 const CallScriptBuilder: React.FC<CallScriptBuilderProps> = () => {
+    useEffect(() => {
+        document.title = 'Call Agent | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const { plan, isLoading: planLoading } = usePlan();
     const [script, setScript] = useState<CallScript>(defaultScript);
     const [savedScripts, setSavedScripts] = useState<any[]>([]);

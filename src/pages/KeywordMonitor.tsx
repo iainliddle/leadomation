@@ -55,6 +55,11 @@ interface KeywordMonitorProps {
 }
 
 const KeywordMonitor: React.FC<KeywordMonitorProps> = () => {
+    useEffect(() => {
+        document.title = 'Keyword Monitor | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const { plan, isLoading: planLoading } = usePlan();
     const [monitors, setMonitors] = useState<KeywordMonitor[]>([]);
     const [hits, setHits] = useState<KeywordHit[]>([]);

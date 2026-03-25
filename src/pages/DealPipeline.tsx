@@ -538,6 +538,11 @@ const DealDrawer: React.FC<DealDrawerProps> = ({ deal, activity, onClose, onSave
 interface DealPipelineProps { }
 
 const DealPipeline: React.FC<DealPipelineProps> = () => {
+    useEffect(() => {
+        document.title = 'Deal Pipeline | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [deals, setDeals] = useState<Deal[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);

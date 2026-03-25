@@ -245,6 +245,11 @@ const IntentScoreBadge: React.FC<{ lead: Lead }> = ({ lead }) => {
 };
 
 const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }) => {
+    useEffect(() => {
+        document.title = 'Lead Database | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [campaignFilter, setCampaignFilter] = useState<string | null>(() => {
         const searchParams = new URLSearchParams(window.location.search);
         return searchParams.get('campaign');

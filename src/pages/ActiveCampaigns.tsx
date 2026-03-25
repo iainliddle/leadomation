@@ -54,6 +54,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
+    useEffect(() => {
+        document.title = 'Active Campaigns | Leadomation';
+        return () => { document.title = 'Leadomation'; };
+    }, []);
+
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const channelRef = React.useRef<any>(null);
