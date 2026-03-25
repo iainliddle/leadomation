@@ -32,7 +32,7 @@ interface SettingsProps {
   onPageChange?: (page: string) => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
+const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -700,7 +700,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange: _onPageChange }) => {
                                         <p className="text-sm text-[#6B7280]">£159 / month</p>
                                     </div>
                                     <button
-                                        onClick={() => navigate('/pricing')}
+                                        onClick={() => onPageChange?.('Pricing')}
                                         className="px-4 py-2 border border-[#4F46E5] text-[#4F46E5] rounded-lg text-sm font-medium hover:bg-[#EEF2FF]"
                                     >
                                         Change plan
