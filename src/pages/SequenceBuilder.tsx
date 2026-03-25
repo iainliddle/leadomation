@@ -120,6 +120,36 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
     useEffect(() => {
         fetchSequences();
         fetchLinkedinEnrollments();
+
+        // Check for template from EmailTemplates page
+        const savedTemplate = localStorage.getItem('selected_template');
+        if (savedTemplate) {
+            try {
+                const template = JSON.parse(savedTemplate);
+                localStorage.removeItem('selected_template');
+
+                // Create a new sequence with the template pre-populated
+                const newSequence: Partial<Sequence> = {
+                    name: template.name || 'New Sequence',
+                    status: 'draft',
+                    steps: [
+                        {
+                            step: 1,
+                            channel: 'email',
+                            subject: template.subject || '',
+                            body: template.body || '',
+                            delay_days: 0
+                        }
+                    ]
+                };
+                setEditingSequence(newSequence as Sequence);
+                setActiveStepIndex(0);
+                showToast('Template loaded. Edit and save your step.', 'success');
+            } catch (e) {
+                console.error('Error parsing saved template:', e);
+                localStorage.removeItem('selected_template');
+            }
+        }
     }, []);
 
     useEffect(() => {
