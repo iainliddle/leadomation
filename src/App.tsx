@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from './layouts/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -36,10 +37,11 @@ import CancellationFeedback from './pages/CancellationFeedback';
 
 // Map URL paths to page names
 const urlToPage: Record<string, string> = {
+  '/': 'Landing',
   '/dashboard': 'Dashboard',
   '/global-demand': 'Global Demand',
-  '/new-campaign': 'New Campaign',
-  '/active-campaigns': 'Active Campaigns',
+  '/campaigns/new': 'New Campaign',
+  '/campaigns/active': 'Active Campaigns',
   '/lead-database': 'Lead Database',
   '/deal-pipeline': 'Deal Pipeline',
   '/calendar': 'Calendar',
@@ -48,12 +50,13 @@ const urlToPage: Record<string, string> = {
   '/call-agent': 'Call Agent',
   '/inbox': 'Inbox',
   '/email-templates': 'Email Templates',
+  '/analytics': 'Analytics',
+  '/performance': 'Performance',
+  '/settings/profile': 'Settings',
   '/integrations': 'Integrations',
   '/email-config': 'Email Config',
   '/compliance': 'Compliance',
   '/pricing': 'Pricing',
-  '/settings': 'Settings',
-  '/performance': 'Performance',
   '/login': 'Login',
   '/register': 'Register',
   '/terms': 'Terms',
@@ -61,10 +64,18 @@ const urlToPage: Record<string, string> = {
   '/refund': 'Refund',
 };
 
+// Reverse mapping: page names to URL paths
+const pageToUrl: Record<string, string> = Object.fromEntries(
+  Object.entries(urlToPage).map(([url, page]) => [page, url])
+);
+
 // Pages that don't require authentication
 const publicPages = ['Landing', 'Login', 'Register', 'Terms', 'Privacy', 'Refund', 'Pricing'];
 
 const App: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [activePage, setActivePage] = useState(() => {
     const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     if (params.get('checkout') === 'success') return 'CheckoutSuccess';
@@ -78,6 +89,15 @@ const App: React.FC = () => {
   });
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Navigation function that updates both state and URL
+  const navigateTo = useCallback((page: string) => {
+    setActivePage(page);
+    const url = pageToUrl[page];
+    if (url) {
+      navigate(url);
+    }
+  }, [navigate]);
 
   const {
     plan,
@@ -98,7 +118,7 @@ const App: React.FC = () => {
   };
 
   const goToPricing = () => {
-    setActivePage('Pricing');
+    navigateTo('Pricing');
   };
 
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -127,9 +147,9 @@ const App: React.FC = () => {
         if (!session) {
           // If user is trying to access a protected page, redirect to login with return path
           if (!publicPages.includes(activePage)) {
-            const currentPath = window.location.pathname;
+            const currentPath = location.pathname;
             // Store the intended destination and redirect to login
-            window.history.replaceState({}, '', `/login?redirect=${encodeURIComponent(currentPath)}`);
+            navigate(`/login?redirect=${encodeURIComponent(currentPath)}`, { replace: true });
             setActivePage('Login');
           }
           return;
@@ -137,15 +157,14 @@ const App: React.FC = () => {
 
         if (activePage === 'Landing' || activePage === 'Login' || activePage === 'Register') {
           // Check for redirect parameter in URL (user just logged in)
-          const params = new URLSearchParams(window.location.search);
+          const params = new URLSearchParams(location.search);
           const redirectPath = params.get('redirect');
 
           if (redirectPath) {
-            // Clear the URL params
-            window.history.replaceState({}, '', redirectPath);
             // Map the redirect path to a page name
             const redirectPage = urlToPage[redirectPath];
             if (redirectPage && !publicPages.includes(redirectPage)) {
+              navigate(redirectPath, { replace: true });
               setActivePage(redirectPage);
               setLoading(false);
               setSessionChecked(true);
@@ -168,6 +187,7 @@ const App: React.FC = () => {
 
         if (event === 'SIGNED_OUT' || !session) {
           if (activePage !== 'Register' && activePage !== 'Terms' && activePage !== 'Privacy' && activePage !== 'Refund' && activePage !== 'Login') {
+            navigate('/', { replace: true });
             setActivePage('Landing');
           }
           return;
@@ -177,15 +197,14 @@ const App: React.FC = () => {
           setLoading(true);
 
           // Check for redirect parameter in URL
-          const params = new URLSearchParams(window.location.search);
+          const params = new URLSearchParams(location.search);
           const redirectPath = params.get('redirect');
 
           if (redirectPath) {
-            // Clear the URL params
-            window.history.replaceState({}, '', redirectPath);
             // Map the redirect path to a page name
             const redirectPage = urlToPage[redirectPath];
             if (redirectPage && !publicPages.includes(redirectPage)) {
+              navigate(redirectPath, { replace: true });
               setActivePage(redirectPage);
               return;
             }
@@ -201,11 +220,18 @@ const App: React.FC = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [activePage]);
+  }, [activePage, location.search, navigate]);
+
+  // Sync URL with activePage changes
+  useEffect(() => {
+    const url = pageToUrl[activePage];
+    if (url && location.pathname !== url) {
+      navigate(url, { replace: true });
+    }
+  }, [activePage, location.pathname, navigate]);
 
   useEffect(() => {
     if (activePage === 'CheckoutSuccess') {
-      window.history.replaceState({}, '', window.location.pathname);
       const timer = setTimeout(() => setActivePage('Dashboard'), 3000);
       return () => clearTimeout(timer);
     }
@@ -213,17 +239,18 @@ const App: React.FC = () => {
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session && window.location.pathname === '/auth/callback') {
+      if (event === 'SIGNED_IN' && session && location.pathname === '/auth/callback') {
         const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
         fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ to: session.user.email, type: 'welcome', firstName })
         });
-        window.location.href = '/dashboard';
+        navigate('/dashboard', { replace: true });
+        setActivePage('Dashboard');
       }
     });
-  }, []);
+  }, [location.pathname, navigate]);
 
   const renderPage = (page: string) => {
     switch (page) {
@@ -328,11 +355,11 @@ const App: React.FC = () => {
     );
   }
 
-  if (window.location.pathname === '/auth/callback') {
+  if (location.pathname === '/auth/callback') {
     return <AuthCallback />;
   }
 
-  if (window.location.pathname === '/cancellation-feedback') {
+  if (location.pathname === '/cancellation-feedback') {
     return <CancellationFeedback />;
   }
 
