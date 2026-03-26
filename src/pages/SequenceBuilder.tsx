@@ -117,6 +117,13 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
     // LinkedIn phase dropdown state
     const [showPhaseDropdown, setShowPhaseDropdown] = useState<string | null>(null);
 
+    // Template banner state (from URL params)
+    const [templateBanner, setTemplateBanner] = useState<{
+        subject: string;
+        body: string;
+        name: string;
+    } | null>(null);
+
     useEffect(() => {
         fetchSequences();
         fetchLinkedinEnrollments();
@@ -159,6 +166,21 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
             return () => document.removeEventListener('click', handleClickOutside);
         }
     }, [showPhaseDropdown]);
+
+    // Read URL params for template on mount
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const subject = params.get('template_subject');
+        const body = params.get('template_body');
+        const name = params.get('template_name');
+        if (subject) {
+            setTemplateBanner({
+                subject: decodeURIComponent(subject),
+                body: decodeURIComponent(body || ''),
+                name: decodeURIComponent(name || '')
+            });
+        }
+    }, []);
 
     const fetchSequences = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -622,6 +644,52 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                             New Sequence
                         </button>
                     </div>
+
+                    {/* Template Banner */}
+                    {templateBanner && (
+                        <div className="bg-[#EEF2FF] border border-[#4F46E5]/20 rounded-xl p-4 mb-6 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-semibold text-[#4F46E5]">
+                                    Template ready: {templateBanner.name}
+                                </p>
+                                <p className="text-xs text-[#6B7280] mt-1">
+                                    Create a new sequence and add a step to use this template.
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => {
+                                        // Create new sequence with template pre-filled
+                                        const newSequence: Partial<Sequence> = {
+                                            name: templateBanner.name || 'New Sequence',
+                                            status: 'draft',
+                                            steps: [
+                                                {
+                                                    step: 1,
+                                                    channel: 'email',
+                                                    subject: templateBanner.subject || '',
+                                                    body: templateBanner.body || '',
+                                                    delay_days: 0
+                                                }
+                                            ]
+                                        };
+                                        setEditingSequence(newSequence as Sequence);
+                                        setActiveStepIndex(0);
+                                        setTemplateBanner(null);
+                                    }}
+                                    className="bg-[#4F46E5] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#4338CA]"
+                                >
+                                    Create New Sequence
+                                </button>
+                                <button
+                                    onClick={() => setTemplateBanner(null)}
+                                    className="text-[#6B7280] hover:text-[#111827] text-sm"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Tabs */}
                     <div className="flex border-b border-gray-200 mb-6">
