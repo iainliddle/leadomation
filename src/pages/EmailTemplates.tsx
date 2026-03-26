@@ -240,7 +240,7 @@ const EmailTemplates: React.FC = () => {
                     {filtered.map(template => (
                         <div
                             key={template.id}
-                            className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:border-[#4F46E5] hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col"
+                            className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:border-[#4F46E5] hover:shadow-md transition-all duration-200 flex flex-col"
                         >
                             {/* Tags Row */}
                             <div className="flex flex-wrap gap-1.5 mb-2">
