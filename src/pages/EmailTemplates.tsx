@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
     Plus,
     Edit3,
@@ -24,8 +23,6 @@ const formatUseCase = (slug: string): string => {
 };
 
 const EmailTemplates: React.FC = () => {
-    const navigate = useNavigate();
-
     useEffect(() => {
         document.title = 'Email Templates | Leadomation';
         return () => { document.title = 'Leadomation'; };
@@ -138,7 +135,7 @@ const EmailTemplates: React.FC = () => {
         const subject = encodeURIComponent(template.subject || '');
         const body = encodeURIComponent(template.body_html || template.body || '');
         const name = encodeURIComponent(template.name || '');
-        navigate(`/sequence-builder?template_subject=${subject}&template_body=${body}&template_name=${name}`);
+        window.location.href = `/sequence-builder?template_subject=${subject}&template_body=${body}&template_name=${name}`;
     };
 
     const openCreate = () => {
