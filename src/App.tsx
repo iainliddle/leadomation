@@ -254,9 +254,22 @@ const App: React.FC = () => {
   }, [plan, stripeSubscriptionStatus, planLoading, session, activePage, navigate]);
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session && location.pathname === '/auth/callback') {
-        const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 'there';
+        // Fetch first_name from profiles table
+        let firstName = 'there';
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.first_name) {
+          firstName = profile.first_name;
+        } else if (session.user.user_metadata?.full_name) {
+          firstName = session.user.user_metadata.full_name.split(' ')[0];
+        }
+
         fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

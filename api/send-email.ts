@@ -30,7 +30,7 @@ export default async function handler(req: any, res: any) {
     // Handle server-side triggers from Supabase (type: 'welcome')
     if (type === 'welcome') {
         const name = firstName || 'there';
-        subject = subject || "Welcome to Leadomation — let's find your first leads 🚀";
+        subject = subject || "Welcome to Leadomation - let's find your first leads 🚀";
         const bodyContent = WELCOME_EMAIL_BODY.replace(/{{first_name}}/g, name);
         html = BASE_LAYOUT(subject, bodyContent);
     }

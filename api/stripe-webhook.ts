@@ -53,7 +53,7 @@ const CANCELLATION_EMAIL_BODY = `
   Your Leadomation subscription has been cancelled. Your data will be kept safe for 30 days in case you change your mind.
 </p>
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-  I'd love to know why you cancelled — it only takes one click:
+  I'd love to know why you cancelled, and it only takes one click:
 </p>
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
   <tr><td style="padding:8px 0;"><a href="https://www.leadomation.co.uk/cancellation-feedback?reason=too_expensive&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">💰 It was too expensive</a></td></tr>
@@ -62,7 +62,7 @@ const CANCELLATION_EMAIL_BODY = `
   <tr><td style="padding:8px 0;"><a href="https://www.leadomation.co.uk/cancellation-feedback?reason=no_longer_needed&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">📦 I no longer need it</a></td></tr>
 </table>
 <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-  If price was the issue, reply to this email — I may be able to help.
+  If price was the issue, reply to this email. I may be able to help.
 </p>
 <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
   Iain<br>
@@ -372,7 +372,7 @@ export default async function handler(req: any, res: any) {
                                 userId = cancelProfile.id;
                             }
 
-                            const subject = 'Sorry to see you go — can I ask why?';
+                            const subject = 'Sorry to see you go - can I ask why?';
                             const body = CANCELLATION_EMAIL_BODY
                                 .replace(/{{first_name}}/g, firstName)
                                 .replace(/{{user_id}}/g, userId);
@@ -411,7 +411,7 @@ export default async function handler(req: any, res: any) {
                         const amount = plan === 'pro' ? '£159' : '£59';
                         const planName = plan === 'pro' ? 'Pro' : 'Starter';
 
-                        const subject = `Your free trial ends in 2 days — here's what happens next`;
+                        const subject = `Your free trial ends in 2 days - here's what happens next`;
                         const bodyContent = `
                             <h1 style="margin:0 0 24px;font-size:24px;font-weight:800;color:#111827;">Your trial ends on ${chargeDate}</h1>
                             <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">Hi ${firstName},</p>
@@ -428,7 +428,7 @@ export default async function handler(req: any, res: any) {
                             </div>
                             <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.7;">
                                 If you want to cancel, you can do so from your account settings before <strong>${chargeDate}</strong>. 
-                                No hard feelings — we'll send you a confirmation straight away.
+                                No hard feelings, we'll send you a confirmation straight away.
                             </p>
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
                                 <tr>
