@@ -219,6 +219,7 @@ const Settings: React.FC<SettingsProps> = ({ onPageChange }) => {
                 full_name: fullName,
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
+                email: userEmail,
                 phone: phone.trim(),
                 company_name: company.trim(),
                 job_title: jobTitle.trim(),

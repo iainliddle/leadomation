@@ -57,6 +57,23 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin, onGoToTerms, onGoToPri
             if (authError) throw authError;
 
             console.log('Registration successful:', data.user);
+
+            // Split full name into first and last name and save to profiles
+            if (data.user) {
+                const nameParts = name.trim().split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+
+                await supabase
+                    .from('profiles')
+                    .upsert({
+                        id: data.user.id,
+                        first_name: firstName,
+                        last_name: lastName,
+                        full_name: name.trim(),
+                    });
+            }
+
             setSuccess(true);
         } catch (err: any) {
             console.error('Signup error:', err);
