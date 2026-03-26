@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BarChart3, ChevronRight, BarChart2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { supabase } from '../lib/supabase';
@@ -39,6 +39,18 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
     const [funnel, setFunnel] = useState<FunnelData>({ totalLeads: 0, contacted: 0, qualified: 0, deals: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [isEmpty, setIsEmpty] = useState(true);
+    const [chartReady, setChartReady] = useState(false);
+    const chartContainerRef = useRef<HTMLDivElement>(null);
+
+    // Delay chart render to ensure container has valid dimensions
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (chartContainerRef.current && chartContainerRef.current.offsetWidth > 0) {
+                setChartReady(true);
+            }
+        }, 50);
+        return () => clearTimeout(timer);
+    }, [isLoading, isEmpty]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -149,8 +161,8 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                     </p>
                 </div>
             ) : (
-                <div>
-                    <ResponsiveContainer width="100%" height={280}>
+                <div ref={chartContainerRef} style={{ minHeight: '280px' }}>
+                    {chartReady && <ResponsiveContainer width="100%" height={280}>
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="fillLeads" x1="0" y1="0" x2="0" y2="1">
@@ -209,7 +221,7 @@ const CampaignPerformance: React.FC<{ dateFrom?: string }> = ({ dateFrom }) => {
                                 fill="url(#fillEmails)"
                             />
                         </AreaChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer>}
                 </div>
             )}
 
