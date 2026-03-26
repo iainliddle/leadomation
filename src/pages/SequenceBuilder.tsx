@@ -169,16 +169,30 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
 
     // Read URL params for template on mount
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const subject = params.get('template_subject');
-        const body = params.get('template_body');
-        const name = params.get('template_name');
-        if (subject) {
-            setTemplateBanner({
-                subject: decodeURIComponent(subject),
-                body: decodeURIComponent(body || ''),
-                name: decodeURIComponent(name || '')
-            });
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const subject = params.get('template_subject');
+            const body = params.get('template_body');
+            const name = params.get('template_name');
+
+            if (subject) {
+                const safeDecoded = (val: string | null) => {
+                    if (!val) return '';
+                    try {
+                        return decodeURIComponent(val);
+                    } catch {
+                        return val;
+                    }
+                };
+
+                setTemplateBanner({
+                    subject: safeDecoded(subject),
+                    body: safeDecoded(body),
+                    name: safeDecoded(name)
+                });
+            }
+        } catch (err) {
+            console.error('Error reading template params:', err);
         }
     }, []);
 
