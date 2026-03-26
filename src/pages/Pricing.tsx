@@ -164,7 +164,7 @@ const Pricing: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [cancelled, setCancelled] = useState(false);
     const [showNotifyToast, setShowNotifyToast] = useState(false);
-    const { plan } = usePlan();
+    const { plan, stripeSubscriptionStatus } = usePlan();
 
     // Determine user's plan state: 'trialing', 'starter', or 'pro'
     const userPlanState = plan === 'trial' || plan === 'trialing' ? 'trialing' : plan;
@@ -188,14 +188,7 @@ const Pricing: React.FC = () => {
 
     // Get button props for Starter card based on user's plan
     const getStarterButtonProps = () => {
-        if (userPlanState === 'trialing') {
-            return {
-                buttonText: isLoading ? 'Loading...' : 'Upgrade to Starter',
-                buttonVariant: 'outline-indigo' as const,
-                buttonDisabled: false,
-                onCheckout: () => handleCheckout('Starter')
-            };
-        }
+        // User is already on Starter - show Current plan
         if (userPlanState === 'starter') {
             return {
                 buttonText: 'Current plan',
@@ -204,7 +197,8 @@ const Pricing: React.FC = () => {
                 onCheckout: () => {}
             };
         }
-        if (userPlanState === 'pro') {
+        // User has active subscription on Pro - show Downgrade
+        if (stripeSubscriptionStatus === 'active' && userPlanState === 'pro') {
             return {
                 buttonText: 'Downgrade',
                 buttonVariant: 'outline-gray' as const,
@@ -212,10 +206,10 @@ const Pricing: React.FC = () => {
                 onCheckout: () => handleCheckout('Starter')
             };
         }
-        // Default fallback
+        // Expired trial or no active subscription - show Get started
         return {
-            buttonText: isLoading ? 'Loading...' : 'Start Free Trial',
-            buttonVariant: undefined,
+            buttonText: isLoading ? 'Loading...' : 'Get started',
+            buttonVariant: 'outline-indigo' as const,
             buttonDisabled: false,
             onCheckout: () => handleCheckout('Starter')
         };
@@ -417,7 +411,7 @@ const Pricing: React.FC = () => {
                             "Email sequences up to 4 steps",
                             "25 keyword searches/month",
                             "Lead database with search & filters",
-                            "6 pre-built email templates",
+                            "25 pre-built email templates",
                             "Email signature builder",
                             "Basic dashboard & analytics",
                             "CSV export",
