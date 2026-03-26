@@ -1150,10 +1150,10 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({ onPageChange, canAcce
                                         onDragStart={() => handleDragStart(index)}
                                         onDragOver={handleDragOver}
                                         onDrop={() => handleDrop(index)}
-                                        className={`group relative flex items-center gap-3 p-3 rounded-xl border shadow-sm transition-all duration-150 cursor-grab active:cursor-grabbing z-10 ${
+                                        className={`group relative flex items-center gap-3 p-3 rounded-xl border border-gray-200 shadow-sm transition-all duration-150 cursor-grab active:cursor-grabbing z-10 ${
                                             activeStepIndex === index
-                                                ? 'bg-indigo-50 border-l-4 border-l-[#4F46E5] border-t border-r border-b border-gray-200 shadow-md'
-                                                : 'bg-white border-gray-200 hover:border-[#818CF8]'
+                                                ? 'bg-indigo-50 ring-2 ring-[#4F46E5] shadow-md'
+                                                : 'bg-white hover:border-[#818CF8]'
                                         }`}
                                         onClick={() => setActiveStepIndex(index)}
                                     >
