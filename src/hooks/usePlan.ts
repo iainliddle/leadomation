@@ -14,7 +14,7 @@ import {
 
 interface UsePlanReturn {
     plan: PlanType;
-    rawPlan: string;
+    rawPlan: string | null;
     selectedPlan: string | null; // Plan user will convert to after trial
     isLoading: boolean;
     trialDaysRemaining: number;
@@ -47,7 +47,7 @@ interface UsePlanReturn {
 }
 
 export const usePlan = (): UsePlanReturn => {
-    const [rawPlan, setRawPlan] = useState<string>('trial');
+    const [rawPlan, setRawPlan] = useState<string | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [trialEnd, setTrialEnd] = useState<string | null>(null);
     const [billingInterval, setBillingInterval] = useState<string | null>(null);
@@ -134,7 +134,7 @@ export const usePlan = (): UsePlanReturn => {
         loadPlan();
     }, []);
 
-    const effectivePlan = getEffectivePlan(rawPlan, trialEnd);
+    const effectivePlan = rawPlan === null ? 'trial' : getEffectivePlan(rawPlan as string, trialEnd);
     const limits = getPlanLimits(effectivePlan);
     const features = getFeatureAccess(effectivePlan);
     const trialDaysRemaining = getTrialDaysRemaining(trialEnd);
