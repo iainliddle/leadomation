@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2, Lock, Check } from 'lucide-react';
 import logo from '../assets/logo-full.png';
 import { supabase } from '../lib/supabase';
@@ -9,6 +9,24 @@ const TrialSetup: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('pro');
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+    const [sessionReady, setSessionReady] = useState(false);
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                setSessionReady(true);
+            } else {
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                    if (session) {
+                        setSessionReady(true);
+                        subscription.unsubscribe();
+                    }
+                });
+            }
+        };
+        checkSession();
+    }, []);
 
     const handleActivate = async () => {
         setIsLoading(true);
@@ -127,11 +145,11 @@ const TrialSetup: React.FC = () => {
                 <div className="flex flex-col gap-4">
                     <button
                         onClick={handleActivate}
-                        disabled={isLoading}
+                        disabled={!sessionReady || isLoading}
                         className="w-full py-3.5 rounded-xl text-sm font-black text-white hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                         style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%)' }}
                     >
-                        {isLoading ? (<><Loader2 size={18} className="animate-spin" /> ACTIVATING...</>) : ('Activate Free Trial →')}
+                        {isLoading ? (<><Loader2 size={18} className="animate-spin" /> ACTIVATING...</>) : (sessionReady ? 'Activate Free Trial →' : 'Setting up your account...')}
                     </button>
 
                     <div className="flex items-center justify-center gap-2 text-xs font-medium text-gray-500">
