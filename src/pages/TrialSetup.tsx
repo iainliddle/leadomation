@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Lock, Check } from 'lucide-react';
 import logo from '../assets/logo-full.png';
 import { supabase } from '../lib/supabase';
+import type { Session } from '@supabase/supabase-js';
 import './Register.css';
 
 const TrialSetup: React.FC = () => {
@@ -10,22 +11,36 @@ const TrialSetup: React.FC = () => {
     const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('pro');
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
     const [sessionReady, setSessionReady] = useState(false);
+    const sessionRef = useRef<Session | null>(null);
 
     useEffect(() => {
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                setSessionReady(true);
-            } else {
-                const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-                    if (session) {
-                        setSessionReady(true);
-                        subscription.unsubscribe();
-                    }
-                });
+        let mounted = true;
+
+        // Set up auth listener FIRST (synchronously) to catch hash token processing
+        // This must happen before any async operations to avoid missing auth events
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, newSession) => {
+                console.log('[TrialSetup] Auth event:', event, !!newSession);
+                if (mounted && newSession) {
+                    sessionRef.current = newSession;
+                    setSessionReady(true);
+                }
             }
+        );
+
+        // Also check if session already exists (in case hash was already processed)
+        supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+            console.log('[TrialSetup] Initial session check:', !!existingSession);
+            if (mounted && existingSession) {
+                sessionRef.current = existingSession;
+                setSessionReady(true);
+            }
+        });
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
         };
-        checkSession();
     }, []);
 
     const handleActivate = async () => {
@@ -33,24 +48,32 @@ const TrialSetup: React.FC = () => {
         setError(null);
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                setError('You must be signed in to activate your trial.');
+            // Use stored session from ref, or try to get fresh one as fallback
+            let currentSession = sessionRef.current;
+            if (!currentSession) {
+                const { data: { session: freshSession } } = await supabase.auth.getSession();
+                currentSession = freshSession;
+            }
+
+            if (!currentSession) {
+                setError('You must be signed in to activate your trial. Please refresh the page and try again.');
                 setIsLoading(false);
                 return;
             }
+
+            console.log('[TrialSetup] Starting checkout with session for user:', currentSession.user.id);
 
             const response = await fetch('/api/create-checkout-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+                    'Authorization': `Bearer ${currentSession.access_token}`
                 },
                 body: JSON.stringify({
                     plan: selectedPlan,
                     billingCycle,
-                    userId: session.user.id,
-                    userEmail: session.user.email
+                    userId: currentSession.user.id,
+                    userEmail: currentSession.user.email
                 })
             });
 
