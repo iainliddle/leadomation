@@ -249,7 +249,7 @@ export default async function handler(req: any, res: any) {
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     to: customer.email,
-                                    first_name: first_name
+                                    firstName: first_name
                                 })
                             });
                             console.log(`✅ Welcome email webhook triggered for ${customer.email}`);
