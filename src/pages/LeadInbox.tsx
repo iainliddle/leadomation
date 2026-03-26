@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     Search,
     Inbox,
@@ -97,6 +97,11 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
     const [crmToast, setCrmToast] = useState<{ type: 'success' | 'exists' | 'error'; emailId: string } | null>(null);
     const [resumingSequence, setResumingSequence] = useState<string | null>(null);
 
+    // Realtime subscription refs
+    const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+    const retryCountRef = useRef(0);
+    const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     const loadEmails = useCallback(async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -149,9 +154,18 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
     }, [loadEmails, loadCampaigns]);
 
     useEffect(() => {
+        let cancelled = false;
+        const MAX_RETRIES = 3;
+
         const setupRealtimeSubscription = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+            if (!user || cancelled) return;
+
+            // Clean up existing channel before creating new one
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
 
             const channel = supabase
                 .channel('inbound_emails_changes')
@@ -182,14 +196,48 @@ const LeadInbox: React.FC<LeadInboxProps> = ({ onPageChange, onOpenLeadDrawer })
                         ));
                     }
                 )
-                .subscribe();
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        // Reset retry count on successful subscription
+                        retryCountRef.current = 0;
+                    } else if (status === 'CHANNEL_ERROR') {
+                        // Handle subscription error with exponential backoff
+                        if (retryCountRef.current < MAX_RETRIES && !cancelled) {
+                            const delay = Math.pow(2, retryCountRef.current) * 1000; // 2s, 4s, 8s
+                            retryCountRef.current += 1;
 
-            return () => {
+                            retryTimeoutRef.current = setTimeout(() => {
+                                if (!cancelled) {
+                                    setupRealtimeSubscription();
+                                }
+                            }, delay);
+                        } else if (retryCountRef.current >= MAX_RETRIES) {
+                            // Max retries reached, log once and stop
+                            console.log('Inbox realtime subscription failed after 3 attempts. Using polling fallback.');
+                        }
+                    }
+                });
+
+            if (!cancelled) {
+                channelRef.current = channel;
+            } else {
                 supabase.removeChannel(channel);
-            };
+            }
         };
 
         setupRealtimeSubscription();
+
+        return () => {
+            cancelled = true;
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+                retryTimeoutRef.current = null;
+            }
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
+        };
     }, []);
 
     const markAsRead = async (emailId: string) => {

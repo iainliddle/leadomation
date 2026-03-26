@@ -61,7 +61,9 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const channelRef = React.useRef<any>(null);
+    const channelRef = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
+    const retryCountRef = React.useRef(0);
+    const retryTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const fetchCampaigns = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -109,10 +111,17 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
     useEffect(() => {
         fetchCampaigns();
         let cancelled = false;
+        const MAX_RETRIES = 3;
 
         const setupRealtime = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user || cancelled) return;
+
+            // Clean up existing channel before creating new one
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
 
             const channel = supabase
                 .channel(`campaigns-changes-${user.id}`)
@@ -121,12 +130,29 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
                     schema: 'public',
                     table: 'campaigns',
                     filter: `user_id=eq.${user.id}`
-                }, (payload) => {
-                    console.log('Realtime event received:', payload);
+                }, () => {
                     fetchCampaigns();
                 })
                 .subscribe((status) => {
-                    console.log('Realtime subscription status:', status);
+                    if (status === 'SUBSCRIBED') {
+                        // Reset retry count on successful subscription
+                        retryCountRef.current = 0;
+                    } else if (status === 'CHANNEL_ERROR') {
+                        // Handle subscription error with exponential backoff
+                        if (retryCountRef.current < MAX_RETRIES && !cancelled) {
+                            const delay = Math.pow(2, retryCountRef.current) * 1000; // 2s, 4s, 8s
+                            retryCountRef.current += 1;
+
+                            retryTimeoutRef.current = setTimeout(() => {
+                                if (!cancelled) {
+                                    setupRealtime();
+                                }
+                            }, delay);
+                        } else if (retryCountRef.current >= MAX_RETRIES) {
+                            // Max retries reached, log once and stop
+                            console.log('Campaigns realtime subscription failed after 3 attempts.');
+                        }
+                    }
                 });
 
             if (!cancelled) {
@@ -140,6 +166,10 @@ const ActiveCampaigns: React.FC<ActiveCampaignsProps> = ({ onPageChange }) => {
 
         return () => {
             cancelled = true;
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+                retryTimeoutRef.current = null;
+            }
             if (channelRef.current) {
                 supabase.removeChannel(channelRef.current);
                 channelRef.current = null;

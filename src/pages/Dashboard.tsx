@@ -493,6 +493,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         fetchDashboardData();
     }, [fetchDashboardData]);
 
+    // Polling-based refresh for live activity feed (every 30 seconds)
+    // This replaces WebSocket subscriptions which can cause CHANNEL_ERROR flooding
+    useEffect(() => {
+        const pollInterval = setInterval(() => {
+            fetchDashboardData();
+        }, 30000); // 30 seconds
+
+        return () => {
+            clearInterval(pollInterval);
+        };
+    }, [fetchDashboardData]);
+
     const handleCloseOnboarding = () => {
         localStorage.setItem('leadomation_onboarding_completed', 'true');
         setShowOnboarding(false);
