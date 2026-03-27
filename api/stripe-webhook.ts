@@ -4,47 +4,7 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const BASE_LAYOUT = (subject: string, bodyContent: string) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${subject}</title>
-</head>
-<body style="margin:0;padding:0;background-color:#F8F9FF;font-family:Inter,system-ui,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8F9FF;padding:40px 20px;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-          <tr>
-            <td style="background:linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
-              <div style="display:inline-flex;align-items:center;gap:10px;">
-                <img src="https://www.leadomation.co.uk/leadomation-logo.png" alt="Leadomation" width="160" style="display:block;" />
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="background:#FFFFFF;padding:40px;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">
-              ${bodyContent}
-            </td>
-          </tr>
-          <tr>
-            <td style="background:#F3F4F6;border-radius:0 0 16px 16px;padding:24px 40px;border:1px solid #E5E7EB;border-top:none;">
-              <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;line-height:1.6;">
-                You're receiving this email because you signed up for Leadomation.<br>
-                <a href="#" style="color:#6B7280;text-decoration:underline;">Unsubscribe</a> · 
-                <a href="https://leadomation.co.uk" style="color:#6B7280;text-decoration:underline;">Visit Leadomation</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`;
+const BASE_LAYOUT = (subject: string, body: string) => `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;padding:0;background-color:#F8F9FF;font-family:Inter,system-ui,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#F8F9FF" style="background-color:#F8F9FF;padding:40px 20px;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;"><tr><td bgcolor="#ffffff" style="background-color:#ffffff;border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;border-top:6px solid #4F46E5;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;"><img src="https://www.leadomation.co.uk/assets/logo-full-CtvVA_AY.png" alt="Leadomation" width="180" style="display:block;margin:0 auto;height:auto;" /></td></tr><tr><td bgcolor="#ffffff" style="background-color:#ffffff;padding:40px;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">${body}</td></tr><tr><td bgcolor="#F3F4F6" style="background:#F3F4F6;border-radius:0 0 16px 16px;padding:24px 40px;border:1px solid #E5E7EB;border-top:none;"><p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;line-height:1.6;">© 2026 Leadomation. All rights reserved.<br><a href="https://www.leadomation.co.uk" style="color:#6B7280;text-decoration:underline;">leadomation.co.uk</a></p></td></tr></table></td></tr></table></body></html>`;
 
 const CANCELLATION_EMAIL_BODY = `
 <h1 style="margin:0 0 24px;font-size:24px;font-weight:800;color:#111827;">We've cancelled your subscription</h1>
