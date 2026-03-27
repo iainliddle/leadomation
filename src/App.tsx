@@ -61,6 +61,7 @@ const urlToPage: Record<string, string> = {
   '/terms': 'Terms',
   '/privacy': 'Privacy',
   '/refund': 'Refund',
+  '/cancellation-feedback': 'CancellationFeedback',
 };
 
 // Reverse mapping: page names to URL paths
@@ -69,7 +70,7 @@ const pageToUrl: Record<string, string> = Object.fromEntries(
 );
 
 // Pages that don't require authentication
-const publicPages = ['Landing', 'Login', 'Register', 'Terms', 'Privacy', 'Refund', 'Pricing'];
+const publicPages = ['Landing', 'Login', 'Register', 'Terms', 'Privacy', 'Refund', 'Pricing', 'CancellationFeedback'];
 
 const App: React.FC = () => {
   const navigate = useNavigate();
