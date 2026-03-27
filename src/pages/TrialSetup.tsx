@@ -10,7 +10,7 @@ const TrialSetup: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('pro');
-    const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
     const [sessionReady, setSessionReady] = useState(false);
     const sessionRef = useRef<Session | null>(null);
     const { stripeCustomerId } = usePlan();
@@ -136,7 +136,7 @@ const TrialSetup: React.FC = () => {
                         onClick={() => setSelectedPlan('starter')}
                         className={`text-left p-4 rounded-xl border-2 transition-all gap-2 flex flex-col items-start ${selectedPlan === 'starter' ? 'border-indigo-500 bg-indigo-50/30' : 'border-gray-200 hover:border-gray-300'}`}
                     >
-                        <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Starter</div>
+                        <div className="text-xs font-bold text-gray-500 tracking-widest mb-1">Starter</div>
                         <div className="text-xl font-black text-gray-900 mb-3 block">
                             £{billingCycle === 'monthly' ? '59' : '566'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                         </div>
@@ -158,7 +158,7 @@ const TrialSetup: React.FC = () => {
                         className={`text-left p-4 rounded-xl border-2 transition-all gap-2 flex flex-col items-start relative overflow-hidden ${selectedPlan === 'pro' ? 'border-indigo-500 bg-indigo-50/30' : 'border-gray-200 hover:border-gray-300'}`}
                     >
                         <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg uppercase">Popular</div>
-                        <div className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Pro</div>
+                        <div className="text-xs font-bold text-indigo-500 tracking-widest mb-1">Pro</div>
                         <div className="text-xl font-black text-gray-900 mb-3 block">
                             £{billingCycle === 'monthly' ? '159' : '1,526'}<span className="text-xs font-bold text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                         </div>
