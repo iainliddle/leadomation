@@ -3,6 +3,7 @@ import { Loader2, Lock, Check } from 'lucide-react';
 import logo from '../assets/logo-full.png';
 import { supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
+import { usePlan } from '../hooks/usePlan';
 import './Register.css';
 
 const TrialSetup: React.FC = () => {
@@ -12,6 +13,10 @@ const TrialSetup: React.FC = () => {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
     const [sessionReady, setSessionReady] = useState(false);
     const sessionRef = useRef<Session | null>(null);
+    const { stripeCustomerId } = usePlan();
+
+    // Determine if this is a new user (no stripe customer) or returning user (expired/cancelled)
+    const isNewUser = !stripeCustomerId;
 
     useEffect(() => {
         let mounted = true;
@@ -97,9 +102,13 @@ const TrialSetup: React.FC = () => {
 
             <div className="register-card" style={{ maxWidth: '440px', width: '100%', padding: '2.5rem 2rem', backgroundColor: 'white', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
                 <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Your trial has ended. Choose a plan to continue.</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                        {isNewUser ? 'Start your 7-day free trial' : 'Your trial has ended. Choose a plan to continue.'}
+                    </h1>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                        Select a plan below to continue using Leadomation. Your data and campaigns are saved and ready when you upgrade.
+                        {isNewUser
+                            ? 'Full Pro access. No charge for 7 days. Cancel anytime.'
+                            : 'Select a plan below to continue using Leadomation. Your data and campaigns are saved and ready when you upgrade.'}
                     </p>
                 </div>
 
