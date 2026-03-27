@@ -146,9 +146,15 @@ const App: React.FC = () => {
         setSession(session);
 
         if (!session) {
+          const currentPath = location.pathname;
+          // Allow cancellation-feedback route for unauthenticated users
+          if (currentPath === '/cancellation-feedback') {
+            setActivePage('CancellationFeedback');
+            setLoading(false);
+            return;
+          }
           // If user is trying to access a protected page, redirect to login with return path
           if (!publicPages.includes(activePage)) {
-            const currentPath = location.pathname;
             // Store the intended destination and redirect to login
             navigate(`/login?redirect=${encodeURIComponent(currentPath)}`, { replace: true });
             setActivePage('Login');
