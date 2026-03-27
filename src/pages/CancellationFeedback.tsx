@@ -11,7 +11,10 @@ const CancellationFeedback: React.FC = () => {
         if (reason && userId && userId !== 'test') {
             fetch('/api/cancellation-reason', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-secret': import.meta.env.VITE_CANCELLATION_SECRET
+                },
                 body: JSON.stringify({ userId, reason }),
             }).catch((err) => {
                 console.error('Failed to save cancellation reason:', err);
