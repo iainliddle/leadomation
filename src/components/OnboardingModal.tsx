@@ -102,7 +102,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
                             onClick={completeOnboarding}
                             className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 hover:shadow-xl transition-all active:scale-[0.98]"
                         >
-                            GO TO DASHBOARD
+                            Go to dashboard
                         </button>
                     </div>
                 );
