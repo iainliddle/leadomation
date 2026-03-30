@@ -128,6 +128,36 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
         trialMaxKeywordSearches: 0,
         trialMaxCampaigns: 0,
     },
+    cancelled: {
+        maxCampaigns: 0,
+        maxLeadsPerMonth: 0,
+        maxEmailsPerDay: 0,
+        maxSequenceSteps: 0,
+        maxKeywordSearches: 0,
+        maxEmailTemplates: 0,
+        maxVoiceCallsPerMonth: 0,
+        trialMaxLeads: 0,
+        trialMaxEmails: 0,
+        trialMaxVoiceCalls: 0,
+        trialMaxAiEmails: 0,
+        trialMaxKeywordSearches: 0,
+        trialMaxCampaigns: 0,
+    },
+    expired: {
+        maxCampaigns: 0,
+        maxLeadsPerMonth: 0,
+        maxEmailsPerDay: 0,
+        maxSequenceSteps: 0,
+        maxKeywordSearches: 0,
+        maxEmailTemplates: 0,
+        maxVoiceCallsPerMonth: 0,
+        trialMaxLeads: 0,
+        trialMaxEmails: 0,
+        trialMaxVoiceCalls: 0,
+        trialMaxAiEmails: 0,
+        trialMaxKeywordSearches: 0,
+        trialMaxCampaigns: 0,
+    },
 };
 
 export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
@@ -383,6 +413,8 @@ export const getEffectivePlan = (
     plan: string,
     trialEnd: string | null
 ): PlanType => {
+    // Handle null or undefined plan values gracefully
+    if (!plan) return 'expired';
     // 'trialing' = card on file, 7-day trial with full Pro access
     if (plan === 'trialing') {
         return isTrialActive(trialEnd) ? 'trialing' : 'expired';
