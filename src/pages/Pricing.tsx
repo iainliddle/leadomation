@@ -293,7 +293,9 @@ const Pricing: React.FC = () => {
                 body: JSON.stringify({
                     priceId: correctPriceId,
                     userId: session.user.id,
-                    userEmail: session.user.email
+                    userEmail: session.user.email,
+                    plan: plan.toLowerCase(),
+                    billingCycle: isAnnual ? 'annual' : 'monthly'
                 })
             });
 
