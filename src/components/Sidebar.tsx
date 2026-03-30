@@ -109,6 +109,7 @@ interface SidebarProps {
     userPlan?: string;
     canAccess: (feature: keyof FeatureAccess) => boolean;
     triggerUpgrade: (feature: string, targetPlan?: 'starter' | 'pro') => void;
+    isLoading?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -120,7 +121,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     setIsCollapsed: externalSetIsCollapsed,
     userPlan,
     canAccess,
-    triggerUpgrade
+    triggerUpgrade,
+    isLoading
 }) => {
     // Use internal state if no external state provided, with localStorage persistence
     const [internalCollapsed, setInternalCollapsed] = useState(() => {
@@ -266,7 +268,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 isCollapsed={isCollapsed}
                             />
                             <SidebarLock
-                                hasAccess={canAccess('globalDemand')}
+                                hasAccess={isLoading || canAccess('globalDemand')}
                                 onClick={() => triggerUpgrade('Global Demand Intelligence', 'pro')}
                                 tooltipText="Pro feature. Upgrade to unlock Global Demand."
                             >
@@ -310,7 +312,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                         <NavSection title="CRM" isCollapsed={isCollapsed}>
                             <SidebarLock
-                                hasAccess={canAccess('dealPipeline')}
+                                hasAccess={isLoading || canAccess('dealPipeline')}
                                 onClick={() => triggerUpgrade('Deal Pipeline / Kanban CRM', 'pro')}
                                 tooltipText="Pro feature. Upgrade to unlock Deal Pipeline."
                             >
@@ -341,7 +343,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 isCollapsed={isCollapsed}
                             />
                             <SidebarLock
-                                hasAccess={canAccess('keywordMonitor')}
+                                hasAccess={isLoading || canAccess('keywordMonitor')}
                                 onClick={() => triggerUpgrade('LinkedIn Keyword Monitor', 'pro')}
                                 tooltipText="Pro feature. Upgrade to unlock Keyword Monitor."
                             >
@@ -354,7 +356,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 />
                             </SidebarLock>
                             <SidebarLock
-                                hasAccess={canAccess('aiVoiceAgent')}
+                                hasAccess={isLoading || canAccess('aiVoiceAgent')}
                                 onClick={() => triggerUpgrade('AI Voice Agent', 'pro')}
                                 tooltipText="Pro feature. Upgrade to unlock AI Voice Agent."
                             >
@@ -367,7 +369,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 />
                             </SidebarLock>
                             <SidebarLock
-                                hasAccess={canAccess('inbox')}
+                                hasAccess={isLoading || canAccess('inbox')}
                                 onClick={() => triggerUpgrade('Unified Inbox', 'pro')}
                                 tooltipText="Pro feature. Upgrade to unlock Unified Inbox."
                             >
@@ -391,7 +393,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                         <NavSection title="ANALYTICS" isCollapsed={isCollapsed}>
                             <SidebarLock
-                                hasAccess={canAccess('advancedAnalytics')}
+                                hasAccess={isLoading || canAccess('advancedAnalytics')}
                                 onClick={() => triggerUpgrade('Performance Insights', 'pro')}
                                 tooltipText="Pro feature. Upgrade to unlock Performance Insights."
                             >

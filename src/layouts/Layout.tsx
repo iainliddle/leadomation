@@ -12,12 +12,13 @@ interface LayoutProps {
     stripeSubscriptionStatus?: string | null;
     canAccess: (feature: any) => boolean;
     triggerUpgrade: (feature: string, targetPlan?: 'starter' | 'pro') => void;
+    isLoading?: boolean;
 }
 
 const SIDEBAR_WIDTH_EXPANDED = 240;
 const SIDEBAR_WIDTH_COLLAPSED = 64;
 
-const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free', stripeSubscriptionStatus, canAccess, triggerUpgrade }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, userPlan = 'free', stripeSubscriptionStatus, canAccess, triggerUpgrade, isLoading }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsedState] = useState(() => {
         try {
@@ -50,6 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onPageChange, use
                 userPlan={userPlan}
                 canAccess={canAccess}
                 triggerUpgrade={triggerUpgrade}
+                isLoading={isLoading}
             />
 
             <div

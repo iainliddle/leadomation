@@ -460,6 +460,7 @@ const App: React.FC = () => {
         stripeSubscriptionStatus={stripeSubscriptionStatus}
         canAccess={canAccess}
         triggerUpgrade={triggerUpgrade}
+        isLoading={planLoading}
       >
         {(page: string) => (
           <div className="flex flex-col h-full relative">
