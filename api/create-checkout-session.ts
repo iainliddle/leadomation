@@ -57,8 +57,8 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
-        // Determine trial period: returning users (allowTrial === false) get no trial
-        const trialDays = allowTrial === false ? 0 : 7;
+        // Returning users (allowTrial === false) get no trial - omit parameter entirely
+        const trialConfig = allowTrial === false ? {} : { trial_period_days: 7 };
 
         // Use authenticated user's ID and email
         const session = await stripe.checkout.sessions.create({
@@ -71,7 +71,7 @@ export default async function handler(req: any, res: any) {
                 },
             ],
             subscription_data: {
-                trial_period_days: trialDays,
+                ...trialConfig,
                 metadata: {
                     userId: user.id,
                     plan: plan,
