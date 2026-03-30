@@ -170,13 +170,84 @@
     },
     {
       "parameters": {
+        "method": "GET",
+        "url": "https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/suppression_list",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "=eq.{{ $('ExtractStep').first().json.lead_email }}"
+            },
+            {
+              "name": "user_id",
+              "value": "=eq.{{ $('ExtractStep').first().json.enrollment_user_id }}"
+            },
+            {
+              "name": "select",
+              "value": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "esp-020-check-suppression",
+      "name": "Check Suppression List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-not-suppressed",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "esp-021-is-suppressed",
+      "name": "Is Suppressed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
         "rules": {
           "values": [
             {
               "conditions": {
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.step_channel }}",
+                    "leftValue": "={{ $('ExtractStep').first().json.step_channel }}",
                     "rightValue": "email",
                     "operator": {
                       "type": "string",
@@ -192,7 +263,7 @@
               "conditions": {
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.step_channel }}",
+                    "leftValue": "={{ $('ExtractStep').first().json.step_channel }}",
                     "rightValue": "linkedin",
                     "operator": {
                       "type": "string",
@@ -208,7 +279,7 @@
               "conditions": {
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.step_channel }}",
+                    "leftValue": "={{ $('ExtractStep').first().json.step_channel }}",
                     "rightValue": "call",
                     "operator": {
                       "type": "string",
@@ -228,7 +299,7 @@
       "name": "Channel Router",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [1560, 380]
+      "position": [2000, 300]
     },
     {
       "parameters": {
@@ -249,24 +320,24 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"iainliddle@leadomation.co.uk\",\n  \"to\": \"{{ $json.lead_email }}\",\n  \"subject\": \"{{ $json.subject }}\",\n  \"html\": \"{{ $json.body.replace(/\\n/g, '<br>') }}\"\n}",
+        "jsonBody": "={\n  \"from\": \"iainliddle@leadomation.co.uk\",\n  \"to\": \"{{ $('ExtractStep').first().json.lead_email }}\",\n  \"subject\": \"{{ $('ExtractStep').first().json.subject }}\",\n  \"html\": \"{{ $('ExtractStep').first().json.body.replace(/\\n/g, '<br>') }}\"\n}",
         "options": {}
       },
       "id": "esp-010-send-email",
       "name": "Send Email (Resend)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1800, 200]
+      "position": [2240, 120]
     },
     {
       "parameters": {
-        "jsCode": "// Prepare AB Counts Update\n// This runs AFTER email is sent successfully\n\nconst data = $input.first().json;\n\n// If A/B test is not active, skip the update\nif (!data.ab_test_active || !data.variant_assigned) {\n  return [{\n    json: {\n      skip_ab_update: true,\n      sequence_id: data.sequence_id,\n      steps: data.full_steps,\n      // Pass through all fields for downstream nodes\n      enrollment_id: data.enrollment_id,\n      enrollment_user_id: data.enrollment_user_id,\n      lead_id: data.lead_id,\n      step_index: data.step_index,\n      step_channel: data.step_channel,\n      subject: data.subject,\n      body: data.body,\n      variant_assigned: data.variant_assigned,\n      next_step_index: data.next_step_index,\n      next_step_at: data.next_step_at,\n      is_final_step: data.is_final_step\n    }\n  }];\n}\n\n// Clone steps array to modify\nconst steps = JSON.parse(JSON.stringify(data.full_steps));\nconst stepIndex = data.step_index;\nconst step = steps[stepIndex];\n\n// Increment the appropriate sends counter\nif (data.variant_assigned === 'A') {\n  step.ab_variant_a_sends = (step.ab_variant_a_sends || 0) + 1;\n} else if (data.variant_assigned === 'B') {\n  step.ab_variant_b_sends = (step.ab_variant_b_sends || 0) + 1;\n}\n\n// Check if we have reached sample size and should determine winner\nconst totalSends = (step.ab_variant_a_sends || 0) + (step.ab_variant_b_sends || 0);\nconst sampleSize = step.ab_sample_size || 50;\n\nlet shouldDetermineWinner = false;\nlet winner = null;\n\nif (totalSends >= sampleSize && !step.ab_winner) {\n  shouldDetermineWinner = true;\n\n  const aOpens = step.ab_variant_a_opens || 0;\n  const bOpens = step.ab_variant_b_opens || 0;\n  const aSends = step.ab_variant_a_sends || 0;\n  const bSends = step.ab_variant_b_sends || 0;\n\n  const aOpenRate = aSends > 0 ? aOpens / aSends : 0;\n  const bOpenRate = bSends > 0 ? bOpens / bSends : 0;\n\n  if (aOpenRate >= bOpenRate) {\n    winner = 'A';\n  } else {\n    winner = 'B';\n  }\n\n  step.ab_winner = winner;\n}\n\nsteps[stepIndex] = step;\n\nreturn [{\n  json: {\n    skip_ab_update: false,\n    sequence_id: data.sequence_id,\n    steps: steps,\n    step_index: stepIndex,\n    variant_assigned: data.variant_assigned,\n    total_sends: totalSends,\n    sample_size: sampleSize,\n    winner_determined: shouldDetermineWinner,\n    winner: winner,\n    // Pass through\n    enrollment_id: data.enrollment_id,\n    enrollment_user_id: data.enrollment_user_id,\n    lead_id: data.lead_id,\n    step_channel: data.step_channel,\n    subject: data.subject,\n    body: data.body,\n    next_step_index: data.next_step_index,\n    next_step_at: data.next_step_at,\n    is_final_step: data.is_final_step\n  }\n}];\n"
+        "jsCode": "// Prepare AB Counts Update\n// This runs AFTER email is sent successfully\n\nconst data = $('ExtractStep').first().json;\n\n// If A/B test is not active, skip the update\nif (!data.ab_test_active || !data.variant_assigned) {\n  return [{\n    json: {\n      skip_ab_update: true,\n      sequence_id: data.sequence_id,\n      steps: data.full_steps,\n      // Pass through all fields for downstream nodes\n      enrollment_id: data.enrollment_id,\n      enrollment_user_id: data.enrollment_user_id,\n      lead_id: data.lead_id,\n      step_index: data.step_index,\n      step_channel: data.step_channel,\n      subject: data.subject,\n      body: data.body,\n      variant_assigned: data.variant_assigned,\n      next_step_index: data.next_step_index,\n      next_step_at: data.next_step_at,\n      is_final_step: data.is_final_step\n    }\n  }];\n}\n\n// Clone steps array to modify\nconst steps = JSON.parse(JSON.stringify(data.full_steps));\nconst stepIndex = data.step_index;\nconst step = steps[stepIndex];\n\n// Increment the appropriate sends counter\nif (data.variant_assigned === 'A') {\n  step.ab_variant_a_sends = (step.ab_variant_a_sends || 0) + 1;\n} else if (data.variant_assigned === 'B') {\n  step.ab_variant_b_sends = (step.ab_variant_b_sends || 0) + 1;\n}\n\n// Check if we have reached sample size and should determine winner\nconst totalSends = (step.ab_variant_a_sends || 0) + (step.ab_variant_b_sends || 0);\nconst sampleSize = step.ab_sample_size || 50;\n\nlet shouldDetermineWinner = false;\nlet winner = null;\n\nif (totalSends >= sampleSize && !step.ab_winner) {\n  shouldDetermineWinner = true;\n\n  const aOpens = step.ab_variant_a_opens || 0;\n  const bOpens = step.ab_variant_b_opens || 0;\n  const aSends = step.ab_variant_a_sends || 0;\n  const bSends = step.ab_variant_b_sends || 0;\n\n  const aOpenRate = aSends > 0 ? aOpens / aSends : 0;\n  const bOpenRate = bSends > 0 ? bOpens / bSends : 0;\n\n  if (aOpenRate >= bOpenRate) {\n    winner = 'A';\n  } else {\n    winner = 'B';\n  }\n\n  step.ab_winner = winner;\n}\n\nsteps[stepIndex] = step;\n\nreturn [{\n  json: {\n    skip_ab_update: false,\n    sequence_id: data.sequence_id,\n    steps: steps,\n    step_index: stepIndex,\n    variant_assigned: data.variant_assigned,\n    total_sends: totalSends,\n    sample_size: sampleSize,\n    winner_determined: shouldDetermineWinner,\n    winner: winner,\n    // Pass through\n    enrollment_id: data.enrollment_id,\n    enrollment_user_id: data.enrollment_user_id,\n    lead_id: data.lead_id,\n    step_channel: data.step_channel,\n    subject: data.subject,\n    body: data.body,\n    next_step_index: data.next_step_index,\n    next_step_at: data.next_step_at,\n    is_final_step: data.is_final_step\n  }\n}];\n"
       },
       "id": "esp-011-prepare-ab",
       "name": "Prepare AB Counts Update",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2020, 200]
+      "position": [2460, 120]
     },
     {
       "parameters": {
@@ -295,7 +366,7 @@
       "name": "Check Skip AB",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [2240, 200]
+      "position": [2680, 120]
     },
     {
       "parameters": {
@@ -327,7 +398,7 @@
       "name": "PATCH Sequences (AB Update)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2460, 300]
+      "position": [2900, 220]
     },
     {
       "parameters": {
@@ -348,19 +419,19 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"account_id\": \"4FUgDVu3RyaxwstoCY3k7Q\",\n  \"recipient_url\": \"{{ $json.lead_linkedin_url }}\",\n  \"text\": \"{{ $json.body }}\"\n}",
+        "jsonBody": "={\n  \"account_id\": \"4FUgDVu3RyaxwstoCY3k7Q\",\n  \"recipient_url\": \"{{ $('ExtractStep').first().json.lead_linkedin_url }}\",\n  \"text\": \"{{ $('ExtractStep').first().json.body }}\"\n}",
         "options": {}
       },
       "id": "esp-014-send-linkedin",
       "name": "Send LinkedIn Message (Unipile)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1800, 420]
+      "position": [2240, 340]
     },
     {
       "parameters": {
         "method": "GET",
-        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/call_scripts?campaign_id=eq.{{ $json.campaign_id }}&select=id&limit=1",
+        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/call_scripts?campaign_id=eq.{{ $('ExtractStep').first().json.campaign_id }}&select=id&limit=1",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -380,7 +451,7 @@
       "name": "Lookup Call Script",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1800, 620]
+      "position": [2240, 540]
     },
     {
       "parameters": {
@@ -390,7 +461,7 @@
       "name": "Prepare Call Queue Insert",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2020, 620]
+      "position": [2460, 540]
     },
     {
       "parameters": {
@@ -426,7 +497,7 @@
       "name": "Insert into call_queue",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2240, 620]
+      "position": [2680, 540]
     },
     {
       "parameters": {
@@ -458,7 +529,7 @@
       "name": "Log Step",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2680, 400]
+      "position": [3120, 340]
     },
     {
       "parameters": {
@@ -490,7 +561,7 @@
       "name": "Update Enrollment (Next Step)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2900, 400]
+      "position": [3340, 340]
     }
   ],
   "connections": {
@@ -567,7 +638,7 @@
         ],
         [
           {
-            "node": "Channel Router",
+            "node": "Check Suppression List",
             "type": "main",
             "index": 0
           }
@@ -579,6 +650,35 @@
         [
           {
             "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Suppression List": {
+      "main": [
+        [
+          {
+            "node": "Is Suppressed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Suppressed?": {
+      "main": [
+        [
+          {
+            "node": "Channel Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Enrollment (Next Step)",
             "type": "main",
             "index": 0
           }
@@ -735,5 +835,5 @@
   "tags": [],
   "triggerCount": 1,
   "updatedAt": "2026-03-30T00:00:00.000Z",
-  "versionId": "1"
+  "versionId": "2"
 }
