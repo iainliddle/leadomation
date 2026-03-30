@@ -164,14 +164,19 @@ const Pricing: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [cancelled, setCancelled] = useState(false);
     const [showNotifyToast, setShowNotifyToast] = useState(false);
-    const { plan, stripeSubscriptionStatus, stripeCustomerId } = usePlan();
+    const { plan, rawPlan, stripeSubscriptionStatus, stripeCustomerId } = usePlan();
 
     // Determine user's plan state: 'trialing', 'starter', or 'pro'
     const userPlanState = plan === 'trial' || plan === 'trialing' ? 'trialing' : plan;
 
     // Detect returning cancelled users (had a previous subscription)
-    const isReturningCancelledUser = Boolean(stripeCustomerId) &&
-        (stripeSubscriptionStatus === 'cancelled' || stripeSubscriptionStatus === 'expired');
+    const isReturningCancelledUser = !!stripeCustomerId && (
+        stripeSubscriptionStatus === 'cancelled' ||
+        stripeSubscriptionStatus === 'expired' ||
+        rawPlan === 'cancelled' ||
+        plan === 'cancelled' ||
+        plan === 'expired'
+    );
 
     // Brand new users have no stripeCustomerId
     const isBrandNewUser = !stripeCustomerId;
