@@ -164,10 +164,17 @@ const Pricing: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [cancelled, setCancelled] = useState(false);
     const [showNotifyToast, setShowNotifyToast] = useState(false);
-    const { plan, stripeSubscriptionStatus } = usePlan();
+    const { plan, stripeSubscriptionStatus, stripeCustomerId } = usePlan();
 
     // Determine user's plan state: 'trialing', 'starter', or 'pro'
     const userPlanState = plan === 'trial' || plan === 'trialing' ? 'trialing' : plan;
+
+    // Detect returning cancelled users (had a previous subscription)
+    const isReturningCancelledUser = Boolean(stripeCustomerId) &&
+        (stripeSubscriptionStatus === 'cancelled' || stripeSubscriptionStatus === 'expired');
+
+    // Brand new users have no stripeCustomerId
+    const isBrandNewUser = !stripeCustomerId;
 
     React.useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -203,15 +210,33 @@ const Pricing: React.FC = () => {
                 buttonText: 'Downgrade',
                 buttonVariant: 'outline-gray' as const,
                 buttonDisabled: false,
-                onCheckout: () => handleCheckout('Starter')
+                onCheckout: () => handleCheckout('Starter', true)
             };
         }
-        // Expired trial or no active subscription - show Get started
+        // Returning cancelled user - show Reactivate
+        if (isReturningCancelledUser) {
+            return {
+                buttonText: isLoading ? 'Loading...' : 'Reactivate',
+                buttonVariant: 'outline-indigo' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Starter', false)
+            };
+        }
+        // Brand new user - show Start free trial
+        if (isBrandNewUser) {
+            return {
+                buttonText: isLoading ? 'Loading...' : 'Start free trial',
+                buttonVariant: 'outline-indigo' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Starter', true)
+            };
+        }
+        // Default fallback - show Get started
         return {
             buttonText: isLoading ? 'Loading...' : 'Get started',
             buttonVariant: 'outline-indigo' as const,
             buttonDisabled: false,
-            onCheckout: () => handleCheckout('Starter')
+            onCheckout: () => handleCheckout('Starter', true)
         };
     };
 
@@ -222,7 +247,7 @@ const Pricing: React.FC = () => {
                 buttonText: isLoading ? 'Loading...' : 'Upgrade to Pro',
                 buttonVariant: 'filled' as const,
                 buttonDisabled: false,
-                onCheckout: () => handleCheckout('Pro')
+                onCheckout: () => handleCheckout('Pro', true)
             };
         }
         if (userPlanState === 'starter') {
@@ -230,7 +255,7 @@ const Pricing: React.FC = () => {
                 buttonText: isLoading ? 'Loading...' : 'Upgrade to Pro',
                 buttonVariant: 'filled' as const,
                 buttonDisabled: false,
-                onCheckout: () => handleCheckout('Pro')
+                onCheckout: () => handleCheckout('Pro', true)
             };
         }
         if (userPlanState === 'pro') {
@@ -241,12 +266,30 @@ const Pricing: React.FC = () => {
                 onCheckout: () => {}
             };
         }
+        // Returning cancelled user - show Reactivate
+        if (isReturningCancelledUser) {
+            return {
+                buttonText: isLoading ? 'Loading...' : 'Reactivate',
+                buttonVariant: 'filled' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Pro', false)
+            };
+        }
+        // Brand new user - show Start free trial
+        if (isBrandNewUser) {
+            return {
+                buttonText: isLoading ? 'Loading...' : 'Start free trial',
+                buttonVariant: 'filled' as const,
+                buttonDisabled: false,
+                onCheckout: () => handleCheckout('Pro', true)
+            };
+        }
         // Default fallback
         return {
-            buttonText: isLoading ? 'Loading...' : 'Start Free Trial',
+            buttonText: isLoading ? 'Loading...' : 'Start free trial',
             buttonVariant: undefined,
             buttonDisabled: false,
-            onCheckout: () => handleCheckout('Pro')
+            onCheckout: () => handleCheckout('Pro', true)
         };
     };
 
@@ -271,7 +314,7 @@ const Pricing: React.FC = () => {
         };
     };
 
-    const handleCheckout = async (plan: string) => {
+    const handleCheckout = async (plan: string, allowTrial: boolean = true) => {
         setIsLoading(true);
         try {
             const { data: { session } } = await supabase.auth.getSession();
@@ -295,7 +338,8 @@ const Pricing: React.FC = () => {
                     userId: session.user.id,
                     userEmail: session.user.email,
                     plan: plan.toLowerCase(),
-                    billingCycle: isAnnual ? 'annual' : 'monthly'
+                    billingCycle: isAnnual ? 'annual' : 'monthly',
+                    allowTrial
                 })
             });
 

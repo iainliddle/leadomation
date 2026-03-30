@@ -64,14 +64,23 @@ const Register: React.FC<RegisterProps> = ({ onGoToLogin, onGoToTerms, onGoToPri
                 const firstName = nameParts[0] || '';
                 const lastName = nameParts.slice(1).join(' ') || '';
 
-                await supabase
+                const { error: profileError } = await supabase
                     .from('profiles')
-                    .upsert({
-                        id: data.user.id,
-                        first_name: firstName,
-                        last_name: lastName,
-                        full_name: name.trim(),
-                    });
+                    .upsert(
+                        {
+                            id: data.user.id,
+                            first_name: firstName,
+                            last_name: lastName,
+                            full_name: name.trim(),
+                        },
+                        { onConflict: 'id' }
+                    );
+
+                if (profileError) {
+                    console.error('Profile upsert error:', profileError);
+                } else {
+                    console.log('Profile saved successfully:', { firstName, lastName, fullName: name.trim() });
+                }
             }
 
             setSuccess(true);
