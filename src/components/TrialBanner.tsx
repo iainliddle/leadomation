@@ -22,7 +22,7 @@ const TrialBanner: React.FC<TrialBannerProps> = ({ daysRemaining, plan, selected
         const planName = selectedPlan === 'pro' ? 'Pro' : 'Starter';
 
         return (
-            <div className={`${bgClass} text-white px-6 py-2.5 flex items-center justify-between gap-4 rounded-xl mt-3 shadow-sm`}>
+            <div className={`${bgClass} text-white px-6 py-2.5 flex items-center justify-between gap-4 mx-6 my-3 rounded-xl shadow-sm`}>
                 <div className="flex items-center gap-3">
                     {isUrgent ? <AlertTriangle size={16} /> : <Clock size={16} />}
                     <span className="text-sm font-bold">
@@ -50,7 +50,7 @@ const TrialBanner: React.FC<TrialBannerProps> = ({ daysRemaining, plan, selected
             : 'bg-[#4F46E5]';
 
         return (
-            <div className={`${bgClass} text-white px-6 py-2.5 flex items-center justify-between gap-4 rounded-xl mt-3 shadow-sm`}>
+            <div className={`${bgClass} text-white px-6 py-2.5 flex items-center justify-between gap-4 mx-6 my-3 rounded-xl shadow-sm`}>
                 <div className="flex items-center gap-3">
                     {isUrgent ? <AlertTriangle size={16} /> : <Clock size={16} />}
                     <span className="text-sm font-bold">
