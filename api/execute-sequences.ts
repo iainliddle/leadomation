@@ -11,6 +11,24 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export default async function handler(req: any, res: any) {
     if (req.method !== 'POST') return res.status(405).end();
 
+    // Authenticate - this endpoint should only be called by N8N/cron
+    const authHeader = req.headers['authorization'];
+    const cronSecret = req.headers['x-cron-secret'];
+    const expectedSecret = process.env.CRON_SECRET || process.env.INTERNAL_API_SECRET;
+
+    if (!expectedSecret) {
+        console.error('CRON_SECRET or INTERNAL_API_SECRET not configured');
+        return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    const isAuthorized =
+        cronSecret === expectedSecret ||
+        authHeader === `Bearer ${expectedSecret}`;
+
+    if (!isAuthorized) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     // Get all active enrollments where next_step_at is due
     const { data: dueEnrollments } = await supabase
         .from('sequence_enrollments')

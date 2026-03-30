@@ -1,16 +1,35 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { email, userId } = req.query;
+// Generate HMAC signature for unsubscribe links
+export function generateUnsubscribeToken(email: string, userId: string): string {
+  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.INTERNAL_API_SECRET || 'fallback-secret';
+  const data = `${email}:${userId}`;
+  return crypto.createHmac('sha256', secret).update(data).digest('hex');
+}
 
-  if (!email || !userId) {
+// Verify HMAC signature
+function verifyUnsubscribeToken(email: string, userId: string, token: string): boolean {
+  const expectedToken = generateUnsubscribeToken(email, userId);
+  return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expectedToken));
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const { email, userId, token } = req.query;
+
+  if (!email || !userId || !token) {
     return res.status(400).send('Missing required parameters');
+  }
+
+  // Verify the HMAC token to prevent unauthorized unsubscribes
+  if (!verifyUnsubscribeToken(String(email), String(userId), String(token))) {
+    return res.status(403).send('Invalid or expired unsubscribe link');
   }
 
   try {

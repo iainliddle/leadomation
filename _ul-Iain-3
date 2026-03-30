@@ -1,0 +1,9 @@
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/LeadDatabase.tsx:            .from('sequences')
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/LeadDatabase.tsx:                        .from('sequences')
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/NewCampaign.tsx:        const { data } = await supabase.from('sequences').select('id, name').eq('user_id', user.id).order('created_at', { ascending: false });
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/SequenceBuilder.tsx:            .from('sequences')
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/SequenceBuilder.tsx:            const { error } = await supabase.from('sequences').update(sequenceData).eq('id', editingSequence.id);
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/SequenceBuilder.tsx:            const { error } = await supabase.from('sequences').insert(sequenceData);
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/SequenceBuilder.tsx:        const { error } = await supabase.from('sequences').delete().eq('id', id);
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/SequenceBuilder.tsx:        const { error } = await supabase.from('sequences').update({ status: newStatus }).eq('id', seq.id);
+c:\Users\Iainl\OneDrive\Desktop\Leadomation\src/pages/SequenceBuilder.tsx:        const { error } = await supabase.from('sequences').insert({

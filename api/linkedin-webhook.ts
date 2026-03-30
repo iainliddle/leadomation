@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
 import Anthropic from '@anthropic-ai/sdk'
+import crypto from 'crypto'
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL!,
@@ -10,6 +11,34 @@ const supabase = createClient(
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
+
+// Verify Unipile webhook signature
+function verifyUnipileSignature(req: VercelRequest): boolean {
+  const secret = process.env.UNIPILE_WEBHOOK_SECRET
+  if (!secret) {
+    // If no secret configured, log warning but allow (for backwards compatibility during setup)
+    console.warn('UNIPILE_WEBHOOK_SECRET not configured - webhook signature verification skipped')
+    return true
+  }
+
+  const signature = req.headers['x-unipile-signature'] || req.headers['x-webhook-signature']
+  if (!signature) {
+    console.error('No webhook signature header found')
+    return false
+  }
+
+  try {
+    const body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
+    const expectedSignature = crypto.createHmac('sha256', secret).update(body).digest('hex')
+    return crypto.timingSafeEqual(
+      Buffer.from(String(signature)),
+      Buffer.from(expectedSignature)
+    )
+  } catch (error) {
+    console.error('Signature verification error:', error)
+    return false
+  }
+}
 
 interface ClassificationResult {
   label: 'Interested' | 'Not Interested' | 'OOO'
@@ -50,6 +79,11 @@ Return ONLY JSON: { "label": string, "confidence": number (0-1) }`,
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  // Verify webhook signature
+  if (!verifyUnipileSignature(req)) {
+    return res.status(401).json({ error: 'Invalid webhook signature' })
   }
 
   try {

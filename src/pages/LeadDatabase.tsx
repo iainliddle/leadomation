@@ -1287,84 +1287,40 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 }
             }
 
-            const apiKey = import.meta.env.VITE_VAPI_API_KEY;
-            const phoneNumberId = import.meta.env.VITE_VAPI_PHONE_NUMBER_ID;
-
-            if (!apiKey || !phoneNumberId) {
-                throw new Error('Vapi API key or phone number not configured');
+            // Get session token for backend authentication
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                throw new Error('Not authenticated');
             }
 
-            let phoneNumber = callLeadTarget.phone.replace(/\s/g, '');
-            if (!phoneNumber.startsWith('+')) {
-                phoneNumber = '+' + phoneNumber;
-            }
-
-            const response = await fetch('https://api.vapi.ai/call/phone', {
+            // Call backend endpoint (Vapi credentials kept server-side)
+            const response = await fetch('/api/initiate-call', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
+                    'Authorization': `Bearer ${session.access_token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    phoneNumberId: phoneNumberId,
-                    metadata: {
-                        user_id: user?.id || '',
-                        lead_id: callLeadTarget.id,
-                        call_script_id: selectedScriptId
-                    },
-                    customer: {
-                        number: phoneNumber,
-                        name: `${callLeadTarget.first_name || ''} ${callLeadTarget.last_name || ''}`.trim() || callLeadTarget.company
-                    },
-                    assistant: {
-                        name: 'Sarah',
-                        serverUrl: 'https://n8n.srv1377696.hstgr.cloud/webhook/2d5b4f99-77c8-48e7-a8b9-78b28c789ea2',
-                        firstMessage: `Hi there, is ${callLeadTarget.first_name || 'the manager'} available at all?`,
-                        firstMessageMode: 'assistant-waits-for-user',
-                        model: {
-                            provider: 'openai',
-                            model: 'gpt-4o-mini',
-                            temperature: 0.7,
-                            messages: [
-                                {
-                                    role: 'system',
-                                    content: script.system_prompt + `\n\nCALL CONTEXT:\n- You are calling: ${callLeadTarget.first_name || ''} ${callLeadTarget.last_name || ''}\n- Their company: ${callLeadTarget.company}\n- Their role: ${callLeadTarget.job_title || 'Unknown'}\n- Your name is Sarah. Always introduce yourself as Sarah calling on behalf of the company mentioned in your script\n- ALWAYS start by asking for ${callLeadTarget.first_name || 'the right person'} by name. Wait for confirmation before pitching anything.\n- After confirming you are speaking to the right person, say "Hey ${callLeadTarget.first_name || 'there'}, it is Sarah calling on behalf of" and then mention the company from your script. Then say "How are you doing today?" and WAIT for their response before continuing.\n\nCONVERSATION STYLE:\n- Sound like a real human being having a phone conversation, not a robot or AI\n- Use filler words occasionally like "um", "so", "right", "anyway" to sound natural\n- Keep responses SHORT. One sentence at a time. Real people do not give speeches on the phone\n- After saying something, STOP and wait for the other person to respond. Do not keep talking\n- React to what they say before moving on. Say things like "oh nice", "ah right okay", "yeah that makes sense"\n- Match the speed and tone of the person you are talking to\n- Laugh briefly if something is funny. Be personable\n- NEVER read out URLs, links, or email addresses. Say you will text or email them instead\n- NEVER say "as an AI" or "I am an artificial intelligence" unless directly asked\n- If asked if you are real, say "Ha, I get that a lot. I am actually an AI assistant calling on behalf of the team, but I can definitely help you out or get someone from the team to call you back"\n- Do not repeat yourself or circle back to things already discussed\n\nBOOKING A MEETING:\n- When the prospect agrees to a meeting, say: "Brilliant, let me get that booked in for you. What is the best email address to send the calendar invite to?"\n- Wait for them to give their email. Confirm it back by repeating it\n- Then say: "Perfect. And what is the best mobile number to ping the confirmation text to? Sometimes these get buried in email"\n- If they give the business number you called, say: "No problem. And is that a mobile? Just so the text comes through properly"\n- Once you have their mobile number, confirm it back to them\n- Then say: "Lovely, I will get that sent over to you now. You should have it in the next couple of minutes"\n- NEVER mention that you already have their email or any of their details. Let them provide everything naturally\n- NEVER read out a URL or booking link. Just say you will send the invite to their email and a text to their mobile\n- Store the email and mobile number they give you. These are critical for follow up\n- Keep the booking process feeling personal and human, like a real assistant would handle it`
-                                }
-                            ]
-                        },
-                        voice: {
-                            provider: '11labs',
-                            voiceId: 'cgSgspJ2msm6clMCkdW9',
-                            model: 'eleven_turbo_v2_5'
-                        },
-                        silenceTimeoutSeconds: 30,
-                        responseDelaySeconds: 0.5
-                    }
+                    leadId: callLeadTarget.id,
+                    phoneNumber: callLeadTarget.phone,
+                    leadFirstName: callLeadTarget.first_name,
+                    leadLastName: callLeadTarget.last_name,
+                    leadCompany: callLeadTarget.company,
+                    leadJobTitle: callLeadTarget.job_title,
+                    callScriptId: selectedScriptId,
+                    systemPrompt: script.system_prompt
                 })
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Vapi API error:', errorData);
-                throw new Error(errorData.message || 'Failed to initiate call');
+                throw new Error(errorData.error || 'Failed to initiate call');
             }
 
             const callData = await response.json();
-            console.log('Call initiated:', callData);
             setCallStatus('connected');
 
             await handleUpdateStatus(callLeadTarget.id, 'Contacted');
-
-            if (user) {
-                await supabase.from('call_logs').insert({
-                    user_id: user.id,
-                    lead_id: callLeadTarget.id,
-                    call_script_id: selectedScriptId,
-                    vapi_call_id: callData.id,
-                    status: 'initiated',
-                    phone_number: phoneNumber
-                });
-            }
 
         } catch (error: any) {
             console.error('Call error:', error);

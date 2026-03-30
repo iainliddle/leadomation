@@ -7,15 +7,15 @@ const CancellationFeedback: React.FC = () => {
         const params = new URLSearchParams(window.location.search);
         const reason = params.get('reason');
         const userId = params.get('userId');
+        const token = params.get('token');
 
-        if (reason && userId && userId !== 'test') {
+        if (reason && userId && token && userId !== 'test') {
             fetch('/api/cancellation-reason', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-secret': import.meta.env.VITE_CANCELLATION_SECRET
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userId, reason }),
+                body: JSON.stringify({ userId, reason, token }),
             }).catch((err) => {
                 console.error('Failed to save cancellation reason:', err);
             });
