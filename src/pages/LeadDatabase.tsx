@@ -1317,7 +1317,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                 throw new Error(errorData.error || 'Failed to initiate call');
             }
 
-            const callData = await response.json();
+            await response.json(); // Parse response to confirm success
             setCallStatus('connected');
 
             await handleUpdateStatus(callLeadTarget.id, 'Contacted');
