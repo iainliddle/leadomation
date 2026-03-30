@@ -644,17 +644,21 @@ const Pricing: React.FC = () => {
                         </>
                     ) : (
                         <>
-                            <h2 className="text-2xl font-bold text-[#111827] mb-3">Still not sure?</h2>
+                            <h2 className="text-2xl font-bold text-[#111827] mb-3">
+                                {isReturningCancelledUser ? 'Welcome back!' : 'Still not sure?'}
+                            </h2>
                             <p className="text-[#6B7280] mb-6 max-w-lg mx-auto">
-                                Start your free trial and see the results for yourself.
+                                {isReturningCancelledUser
+                                    ? 'Your data is still here. Reactivate your subscription to continue.'
+                                    : 'Start your free trial and see the results for yourself.'}
                             </p>
                             <button
-                                onClick={() => handleCheckout('Pro')}
+                                onClick={() => handleCheckout('Pro', !isReturningCancelledUser)}
                                 disabled={isLoading}
                                 className="px-8 py-3 bg-[#4F46E5] text-white font-semibold rounded-xl hover:bg-[#4338CA] transition-all shadow-lg flex items-center gap-2 mx-auto"
                             >
                                 {isLoading && <Loader2 size={20} className="animate-spin" />}
-                                Start 7-Day Free Trial
+                                {isReturningCancelledUser ? 'Reactivate subscription' : 'Start 7-day free trial'}
                             </button>
                             <div className="mt-6 flex items-center justify-center gap-6 text-xs text-[#6B7280]">
                                 <div className="flex items-center gap-2">

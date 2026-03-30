@@ -26,7 +26,7 @@ export default async function handler(req: any, res: any) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { plan, billingCycle } = req.body;
+    const { plan, billingCycle, allowTrial } = req.body;
 
     // Input validation
     if (!plan || !billingCycle) {
@@ -57,6 +57,9 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
+        // Determine trial period: returning users (allowTrial === false) get no trial
+        const trialDays = allowTrial === false ? 0 : 7;
+
         // Use authenticated user's ID and email
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
@@ -68,7 +71,7 @@ export default async function handler(req: any, res: any) {
                 },
             ],
             subscription_data: {
-                trial_period_days: 7,
+                trial_period_days: trialDays,
                 metadata: {
                     userId: user.id,
                     plan: plan,
