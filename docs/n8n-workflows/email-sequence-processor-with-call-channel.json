@@ -1,0 +1,739 @@
+{
+  "name": "Email Sequence Processor (with Call Channel)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "esp-001-schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/sequence_enrollments?status=eq.active&next_step_at=lte.now()&select=*,sequences(*),leads(*)&limit=50",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "esp-002-get-enrollments",
+      "name": "Get Due Enrollments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-has-enrollments",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "esp-003-if-has-enrollments",
+      "name": "IF Has Enrollments",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {},
+      "id": "esp-004-no-enrollments",
+      "name": "No Enrollments",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {
+          "reset": true
+        }
+      },
+      "id": "esp-005-split-batches",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ExtractStep with A/B Testing Logic and Channel Detection\n// N8N Code Node - JavaScript\n\nconst enrollment = $input.first().json;\nconst sequence = enrollment.sequences;\nconst lead = enrollment.leads;\nconst steps = sequence.steps || [];\nconst currentStepIndex = enrollment.current_step || 0;\n\n// Check if sequence is complete\nif (currentStepIndex >= steps.length) {\n  return [{\n    json: {\n      skip: true,\n      reason: 'sequence_complete',\n      enrollment_id: enrollment.id\n    }\n  }];\n}\n\nconst step = steps[currentStepIndex];\n\n// =========================================\n// A/B TESTING LOGIC (email channel only)\n// =========================================\n\nlet selectedSubject = step.subject || '';\nlet variantAssigned = null;\nlet abTestActive = step.ab_test_active === true;\n\nif (abTestActive && step.channel === 'email') {\n  if (step.ab_winner === 'A') {\n    selectedSubject = step.subject || '';\n    variantAssigned = 'A';\n  } else if (step.ab_winner === 'B') {\n    selectedSubject = step.subject_b || step.subject || '';\n    variantAssigned = 'B';\n  } else {\n    if (Math.random() > 0.5) {\n      selectedSubject = step.subject_b || step.subject || '';\n      variantAssigned = 'B';\n    } else {\n      selectedSubject = step.subject || '';\n      variantAssigned = 'A';\n    }\n  }\n}\n\n// =========================================\n// MERGE TAG REPLACEMENT\n// =========================================\n\nconst replaceMergeTags = (text) => {\n  if (!text) return '';\n  return text\n    .replace(/\\{\\{business_name\\}\\}/g, lead.company || '')\n    .replace(/\\{\\{first_name\\}\\}/g, lead.first_name || '')\n    .replace(/\\{\\{last_name\\}\\}/g, lead.last_name || '')\n    .replace(/\\{\\{city\\}\\}/g, lead.location || '')\n    .replace(/\\{\\{rating\\}\\}/g, lead.rating || '')\n    .replace(/\\{\\{website\\}\\}/g, lead.website || '')\n    .replace(/\\{\\{company\\}\\}/g, lead.company || '')\n    .replace(/\\{\\{title\\}\\}/g, lead.title || '');\n};\n\nconst processedSubject = replaceMergeTags(selectedSubject);\nconst processedBody = replaceMergeTags(step.body || '');\n\n// =========================================\n// CALCULATE NEXT STEP TIMING\n// =========================================\n\nconst nextStepIndex = currentStepIndex + 1;\nlet nextStepAt = null;\n\nif (nextStepIndex < steps.length) {\n  const nextStep = steps[nextStepIndex];\n  const waitDays = nextStep.waitDays || 1;\n  const next = new Date();\n  next.setDate(next.getDate() + waitDays);\n  nextStepAt = next.toISOString();\n}\n\n// =========================================\n// RETURN PROCESSED STEP DATA\n// =========================================\n\nreturn [{\n  json: {\n    skip: false,\n    enrollment_id: enrollment.id,\n    enrollment_user_id: enrollment.user_id,\n    sequence_id: sequence.id,\n    sequence_name: sequence.name,\n    campaign_id: sequence.campaign_id || null,\n    lead_id: lead.id,\n    lead_email: lead.email,\n    lead_first_name: lead.first_name,\n    lead_company: lead.company,\n    lead_phone: lead.phone || null,\n\n    // Step details\n    step_index: currentStepIndex,\n    step_channel: step.channel || 'email',\n    subject: processedSubject,\n    body: processedBody,\n\n    // A/B testing data\n    ab_test_active: abTestActive,\n    variant_assigned: variantAssigned,\n    ab_sample_size: step.ab_sample_size || 50,\n    ab_current_a_sends: step.ab_variant_a_sends || 0,\n    ab_current_b_sends: step.ab_variant_b_sends || 0,\n    ab_current_a_opens: step.ab_variant_a_opens || 0,\n    ab_current_b_opens: step.ab_variant_b_opens || 0,\n    ab_winner: step.ab_winner || null,\n\n    // Sequence progression\n    next_step_index: nextStepIndex,\n    next_step_at: nextStepAt,\n    is_final_step: nextStepIndex >= steps.length,\n\n    // Full step data for AB update\n    full_steps: steps,\n\n    // Original unprocessed subjects for reference\n    original_subject_a: step.subject,\n    original_subject_b: step.subject_b\n  }\n}];\n"
+      },
+      "id": "esp-006-extract-step",
+      "name": "ExtractStep",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-skip",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "esp-007-check-skip",
+      "name": "Check If Skip",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/sequence_enrollments?id=eq.{{ $json.enrollment_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"completed\", \"updated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "esp-008-mark-complete",
+      "name": "Mark Enrollment Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 160]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.step_channel }}",
+                    "rightValue": "email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "email"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.step_channel }}",
+                    "rightValue": "linkedin",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "linkedin"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.step_channel }}",
+                    "rightValue": "call",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "call"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "esp-009-channel-switch",
+      "name": "Channel Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1560, 380]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.RESEND_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"iainliddle@leadomation.co.uk\",\n  \"to\": \"{{ $json.lead_email }}\",\n  \"subject\": \"{{ $json.subject }}\",\n  \"html\": \"{{ $json.body.replace(/\\n/g, '<br>') }}\"\n}",
+        "options": {}
+      },
+      "id": "esp-010-send-email",
+      "name": "Send Email (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare AB Counts Update\n// This runs AFTER email is sent successfully\n\nconst data = $input.first().json;\n\n// If A/B test is not active, skip the update\nif (!data.ab_test_active || !data.variant_assigned) {\n  return [{\n    json: {\n      skip_ab_update: true,\n      sequence_id: data.sequence_id,\n      steps: data.full_steps,\n      // Pass through all fields for downstream nodes\n      enrollment_id: data.enrollment_id,\n      enrollment_user_id: data.enrollment_user_id,\n      lead_id: data.lead_id,\n      step_index: data.step_index,\n      step_channel: data.step_channel,\n      subject: data.subject,\n      body: data.body,\n      variant_assigned: data.variant_assigned,\n      next_step_index: data.next_step_index,\n      next_step_at: data.next_step_at,\n      is_final_step: data.is_final_step\n    }\n  }];\n}\n\n// Clone steps array to modify\nconst steps = JSON.parse(JSON.stringify(data.full_steps));\nconst stepIndex = data.step_index;\nconst step = steps[stepIndex];\n\n// Increment the appropriate sends counter\nif (data.variant_assigned === 'A') {\n  step.ab_variant_a_sends = (step.ab_variant_a_sends || 0) + 1;\n} else if (data.variant_assigned === 'B') {\n  step.ab_variant_b_sends = (step.ab_variant_b_sends || 0) + 1;\n}\n\n// Check if we have reached sample size and should determine winner\nconst totalSends = (step.ab_variant_a_sends || 0) + (step.ab_variant_b_sends || 0);\nconst sampleSize = step.ab_sample_size || 50;\n\nlet shouldDetermineWinner = false;\nlet winner = null;\n\nif (totalSends >= sampleSize && !step.ab_winner) {\n  shouldDetermineWinner = true;\n\n  const aOpens = step.ab_variant_a_opens || 0;\n  const bOpens = step.ab_variant_b_opens || 0;\n  const aSends = step.ab_variant_a_sends || 0;\n  const bSends = step.ab_variant_b_sends || 0;\n\n  const aOpenRate = aSends > 0 ? aOpens / aSends : 0;\n  const bOpenRate = bSends > 0 ? bOpens / bSends : 0;\n\n  if (aOpenRate >= bOpenRate) {\n    winner = 'A';\n  } else {\n    winner = 'B';\n  }\n\n  step.ab_winner = winner;\n}\n\nsteps[stepIndex] = step;\n\nreturn [{\n  json: {\n    skip_ab_update: false,\n    sequence_id: data.sequence_id,\n    steps: steps,\n    step_index: stepIndex,\n    variant_assigned: data.variant_assigned,\n    total_sends: totalSends,\n    sample_size: sampleSize,\n    winner_determined: shouldDetermineWinner,\n    winner: winner,\n    // Pass through\n    enrollment_id: data.enrollment_id,\n    enrollment_user_id: data.enrollment_user_id,\n    lead_id: data.lead_id,\n    step_channel: data.step_channel,\n    subject: data.subject,\n    body: data.body,\n    next_step_index: data.next_step_index,\n    next_step_at: data.next_step_at,\n    is_final_step: data.is_final_step\n  }\n}];\n"
+      },
+      "id": "esp-011-prepare-ab",
+      "name": "Prepare AB Counts Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-skip-ab",
+              "leftValue": "={{ $json.skip_ab_update }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "esp-012-check-skip-ab",
+      "name": "Check Skip AB",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2240, 200]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/sequences?id=eq.{{ $json.sequence_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"steps\": {{ JSON.stringify($json.steps) }},\n  \"updated_at\": \"{{ new Date().toISOString() }}\"\n}",
+        "options": {}
+      },
+      "id": "esp-013-patch-sequences",
+      "name": "PATCH Sequences (AB Update)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api4.unipile.com:13458/api/v1/chats/message",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "{{ $env.UNIPILE_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"account_id\": \"4FUgDVu3RyaxwstoCY3k7Q\",\n  \"recipient_url\": \"{{ $json.lead_linkedin_url }}\",\n  \"text\": \"{{ $json.body }}\"\n}",
+        "options": {}
+      },
+      "id": "esp-014-send-linkedin",
+      "name": "Send LinkedIn Message (Unipile)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 420]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/call_scripts?campaign_id=eq.{{ $json.campaign_id }}&select=id&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "esp-015-lookup-call-script",
+      "name": "Lookup Call Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 620]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare call_queue insert payload\n// Uses the script_id from the lookup, or null if not found\n\nconst lookupResult = $input.first().json;\nconst extractData = $('ExtractStep').first().json;\n\n// The lookup returns an array; grab the first result's id or null\nlet scriptId = null;\nif (Array.isArray(lookupResult) && lookupResult.length > 0 && lookupResult[0].id) {\n  scriptId = lookupResult[0].id;\n} else if (lookupResult && lookupResult.id) {\n  scriptId = lookupResult.id;\n}\n\nreturn [{\n  json: {\n    lead_id: extractData.lead_id,\n    user_id: extractData.enrollment_user_id,\n    script_id: scriptId,\n    status: 'queued',\n    queued_at: new Date().toISOString(),\n    // Pass through for downstream nodes\n    enrollment_id: extractData.enrollment_id,\n    enrollment_user_id: extractData.enrollment_user_id,\n    sequence_id: extractData.sequence_id,\n    step_index: extractData.step_index,\n    step_channel: extractData.step_channel,\n    subject: extractData.subject,\n    body: extractData.body,\n    next_step_index: extractData.next_step_index,\n    next_step_at: extractData.next_step_at,\n    is_final_step: extractData.is_final_step\n  }\n}];\n"
+      },
+      "id": "esp-016-prepare-call-insert",
+      "name": "Prepare Call Queue Insert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 620]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/call_queue",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"lead_id\": \"{{ $json.lead_id }}\",\n  \"user_id\": \"{{ $json.user_id }}\",\n  \"script_id\": {{ $json.script_id ? '\"' + $json.script_id + '\"' : 'null' }},\n  \"status\": \"queued\",\n  \"queued_at\": \"{{ $json.queued_at }}\"\n}",
+        "options": {}
+      },
+      "id": "esp-017-insert-call-queue",
+      "name": "Insert into call_queue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2240, 620]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/sequence_step_logs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"enrollment_id\": \"{{ $('ExtractStep').first().json.enrollment_id }}\",\n  \"sequence_id\": \"{{ $('ExtractStep').first().json.sequence_id }}\",\n  \"lead_id\": \"{{ $('ExtractStep').first().json.lead_id }}\",\n  \"user_id\": \"{{ $('ExtractStep').first().json.enrollment_user_id }}\",\n  \"step_index\": {{ $('ExtractStep').first().json.step_index }},\n  \"channel\": \"{{ $('ExtractStep').first().json.step_channel }}\",\n  \"subject\": \"{{ $('ExtractStep').first().json.subject }}\",\n  \"body\": \"{{ $('ExtractStep').first().json.body }}\",\n  \"status\": \"sent\",\n  \"sent_at\": \"{{ new Date().toISOString() }}\",\n  \"ab_variant\": {{ $('ExtractStep').first().json.variant_assigned ? '\"' + $('ExtractStep').first().json.variant_assigned + '\"' : 'null' }}\n}",
+        "options": {}
+      },
+      "id": "esp-018-log-step",
+      "name": "Log Step",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2680, 400]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://rmcyfrqgmpnkvrgzeyxq.supabase.co/rest/v1/sequence_enrollments?id=eq.{{ $('ExtractStep').first().json.enrollment_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtY3lmcnFnbXBua3ZyZ3pleXhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTA4NTQ5MCwiZXhwIjoyMDg2NjYxNDkwfQ.rsLKNUvn9AykmAsYdara50qrAyErbHP_YMEVz9PewAw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"current_step\": {{ $('ExtractStep').first().json.next_step_index }},\n  \"next_step_at\": {{ $('ExtractStep').first().json.next_step_at ? '\"' + $('ExtractStep').first().json.next_step_at + '\"' : 'null' }},\n  \"status\": \"{{ $('ExtractStep').first().json.is_final_step ? 'completed' : 'active' }}\",\n  \"updated_at\": \"{{ new Date().toISOString() }}\"\n}",
+        "options": {}
+      },
+      "id": "esp-019-update-enrollment",
+      "name": "Update Enrollment (Next Step)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2900, 400]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Due Enrollments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Due Enrollments": {
+      "main": [
+        [
+          {
+            "node": "IF Has Enrollments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Has Enrollments": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Enrollments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "ExtractStep",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtractStep": {
+      "main": [
+        [
+          {
+            "node": "Check If Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Skip": {
+      "main": [
+        [
+          {
+            "node": "Mark Enrollment Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Channel Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Enrollment Complete": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Channel Router": {
+      "main": [
+        [
+          {
+            "node": "Send Email (Resend)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send LinkedIn Message (Unipile)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lookup Call Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email (Resend)": {
+      "main": [
+        [
+          {
+            "node": "Prepare AB Counts Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AB Counts Update": {
+      "main": [
+        [
+          {
+            "node": "Check Skip AB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Skip AB": {
+      "main": [
+        [
+          {
+            "node": "Log Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PATCH Sequences (AB Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PATCH Sequences (AB Update)": {
+      "main": [
+        [
+          {
+            "node": "Log Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send LinkedIn Message (Unipile)": {
+      "main": [
+        [
+          {
+            "node": "Log Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Call Script": {
+      "main": [
+        [
+          {
+            "node": "Prepare Call Queue Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Call Queue Insert": {
+      "main": [
+        [
+          {
+            "node": "Insert into call_queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert into call_queue": {
+      "main": [
+        [
+          {
+            "node": "Log Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Step": {
+      "main": [
+        [
+          {
+            "node": "Update Enrollment (Next Step)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Enrollment (Next Step)": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-03-30T00:00:00.000Z",
+  "versionId": "1"
+}
