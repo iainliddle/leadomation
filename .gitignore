@@ -43,3 +43,6 @@ n8nac-instance.json.env.production
 docs/n8n-workflows/campaign-performance-analyser-workflow.json
 skills/
 node_modules/
+
+# Remotion rendered output
+leadomation-social/out/
