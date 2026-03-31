@@ -52,7 +52,7 @@ export const SequencerTimeline: React.FC = () => {
     return (
       <div key={index} style={{ flex: 1, opacity: cardOpacity, transform: `scale(${cardScale})` }}>
         <div style={{
-          background: 'white', borderRadius: 16, padding: '22px 18px', textAlign: 'center',
+          background: 'white', borderRadius: 16, padding: '16px 14px', textAlign: 'center',
           borderTop: `3px solid ${phase.borderColor}`, height: '100%', boxSizing: 'border-box' as const,
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center',
         }}>
@@ -82,16 +82,16 @@ export const SequencerTimeline: React.FC = () => {
 
       {/* ZONE 2 - Headline */}
       <div style={{ position: 'absolute', top: 110, left: 48, right: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
-        <div style={{ opacity: hlOpacity, transform: `translateY(${hlY}px)`, fontSize: 78, fontWeight: 800, color: 'white', lineHeight: 1.1, textAlign: 'center', letterSpacing: -2.5 }}>
+        <div style={{ opacity: hlOpacity, transform: `translateY(${hlY}px)`, fontSize: 82, fontWeight: 800, color: 'white', lineHeight: 1.1, textAlign: 'center', letterSpacing: -2.5 }}>
           35 days from cold to<br /><span style={{ color: '#22D3EE' }}>conversation.</span>
         </div>
-        <div style={{ opacity: shOpacity, transform: `translateY(${shY}px)`, fontSize: 24, fontWeight: 500, color: 'rgba(255,255,255,0.75)', marginTop: 14, textAlign: 'center' }}>
+        <div style={{ opacity: shOpacity, transform: `translateY(${shY}px)`, fontSize: 26, fontWeight: 500, color: 'rgba(255,255,255,0.75)', marginTop: 20, textAlign: 'center' }}>
           LinkedIn relationship sequencer, fully automated.
         </div>
       </div>
 
       {/* ZONE 3 - 2x3 Grid */}
-      <div style={{ position: 'absolute', top: 310, left: 60, right: 60, zIndex: 20 }}>
+      <div style={{ position: 'absolute', top: 340, left: 60, right: 60, marginTop: 0, zIndex: 20 }}>
         {/* Row 1 */}
         <div style={{ display: 'flex', gap: 20, marginBottom: 0 }}>
           {row1.map((phase, i) => (
@@ -119,7 +119,7 @@ export const SequencerTimeline: React.FC = () => {
       </div>
 
       {/* Pro feature pill */}
-      <div style={{ position: 'absolute', bottom: 130, left: 48, right: 48, display: 'flex', justifyContent: 'center', opacity: pillOpacity, transform: `translateY(${pillY}px)`, zIndex: 25 }}>
+      <div style={{ position: 'absolute', top: 640, left: 48, right: 48, display: 'flex', justifyContent: 'center', opacity: pillOpacity, transform: `translateY(${pillY}px)`, zIndex: 25 }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'white', borderRadius: 24, padding: '8px 20px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4F46E5' }} />
           <span style={{ fontSize: 13, fontWeight: 600, color: '#4F46E5' }}>Pro feature</span>
@@ -127,12 +127,12 @@ export const SequencerTimeline: React.FC = () => {
       </div>
 
       {/* ZONE 4 - Bottom copy */}
-      <div style={{ position: 'absolute', bottom: 50, left: 48, right: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: copyOpacity, transform: `translateY(${copyY}px)`, zIndex: 30 }}>
+      <div style={{ position: 'absolute', top: 720, left: 48, right: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: copyOpacity, transform: `translateY(${copyY}px)`, zIndex: 30 }}>
         <div style={{ fontSize: 26, fontWeight: 600, textAlign: 'center', lineHeight: 1.35, letterSpacing: -0.3 }}>
           <span style={{ color: 'white' }}>Cold stranger to warm conversation. </span>
           <span style={{ color: '#22D3EE' }}>Automatically.</span>
         </div>
-        <div style={{ opacity: urlOpacity, fontSize: 18, fontWeight: 500, color: 'rgba(255,255,255,0.5)', letterSpacing: 0.5 }}>leadomation.co.uk</div>
+        <div style={{ opacity: urlOpacity, fontSize: 18, fontWeight: 500, color: 'rgba(255,255,255,0.5)', letterSpacing: 0.5, marginTop: 38 }}>leadomation.co.uk</div>
       </div>
     </AbsoluteFill>
   );

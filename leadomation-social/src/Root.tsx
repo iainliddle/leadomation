@@ -8,12 +8,15 @@ import { PipelineFlow } from './compositions/PipelineFlow';
 import { SequencerTimeline } from './compositions/SequencerTimeline';
 import { CampaignStats } from './compositions/CampaignStats';
 import { KeywordMonitor } from './compositions/KeywordMonitor';
+import { FullShowcase } from './compositions/FullShowcase';
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/* ── Full showcase ── */}
+      <Composition id="FullShowcase" component={FullShowcase} durationInFrames={900} fps={30} width={1080} height={1080} />
       {/* ── Social 1080x1080 compositions ── */}
-      <Composition id="DashboardShowcase" component={DashboardShowcase} durationInFrames={270} fps={30} width={1080} height={1080} />
+      <Composition id="DashboardShowcase" component={DashboardShowcase} durationInFrames={300} fps={30} width={1080} height={1080} />
       <Composition id="IntentScoreReveal" component={IntentScoreReveal} durationInFrames={240} fps={30} width={1080} height={1080} />
       <Composition id="PipelineFlow"      component={PipelineFlow}      durationInFrames={240} fps={30} width={1080} height={1080} />
       <Composition id="SequencerTimeline" component={SequencerTimeline} durationInFrames={240} fps={30} width={1080} height={1080} />
