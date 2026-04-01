@@ -277,7 +277,7 @@ const FloatingBadge: React.FC<{
         fontFamily: brand.fontSans,
         boxShadow: `0 4px 12px ${color}33`,
         whiteSpace: 'nowrap',
-        zIndex: 20,
+        zIndex: 30,
         backdropFilter: 'blur(8px)',
       }}
     >
@@ -671,10 +671,22 @@ const SceneOutreach: React.FC<{ frame: number; fps: number; opacity: number }> =
         })}
       </div>
 
-      {/* Floating notification badges */}
-      <FloatingBadge text="Opened" icon="\u2709\uFE0F" color="#10B981" bgColor="rgba(16,185,129,0.15)" x={80} y={595} delay={470} frame={frame} fps={fps} />
-      <FloatingBadge text="Connected" icon="\u{1F91D}" color="#818CF8" bgColor="rgba(99,102,241,0.15)" x={355} y={578} delay={488} frame={frame} fps={fps} />
-      <FloatingBadge text="Meeting booked" icon="\u{1F4C5}" color="#22D3EE" bgColor="rgba(34,211,238,0.15)" x={655} y={592} delay={506} frame={frame} fps={fps} />
+      {/* Floating notification badges - fade in after cards, fade out before scene end */}
+      {frame >= 490 && (
+        <div style={{ opacity: frame < 505 ? interpolate(frame, [490, 500], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }) : interpolate(frame, [505, 510], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }), zIndex: 30, position: 'absolute', inset: 0 }}>
+          <FloatingBadge text="Opened" icon="\u2709\uFE0F" color="#10B981" bgColor="rgba(16,185,129,0.15)" x={90} y={610} delay={490} frame={frame} fps={fps} />
+        </div>
+      )}
+      {frame >= 493 && (
+        <div style={{ opacity: frame < 505 ? interpolate(frame, [493, 503], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }) : interpolate(frame, [505, 510], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }), zIndex: 30, position: 'absolute', inset: 0 }}>
+          <FloatingBadge text="Connected" icon="\u{1F91D}" color="#818CF8" bgColor="rgba(99,102,241,0.15)" x={360} y={610} delay={493} frame={frame} fps={fps} />
+        </div>
+      )}
+      {frame >= 496 && (
+        <div style={{ opacity: frame < 505 ? interpolate(frame, [496, 506], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }) : interpolate(frame, [505, 510], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }), zIndex: 30, position: 'absolute', inset: 0 }}>
+          <FloatingBadge text="Meeting booked" icon="\u{1F4C5}" color="#22D3EE" bgColor="rgba(34,211,238,0.15)" x={630} y={610} delay={496} frame={frame} fps={fps} />
+        </div>
+      )}
     </AbsoluteFill>
   );
 };
@@ -830,7 +842,7 @@ const SceneCTA: React.FC<{ frame: number; fps: number; opacity: number }> = ({ f
         <div style={{ color: 'white', fontSize: 72, fontWeight: 900, lineHeight: 1.1 }}>Start your free trial.</div>
       </div>
       <div style={{ position: 'relative', zIndex: 1, ...subText, textAlign: 'center', marginTop: 12 }}>
-        <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 20 }}>7 days free. No card required. Cancel anytime.</div>
+        <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 20 }}>7 days free. Cancel anytime. No lock-in.</div>
       </div>
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
         {badges.map((badge, i) => {
@@ -912,7 +924,7 @@ const SceneCTA: React.FC<{ frame: number; fps: number; opacity: number }> = ({ f
         }}
       >
         <span style={{ color: '#22D3EE', fontSize: 14, fontWeight: 600, fontFamily: brand.fontSans, position: 'relative', zIndex: 1 }}>
-          Start free - no card needed
+          Start your 7-day free trial
         </span>
         {/* Shimmer stripe */}
         <div

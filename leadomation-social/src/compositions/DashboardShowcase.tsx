@@ -121,36 +121,60 @@ export const DashboardShowcase: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  /* ── Animation helpers ── */
-  const fadeUp = (delay: number) => {
+  /* ── Universal reveal helper: spring fadeUp 12px ── */
+  const reveal = (startFrame: number) => {
+    const f = Math.max(0, frame - startFrame);
+    const progress = spring({ frame: f, fps, config: { damping: 14, stiffness: 160 }, durationInFrames: 25 });
+    return {
+      opacity: interpolate(f, [0, 15], [0, 1], { extrapolateRight: 'clamp' }),
+      transform: `translateY(${interpolate(progress, [0, 1], [12, 0])}px)`,
+    };
+  };
+
+  /* Fade-only variant (no translateY) for chart SVG */
+  const fadeOnly = (startFrame: number) => ({
+    opacity: interpolate(frame, [startFrame, startFrame + 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
+  });
+
+  /* Zone 1 headline springs (keep original large motion for hero) */
+  const heroUp = (delay: number) => {
     const s = spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 14, stiffness: 160 }, durationInFrames: 30 });
     return { opacity: interpolate(s, [0, 1], [0, 1]), transform: `translateY(${interpolate(s, [0, 1], [30, 0])}px)` };
   };
-  const scaleIn = (delay: number) => {
-    const s = spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 14, stiffness: 160 }, durationInFrames: 30 });
-    return { opacity: interpolate(s, [0, 1], [0, 1]), transform: `scale(${interpolate(s, [0, 1], [0.92, 1])})` };
-  };
-  const fadeIn = (start: number, dur: number) => ({
-    opacity: interpolate(frame, [start, start + dur], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
-  });
-  const slideY = (delay: number) => {
-    const s = spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 14, stiffness: 160 }, durationInFrames: 30 });
-    return { opacity: interpolate(s, [0, 1], [0, 1]), transform: `translateY(${interpolate(s, [0, 1], [10, 0])}px)` };
-  };
 
-  /* Zone 2 card spring */
-  const cardS = spring({ frame: Math.max(0, frame - 35), fps, config: { damping: 14, stiffness: 160 }, durationInFrames: 45 });
+  /* Zone 2 card spring - frame 40 */
+  const cardS = spring({ frame: Math.max(0, frame - 40), fps, config: { damping: 14, stiffness: 160 }, durationInFrames: 45 });
   const cardStyle = {
     opacity: interpolate(cardS, [0, 1], [0, 1]),
     transform: `scale(${interpolate(cardS, [0, 1], [0.93, 1])})`,
     transformOrigin: 'top center' as const,
   };
 
-  /* Zone 3 spring */
-  const z3S = spring({ frame: Math.max(0, frame - 248), fps, config: { damping: 14, stiffness: 160 }, durationInFrames: 30 });
+  /* Data arrays */
+  const activityRows = [
+    { initials: 'SC', text: 'AI call to Smile Clinic Northwest', time: '2d ago', badge: 'COMPLETED', bgColor: '#ECFDF5', textColor: '#059669' },
+    { initials: 'DD', text: 'New lead: Dunmore Dental Care', time: '5d ago', badge: 'NEW', bgColor: '#ECFDF5', textColor: '#059669' },
+    { initials: 'FL', text: 'Lead qualified: Fletcher Law Group', time: '6d ago', badge: 'QUALIFIED', bgColor: '#F5F3FF', textColor: '#7C3AED' },
+    { initials: 'TG', text: 'AI call to The Grand Manchester', time: '8d ago', badge: 'COMPLETED', bgColor: '#ECFDF5', textColor: '#059669' },
+  ];
 
-  /* Zone 4 fade */
-  const z4Op = interpolate(frame, [262, 277], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const events = [
+    { border: '#6366F1', title: 'Discovery Call - James Hartley', date: 'Tue 31 Mar', time: '10:30' },
+    { border: '#F59E0B', title: 'Proposal Call - Dr Paul Nkemdirim', date: 'Wed 1 Apr', time: '12:45' },
+    { border: '#22D3EE', title: 'Onboarding - Dr Amir Patel', date: 'Thu 2 Apr', time: '11:00' },
+  ];
+
+  const campaigns = [
+    { name: 'Dental Clinics - LinkedIn', type: 'SPECIFIER', typeBg: '#F5F3FF', typeColor: '#7C3AED', pct: '6.74%', w: '89%', barColor: '#7C3AED' },
+    { name: 'Law Firms - Full Pipeline', type: 'DIRECT', typeBg: '#EFF6FF', typeColor: '#2563EB', pct: '11.22%', w: '96%', barColor: '#2563EB' },
+    { name: 'UK Hotels - Q2 Outreach', type: 'DIRECT', typeBg: '#EFF6FF', typeColor: '#2563EB', pct: '8.36%', w: '72%', barColor: '#2563EB' },
+  ];
+
+  const statPills = [
+    { value: '34%', label: 'Open rate', subtitle: 'Above industry avg', circleBg: 'rgba(34,211,238,0.2)', border: '#22D3EE', valueColor: 'white' },
+    { value: '\u00A39k', label: 'Active pipeline', subtitle: '10 open deals', circleBg: 'rgba(99,102,241,0.25)', border: '#818CF8', valueColor: 'white' },
+    { value: '11', label: 'Meetings booked', subtitle: 'This month', circleBg: 'rgba(16,185,129,0.2)', border: '#10B981', valueColor: '#10B981' },
+  ];
 
   return (
     <AbsoluteFill style={{ fontFamily, overflow: 'hidden' }}>
@@ -158,20 +182,20 @@ export const DashboardShowcase: React.FC = () => {
 
       {/* ══════════ ZONE 1 - Logo + Headline ══════════ */}
       <div style={{ position: 'absolute', top: 44, left: 0, right: 0, textAlign: 'center', paddingBottom: 8 }}>
-        <div style={fadeUp(0)}>
+        <div style={heroUp(0)}>
           <Img src={staticFile('logo.png')} style={{ height: 42, width: 'auto', display: 'block', margin: '0 auto' }} />
         </div>
-        <div style={{ ...fadeUp(0), marginTop: 16 }}>
+        <div style={{ ...heroUp(0), marginTop: 16 }}>
           <div style={{ fontSize: 52, fontWeight: 800, color: 'white', lineHeight: 1.05, letterSpacing: -2 }}>
             Every campaign. Every result.
           </div>
         </div>
-        <div style={{ ...fadeUp(12), marginTop: -2 }}>
+        <div style={{ ...heroUp(12), marginTop: -2 }}>
           <div style={{ fontSize: 52, fontWeight: 800, color: '#22D3EE', lineHeight: 1.05, letterSpacing: -2 }}>
             One dashboard.
           </div>
         </div>
-        <div style={{ ...fadeUp(24), marginTop: 6 }}>
+        <div style={{ ...heroUp(24), marginTop: 6 }}>
           <div style={{ fontSize: 17, color: 'rgba(255,255,255,0.65)', fontWeight: 500 }}>
             Live right now inside Leadomation.
           </div>
@@ -191,13 +215,11 @@ export const DashboardShowcase: React.FC = () => {
           height: 34, background: '#F3F4F6', borderBottom: '1px solid #E5E7EB',
           display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6, flexShrink: 0,
         }}>
-          {/* Traffic lights */}
           <div style={{ display: 'flex', gap: 5 }}>
             <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#FF5F57' }} />
             <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#FEBC2E' }} />
             <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#28C840' }} />
           </div>
-          {/* Address bar */}
           <div style={{
             flex: 1, margin: '0 12px', background: 'white', borderRadius: 4,
             height: 18, display: 'flex', alignItems: 'center', padding: '0 8px', gap: 4,
@@ -218,40 +240,31 @@ export const DashboardShowcase: React.FC = () => {
             width: 150, minWidth: 150, background: 'white', borderRight: '1px solid #E5E7EB',
             display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0,
           }}>
-            {/* Sidebar header */}
             <div style={{ padding: '10px 10px 8px' }}>
               <Img src={staticFile('logo-full.png')} style={{ height: 18, width: 'auto' }} />
               <div style={{ color: '#9CA3AF', fontSize: 7, marginTop: 3, fontWeight: 500 }}>B2B Outreach Platform</div>
               <div style={{ borderBottom: '1px solid #F3F4F6', marginBottom: 4, marginTop: 8 }} />
             </div>
-
-            {/* Nav sections */}
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <SectionLabel text="MAIN" />
               <NavItem icon={<LayoutDashboard size={9} color="#4F46E5" />} label="Dashboard" active />
               <NavItem icon={<Globe size={9} color="#9CA3AF" />} label="Global Demand" />
-
               <SectionLabel text="CAMPAIGNS" />
               <NavItem icon={<Plus size={9} color="#9CA3AF" />} label="New Campaign" />
               <NavItem icon={<Zap size={9} color="#9CA3AF" />} label="Active Campaigns" />
-
               <SectionLabel text="LEADS" />
               <NavItem icon={<Users size={9} color="#9CA3AF" />} label="Lead Database" badge="271" />
-
               <SectionLabel text="CRM" />
               <NavItem icon={<TrendingUp size={9} color="#9CA3AF" />} label="Deal Pipeline" badge="10" />
               <NavItem icon={<CalendarDays size={9} color="#9CA3AF" />} label="Calendar" />
-
               <SectionLabel text="OUTREACH" />
               <NavItem icon={<Mail size={9} color="#9CA3AF" />} label="Sequence Builder" />
               <NavItem icon={<Target size={9} color="#9CA3AF" />} label="Keyword Monitor" />
               <NavItem icon={<Phone size={9} color="#9CA3AF" />} label="Call Agent" />
               <NavItem icon={<Inbox size={9} color="#9CA3AF" />} label="Inbox" badge="12" />
               <NavItem icon={<FileText size={9} color="#9CA3AF" />} label="Email Templates" />
-
               <SectionLabel text="ANALYTICS" />
               <NavItem icon={<TrendingUp size={9} color="#9CA3AF" />} label="Performance" />
-
               <SectionLabel text="SETTINGS" />
               <NavItem icon={<User size={9} color="#9CA3AF" />} label="My Profile" />
               <NavItem icon={<Link size={9} color="#9CA3AF" />} label="Integrations" />
@@ -259,8 +272,6 @@ export const DashboardShowcase: React.FC = () => {
               <NavItem icon={<Shield size={9} color="#9CA3AF" />} label="Compliance" />
               <NavItem icon={<CreditCard size={9} color="#9CA3AF" />} label="Pricing and Plans" />
             </div>
-
-            {/* Sign out */}
             <div style={{ borderTop: '1px solid #E5E7EB', marginTop: 'auto', padding: '6px 0' }}>
               <div style={{
                 color: '#9CA3AF', fontSize: 9, display: 'flex', alignItems: 'center',
@@ -275,24 +286,18 @@ export const DashboardShowcase: React.FC = () => {
           <div style={{
             flex: 1, overflow: 'hidden', position: 'relative', background: '#F8F9FA',
           }}>
+            <div style={{ padding: '10px 12px', width: '100%' }}>
 
-            {/* Static content div */}
-            <div style={{
-              padding: '10px 12px',
-              width: '100%',
-            }}>
-
-              {/* Section 1 - Greeting */}
-              <div>
+              {/* Section 1 - Greeting (frame 50) */}
+              <div style={reveal(50)}>
                 <div style={{ color: '#111827', fontSize: 11, fontWeight: 700 }}>Good morning, Iain 👋</div>
                 <div style={{ color: '#6B7280', fontSize: 7, marginTop: 2 }}>Tuesday, 31 March 2026 - Let's make today count.</div>
               </div>
 
-              {/* Section 2 - 5 stat cards */}
+              {/* Section 2 - 5 stat cards (stagger 60, 68, 76, 84, 92) */}
               <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
-
                 {/* Card 1 - Total Leads */}
-                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...scaleIn(50) }}>
+                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...reveal(60) }}>
                   <div style={{ background: '#ECFEFF', borderRadius: 4, width: 13, height: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Users size={9} color="#0891B2" />
                   </div>
@@ -306,7 +311,7 @@ export const DashboardShowcase: React.FC = () => {
                 </div>
 
                 {/* Card 2 - Leads with Emails */}
-                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...scaleIn(60) }}>
+                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...reveal(68) }}>
                   <div style={{ background: '#ECFDF5', borderRadius: 4, width: 13, height: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Mail size={9} color="#059669" />
                   </div>
@@ -318,7 +323,7 @@ export const DashboardShowcase: React.FC = () => {
                 </div>
 
                 {/* Card 3 - Leads Contacted */}
-                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...scaleIn(70) }}>
+                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...reveal(76) }}>
                   <div style={{ background: '#F5F3FF', borderRadius: 4, width: 13, height: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <MessageCircle size={9} color="#7C3AED" />
                   </div>
@@ -330,7 +335,7 @@ export const DashboardShowcase: React.FC = () => {
                 </div>
 
                 {/* Card 4 - Total Deals */}
-                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...scaleIn(80) }}>
+                <div style={{ background: 'white', borderRadius: 7, border: '1px solid #E5E7EB', padding: '7px 8px', flex: 1, position: 'relative', ...reveal(84) }}>
                   <div style={{ background: '#FFF1F2', borderRadius: 4, width: 13, height: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TrendingUp size={9} color="#F43F5E" />
                   </div>
@@ -345,7 +350,7 @@ export const DashboardShowcase: React.FC = () => {
                 <div style={{
                   background: 'linear-gradient(135deg, #EEF2FF, #E0E7FF)', borderRadius: 7,
                   border: '1px solid #C7D2FE', padding: '7px 8px', flex: 1,
-                  display: 'flex', flexDirection: 'column', ...scaleIn(90),
+                  display: 'flex', flexDirection: 'column', ...reveal(92),
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                     <Img src={staticFile('logo-icon.png')} style={{ width: 10, height: 10 }} />
@@ -367,80 +372,84 @@ export const DashboardShowcase: React.FC = () => {
               </div>
 
               {/* Section 3 - Charts row */}
-              <div style={{ display: 'flex', gap: 6, marginTop: 6, ...fadeIn(110, 20) }}>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
 
                 {/* Left - Campaign Performance (59%) */}
                 <div style={{
                   width: '59%', background: 'white', borderRadius: 7,
                   border: '1px solid #E5E7EB', padding: '8px 10px',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <BarChart2 size={8} color="#4F46E5" />
-                    <span style={{ color: '#111827', fontSize: 9, fontWeight: 700 }}>Campaign Performance</span>
-                  </div>
-                  <div style={{ color: '#9CA3AF', fontSize: 6, marginLeft: 12 }}>Last 14 days</div>
-
-                  {/* SVG area chart */}
-                  <svg viewBox="0 0 240 56" style={{ width: '100%', height: 56, marginTop: 4 }} preserveAspectRatio="none">
-                    {/* Gridlines */}
-                    {[11, 23, 35, 47].map((y) => (
-                      <line key={y} x1={0} y1={y} x2={240} y2={y} stroke="#F3F4F6" strokeWidth={0.5} />
-                    ))}
-                    <line x1={0} y1={53} x2={240} y2={53} stroke="#E5E7EB" strokeWidth={0.5} />
-                    {/* New Leads */}
-                    <path d={nlPath.area} fill="rgba(16,185,129,0.12)" />
-                    <path d={nlPath.line} fill="none" stroke="#10B981" strokeWidth={1.5} />
-                    {/* AI Calls */}
-                    <path d={aiPath.area} fill="rgba(99,102,241,0.10)" />
-                    <path d={aiPath.line} fill="none" stroke="#6366F1" strokeWidth={1.5} />
-                    {/* Emails */}
-                    <path d={emPath.area} fill="rgba(6,182,212,0.10)" />
-                    <path d={emPath.line} fill="none" stroke="#06B6D4" strokeWidth={1.5} />
-                  </svg>
-
-                  {/* X axis labels */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                    {['18 Mar', '20 Mar', '22 Mar', '24 Mar', '26 Mar', '28 Mar', '31 Mar'].map((d) => (
-                      <span key={d} style={{ fontSize: 5, color: '#9CA3AF' }}>{d}</span>
-                    ))}
+                  {/* Header (frame 110) */}
+                  <div style={reveal(110)}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <BarChart2 size={8} color="#4F46E5" />
+                      <span style={{ color: '#111827', fontSize: 9, fontWeight: 700 }}>Campaign Performance</span>
+                    </div>
+                    <div style={{ color: '#9CA3AF', fontSize: 6, marginLeft: 12 }}>Last 14 days</div>
                   </div>
 
-                  {/* Legend */}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 3, justifyContent: 'center' }}>
-                    {[
-                      { color: '#6366F1', label: 'AI Calls' },
-                      { color: '#06B6D4', label: 'Emails' },
-                      { color: '#10B981', label: 'New Leads' },
-                    ].map((l) => (
-                      <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: l.color }} />
-                        <span style={{ fontSize: 6, color: '#6B7280' }}>{l.label}</span>
-                      </div>
-                    ))}
+                  {/* SVG area chart (frame 118, fade only) */}
+                  <div style={fadeOnly(118)}>
+                    <svg viewBox="0 0 240 56" style={{ width: '100%', height: 56, marginTop: 4 }} preserveAspectRatio="none">
+                      {[11, 23, 35, 47].map((y) => (
+                        <line key={y} x1={0} y1={y} x2={240} y2={y} stroke="#F3F4F6" strokeWidth={0.5} />
+                      ))}
+                      <line x1={0} y1={53} x2={240} y2={53} stroke="#E5E7EB" strokeWidth={0.5} />
+                      <path d={nlPath.area} fill="rgba(16,185,129,0.12)" />
+                      <path d={nlPath.line} fill="none" stroke="#10B981" strokeWidth={1.5} />
+                      <path d={aiPath.area} fill="rgba(99,102,241,0.10)" />
+                      <path d={aiPath.line} fill="none" stroke="#6366F1" strokeWidth={1.5} />
+                      <path d={emPath.area} fill="rgba(6,182,212,0.10)" />
+                      <path d={emPath.line} fill="none" stroke="#06B6D4" strokeWidth={1.5} />
+                    </svg>
                   </div>
 
-                  {/* Funnel row */}
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 2, marginTop: 5,
-                    paddingTop: 5, borderTop: '1px solid #F3F4F6',
-                  }}>
-                    {[
-                      { n: '271', l: 'TOTAL LEADS' },
-                      { n: '0', l: 'CONTACTED' },
-                      { n: '0', l: 'QUALIFIED' },
-                      { n: '10', l: 'DEALS' },
-                    ].map((item, i, arr) => (
-                      <React.Fragment key={i}>
-                        <div style={{
-                          background: '#F9FAFB', borderRadius: 3, padding: '2px 4px',
-                          flex: 1, textAlign: 'center',
-                        }}>
-                          <div style={{ color: '#111827', fontSize: 8, fontWeight: 700 }}>{item.n}</div>
-                          <div style={{ color: '#9CA3AF', fontSize: 5, textTransform: 'uppercase' }}>{item.l}</div>
+                  {/* Legend + funnel (frame 126) */}
+                  <div style={reveal(126)}>
+                    {/* X axis labels */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                      {['18 Mar', '20 Mar', '22 Mar', '24 Mar', '26 Mar', '28 Mar', '31 Mar'].map((d) => (
+                        <span key={d} style={{ fontSize: 5, color: '#9CA3AF' }}>{d}</span>
+                      ))}
+                    </div>
+
+                    {/* Legend */}
+                    <div style={{ display: 'flex', gap: 8, marginTop: 3, justifyContent: 'center' }}>
+                      {[
+                        { color: '#6366F1', label: 'AI Calls' },
+                        { color: '#06B6D4', label: 'Emails' },
+                        { color: '#10B981', label: 'New Leads' },
+                      ].map((l) => (
+                        <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: '50%', background: l.color }} />
+                          <span style={{ fontSize: 6, color: '#6B7280' }}>{l.label}</span>
                         </div>
-                        {i < arr.length - 1 && <ChevronRight size={5} color="#D1D5DB" />}
-                      </React.Fragment>
-                    ))}
+                      ))}
+                    </div>
+
+                    {/* Funnel row */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 2, marginTop: 5,
+                      paddingTop: 5, borderTop: '1px solid #F3F4F6',
+                    }}>
+                      {[
+                        { n: '271', l: 'TOTAL LEADS' },
+                        { n: '0', l: 'CONTACTED' },
+                        { n: '0', l: 'QUALIFIED' },
+                        { n: '10', l: 'DEALS' },
+                      ].map((item, i, arr) => (
+                        <React.Fragment key={i}>
+                          <div style={{
+                            background: '#F9FAFB', borderRadius: 3, padding: '2px 4px',
+                            flex: 1, textAlign: 'center',
+                          }}>
+                            <div style={{ color: '#111827', fontSize: 8, fontWeight: 700 }}>{item.n}</div>
+                            <div style={{ color: '#9CA3AF', fontSize: 5, textTransform: 'uppercase' }}>{item.l}</div>
+                          </div>
+                          {i < arr.length - 1 && <ChevronRight size={5} color="#D1D5DB" />}
+                        </React.Fragment>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -449,17 +458,15 @@ export const DashboardShowcase: React.FC = () => {
                   width: '41%', background: 'white', borderRadius: 7,
                   border: '1px solid #E5E7EB', padding: '8px 10px',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 7 }}>
+                  {/* Header (frame 110) */}
+                  <div style={{ ...reveal(110), display: 'flex', alignItems: 'center', gap: 4, marginBottom: 7 }}>
                     <Trophy size={8} color="#4F46E5" />
                     <span style={{ color: '#111827', fontSize: 8, fontWeight: 700 }}>Top Performing Campaigns</span>
                   </div>
 
-                  {[
-                    { name: 'Dental Clinics - LinkedIn', type: 'SPECIFIER', typeBg: '#F5F3FF', typeColor: '#7C3AED', pct: '6.74%', w: '89%', barColor: '#7C3AED', delay: 118 },
-                    { name: 'Law Firms - Full Pipeline', type: 'DIRECT', typeBg: '#EFF6FF', typeColor: '#2563EB', pct: '11.22%', w: '96%', barColor: '#2563EB', delay: 126 },
-                    { name: 'UK Hotels - Q2 Outreach', type: 'DIRECT', typeBg: '#EFF6FF', typeColor: '#2563EB', pct: '8.36%', w: '72%', barColor: '#2563EB', delay: 134 },
-                  ].map((c, i) => (
-                    <div key={i} style={{ marginBottom: 8, ...slideY(c.delay) }}>
+                  {/* Campaign rows (120, 130, 140) */}
+                  {campaigns.map((c, i) => (
+                    <div key={i} style={{ marginBottom: 8, ...reveal(120 + i * 10) }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
                           <span style={{ color: '#111827', fontSize: 7.5, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</span>
@@ -477,7 +484,9 @@ export const DashboardShowcase: React.FC = () => {
                     </div>
                   ))}
 
+                  {/* VIEW ALL link (frame 148) */}
                   <div style={{
+                    ...reveal(148),
                     color: '#4F46E5', fontSize: 6, fontWeight: 700, textAlign: 'center',
                     marginTop: 6, paddingTop: 6, borderTop: '1px solid #F3F4F6',
                   }}>VIEW ALL CAMPAIGNS</div>
@@ -492,7 +501,8 @@ export const DashboardShowcase: React.FC = () => {
                   width: '59%', background: 'white', borderRadius: 7,
                   border: '1px solid #E5E7EB', padding: '6px 8px',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                  {/* Header (frame 165) */}
+                  <div style={{ ...reveal(165), display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Activity size={8} color="#4F46E5" />
                       <span style={{ color: '#111827', fontSize: 8, fontWeight: 700 }}>Recent Activity</span>
@@ -503,13 +513,10 @@ export const DashboardShowcase: React.FC = () => {
                     </div>
                   </div>
 
-                  {[
-                    { initials: 'SC', text: 'AI call to Smile Clinic Northwest', time: '2d ago', badge: 'COMPLETED', badgeBg: '#ECFDF5', badgeColor: '#059669' },
-                    { initials: 'DD', text: 'New lead: Dunmore Dental Care', time: '5d ago', badge: 'NEW', badgeBg: '#ECFDF5', badgeColor: '#059669' },
-                    { initials: 'FL', text: 'Lead qualified: Fletcher Law Group', time: '6d ago', badge: 'QUALIFIED', badgeBg: '#F5F3FF', badgeColor: '#7C3AED' },
-                    { initials: 'TG', text: 'AI call to The Grand Manchester', time: '8d ago', badge: 'COMPLETED', badgeBg: '#ECFDF5', badgeColor: '#059669' },
-                  ].map((row, i) => (
+                  {/* Activity rows (173, 181, 189, 197) */}
+                  {activityRows.map((row, i) => (
                     <div key={i} style={{
+                      ...reveal(173 + i * 8),
                       display: 'flex', alignItems: 'center', gap: 5, padding: '3px 0',
                       borderBottom: i < 3 ? '1px solid #F9FAFB' : 'none',
                     }}>
@@ -522,7 +529,7 @@ export const DashboardShowcase: React.FC = () => {
                       <span style={{ color: '#111827', fontSize: 7, flex: 1 }}>{row.text}</span>
                       <span style={{ color: '#9CA3AF', fontSize: 6, flexShrink: 0 }}>{row.time}</span>
                       <span style={{
-                        background: row.badgeBg, color: row.badgeColor,
+                        background: row.bgColor, color: row.textColor,
                         fontSize: 5.5, fontWeight: 600, padding: '1px 4px', borderRadius: 4, flexShrink: 0,
                       }}>{row.badge}</span>
                     </div>
@@ -534,7 +541,8 @@ export const DashboardShowcase: React.FC = () => {
                   width: '41%', background: 'white', borderRadius: 7,
                   border: '1px solid #E5E7EB', padding: '6px 8px',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                  {/* Header (frame 165) */}
+                  <div style={{ ...reveal(165), display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Calendar size={8} color="#4F46E5" />
                       <span style={{ color: '#111827', fontSize: 8, fontWeight: 700 }}>Upcoming events</span>
@@ -542,14 +550,12 @@ export const DashboardShowcase: React.FC = () => {
                     <span style={{ color: '#4F46E5', fontSize: 6, fontWeight: 700 }}>VIEW CALENDAR</span>
                   </div>
 
-                  {[
-                    { color: '#6366F1', title: 'Discovery Call - James Hartley', date: 'Tue 31 Mar', time: '10:30' },
-                    { color: '#F59E0B', title: 'Proposal Call - Dr Paul Nkemdirim', date: 'Wed 1 Apr', time: '12:45' },
-                    { color: '#22D3EE', title: 'Onboarding - Dr Amir Patel', date: 'Thu 2 Apr', time: '11:00' },
-                  ].map((evt, i) => (
+                  {/* Event rows (175, 183, 191) */}
+                  {events.map((evt, i) => (
                     <div key={i} style={{
+                      ...reveal(175 + i * 8),
                       background: '#F9FAFB', borderRadius: 3, padding: '3px 5px',
-                      borderLeft: `2px solid ${evt.color}`, marginBottom: 3,
+                      borderLeft: `2px solid ${evt.border}`, marginBottom: 3,
                       display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
                     }}>
                       <div style={{ flex: 1 }}>
@@ -562,9 +568,9 @@ export const DashboardShowcase: React.FC = () => {
                 </div>
               </div>
 
-            </div>{/* end static content div */}
+            </div>{/* end content div */}
 
-            {/* Bottom fade gradient (always present) */}
+            {/* Bottom fade gradient */}
             <div style={{
               position: 'absolute', bottom: 0, left: 150, right: 0, height: 40,
               background: 'linear-gradient(to bottom, transparent, rgba(248,249,250,0.95))',
@@ -574,19 +580,14 @@ export const DashboardShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ══════════ ZONE 3 - Three stat pills ══════════ */}
+      {/* ══════════ ZONE 3 - Three stat pills (stagger 210, 222, 234) ══════════ */}
       <div style={{
         position: 'absolute', top: 850, left: 24, right: 24,
         display: 'flex', gap: 12, zIndex: 30,
-        opacity: interpolate(z3S, [0, 1], [0, 1]),
-        transform: `scale(${interpolate(z3S, [0, 1], [0.85, 1])})`,
       }}>
-        {[
-          { value: '34%', label: 'Open rate', subtitle: 'Above industry avg', circleBg: 'rgba(34,211,238,0.2)', border: '#22D3EE', valueColor: 'white' },
-          { value: '\u00A39k', label: 'Active pipeline', subtitle: '10 open deals', circleBg: 'rgba(99,102,241,0.25)', border: '#818CF8', valueColor: 'white' },
-          { value: '11', label: 'Meetings booked', subtitle: 'This month', circleBg: 'rgba(16,185,129,0.2)', border: '#10B981', valueColor: '#10B981' },
-        ].map((p, i) => (
+        {statPills.map((p, i) => (
           <div key={i} style={{
+            ...reveal(210 + i * 12),
             flex: 1, background: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.2)', borderRadius: 12,
             padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10,
@@ -609,13 +610,13 @@ export const DashboardShowcase: React.FC = () => {
       {/* ══════════ ZONE 4 - Tagline + URL ══════════ */}
       <div style={{
         position: 'absolute', top: 974, left: 0, right: 0,
-        textAlign: 'center', opacity: z4Op, zIndex: 10,
+        textAlign: 'center', zIndex: 10,
       }}>
-        <div style={{ fontSize: 22, fontWeight: 600 }}>
+        <div style={{ ...reveal(248), fontSize: 22, fontWeight: 600 }}>
           <span style={{ color: 'white' }}>Every campaign. Every result.</span>
           <span style={{ color: '#22D3EE' }}> One dashboard.</span>
         </div>
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 15, marginTop: 6, fontWeight: 500 }}>leadomation.co.uk</div>
+        <div style={{ ...reveal(255), color: 'rgba(255,255,255,0.4)', fontSize: 15, marginTop: 6, fontWeight: 500 }}>leadomation.co.uk</div>
       </div>
     </AbsoluteFill>
   );
