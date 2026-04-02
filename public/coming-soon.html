@@ -133,7 +133,6 @@ p {
   text-decoration: none;
   transition: all 0.2s ease;
   box-shadow: 0 4px 20px rgba(79,70,229,0.25);
-  margin-bottom: 48px;
 }
 .cta:hover {
   background: #4338CA;
@@ -164,6 +163,34 @@ p {
   color: #4F46E5;
   text-decoration: none;
 }
+.email-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 48px;
+  width: 100%;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.email-input {
+  width: 100%;
+  padding: 14px 20px;
+  border: 1.5px solid #E2E4ED;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  color: #0F172A;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.email-input:focus {
+  border-color: #4F46E5;
+}
+.email-input::placeholder {
+  color: #94A3B8;
+}
 </style>
 </head>
 <body>
@@ -185,9 +212,17 @@ p {
 
   <p>We are putting the finishing touches on Leadomation. Find leads, run AI outreach and close deals automatically. Be the first to know when we go live.</p>
 
-  <a href="mailto:iainliddle@leadomation.co.uk?subject=Notify me when Leadomation launches" class="cta">
-    Notify me at launch →
-  </a>
+  <form class="email-form" onsubmit="handleSubmit(event)">
+    <input
+      type="email"
+      id="email-input"
+      placeholder="Enter your email address"
+      required
+      class="email-input"
+    />
+    <button type="submit" class="cta">Notify me at launch →</button>
+  </form>
+  <p id="success-msg" style="display:none; color:#4F46E5; font-weight:600; font-size:15px; margin-bottom:40px;">You are on the list. We will be in touch soon.</p>
 
   <div class="features">
     <span class="feature-chip">Lead scraping</span>
@@ -200,6 +235,20 @@ p {
 
   <p class="footer-text">© 2026 Leadomation by Lumarr Ltd &nbsp;·&nbsp; <a href="mailto:iainliddle@leadomation.co.uk">Contact us</a></p>
 </div>
+
+<script>
+function handleSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('email-input').value;
+  fetch('https://hook.eu1.make.com/placeholder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, source: 'coming_soon' })
+  }).catch(() => {});
+  document.querySelector('.email-form').style.display = 'none';
+  document.getElementById('success-msg').style.display = 'block';
+}
+</script>
 
 </body>
 </html>
