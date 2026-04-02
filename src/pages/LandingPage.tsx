@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import logoDark from '../assets/logo-full.png';
+import heroSwirl from '../assets/hero-swirl.png';
 import './LandingPage.css';
 
 // ---- Counter hook ----
@@ -270,9 +271,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
 
       {/* ===== HERO ===== */}
       <section className="lp-hero">
-        <div className="lp-hero-swirl-left"></div>
-        <div className="lp-hero-swirl-right"></div>
-        <div className="lp-container">
+        <div className="lp-hero-left">
           <div className="lp-hero-badge">🚀 B2B Lead Generation on Autopilot</div>
           <h1 className="lp-hero-title">
             Turn Cold Leads into Booked Calls.<br />
@@ -286,6 +285,9 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <button onClick={() => scrollTo('how-it-works')} className="lp-btn lp-btn-outline lp-btn-lg">See How It Works</button>
           </div>
           <p className="lp-hero-note">Secure your trial with a card. Cancel anytime before day 7.</p>
+        </div>
+        <div className="lp-hero-right">
+          <img src={heroSwirl} alt="" className="lp-hero-swirl-img" />
         </div>
       </section>
 

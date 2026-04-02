@@ -86,7 +86,7 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(255,255,255,0.92);
+    background: rgba(255,255,255,0.95);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(226,228,237,0.8);
 }
@@ -223,95 +223,39 @@
 
 /* ===== HERO ===== */
 .lp-hero {
-    padding: 140px 0 0;
-    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
     background: #FFFFFF;
     position: relative;
     overflow: hidden;
+    padding: 0;
 }
 
-.lp-hero::after {
-    content: '';
-    position: absolute;
-    top: -100px;
-    right: -200px;
-    width: 700px;
-    height: 900px;
-    background:
-        radial-gradient(ellipse 300px 600px at 60% 30%, rgba(34,211,238,0.25) 0%, transparent 70%),
-        radial-gradient(ellipse 250px 500px at 70% 60%, rgba(59,130,246,0.2) 0%, transparent 70%),
-        radial-gradient(ellipse 200px 400px at 80% 80%, rgba(79,70,229,0.2) 0%, transparent 70%);
-    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-    animation: lp-swirlFlow 8s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(40px);
-}
-
-@keyframes lp-swirlFlow {
-    0%, 100% {
-        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-        transform: translateY(0) rotate(0deg);
-    }
-    25% {
-        border-radius: 50% 50% 30% 70% / 60% 40% 60% 40%;
-        transform: translateY(-20px) rotate(5deg);
-    }
-    50% {
-        border-radius: 30% 70% 50% 50% / 50% 60% 40% 50%;
-        transform: translateY(-10px) rotate(-3deg);
-    }
-    75% {
-        border-radius: 60% 40% 40% 60% / 30% 70% 50% 50%;
-        transform: translateY(-30px) rotate(8deg);
-    }
-}
-
-.lp-hero-swirl-left {
-    position: absolute;
-    top: 200px;
-    left: -150px;
-    width: 400px;
-    height: 600px;
-    background: radial-gradient(ellipse, rgba(79,70,229,0.12) 0%, rgba(34,211,238,0.08) 50%, transparent 70%);
-    border-radius: 50% 50% 30% 70% / 60% 40% 70% 30%;
-    animation: lp-swirlLeft 10s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(50px);
-}
-
-@keyframes lp-swirlLeft {
-    0%, 100% { transform: translateY(0) rotate(0deg); border-radius: 50% 50% 30% 70% / 60% 40% 70% 30%; }
-    50% { transform: translateY(40px) rotate(-10deg); border-radius: 30% 70% 70% 30% / 50% 60% 40% 60%; }
-}
-
-.lp-hero-swirl-right {
-    position: absolute;
-    top: -50px;
-    right: -100px;
-    width: 500px;
-    height: 700px;
-    background:
-        radial-gradient(ellipse 200px 400px at 40% 20%, rgba(34,211,238,0.2) 0%, transparent 60%),
-        radial-gradient(ellipse 150px 300px at 60% 50%, rgba(59,130,246,0.15) 0%, transparent 60%),
-        radial-gradient(ellipse 200px 350px at 70% 80%, rgba(79,70,229,0.18) 0%, transparent 60%);
-    border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
-    animation: lp-swirlRight 12s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(35px);
-}
-
-@keyframes lp-swirlRight {
-    0%, 100% { transform: translateY(0) rotate(0deg); border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; }
-    33% { transform: translateY(-30px) rotate(8deg); border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; }
-    66% { transform: translateY(20px) rotate(-5deg); border-radius: 70% 30% 40% 60% / 40% 70% 30% 60%; }
-}
-
-.lp-hero > .lp-container {
+.lp-hero-left {
+    flex: 0 0 52%;
+    padding: 140px 48px 80px 80px;
     position: relative;
     z-index: 1;
+}
+
+.lp-hero-right {
+    flex: 0 0 48%;
+    position: relative;
+    align-self: stretch;
+    overflow: hidden;
+}
+
+.lp-hero-swirl-img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left center;
+    mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, black 35%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, black 35%);
 }
 
 .lp-hero-badge {
@@ -333,6 +277,7 @@
     margin-bottom: 20px;
     letter-spacing: -0.02em;
     color: #0F172A;
+    text-align: left;
 }
 
 .lp-gradient-text {
@@ -346,14 +291,15 @@
     font-size: 1.15rem;
     color: #475569;
     max-width: 600px;
-    margin: 0 auto 32px;
+    margin: 0 0 32px;
     line-height: 1.7;
+    text-align: left;
 }
 
 .lp-hero-buttons {
     display: flex;
     gap: 16px;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     margin-bottom: 12px;
 }
@@ -361,6 +307,7 @@
 .lp-hero-note {
     font-size: 0.8rem;
     color: #94A3B8;
+    text-align: left;
 }
 
 /* ===== HERO DEMO CONTAINER ===== */
@@ -3136,11 +3083,37 @@
     }
 
     .lp-hero {
-        padding: 120px 0 32px;
+        flex-direction: column;
+        min-height: auto;
+        padding-top: 80px;
+    }
+
+    .lp-hero-left {
+        flex: none;
+        width: 100%;
+        padding: 100px 24px 40px;
+        text-align: center;
+    }
+
+    .lp-hero-right {
+        display: none;
     }
 
     .lp-hero-title {
         font-size: 2rem;
+        text-align: center;
+    }
+
+    .lp-hero-sub {
+        text-align: center;
+    }
+
+    .lp-hero-buttons {
+        justify-content: center;
+    }
+
+    .lp-hero-note {
+        text-align: center;
     }
 
     .lp-flow {
