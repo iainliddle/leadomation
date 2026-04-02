@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leadomation - Coming Soon</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.swirl-right {
+  position: fixed;
+  top: -100px;
+  right: -150px;
+  width: 600px;
+  height: 800px;
+  background:
+    radial-gradient(ellipse 220px 500px at 55% 25%, rgba(34,211,238,0.35) 0%, transparent 65%),
+    radial-gradient(ellipse 180px 400px at 65% 55%, rgba(59,130,246,0.3) 0%, transparent 65%),
+    radial-gradient(ellipse 220px 450px at 75% 80%, rgba(79,70,229,0.3) 0%, transparent 65%);
+  border-radius: 45% 55% 60% 40% / 40% 50% 60% 50%;
+  animation: swirlMove 10s ease-in-out infinite;
+  pointer-events: none;
+  filter: blur(30px);
+}
+.swirl-left {
+  position: fixed;
+  bottom: -200px;
+  left: -150px;
+  width: 500px;
+  height: 600px;
+  background:
+    radial-gradient(ellipse 200px 400px at 40% 30%, rgba(79,70,229,0.2) 0%, transparent 65%),
+    radial-gradient(ellipse 150px 350px at 60% 70%, rgba(34,211,238,0.15) 0%, transparent 65%);
+  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
+  animation: swirlMove2 13s ease-in-out infinite;
+  pointer-events: none;
+  filter: blur(40px);
+}
+@keyframes swirlMove {
+  0%, 100% { transform: translateY(0) rotate(0deg); border-radius: 45% 55% 60% 40% / 40% 50% 60% 50%; }
+  33% { transform: translateY(-30px) rotate(6deg); border-radius: 55% 45% 40% 60% / 60% 40% 60% 40%; }
+  66% { transform: translateY(20px) rotate(-4deg); border-radius: 35% 65% 55% 45% / 45% 55% 45% 55%; }
+}
+@keyframes swirlMove2 {
+  0%, 100% { transform: translateY(0) rotate(0deg); border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; }
+  50% { transform: translateY(-40px) rotate(-8deg); border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; }
+}
+.content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 40px 24px;
+  max-width: 580px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 48px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(79,70,229,0.08);
+  border: 1px solid rgba(79,70,229,0.2);
+  color: #4F46E5;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 100px;
+  margin-bottom: 32px;
+  letter-spacing: 0.3px;
+}
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  background: #4F46E5;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+h1 {
+  font-size: clamp(36px, 6vw, 58px);
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.08;
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+}
+.gradient-text {
+  background: linear-gradient(135deg, #4F46E5, #22D3EE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+p {
+  font-size: 17px;
+  color: #475569;
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #4F46E5;
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(79,70,229,0.25);
+  margin-bottom: 48px;
+}
+.cta:hover {
+  background: #4338CA;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(79,70,229,0.35);
+}
+.features {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+.feature-chip {
+  background: #F8FAFC;
+  border: 1px solid #E2E4ED;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 100px;
+}
+.footer-text {
+  font-size: 13px;
+  color: #94A3B8;
+}
+.footer-text a {
+  color: #4F46E5;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+
+<div class="swirl-right"></div>
+<div class="swirl-left"></div>
+
+<div class="content">
+  <div class="logo">
+    <img src="/logo-full.png" alt="Leadomation" style="height: 42px; width: auto;" />
+  </div>
+
+  <div class="badge">
+    <span class="badge-dot"></span>
+    Something big is coming
+  </div>
+
+  <h1>B2B outreach.<br><span class="gradient-text">On autopilot.</span></h1>
+
+  <p>We are putting the finishing touches on Leadomation. Find leads, run AI outreach and close deals automatically. Be the first to know when we go live.</p>
+
+  <a href="mailto:iainliddle@leadomation.co.uk?subject=Notify me when Leadomation launches" class="cta">
+    Notify me at launch →
+  </a>
+
+  <div class="features">
+    <span class="feature-chip">Lead scraping</span>
+    <span class="feature-chip">AI email outreach</span>
+    <span class="feature-chip">LinkedIn sequences</span>
+    <span class="feature-chip">AI voice calling</span>
+    <span class="feature-chip">Intent scoring</span>
+    <span class="feature-chip">Lead intelligence</span>
+  </div>
+
+  <p class="footer-text">© 2026 Leadomation by Lumarr Ltd &nbsp;·&nbsp; <a href="mailto:iainliddle@leadomation.co.uk">Contact us</a></p>
+</div>
+
+</body>
+</html>

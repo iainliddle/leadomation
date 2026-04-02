@@ -5,14 +5,17 @@
             "NPM_FLAGS": "--legacy-peer-deps"
         }
     },
+    "redirects": [
+        {
+            "source": "/((?!api|coming-soon|logo-full|cancellation-feedback|favicon).*)",
+            "destination": "/coming-soon.html",
+            "permanent": false
+        }
+    ],
     "rewrites": [
         {
             "source": "/cancellation-feedback.html",
             "destination": "/cancellation-feedback.html"
-        },
-        {
-            "source": "/((?!api/).*)",
-            "destination": "/index.html"
         }
     ]
 }
