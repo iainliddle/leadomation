@@ -224,38 +224,40 @@
 /* ===== HERO ===== */
 .lp-hero {
     min-height: 100vh;
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 52% 48%;
     background: #FFFFFF;
     position: relative;
     overflow: hidden;
     padding: 0;
+    align-items: stretch;
 }
 
 .lp-hero-left {
-    flex: 0 0 52%;
-    padding: 140px 48px 80px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 48px 80px 80px;
     position: relative;
     z-index: 1;
 }
 
 .lp-hero-right {
-    flex: 0 0 48%;
     position: relative;
-    align-self: stretch;
+    min-height: 100vh;
     overflow: hidden;
 }
 
 .lp-hero-swirl-img {
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: left center;
-    mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, black 35%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, black 35%);
+    object-position: center center;
+    mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 20%, black 45%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 20%, black 45%);
 }
 
 .lp-hero-badge {
@@ -3083,16 +3085,14 @@
     }
 
     .lp-hero {
-        flex-direction: column;
+        grid-template-columns: 1fr;
         min-height: auto;
-        padding-top: 80px;
     }
 
     .lp-hero-left {
-        flex: none;
-        width: 100%;
-        padding: 100px 24px 40px;
+        padding: 120px 24px 48px;
         text-align: center;
+        align-items: center;
     }
 
     .lp-hero-right {
