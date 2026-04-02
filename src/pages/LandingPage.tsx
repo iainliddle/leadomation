@@ -27,7 +27,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   const [statsVisible, setStatsVisible] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   // ===== HERO DEMO STATE =====
-  const [demoScreen, setDemoScreen] = useState(0); // 0=Dashboard, 1=Campaign, 2=Inbox, 3=Pipeline
+  const [demoScreen, setDemoScreen] = useState(0); // 0=Dashboard, 1=Campaign, 2=Inbox, 3=Pipeline, 4=Intelligence
   const [cursorStyle, setCursorStyle] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [isClicking, setIsClicking] = useState(false);
   const [activeNavItem, setActiveNavItem] = useState('dashboard');
@@ -41,6 +41,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   const campaignRef = useRef<HTMLDivElement>(null);
   const inboxRef = useRef<HTMLDivElement>(null);
   const pipelineRef = useRef<HTMLDivElement>(null);
+  const intelligenceRef = useRef<HTMLDivElement>(null);
   const heroBodyRef = useRef<HTMLDivElement>(null);
 
   const getCursorPosition = (targetRef: React.RefObject<HTMLDivElement | null>) => {
@@ -58,6 +59,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
     1: 'app.leadomation.com/new-campaign',
     2: 'app.leadomation.com/inbox',
     3: 'app.leadomation.com/deal-pipeline',
+    4: 'app.leadomation.com/lead-database',
   };
 
   const statsRef = useRef<HTMLDivElement>(null);
@@ -143,18 +145,24 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       setTimeout(() => setActiveNavItem('pipeline'), 16800);
       setTimeout(() => setDemoScreen(3), 17000);
 
-      // Back to Dashboard
-      setTimeout(() => setCursorStyle(getCursorPosition(dashboardRef)), 21000);
+      // Move to Lead Intelligence
+      setTimeout(() => setCursorStyle(getCursorPosition(intelligenceRef)), 21000);
       setTimeout(() => click(), 21500);
-      setTimeout(() => setActiveNavItem('dashboard'), 21800);
-      setTimeout(() => setDemoScreen(0), 22000);
+      setTimeout(() => setActiveNavItem('intelligence'), 21800);
+      setTimeout(() => setDemoScreen(4), 22000);
+
+      // Back to Dashboard
+      setTimeout(() => setCursorStyle(getCursorPosition(dashboardRef)), 26000);
+      setTimeout(() => click(), 26500);
+      setTimeout(() => setActiveNavItem('dashboard'), 26800);
+      setTimeout(() => setDemoScreen(0), 27000);
     };
 
     const startDelay = setTimeout(() => {
       runDemo();
     }, 200);
 
-    const interval = setInterval(runDemo, 23000);
+    const interval = setInterval(runDemo, 28000);
 
     return () => {
       clearTimeout(initDelay);
@@ -262,6 +270,8 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
 
       {/* ===== HERO ===== */}
       <section className="lp-hero">
+        <div className="lp-hero-swirl-left"></div>
+        <div className="lp-hero-swirl-right"></div>
         <div className="lp-container">
           <div className="lp-hero-badge">🚀 B2B Lead Generation on Autopilot</div>
           <h1 className="lp-hero-title">
@@ -324,6 +334,10 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <div className="lp-demo-nav-item">
               <span className="lp-nav-icon">👥</span> Lead Database
               <span className="lp-demo-badge lp-badge-purple">21</span>
+            </div>
+            <div ref={intelligenceRef} className={`lp-demo-nav-item ${activeNavItem === 'intelligence' ? 'active' : ''}`}>
+              <span className="lp-nav-icon">🧠</span> Lead Intelligence
+              <span className="lp-demo-badge lp-badge-purple">NEW</span>
             </div>
 
             <div className="lp-demo-section-label">CRM</div>
@@ -712,6 +726,39 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* ====== SCREEN 4: LEAD INTELLIGENCE ====== */}
+            {demoScreen === 4 && (
+              <div className="lp-demo-screen" key="intelligence">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 900, color: '#111827' }}>Lead Intelligence</span>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#4F46E5', background: '#EEF2FF', padding: '4px 10px', borderRadius: '8px' }}>Pro Feature</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div className="lp-demo-card">
+                    <div className="lp-demo-card-title">Opportunity Rating</div>
+                    <span style={{ background: 'rgba(239,68,68,0.12)', color: '#EF4444', fontWeight: 800, fontSize: '11px', padding: '4px 10px', borderRadius: '6px' }}>🔥 Hot</span>
+                  </div>
+                  <div className="lp-demo-card">
+                    <div className="lp-demo-card-title">Pain Intensity</div>
+                    <div style={{ fontSize: '14px', fontWeight: 900, color: '#111827' }}>7/10</div>
+                    <div style={{ height: '4px', background: '#E2E4ED', borderRadius: '2px', marginTop: '4px' }}><div style={{ height: '100%', width: '70%', background: 'linear-gradient(90deg, #4F46E5, #22D3EE)', borderRadius: '2px' }}></div></div>
+                  </div>
+                </div>
+                <div className="lp-demo-card" style={{ marginTop: '8px' }}>
+                  <div className="lp-demo-card-title">Pain Point</div>
+                  <div style={{ fontSize: '9px', color: '#374151', lineHeight: 1.6 }}>No online booking system. Losing walk-in customers to competitors with digital scheduling.</div>
+                </div>
+                <div className="lp-demo-card" style={{ marginTop: '8px' }}>
+                  <div className="lp-demo-card-title">Suggested Subject Line</div>
+                  <div style={{ fontSize: '9px', color: '#4F46E5', fontWeight: 600 }}>Quick fix for your booking gap</div>
+                </div>
+                <div className="lp-demo-card" style={{ marginTop: '8px' }}>
+                  <div className="lp-demo-card-title">Suggested Opening Line</div>
+                  <div style={{ fontSize: '9px', color: '#4F46E5', fontWeight: 600 }}>I noticed your second location just opened, congrats! I had an idea that could help both sites run smoother.</div>
                 </div>
               </div>
             )}
