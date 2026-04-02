@@ -48,10 +48,15 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { userId, reason, token } = req.body;
+    const { userId, reason, additional_feedback, token } = req.body;
 
-    // Verify the signed token to authenticate the request
-    if (!token || !verifyCancellationToken(token, userId)) {
+    // Authenticate via signed token or API secret header
+    const apiSecret = req.headers['x-api-secret'];
+    const validSecret = process.env.CANCELLATION_API_SECRET || 'leadomation-cancel-2026';
+    const hasValidToken = token && verifyCancellationToken(token, userId);
+    const hasValidSecret = apiSecret && apiSecret === validSecret;
+
+    if (!hasValidToken && !hasValidSecret) {
         return res.status(401).json({ error: 'Invalid or expired cancellation token' });
     }
 
@@ -70,6 +75,7 @@ export default async function handler(req: any, res: any) {
             .insert({
                 user_id: userId,
                 reason: reason,
+                ...(additional_feedback && { additional_feedback: String(additional_feedback).slice(0, 2000) }),
             });
 
         if (error) {

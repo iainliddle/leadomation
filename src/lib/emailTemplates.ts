@@ -17,7 +17,7 @@ export const BASE_LAYOUT = (subject: string, bodyContent: string) => `
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
-              <img src="https://leadomation.co.uk/logo.png" alt="Leadomation" width="140" style="display:block;width:140px;height:auto;margin:0 auto;" />
+              <img src="https://www.leadomation.co.uk/logo.png" alt="Leadomation" width="140" style="display:block;width:140px;height:auto;margin:0 auto;" />
             </td>
           </tr>
           
@@ -257,22 +257,22 @@ export const CANCELLATION_EMAIL_BODY = `
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
   <tr>
     <td style="padding:8px 0;">
-      <a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Too expensive" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">💰 It was too expensive</a>
+      <a href="https://www.leadomation.co.uk/cancellation-feedback.html?reason=too_expensive&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">💰 It was too expensive</a>
     </td>
   </tr>
   <tr>
     <td style="padding:8px 0;">
-      <a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Missing features" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">🔧 It was missing features I needed</a>
+      <a href="https://www.leadomation.co.uk/cancellation-feedback.html?reason=missing_features&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">🔧 It was missing features I needed</a>
     </td>
   </tr>
   <tr>
     <td style="padding:8px 0;">
-      <a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: Too complicated" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">😕 It was too complicated to use</a>
+      <a href="https://www.leadomation.co.uk/cancellation-feedback.html?reason=too_complicated&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">😕 It was too complicated to use</a>
     </td>
   </tr>
   <tr>
     <td style="padding:8px 0;">
-      <a href="mailto:iainliddle@leadomation.co.uk?subject=Cancellation reason: No longer needed" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">📦 I no longer need it</a>
+      <a href="https://www.leadomation.co.uk/cancellation-feedback.html?reason=no_longer_needed&userId={{user_id}}" style="display:block;padding:12px 20px;background:#F8F9FF;border:1px solid #E5E7EB;border-radius:8px;font-size:14px;color:#374151;text-decoration:none;">📦 I no longer need it</a>
     </td>
   </tr>
 </table>
