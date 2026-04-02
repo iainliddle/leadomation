@@ -33,9 +33,11 @@ import {
     Mic,
     Pencil,
     TrendingUp,
-    Flame
+    Flame,
+    Brain
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import LeadIntelligence from '../components/LeadIntelligence';
 
 interface IntentSignal {
     signal: string;
@@ -65,6 +67,10 @@ interface Lead {
     user_id: string;
     intent_score?: number | null;
     intent_signals?: IntentSignal[] | null;
+    category?: string;
+    reviews_count?: number;
+    lead_intelligence?: any | null;
+    intelligence_generated_at?: string | null;
 }
 
 import type { FeatureAccess } from '../lib/planLimits';
@@ -273,6 +279,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [isExporting, setIsExporting] = useState(false);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [drawerTab, setDrawerTab] = useState<'details' | 'intelligence'>('details');
     const [isEditingLead, setIsEditingLead] = useState(false);
     const [editLeadForm, setEditLeadForm] = useState<Partial<Lead>>({});
     const [isSavingLead, setIsSavingLead] = useState(false);
@@ -1614,7 +1621,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                     <tr
                                         key={lead.id}
                                         className={`group cursor-pointer transition-colors duration-150 ${selectedLeads.includes(lead.id) ? 'bg-[#EEF2FF]' : 'hover:bg-gray-50'}`}
-                                        onClick={() => setSelectedLead(lead)}
+                                        onClick={() => { setSelectedLead(lead); setDrawerTab('details'); }}
                                     >
                                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                             <input
@@ -1870,7 +1877,38 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                             )}
                         </div>
 
+                        {/* Drawer Tabs */}
+                        <div className="flex border-b border-gray-200 px-6">
+                            <button
+                                onClick={() => setDrawerTab('details')}
+                                className={`px-4 py-2.5 text-xs font-semibold transition-colors relative ${drawerTab === 'details' ? 'text-[#4F46E5]' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Details
+                                {drawerTab === 'details' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4F46E5] rounded-full" />}
+                            </button>
+                            <button
+                                onClick={() => setDrawerTab('intelligence')}
+                                className={`px-4 py-2.5 text-xs font-semibold transition-colors relative flex items-center gap-1.5 ${drawerTab === 'intelligence' ? 'text-[#4F46E5]' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <Brain size={12} />
+                                Intelligence
+                                {drawerTab === 'intelligence' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4F46E5] rounded-full" />}
+                            </button>
+                        </div>
+
                         {/* Drawer Content */}
+                        {drawerTab === 'intelligence' && selectedLead && (
+                            <div className="flex-1 overflow-y-auto">
+                                <LeadIntelligence
+                                    leadId={selectedLead.id}
+                                    leadName={selectedLead.company || selectedLead.first_name || 'this lead'}
+                                    cachedIntelligence={selectedLead.lead_intelligence}
+                                    cachedAt={selectedLead.intelligence_generated_at}
+                                />
+                            </div>
+                        )}
+
+                        {drawerTab === 'details' && (
                         <div className="flex-1 overflow-y-auto p-6 space-y-6">
                             {/* Status Section */}
                             <div className="space-y-2">
@@ -2163,6 +2201,7 @@ const LeadDatabase: React.FC<LeadDatabaseProps> = ({ canAccess, triggerUpgrade }
                                 )}
                             </div>
                         </div>
+                        )}
 
                         {/* Drawer Footer */}
                         <div className="p-8 border-t border-[#F3F4F6] bg-gray-50/50 flex flex-col gap-4">

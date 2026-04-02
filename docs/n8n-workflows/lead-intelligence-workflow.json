@@ -1,0 +1,416 @@
+{
+  "name": "Lead Intelligence Research",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-intelligence",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-1-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM leads WHERE id = '{{ $json.lead_id }}' LIMIT 1",
+        "options": {}
+      },
+      "id": "node-2-fetch-lead",
+      "name": "Fetch Lead from Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [440, 300],
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_SESSION_POOLER",
+          "name": "Supabase Session Pooler"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $input.first().json;\nlet score = 0;\nif (lead.website) score += 20;\nif (lead.reviews_count > 20) score += 20;\nif (lead.rating) score += 10;\nif (lead.phone) score += 10;\nif (lead.email) score += 15;\nif (lead.intent_score) score += 15;\nif (lead.category) score += 10;\nreturn [{ json: { ...lead, completeness_score: score } }];"
+      },
+      "id": "node-3-completeness",
+      "name": "Calculate Completeness Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "completeness-check",
+              "leftValue": "={{ $json.completeness_score }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-4-if-complete",
+      "name": "IF Completeness >= 40",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "website-check",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-5-if-website",
+      "name": "IF Website Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1100, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.website }}",
+        "options": {
+          "timeout": 10000,
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "node-5b-fetch-website",
+      "name": "Fetch Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 100],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.apollo.io/v1/people/match",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ api_key: $credentials.apolloApi?.apiKey || '', email: $json.email || '', first_name: $json.first_name || '', last_name: $json.last_name || '', organization_name: $json.company || '' }) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "node-6-apollo",
+      "name": "Apollo Enrichment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 300],
+      "continueOnFail": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "APOLLO_API_KEY",
+          "name": "Apollo API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $('Calculate Completeness Score').first().json;\nconst websiteNode = $('Fetch Website');\nconst apolloNode = $('Apollo Enrichment');\n\nlet websiteContent = '';\ntry {\n  const html = websiteNode.first()?.json?.data || websiteNode.first()?.json?.body || '';\n  // Strip HTML tags and take first 500 chars\n  websiteContent = String(html).replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim().substring(0, 500);\n} catch(e) {}\n\nlet apolloData = {};\ntry {\n  const apollo = apolloNode.first()?.json?.person || apolloNode.first()?.json || {};\n  apolloData = {\n    apollo_title: apollo.title || '',\n    apollo_headline: apollo.headline || '',\n    apollo_seniority: apollo.seniority || '',\n    apollo_departments: (apollo.departments || []).join(', '),\n    apollo_company_size: apollo.organization?.estimated_num_employees || '',\n    apollo_company_industry: apollo.organization?.industry || '',\n    apollo_company_revenue: apollo.organization?.annual_revenue_printed || ''\n  };\n} catch(e) {}\n\nreturn [{\n  json: {\n    lead_id: lead.id,\n    business_name: lead.company || '',\n    category: lead.category || lead.industry || '',\n    city: lead.location || '',\n    rating: lead.rating || 'N/A',\n    review_count: lead.reviews_count || 0,\n    website: lead.website || '',\n    phone: lead.phone || '',\n    email: lead.email || '',\n    intent_score: lead.intent_score || 'N/A',\n    first_name: lead.first_name || '',\n    last_name: lead.last_name || '',\n    job_title: lead.job_title || '',\n    website_content: websiteContent,\n    ...apolloData,\n    completeness_score: lead.completeness_score\n  }\n}];"
+      },
+      "id": "node-7-assemble",
+      "name": "Assemble Enriched Profile",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $credentials.anthropicApi?.apiKey }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'You are a world-class B2B sales intelligence analyst with 15+ years experience. Analyse this lead and produce a concise actionable intelligence report.\\n\\nBusiness data:\\n- Name: ' + $json.business_name + '\\n- Category: ' + $json.category + '\\n- Location: ' + $json.city + '\\n- Rating: ' + $json.rating + ' stars from ' + $json.review_count + ' reviews\\n- Website: ' + $json.website + '\\n- Phone: ' + $json.phone + '\\n- Email: ' + $json.email + '\\n- Intent score: ' + $json.intent_score + '\\n- Contact: ' + $json.first_name + ' ' + $json.last_name + '\\n- Job title: ' + $json.job_title + '\\n' + ($json.website_content ? '\\nWebsite excerpt: ' + $json.website_content + '\\n' : '') + ($json.apollo_title ? '\\nApollo data:\\n- Title: ' + $json.apollo_title + '\\n- Seniority: ' + $json.apollo_seniority + '\\n- Company size: ' + $json.apollo_company_size + '\\n- Company industry: ' + $json.apollo_company_industry + '\\n- Revenue: ' + $json.apollo_company_revenue + '\\n' : '') + '\\nRespond ONLY in this exact JSON with no markdown:\\n{\"opportunity_rating\": \"Hot|Warm|Cold\", \"opportunity_reason\": \"one sentence\", \"pain_intensity_score\": 7, \"pain_point\": \"2-3 sentences. Be specific. Reference actual data.\", \"consequences_of_inaction\": \"1-2 sentences.\", \"buying_readiness\": \"2-3 sentences.\", \"decision_maker_profile\": \"2 sentences.\", \"outreach_angle\": \"2-3 sentences. Be specific and actionable.\", \"personalisation_hook\": \"One specific detail to reference in outreach.\", \"suggested_subject_line\": \"Personal not templated\", \"suggested_opening_line\": \"First sentence with a gap for personalisation\"}' }] }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "node-8-claude",
+      "name": "Claude Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1760, 300],
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "ANTHROPIC_API_KEY",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst content = response.content[0].text;\nconst intelligence = JSON.parse(content);\nconst leadId = $('Webhook').first().json.body.lead_id || $('Webhook').first().json.lead_id;\nreturn [{ json: { intelligence, lead_id: leadId } }];"
+      },
+      "id": "node-9-parse",
+      "name": "Parse JSON Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1980, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads SET lead_intelligence = '{{ JSON.stringify($json.intelligence).replace(/'/g, \"''\") }}'::jsonb, intelligence_generated_at = NOW() WHERE id = '{{ $json.lead_id }}'",
+        "options": {}
+      },
+      "id": "node-10-upsert",
+      "name": "Store Intelligence in Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [2200, 300],
+      "credentials": {
+        "postgres": {
+          "id": "SUPABASE_SESSION_POOLER",
+          "name": "Supabase Session Pooler"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ intelligence: $('Parse JSON Response').first().json.intelligence }) }}",
+        "options": {}
+      },
+      "id": "node-11-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2420, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Low completeness path - return with low confidence flag\nconst lead = $input.first().json;\nreturn [{\n  json: {\n    lead_id: lead.id,\n    business_name: lead.company || '',\n    category: lead.category || lead.industry || '',\n    city: lead.location || '',\n    rating: lead.rating || 'N/A',\n    review_count: lead.reviews_count || 0,\n    website: lead.website || '',\n    phone: lead.phone || '',\n    email: lead.email || '',\n    intent_score: lead.intent_score || 'N/A',\n    first_name: lead.first_name || '',\n    last_name: lead.last_name || '',\n    job_title: lead.job_title || '',\n    website_content: '',\n    completeness_score: lead.completeness_score,\n    low_confidence: true\n  }\n}];"
+      },
+      "id": "node-4b-low-completeness",
+      "name": "Low Completeness Path",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Fetch Lead from Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Lead from Supabase": {
+      "main": [
+        [
+          {
+            "node": "Calculate Completeness Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Completeness Score": {
+      "main": [
+        [
+          {
+            "node": "IF Completeness >= 40",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Completeness >= 40": {
+      "main": [
+        [
+          {
+            "node": "IF Website Exists",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Apollo Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Low Completeness Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Website Exists": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Assemble Enriched Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website": {
+      "main": [
+        [
+          {
+            "node": "Assemble Enriched Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Assemble Enriched Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Low Completeness Path": {
+      "main": [
+        [
+          {
+            "node": "Claude Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Enriched Profile": {
+      "main": [
+        [
+          {
+            "node": "Claude Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Response": {
+      "main": [
+        [
+          {
+            "node": "Store Intelligence in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Intelligence in Supabase": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Lead Intelligence"
+    }
+  ],
+  "triggerCount": 1,
+  "active": false
+}
