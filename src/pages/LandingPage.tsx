@@ -102,7 +102,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   // Carousel auto-play
   useEffect(() => {
     if (!isAutoPlaying) return;
-    const interval = setInterval(() => setActiveSlide((p) => (p + 1) % 7), 5000);
+    const interval = setInterval(() => setActiveSlide((p) => (p + 1) % 8), 5000);
     return () => clearInterval(interval);
   }, [isAutoPlaying]);
 
@@ -201,9 +201,10 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   const slides = [
     { id: 'scraping', tab: 'Lead Scraping', icon: '🔍', bg: 'lp-slide-indigo', headline: 'Scrape Verified Leads from Google Maps', sub: 'One click. Thousands of real businesses with names, emails, phone numbers, and ratings.' },
     { id: 'demand', tab: 'Global Demand', icon: '🌍', bg: 'lp-slide-emerald', headline: 'Find High-Demand Markets Before Competitors', sub: 'See keyword search volume by location. Spot untapped opportunities on a live heatmap.' },
+    { id: 'intelligence', tab: 'Lead Intelligence', icon: '🧠', bg: 'lp-slide-navy', headline: 'AI-Powered Lead Research in Seconds', sub: 'Pain points, buying signals, outreach angles and a personalised subject line. All generated automatically for every lead.' },
     { id: 'email', tab: 'AI Emails', icon: '✉️', bg: 'lp-slide-violet', headline: 'AI Writes Personalised Emails at Scale', sub: "Every message references the prospect's business. Spintax for natural variation." },
     { id: 'voice', tab: 'AI Voice Agent', icon: '📞', bg: 'lp-slide-navy', headline: 'An AI That Actually Calls Your Prospects', sub: 'Handles objections, answers questions, and books meetings in your Calendly.' },
-    { id: 'sequences', tab: 'Sequences', icon: '🔀', bg: 'lp-slide-orange', headline: 'Multi-Channel Sequences on Autopilot', sub: 'Email → LinkedIn → Voice Call. Set the flow, set the delays, let it run.' },
+    { id: 'sequences', tab: 'Sequences', icon: '🔀', bg: 'lp-slide-orange', headline: '35-Day LinkedIn + Email Sequences', sub: 'Multi-channel sequences across email, LinkedIn and AI voice calls. Set the flow, set the delays, let it run.' },
     { id: 'pipeline', tab: 'Deal Pipeline', icon: '📊', bg: 'lp-slide-cyan', headline: 'Drag-and-Drop Deal Pipeline', sub: 'Kanban CRM built in. Track every deal from first contact to closed-won.' },
     { id: 'inbox', tab: 'Unified Inbox', icon: '📥', bg: 'lp-slide-rose', headline: 'Every Reply. One Inbox.', sub: 'Email and LinkedIn replies in one place. Never miss a hot lead.' },
   ];
@@ -264,12 +265,11 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         <div className="lp-container">
           <div className="lp-hero-badge">🚀 B2B Lead Generation on Autopilot</div>
           <h1 className="lp-hero-title">
-            Find Leads. Send Outreach.<br />
-            <span className="lp-gradient-text">Close Deals. Automatically.</span>
+            Turn Cold Leads into Booked Calls.<br />
+            <span className="lp-gradient-text">Automatically.</span>
           </h1>
           <p className="lp-hero-sub">
-            Leadomation scrapes leads, writes personalised emails, automates LinkedIn,
-            and even calls prospects with an AI Voice Agent.
+            Leadomation finds, enriches and scores your leads, writes personalised outreach, automates LinkedIn, and even calls prospects with an AI Voice Agent.
           </p>
           <div className="lp-hero-buttons">
             <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-primary lp-btn-lg">Get Started Free →</button>
@@ -279,7 +279,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         </div>
       </section>
 
-      {/* ===== HERO VISUAL — Interactive Dashboard Demo ===== */}
+      {/* ===== HERO VISUAL - Interactive Dashboard Demo ===== */}
       {/* ===== INTERACTIVE HERO DEMO ===== */}
       <div className="lp-hero-demo">
         {/* Browser Chrome Bar */}
@@ -365,7 +365,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <span style={{ fontSize: '16px', fontWeight: 900, color: '#111827' }}>Dashboard</span>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    <span className="lp-demo-chip">Jan 1, 2024 – Feb 1, 2024 ▾</span>
+                    <span className="lp-demo-chip">Jan 1, 2024 - Feb 1, 2024 ▾</span>
                     <span className="lp-demo-chip">+ Export</span>
                     <span className="lp-demo-btn-indigo">+ New Campaign</span>
                   </div>
@@ -732,7 +732,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         </div>
       </div>
 
-      {/* ===== TRUST BAR — Auto-scrolling marquee ===== */}
+      {/* ===== TRUST BAR - Auto-scrolling marquee ===== */}
       <section className="lp-trust">
         <div className="lp-container">
           <p className="lp-trust-label">Powered by Industry Leaders</p>
@@ -882,6 +882,24 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                         </div>
                       </div>
                     )}
+                    {s.id === 'intelligence' && (
+                      <div className="lp-mockup">
+                        <div className="lp-mockup-header">Lead Intelligence Report</div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid #E2E4ED' }}>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>Opportunity rating</div>
+                          <span style={{ background: 'rgba(239,68,68,0.15)', color: '#F87171', fontWeight: 800, fontSize: '0.8rem', padding: '3px 10px', borderRadius: '6px' }}>Hot</span>
+                        </div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid #E2E4ED' }}>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>Pain point</div>
+                          <div style={{ fontSize: '0.8rem', color: '#374151', lineHeight: 1.5 }}>No online booking system. Losing walk-in customers to competitors with digital scheduling.</div>
+                        </div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid #E2E4ED' }}>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>Suggested subject line</div>
+                          <div style={{ fontSize: '0.8rem', color: '#4F46E5', fontWeight: 600 }}>Quick fix for [Business Name]'s booking gap</div>
+                        </div>
+                        <div className="lp-email-ai-badge">🧠 AI Generated - Pro Feature</div>
+                      </div>
+                    )}
                     {s.id === 'email' && (
                       <div className="lp-mockup"><div className="lp-mockup-header">AI Email Composer</div>
                         <div className="lp-email-field"><span>To:</span> j.mitchell@jmplumbing.co.uk</div>
@@ -948,9 +966,169 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         <div className="lp-container">
           <h3 className="lp-extras-title">Plus Everything Else You Need</h3>
           <div className="lp-extras-grid">
-            {['🔥 Inbox Warm-Up', '🔄 Inbox Rotation', '🧠 Decision Maker Enrichment', '✍️ Email Signatures', '🛡️ Compliance Tools', '📈 Advanced Analytics', '📤 CSV Export', '🔗 Integrations', '📝 Email Templates', '🔤 Spintax Support'].map((chip) => (
+            {['🧠 Lead Intelligence', '🎯 Intent Scoring', '📊 Performance Analyser', '🔗 3-Layer Enrichment', '🔥 Inbox Warm-Up', '🔄 Inbox Rotation', '🧠 Decision Maker Enrichment', '✍️ Email Signatures', '🛡️ Compliance Tools', '📈 Advanced Analytics', '📤 CSV Export', '🔗 Integrations', '📝 Email Templates', '🔤 Spintax Support'].map((chip) => (
               <div key={chip} className="lp-extra-chip">{chip}</div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== LEAD INTELLIGENCE ===== */}
+      <section className="lp-intelligence">
+        <div className="lp-container">
+          <div className="lp-intel-layout">
+            <div className="lp-intel-text lp-reveal">
+              <span className="lp-section-tag">Lead Intelligence</span>
+              <h3>Know your lead before you contact them</h3>
+              <p>Lead Intelligence researches every prospect automatically. Pain points, buying signals, outreach angles and a personalised subject line. Generated in seconds.</p>
+              <span className="lp-intel-pro-badge">Pro feature</span>
+            </div>
+            <div className="lp-intel-card lp-reveal">
+              <div className="lp-intel-card-header">Lead Intelligence Report</div>
+              <div className="lp-intel-field">
+                <div className="lp-intel-label">Opportunity rating</div>
+                <span className="lp-intel-rating">Hot</span>
+              </div>
+              <div className="lp-intel-field">
+                <div className="lp-intel-label">Pain intensity</div>
+                <div className="lp-intel-value">7/10</div>
+                <div className="lp-intel-progress"><div className="lp-intel-progress-fill" style={{ width: '70%' }}></div></div>
+              </div>
+              <div className="lp-intel-field">
+                <div className="lp-intel-label">Pain point</div>
+                <div className="lp-intel-value">No online booking system. Losing walk-in customers to competitors with digital scheduling. Website has no clear call to action.</div>
+              </div>
+              <div className="lp-intel-field">
+                <div className="lp-intel-label">Outreach angle</div>
+                <div className="lp-intel-value">Position as a quick-win digital upgrade. Reference their 4.8-star Google rating as social proof they already deliver great service.</div>
+              </div>
+              <div className="lp-intel-field">
+                <div className="lp-intel-label">Personalisation hook</div>
+                <div className="lp-intel-value">Mention their recent expansion to a second location and how online booking could streamline both sites.</div>
+              </div>
+              <div className="lp-intel-field">
+                <div className="lp-intel-label">Suggested subject line</div>
+                <div className="lp-intel-value" style={{ color: '#4F46E5', fontWeight: 600 }}>Quick fix for your booking gap</div>
+              </div>
+              <div className="lp-intel-field">
+                <div className="lp-intel-label">Suggested opening line</div>
+                <div className="lp-intel-value" style={{ color: '#4F46E5', fontWeight: 600 }}>I noticed your second location just opened - congrats! I had an idea that could help both sites run smoother.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== INTENT SCORING ===== */}
+      <section className="lp-intent">
+        <div className="lp-container">
+          <div className="lp-intent-layout">
+            <div className="lp-intent-badges lp-reveal">
+              <div className="lp-intent-badge lp-intent-hot">
+                <span style={{ fontSize: '1.5rem' }}>🔥</span>
+                <div><strong>Hot</strong><br /><span style={{ fontSize: '0.8rem', fontWeight: 400 }}>High buying signals detected</span></div>
+                <span className="lp-intent-score">76-100</span>
+              </div>
+              <div className="lp-intent-badge lp-intent-warm">
+                <span style={{ fontSize: '1.5rem' }}>🌡️</span>
+                <div><strong>Warm</strong><br /><span style={{ fontSize: '0.8rem', fontWeight: 400 }}>Some interest indicators</span></div>
+                <span className="lp-intent-score">51-75</span>
+              </div>
+              <div className="lp-intent-badge lp-intent-cool">
+                <span style={{ fontSize: '1.5rem' }}>❄️</span>
+                <div><strong>Cool</strong><br /><span style={{ fontSize: '0.8rem', fontWeight: 400 }}>Low engagement signals</span></div>
+                <span className="lp-intent-score">26-50</span>
+              </div>
+              <div className="lp-intent-badge lp-intent-unscored">
+                <span style={{ fontSize: '1.5rem' }}>❓</span>
+                <div><strong>Unscored</strong><br /><span style={{ fontSize: '0.8rem', fontWeight: 400 }}>Awaiting enrichment data</span></div>
+                <span className="lp-intent-score">-</span>
+              </div>
+            </div>
+            <div className="lp-intent-text lp-reveal">
+              <span className="lp-section-tag">Intent scoring</span>
+              <h3>Know who's ready to buy</h3>
+              <p>Every lead is automatically scored based on enrichment signals. Hot leads get priority. You spend time on the ones most likely to convert.</p>
+              <ul className="lp-intent-bullets">
+                <li>Scored at enrichment time</li>
+                <li>Filter and sort by intent</li>
+                <li>Prioritise outreach automatically</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CAMPAIGN PERFORMANCE ANALYSER ===== */}
+      <section className="lp-performance">
+        <div className="lp-container">
+          <div className="lp-section-header lp-reveal">
+            <span className="lp-section-tag">Performance analyser</span>
+            <h2>The longer you use Leadomation, the better your results get</h2>
+            <p>The Campaign Performance Analyser studies your email data every 6 hours and sends you a personalised report. Subject line suggestions, timing improvements, follow-up coaching. All automated.</p>
+          </div>
+          <div className="lp-perf-layout lp-reveal">
+            <div className="lp-perf-text">
+              <h3>Personalised insights. Delivered automatically.</h3>
+              <p>Every campaign teaches the system what converts for your audience. Your performance profile compounds over time, making every outreach more effective than the last.</p>
+            </div>
+            <div className="lp-perf-card">
+              <div className="lp-perf-score">
+                <div className="lp-perf-score-circle">78</div>
+                <div>
+                  <div className="lp-perf-score-label">Overall performance score</div>
+                  <div className="lp-perf-score-sub">Based on 1,247 emails analysed</div>
+                </div>
+              </div>
+              <div className="lp-perf-bars">
+                <div className="lp-perf-bar-label">Subject lines with questions</div>
+                <div className="lp-perf-bar"><div className="lp-perf-bar-fill" style={{ width: '78%' }}></div></div>
+                <div className="lp-perf-bar-label">Personalised openers</div>
+                <div className="lp-perf-bar"><div className="lp-perf-bar-fill" style={{ width: '62%' }}></div></div>
+                <div className="lp-perf-bar-label">Generic templates</div>
+                <div className="lp-perf-bar"><div className="lp-perf-bar-fill" style={{ width: '34%' }}></div></div>
+              </div>
+              <div className="lp-perf-insight">
+                <span className="lp-perf-insight-icon">💡</span>
+                <span>Emails sent Tuesday to Thursday perform 34% better than weekend sends</span>
+              </div>
+              <div className="lp-perf-insight">
+                <span className="lp-perf-insight-icon">🎯</span>
+                <span>Add more personalisation to follow-up #2 for higher reply rates</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== ENRICHMENT PIPELINE ===== */}
+      <section className="lp-enrichment">
+        <div className="lp-container">
+          <div className="lp-section-header lp-reveal">
+            <span className="lp-section-tag">Enrichment</span>
+            <h2>Three layers of enrichment. Zero manual work.</h2>
+          </div>
+          <div className="lp-enrich-grid lp-reveal">
+            <div className="lp-enrich-card lp-reveal">
+              <div className="lp-enrich-icon">🗺️</div>
+              <h4>Google Maps</h4>
+              <p>Name, phone, address, rating, category</p>
+              <span className="lp-enrich-stat">271 leads</span>
+            </div>
+            <div className="lp-enrich-arrow">→</div>
+            <div className="lp-enrich-card lp-reveal">
+              <div className="lp-enrich-icon">📧</div>
+              <h4>Hunter.io</h4>
+              <p>Verified email, decision maker name</p>
+              <span className="lp-enrich-stat">1,203 emails verified</span>
+            </div>
+            <div className="lp-enrich-arrow">→</div>
+            <div className="lp-enrich-card lp-reveal">
+              <div className="lp-enrich-icon">🏢</div>
+              <h4>Apollo.io</h4>
+              <p>Job title, LinkedIn URL, company size, industry</p>
+              <span className="lp-enrich-stat">847 decision makers found</span>
+            </div>
           </div>
         </div>
       </section>
@@ -1134,7 +1312,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
               <button onClick={() => onNavigate('Register')} className="lp-btn lp-btn-primary lp-btn-full">Start Free Trial</button>
             </div>
 
-            {/* SCALE — COMING SOON */}
+            {/* SCALE - COMING SOON */}
             <div className="lp-price-card lp-price-scale">
               <div className="lp-price-coming-soon-ribbon">Coming Soon</div>
               <div className="lp-price-header">
@@ -1199,7 +1377,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         )}
       </section>
 
-      {/* ===== TESTIMONIALS — Auto-scrolling carousel ===== */}
+      {/* ===== TESTIMONIALS - Auto-scrolling carousel ===== */}
       <section className="lp-testimonials lp-reveal">
         <div className="lp-container">
           <div className="lp-section-header">
