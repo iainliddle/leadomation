@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Linkedin, Mail, Calendar, CheckCircle, XCircle, Info, Save } from 'lucide-react';
+import { Linkedin, Mail, Calendar, CheckCircle, XCircle, Info, Save, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface LinkedInStatus {
@@ -48,26 +48,28 @@ const Integrations: React.FC = () => {
         }
     }, [toast]);
 
-    // Check LinkedIn status on mount
+    // Check LinkedIn status on mount via API (verifies with Unipile and returns account name)
     useEffect(() => {
         const checkLinkedIn = async () => {
             setLinkedinLoading(true);
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) {
                     setLinkedinLoading(false);
                     return;
                 }
-                const { data } = await supabase
-                    .from('profiles')
-                    .select('linkedin_connected, unipile_account_id')
-                    .eq('id', user.id)
-                    .single();
-                if (data?.linkedin_connected && data?.unipile_account_id) {
+                const response = await fetch('/api/linkedin-status', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
                     setLinkedinStatus({
-                        connected: true,
-                        account_id: data.unipile_account_id,
-                        name: null
+                        connected: data.connected ?? false,
+                        account_id: data.account_id ?? null,
+                        name: data.name ?? null
                     });
                 }
             } catch (err) {
@@ -241,7 +243,12 @@ const Integrations: React.FC = () => {
                                 </div>
                                 <h3 className="text-sm font-semibold text-[#111827]">LinkedIn account</h3>
                             </div>
-                            {linkedinStatus.connected ? (
+                            {linkedinLoading ? (
+                                <div className="flex items-center gap-1 text-xs font-medium text-[#9CA3AF]">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    <span>Checking...</span>
+                                </div>
+                            ) : linkedinStatus.connected ? (
                                 <div className="flex items-center gap-1 text-xs font-medium text-emerald-500">
                                     <CheckCircle size={14} />
                                     <span>Connected</span>
@@ -257,10 +264,10 @@ const Integrations: React.FC = () => {
                             Connect your LinkedIn account to send connection requests and messages directly from Leadomation.
                         </p>
 
-                        {linkedinStatus.connected && linkedinStatus.name && (
+                        {linkedinStatus.connected && (
                             <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 mb-4">
                                 <p className="text-xs text-emerald-700">
-                                    Connected as: <span className="font-medium">{linkedinStatus.name}</span>
+                                    Connected as: <span className="font-medium">{linkedinStatus.name || linkedinStatus.account_id || 'LinkedIn account'}</span>
                                 </p>
                             </div>
                         )}
