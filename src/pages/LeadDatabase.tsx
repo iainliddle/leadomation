@@ -141,11 +141,21 @@ const cityToTimezone: Record<string, string> = {
     'south africa': 'Africa/Johannesburg',
 };
 
+// Sort keys longest-first so "melbourne" matches before "au", and use word-boundary
+// matching for short keys (<=3 chars) to prevent false positives like "in" matching "Arlington"
+const sortedTimezoneEntries = Object.entries(cityToTimezone).sort((a, b) => b[0].length - a[0].length);
+
 const getTimezone = (location: string): string => {
     if (!location) return 'UTC';
     const loc = location.toLowerCase().trim();
-    for (const [key, tz] of Object.entries(cityToTimezone)) {
-        if (loc.includes(key)) return tz;
+    for (const [key, tz] of sortedTimezoneEntries) {
+        if (key.length <= 3) {
+            // Short keys: require word boundary match to avoid substring false positives
+            const regex = new RegExp(`\\b${key}\\b`);
+            if (regex.test(loc)) return tz;
+        } else {
+            if (loc.includes(key)) return tz;
+        }
     }
     return 'UTC';
 };
