@@ -62,7 +62,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onNavigate }) => {
   const [annual, setAnnual] = useState(false)
 
   return (
-    <section className="py-24 bg-white" id="pricing">
+    <section className="py-24 bg-gray-50" id="pricing">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="lp-fade text-xs font-semibold tracking-widest text-[#4F46E5] uppercase mb-4">

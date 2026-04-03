@@ -9,13 +9,15 @@ const stats = [
 
 const StatsBar: React.FC = () => {
   return (
-    <section className="bg-gradient-to-r from-[#4F46E5] to-[#1E1B4B] py-20">
+    <section className="bg-gradient-to-r from-[#4F46E5] to-[#06B6D4] py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="lp-fade grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
           {stats.map((stat) => (
             <div key={stat.label}>
-              <p className="text-5xl sm:text-6xl font-black text-white tracking-tight">{stat.value}</p>
-              <p className="mt-2 text-sm text-white/60">{stat.label}</p>
+              <p className="text-5xl sm:text-6xl font-bold text-white tracking-tight">
+                {stat.value}
+              </p>
+              <p className="mt-2 text-sm text-white/70">{stat.label}</p>
             </div>
           ))}
         </div>

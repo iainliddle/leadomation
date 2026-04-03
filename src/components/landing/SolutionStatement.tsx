@@ -10,15 +10,15 @@ const steps = [
 
 const SolutionStatement: React.FC = () => {
   return (
-    <section className="bg-[#1E1B4B] py-24">
+    <section className="bg-[#EEF2FF] py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-        <p className="lp-fade text-xs font-semibold tracking-widest text-[#22D3EE]/70 uppercase mb-4">
+        <p className="lp-fade text-xs font-semibold tracking-widest text-[#4F46E5] uppercase mb-4">
           The solution
         </p>
-        <h2 className="lp-fade text-4xl sm:text-5xl font-medium tracking-tight text-white text-pretty max-w-3xl mx-auto">
+        <h2 className="lp-fade text-4xl sm:text-5xl font-medium tracking-tight text-[#1E1B4B] text-pretty max-w-3xl mx-auto">
           One platform. Every step of outreach. Completely automated.
         </h2>
-        <p className="lp-fade mt-6 text-lg text-white/55 max-w-2xl mx-auto">
+        <p className="lp-fade mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
           Leadomation replaces your lead scraper, email tool, LinkedIn outreach software and sales dialler with a single AI powered system.
         </p>
 
@@ -26,13 +26,13 @@ const SolutionStatement: React.FC = () => {
           {steps.map((step, i) => (
             <React.Fragment key={step.num}>
               {i > 0 && (
-                <div className="hidden sm:block w-12 h-0.5 bg-[#22D3EE]/20" />
+                <div className="hidden sm:block w-12 h-0.5 bg-[#22D3EE]/30" />
               )}
               <div className="flex flex-col items-center gap-3">
-                <div className="w-14 h-14 rounded-full bg-white/10 border-2 border-[#22D3EE]/30 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-[#22D3EE]">{step.num}</span>
+                <div className="w-14 h-14 rounded-full bg-[#4F46E5] flex items-center justify-center shadow-md">
+                  <span className="text-lg font-semibold text-white">{step.num}</span>
                 </div>
-                <span className="text-sm font-medium text-white/65">{step.label}</span>
+                <span className="text-sm font-medium text-[#1E1B4B]/70">{step.label}</span>
               </div>
             </React.Fragment>
           ))}
