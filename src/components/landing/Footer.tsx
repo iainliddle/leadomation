@@ -19,9 +19,9 @@ const footerLinks = {
     { label: 'Careers', action: 'link', target: '#' },
   ],
   Legal: [
-    { label: 'Privacy Policy', action: 'link', target: '#' },
-    { label: 'Terms of Service', action: 'link', target: '#' },
-    { label: 'Cookie Policy', action: 'link', target: '#' },
+    { label: 'Privacy Policy', action: 'navigate', target: 'Privacy' },
+    { label: 'Terms of Service', action: 'navigate', target: 'Terms' },
+    { label: 'Cookie Policy', action: 'navigate', target: 'Cookies' },
   ],
 }
 
@@ -63,6 +63,13 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     ) : link.action === 'scroll' ? (
                       <button
                         onClick={() => handleClick(link.action, link.target)}
+                        className="text-sm text-white/40 hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </button>
+                    ) : link.action === 'navigate' ? (
+                      <button
+                        onClick={() => onNavigate(link.target)}
                         className="text-sm text-white/40 hover:text-white transition-colors"
                       >
                         {link.label}
