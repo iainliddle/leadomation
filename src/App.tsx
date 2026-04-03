@@ -33,6 +33,7 @@ import UpgradeModal from './components/UpgradeModal';
 import AuthCallback from './pages/AuthCallback';
 import TrialSetup from './pages/TrialSetup';
 import CancellationFeedback from './pages/CancellationFeedback';
+import BlogPage from './pages/BlogPage';
 
 // Map URL paths to page names
 const urlToPage: Record<string, string> = {
@@ -62,6 +63,7 @@ const urlToPage: Record<string, string> = {
   '/privacy': 'Privacy',
   '/refund': 'Refund',
   '/cancellation-feedback': 'CancellationFeedback',
+  '/blog': 'Blog',
 };
 
 // Reverse mapping: page names to URL paths
@@ -70,7 +72,7 @@ const pageToUrl: Record<string, string> = Object.fromEntries(
 );
 
 // Pages that don't require authentication
-const publicPages = ['Landing', 'Login', 'Register', 'Terms', 'Privacy', 'Refund', 'Pricing', 'CancellationFeedback'];
+const publicPages = ['Landing', 'Login', 'Register', 'Terms', 'Privacy', 'Refund', 'Pricing', 'CancellationFeedback', 'Blog'];
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -404,6 +406,10 @@ const App: React.FC = () => {
     return <CancellationFeedback />;
   }
 
+  if (activePage === 'Blog') {
+    return <BlogPage onNavigate={(page) => setActivePage(page)} />;
+  }
+
   if (activePage === 'Terms') {
     return <TermsOfService onBack={() => setActivePage('Login')} onNavigate={(page) => setActivePage(page)} />;
   }
@@ -442,11 +448,7 @@ const App: React.FC = () => {
   if (!session) {
     return (
       <LandingPage onNavigate={(page) => {
-        if (page === 'Register') {
-          setActivePage('Register');
-        } else if (page === 'Login') {
-          setActivePage('Login');
-        }
+        setActivePage(page);
       }} />
     );
   }
