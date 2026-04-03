@@ -1,41 +1,82 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import logoDark from '../assets/logo-full.png';
-import heroSwirl from '../assets/hero-swirl.png';
 import './LandingPage.css';
 
-// ---- IntersectionObserver hook ----
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('lp-visible');
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    const targets = el.querySelectorAll('.lp-animate');
-    targets.forEach((t) => observer.observe(t));
-    return () => observer.disconnect();
-  }, []);
-  return ref;
-}
+gsap.registerPlugin(ScrollTrigger);
 
 const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [annual, setAnnual] = useState(false);
-  const revealRef = useScrollReveal();
+  const pageRef = useRef<HTMLDivElement>(null);
 
   const scrollTo = useCallback((id: string) => {
     setMobileOpen(false);
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  // GSAP scroll animations
+  useEffect(() => {
+    if (!pageRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>('.lp-gsap-fade').forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          y: 40,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 80%',
+          },
+        });
+      });
+
+      gsap.utils.toArray<HTMLElement>('.lp-bento').forEach((grid) => {
+        const cards = grid.querySelectorAll('.lp-bento-card');
+        gsap.from(cards, {
+          opacity: 0,
+          y: 40,
+          duration: 0.8,
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: grid,
+            start: 'top 80%',
+          },
+        });
+      });
+
+      gsap.from('.lp-intel-field', {
+        opacity: 0,
+        y: 20,
+        stagger: 0.15,
+        scrollTrigger: {
+          trigger: '.lp-intel-section',
+          start: 'top 70%',
+        },
+      });
+
+      gsap.utils.toArray<HTMLElement>('.lp-swirl-blob').forEach((blob) => {
+        gsap.fromTo(blob,
+          { scale: 0.8 },
+          {
+            scale: 1.2,
+            scrollTrigger: {
+              trigger: '.lp-swirl-divider',
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: true,
+            },
+          }
+        );
+      });
+    }, pageRef);
+
+    return () => ctx.revert();
   }, []);
 
   const logos = [
@@ -71,7 +112,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   ];
 
   return (
-    <div className="lp-page" ref={revealRef}>
+    <div className="lp-page" ref={pageRef}>
       {/* ========== 1. NAV ========== */}
       <nav className="lp-nav">
         <div className="lp-nav-inner">
@@ -82,7 +123,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             <a href="#how" onClick={(e) => { e.preventDefault(); scrollTo('how'); }}>How it works</a>
             <a href="#features" onClick={(e) => { e.preventDefault(); scrollTo('features'); }}>Features</a>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollTo('pricing'); }}>Pricing</a>
-            <a href="/blog">Blog</a>
+            <Link to="/blog">Blog</Link>
             <a href="#faq" onClick={(e) => { e.preventDefault(); scrollTo('faq'); }}>FAQ</a>
           </div>
           <div className="lp-nav-actions">
@@ -104,7 +145,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         <a href="#how" onClick={(e) => { e.preventDefault(); scrollTo('how'); }}>How it works</a>
         <a href="#features" onClick={(e) => { e.preventDefault(); scrollTo('features'); }}>Features</a>
         <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollTo('pricing'); }}>Pricing</a>
-        <a href="/blog">Blog</a>
+        <Link to="/blog" onClick={() => setMobileOpen(false)}>Blog</Link>
         <a href="#faq" onClick={(e) => { e.preventDefault(); scrollTo('faq'); }}>FAQ</a>
         <button onClick={() => { setMobileOpen(false); onNavigate('Login'); }}>Sign in</button>
         <button className="lp-btn-primary" onClick={() => { setMobileOpen(false); onNavigate('Register'); }}>Start free trial</button>
@@ -112,92 +153,103 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
 
       {/* ========== 2. HERO ========== */}
       <section className="lp-hero">
+        <div className="lp-hero-gradient-bg" />
         <div className="lp-container">
-          <div className="lp-hero-grid">
-            <div className="lp-hero-content">
-              <div className="lp-hero-badge">B2B Lead Generation on Autopilot</div>
-              <h1>
-                Turn Cold Leads into<br />Booked Calls.<br />
-                <span className="lp-hero-gradient">Automatically.</span>
-              </h1>
-              <p className="lp-hero-sub">
-                Leadomation finds and enriches your leads, writes personalised outreach,
-                automates LinkedIn and calls prospects with an AI Voice Agent.
-              </p>
-              <div className="lp-hero-buttons">
-                <button className="lp-btn-primary" onClick={() => onNavigate('Register')}>
-                  Get started free &rarr;
-                </button>
-                <button className="lp-btn-outline" onClick={() => scrollTo('how')}>
-                  See how it works
-                </button>
-              </div>
-              <p className="lp-hero-trust">Secure your trial with a card. Cancel anytime before day 7.</p>
+          <div className="lp-hero-content">
+            <h1>
+              Turn cold leads<br />
+              into booked calls.<br />
+              Automatically.
+            </h1>
+            <p className="lp-hero-sub">
+              Leadomation finds and enriches your leads, writes personalised outreach,
+              automates LinkedIn and calls prospects with an AI voice agent.
+            </p>
+            <div className="lp-hero-buttons">
+              <button className="lp-btn-primary" onClick={() => onNavigate('Register')}>
+                Get started free
+              </button>
+              <button className="lp-btn-secondary" onClick={() => scrollTo('how')}>
+                See how it works
+              </button>
             </div>
-            <div className="lp-hero-visual">
-              <img src={heroSwirl} alt="" className="lp-hero-swirl" />
-            </div>
+            <p className="lp-hero-trust">Secure your trial with a card. Cancel anytime before day 7.</p>
           </div>
 
           {/* Dashboard mockup */}
-          <div className="lp-dashboard-mockup lp-animate">
-            <div className="lp-browser-frame">
-              <div className="lp-browser-bar">
-                <div className="lp-browser-dots">
-                  <div className="lp-browser-dot red" />
-                  <div className="lp-browser-dot yellow" />
-                  <div className="lp-browser-dot green" />
-                </div>
-                <div className="lp-browser-url">app.leadomation.co.uk/dashboard</div>
+          <div className="lp-dashboard-mockup lp-gsap-fade">
+            <div className="lp-browser-bar">
+              <div className="lp-browser-dots">
+                <div className="lp-browser-dot red" />
+                <div className="lp-browser-dot yellow" />
+                <div className="lp-browser-dot green" />
               </div>
-              <div className="lp-browser-content">
-                <div className="lp-mock-sidebar">
-                  <div className="lp-mock-sidebar-brand">Leadomation</div>
-                  {['Dashboard', 'Global Demand', 'New Campaign', 'Lead Database', 'Deal Pipeline', 'Sequence Builder', 'Inbox'].map((item, i) => (
-                    <div key={i} className={`lp-mock-nav-item ${i === 0 ? 'active' : ''}`}>
-                      <div className="lp-mock-nav-icon" />
-                      {item}
+              <div className="lp-browser-url">app.leadomation.co.uk/dashboard</div>
+            </div>
+            <div className="lp-browser-content">
+              <div className="lp-mock-sidebar">
+                <div className="lp-mock-sidebar-brand">Leadomation</div>
+                {['Dashboard', 'Global Demand', 'New Campaign', 'Lead Database', 'Deal Pipeline', 'Sequence Builder', 'Inbox'].map((item, i) => (
+                  <div key={i} className={`lp-mock-nav-item ${i === 0 ? 'active' : ''}`}>
+                    <div className="lp-mock-nav-icon" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <div className="lp-mock-main">
+                <div className="lp-mock-stats">
+                  {[
+                    { label: 'Total Leads', value: '271', trend: '+12%' },
+                    { label: 'Leads with Emails', value: '31', trend: '+8%' },
+                    { label: 'Leads Contacted', value: '0', trend: '' },
+                    { label: 'Total Deals', value: '10', trend: '+3' },
+                  ].map((s, i) => (
+                    <div key={i} className="lp-mock-stat-card">
+                      <div className="lp-mock-stat-label">{s.label}</div>
+                      <div className="lp-mock-stat-value">{s.value}</div>
+                      {s.trend && <div className="lp-mock-stat-trend">{s.trend}</div>}
                     </div>
                   ))}
                 </div>
-                <div className="lp-mock-main">
-                  <div className="lp-mock-stats">
+                <div className="lp-mock-bottom">
+                  <div className="lp-mock-chart">
+                    <div className="lp-mock-chart-title">Campaign Performance</div>
+                    <div className="lp-mock-chart-area">
+                      <svg width="100%" height="100%" viewBox="0 0 400 100" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <polygon
+                          points="0,80 40,70 80,65 120,55 160,60 200,45 240,35 280,30 320,20 360,15 400,10 400,100 0,100"
+                          fill="url(#chartGrad)"
+                        />
+                        <polyline
+                          points="0,80 40,70 80,65 120,55 160,60 200,45 240,35 280,30 320,20 360,15 400,10"
+                          fill="none"
+                          stroke="#22D3EE"
+                          strokeWidth="2.5"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="lp-mock-campaigns">
+                    <div className="lp-mock-chart-title">Top Campaigns</div>
                     {[
-                      { label: 'Total Leads', value: '271', trend: '+12%' },
-                      { label: 'Leads with Emails', value: '31', trend: '+8%' },
-                      { label: 'Leads Contacted', value: '0', trend: '' },
-                      { label: 'Total Deals', value: '10', trend: '+3' },
-                    ].map((s, i) => (
-                      <div key={i} className="lp-mock-stat-card">
-                        <div className="lp-mock-stat-label">{s.label}</div>
-                        <div className="lp-mock-stat-value">{s.value}</div>
-                        {s.trend && <div className="lp-mock-stat-trend">{s.trend}</div>}
+                      { name: 'Dental Clinics', rate: '6.74%', width: '30%' },
+                      { name: 'Law Firms', rate: '11.22%', width: '55%' },
+                      { name: 'Plumbers Edinburgh', rate: '0%', width: '10%' },
+                    ].map((c, i) => (
+                      <div key={i} className="lp-mock-campaign-item">
+                        <div className="lp-mock-campaign-name-row">
+                          <span className="lp-mock-campaign-name">{c.name}</span>
+                          <span className="lp-mock-campaign-rate">{c.rate}</span>
+                        </div>
+                        <div className="lp-mock-campaign-bar" style={{ width: c.width }} />
                       </div>
                     ))}
-                  </div>
-                  <div className="lp-mock-bottom">
-                    <div className="lp-mock-chart">
-                      <div className="lp-mock-chart-title">Campaign Performance</div>
-                      <div className="lp-mock-chart-area">
-                        <div className="lp-mock-chart-line" />
-                      </div>
-                    </div>
-                    <div className="lp-mock-campaigns">
-                      <div className="lp-mock-chart-title">Top Campaigns</div>
-                      {[
-                        { name: 'Dental Clinics', rate: '6.74%', width: '30%' },
-                        { name: 'Law Firms', rate: '11.22%', width: '55%' },
-                        { name: 'Plumbers Edinburgh', rate: '0%', width: '10%' },
-                      ].map((c, i) => (
-                        <div key={i} className="lp-mock-campaign-item">
-                          <div className="lp-mock-campaign-name-row">
-                            <span className="lp-mock-campaign-name">{c.name}</span>
-                            <span className="lp-mock-campaign-rate">{c.rate}</span>
-                          </div>
-                          <div className="lp-mock-campaign-bar" style={{ width: c.width }} />
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -208,7 +260,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
 
       {/* ========== 3. LOGO BAR ========== */}
       <section className="lp-logos">
-        <div className="lp-logos-label">Powered by industry leaders</div>
+        <div className="lp-logos-label lp-gsap-fade">Powered by industry leaders</div>
         <div className="lp-logos-track">
           {[0, 1].map((set) => (
             <div key={set} className="lp-logos-set">
@@ -228,8 +280,8 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       {/* ========== 4. HOW IT WORKS ========== */}
       <section className="lp-how" id="how">
         <div className="lp-container">
-          <div className="lp-section-label lp-animate">HOW IT WORKS</div>
-          <h2 className="lp-section-title lp-animate">From zero to booked calls in minutes</h2>
+          <div className="lp-section-eyebrow lp-gsap-fade">How it works</div>
+          <h2 className="lp-section-heading lp-gsap-fade">From zero to booked calls in minutes</h2>
           <div className="lp-how-grid">
             {[
               {
@@ -248,7 +300,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                 desc: 'AI classifies every reply as Interested, Not Interested or Out of Office. Hot leads get pushed straight to your Deal Pipeline.',
               },
             ].map((step, i) => (
-              <div key={i} className={`lp-how-step lp-animate lp-animate-delay-${i + 1}`}>
+              <div key={i} className="lp-how-step lp-gsap-fade">
                 <div className="lp-how-number">{step.num}</div>
                 <h3>{step.title}</h3>
                 <p>{step.desc}</p>
@@ -258,170 +310,321 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         </div>
       </section>
 
-      {/* ========== 5. BENTO FEATURES ========== */}
-      <section className="lp-features" id="features">
+      {/* ========== 5. LIGHT BENTO SECTION ========== */}
+      <section className="lp-features-section" id="features">
         <div className="lp-container">
-          <div className="lp-section-label lp-animate">FEATURES</div>
-          <h2 className="lp-section-title lp-animate">Everything you need to close more deals</h2>
-          <p className="lp-features-sub lp-animate">
+          <div className="lp-section-eyebrow lp-gsap-fade">Features</div>
+          <h2 className="lp-section-heading lp-gsap-fade">Know more about your prospects than they expect</h2>
+          <p className="lp-features-sub lp-gsap-fade">
             One platform replaces your lead scraper, email tool, LinkedIn outreach and AI calling software.
           </p>
 
           <div className="lp-bento">
-            {/* Lead Database - LARGE */}
-            <div className="lp-bento-card lp-bento-lg lp-animate">
-              <h3>Lead Database</h3>
-              <p>271 enriched leads with verified emails, phone numbers, intent scores and decision maker contacts. Filter by Hot, Warm or Cool intent in one click.</p>
-              <table className="lp-bento-table">
-                <thead>
-                  <tr>
-                    <th>Company</th>
-                    <th>Status</th>
-                    <th>Intent</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <span className="company-name">Dunmore Dental Care</span>{' '}
-                      <span className="enriched-badge">ENRICHED</span>
-                      <br /><span className="company-role">Practice Owner</span>
-                    </td>
-                    <td><span className="status-badge status-contacted">CONTACTED</span></td>
-                    <td><span className="intent-badge intent-warm">Warm 63</span></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <span className="company-name">Smile Clinic Northwest</span>{' '}
-                      <span className="enriched-badge">ENRICHED</span>
-                      <br /><span className="company-role">Clinical Director</span>
-                    </td>
-                    <td><span className="status-badge status-replied">REPLIED</span></td>
-                    <td><span className="intent-badge intent-hot">Hot 95</span></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <span className="company-name">Bright Smile Kent</span>{' '}
-                      <span className="enriched-badge">ENRICHED</span>
-                      <br /><span className="company-role">Practice Owner</span>
-                    </td>
-                    <td><span className="status-badge status-contacted">CONTACTED</span></td>
-                    <td><span className="intent-badge intent-hot">Hot 76</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Intent Scoring - SMALL */}
-            <div className="lp-bento-card lp-bento-sm dark-indigo lp-animate lp-animate-delay-1">
-              <h3>Intent Scoring</h3>
-              <p>Every lead scored Hot, Warm, Cool or Cold based on buying signals, reviews and online presence.</p>
-              <div className="lp-intent-pills">
-                <div className="lp-intent-pill hot">Hot</div>
-                <div className="lp-intent-pill warm">Warm</div>
-                <div className="lp-intent-pill cool">Cool</div>
+            {/* Card 1 - Lead Database - col-span-3 */}
+            <div className="lp-bento-card lp-bento-span-3 lp-bento-rtl">
+              <div className="lp-bento-graphic" style={{ background: '#fff' }}>
+                <table className="lp-lead-table">
+                  <thead>
+                    <tr>
+                      <th>Company</th>
+                      <th>Status</th>
+                      <th>Intent</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <span className="company-name">Dunmore Dental Care</span>
+                        <span className="enriched-badge">ENRICHED</span>
+                        <br /><span className="company-role">Practice Owner</span>
+                      </td>
+                      <td><span className="status-badge status-contacted">CONTACTED</span></td>
+                      <td><span className="intent-badge intent-hot">Hot · 63</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span className="company-name">Smile Clinic Northwest</span>
+                        <span className="enriched-badge">ENRICHED</span>
+                        <br /><span className="company-role">Clinical Director</span>
+                      </td>
+                      <td><span className="status-badge status-replied">REPLIED</span></td>
+                      <td><span className="intent-badge intent-hot">Hot · 95</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span className="company-name">Bright Smile Kent</span>
+                        <span className="enriched-badge">ENRICHED</span>
+                        <br /><span className="company-role">Practice Owner</span>
+                      </td>
+                      <td><span className="status-badge status-contacted">CONTACTED</span></td>
+                      <td><span className="intent-badge intent-hot">Hot · 76</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div className="lp-bento-fade" />
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">Lead database</div>
+                <div className="lp-bento-title">271 enriched leads ready to contact</div>
+                <p className="lp-bento-desc">Verified emails, phone numbers, intent scores and decision maker contacts. Filter by Hot, Warm or Cool in one click.</p>
               </div>
             </div>
 
-            {/* AI Voice - SMALL */}
-            <div className="lp-bento-card lp-bento-sm dark-navy lp-animate lp-animate-delay-2" style={{ gridColumn: 'span 2' }}>
-              <h3>AI Voice Calling</h3>
-              <p>Your AI agent calls prospects, handles objections and books meetings. 24/7.</p>
-              <div className="lp-voice-visual">
-                <div className="lp-phone-icon">
-                  <span role="img" aria-label="phone">📞</span>
-                  <div className="lp-phone-pulse" />
-                </div>
-                <div className="lp-pulse-dot" />
-              </div>
-            </div>
-
-            {/* Campaign Builder - LARGE */}
-            <div className="lp-bento-card lp-bento-lg lp-animate lp-animate-delay-1">
-              <h3>Campaign Builder</h3>
-              <p>5 step campaign wizard. Pick your industry, location, intent filters, enrichment options and outreach strategy. Launch in under 3 minutes.</p>
-              <div className="lp-wizard-steps">
-                {['Campaign details', 'Advanced targeting', 'Intent filters', 'Data enrichment', 'Outreach config'].map((step, i) => (
-                  <React.Fragment key={i}>
-                    {i > 0 && <span className="lp-wizard-arrow">&rarr;</span>}
-                    <div className={`lp-wizard-step ${i === 0 ? 'active' : ''}`}>{step}</div>
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-
-            {/* LinkedIn Sequencer - SMALL (but span 2) */}
-            <div className="lp-bento-card lp-animate lp-animate-delay-2" style={{ gridColumn: 'span 2' }}>
-              <h3>LinkedIn Sequencer</h3>
-              <p>35 day LinkedIn funnel. Silent Awareness, Connection, Warm Thanks, Advice Ask, Soft Offer. Runs automatically.</p>
-              <div className="lp-phases">
-                {[
-                  { n: '1', label: 'Silent Awareness', active: true },
-                  { n: '2', label: 'Connection', active: false },
-                  { n: '3', label: 'Warm Thanks', active: false },
-                  { n: '4', label: 'Advice Ask', active: false },
-                  { n: '5', label: 'Follow Up', active: false },
-                  { n: '6', label: 'Soft Offer', active: false },
-                ].map((p, i) => (
-                  <div key={i} className="lp-phase">
-                    <div className={`lp-phase-dot ${p.active ? 'active' : 'inactive'}`}>{p.n}</div>
-                    <span className="lp-phase-label">{p.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Deal Pipeline - MEDIUM */}
-            <div className="lp-bento-card lp-bento-md lp-animate lp-animate-delay-3">
-              <h3>Deal Pipeline</h3>
-              <p>Kanban CRM built in. Track deals from New Reply to Won.</p>
-              <div className="lp-mini-kanban">
-                {[
-                  { title: 'New Reply', color: '#4F46E5', cards: [{ name: 'Owen Dental', amount: '850' }] },
-                  { title: 'Qualified', color: '#F59E0B', cards: [{ name: 'Donovan Sol.', amount: '950' }] },
-                  { title: 'Won', color: '#10B981', cards: [{ name: 'Smile Clinic', amount: '1,200' }, { name: 'Rivington', amount: '1,800' }] },
-                ].map((col, i) => (
-                  <div key={i} className="lp-kanban-col">
-                    <div className="lp-kanban-col-header" style={{ borderColor: col.color, color: col.color }}>{col.title}</div>
-                    {col.cards.map((c, j) => (
-                      <div key={j} className="lp-kanban-card-mini">
-                        {c.name}
-                        <div className="lp-kanban-amount">&pound;{c.amount}</div>
+            {/* Card 2 - Campaign Builder - col-span-3 */}
+            <div className="lp-bento-card lp-bento-span-3 lp-bento-rtr">
+              <div className="lp-bento-graphic">
+                <div className="lp-wizard-graphic">
+                  <div className="lp-wizard-steps">
+                    {['Campaign details', 'Advanced targeting', 'Intent filters', 'Data enrichment', 'Outreach config'].map((step, i) => (
+                      <div key={i} className={`lp-wizard-step ${i === 0 ? 'active' : ''}`}>
+                        <span className="lp-wizard-step-num">{i + 1}</span>
+                        {step}
                       </div>
                     ))}
                   </div>
-                ))}
+                  <div className="lp-campaign-types">
+                    <div className="lp-campaign-type">Local Businesses</div>
+                    <div className="lp-campaign-type selected">B2B Services</div>
+                    <div className="lp-campaign-type">Custom Search</div>
+                  </div>
+                </div>
+                <div className="lp-bento-fade" />
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">Campaign builder</div>
+                <div className="lp-bento-title">Launch a campaign in 3 minutes</div>
+                <p className="lp-bento-desc">5 step wizard. Pick industry, location, intent filters, enrichment and outreach strategy. Leadomation handles the rest.</p>
               </div>
             </div>
 
-            {/* Email Templates - SMALL */}
-            <div className="lp-bento-card lp-bento-sm light-indigo lp-animate lp-animate-delay-4" style={{ gridColumn: 'span 2' }}>
-              <h3>Email Templates</h3>
-              <p>25 done for you templates across 8 industries. Ready to personalise and send.</p>
+            {/* Card 3 - Intent Scoring - col-span-2 */}
+            <div className="lp-bento-card lp-bento-span-2 lp-bento-rbl">
+              <div className="lp-bento-graphic">
+                <div className="lp-intent-graphic">
+                  <div className="lp-intent-pill hot">
+                    <span>🔥</span> Hot <span style={{ marginLeft: 'auto' }}>95</span>
+                  </div>
+                  <div className="lp-intent-pill warm">
+                    <span>⚡</span> Warm <span style={{ marginLeft: 'auto' }}>72</span>
+                  </div>
+                  <div className="lp-intent-pill cool">
+                    <span>💧</span> Cool <span style={{ marginLeft: 'auto' }}>45</span>
+                  </div>
+                </div>
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">Intent scoring</div>
+                <div className="lp-bento-title">Know who is ready to buy</div>
+                <p className="lp-bento-desc">Every lead scored automatically based on buying signals, reviews and online presence.</p>
+              </div>
             </div>
 
-            {/* Global Demand - SMALL */}
-            <div className="lp-bento-card lp-bento-sm light-cyan lp-animate lp-animate-delay-5" style={{ gridColumn: 'span 1' }}>
-              <h3>Global Demand Map</h3>
-              <p>See business density by region and industry before you launch.</p>
+            {/* Card 4 - AI Voice Calling - col-span-2, navy */}
+            <div className="lp-bento-card lp-bento-span-2 navy-card">
+              <div className="lp-bento-graphic">
+                <div className="lp-voice-graphic">
+                  <div className="lp-voice-phone-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                    <div className="lp-voice-pulse" />
+                  </div>
+                  <div className="lp-voice-dot" />
+                  <div className="lp-voice-label">AI Call Agent</div>
+                </div>
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">AI voice calling</div>
+                <div className="lp-bento-title">Your AI agent calls prospects 24/7</div>
+                <p className="lp-bento-desc">Handles objections, answers questions and books meetings directly into your calendar.</p>
+              </div>
+            </div>
+
+            {/* Card 5 - LinkedIn Sequencer - col-span-2 */}
+            <div className="lp-bento-card lp-bento-span-2 lp-bento-rbr">
+              <div className="lp-bento-graphic">
+                <div className="lp-phases-graphic">
+                  {[
+                    { n: '1', label: 'Silent Awareness', active: true },
+                    { n: '2', label: 'Connection', active: false },
+                    { n: '3', label: 'Warm Thanks', active: false },
+                    { n: '4', label: 'Advice Ask', active: false },
+                    { n: '5', label: 'Follow Up', active: false },
+                    { n: '6', label: 'Soft Offer', active: false },
+                  ].map((p, i, arr) => (
+                    <React.Fragment key={i}>
+                      <div className="lp-phase">
+                        <div className={`lp-phase-dot ${p.active ? 'active' : 'inactive'}`}>{p.n}</div>
+                        <span className="lp-phase-label">{p.label}</span>
+                      </div>
+                      {i < arr.length - 1 && <div className="lp-phase-connector" />}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">LinkedIn sequencer</div>
+                <div className="lp-bento-title">35 day LinkedIn funnel on autopilot</div>
+                <p className="lp-bento-desc">Silent Awareness through to Soft Offer. Runs automatically, builds trust before making any ask.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ========== 6. LEAD INTELLIGENCE ========== */}
-      <section className="lp-intelligence" id="intelligence">
+      {/* ========== 6. DARK BENTO SECTION ========== */}
+      <div className="lp-dark-section">
+        <div className="lp-container">
+          <div className="lp-section-eyebrow dark lp-gsap-fade">Outreach</div>
+          <h2 className="lp-section-heading dark lp-gsap-fade">Close deals faster with AI</h2>
+
+          <div className="lp-bento">
+            {/* Dark Card 1 - Inbox - col-span-4 */}
+            <div className="lp-bento-card lp-bento-span-4 dark-card lp-bento-rtl">
+              <div className="lp-bento-graphic">
+                <div className="lp-inbox-graphic">
+                  <div className="lp-inbox-list">
+                    {[
+                      { name: 'London Smile Studio', status: 'interested' },
+                      { name: 'Smile Clinic Northwest', status: 'interested' },
+                      { name: 'Blackwell Partners', status: 'interested' },
+                      { name: 'Forsyth Family Law', status: 'not-interested' },
+                    ].map((item, i) => (
+                      <div key={i} className="lp-inbox-item">
+                        <div className="lp-inbox-item-name">{item.name}</div>
+                        <span className={`lp-inbox-item-status ${item.status}`}>
+                          {item.status === 'interested' ? 'Interested' : 'Not interested'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="lp-inbox-preview">
+                    <div className="lp-inbox-preview-from">From: London Smile Studio</div>
+                    <div className="lp-inbox-preview-text">
+                      Hi, thanks for reaching out. We have been looking for exactly this kind of service. Could we schedule a call this week to discuss pricing?
+                    </div>
+                  </div>
+                </div>
+                <div className="lp-bento-fade-top" />
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">Inbox</div>
+                <div className="lp-bento-title">Every reply classified automatically</div>
+                <p className="lp-bento-desc">AI reads every email and LinkedIn reply. Interested, Not Interested or Out of Office. Hot leads pushed to your pipeline instantly.</p>
+              </div>
+            </div>
+
+            {/* Dark Card 2 - Deal Pipeline - col-span-2 */}
+            <div className="lp-bento-card lp-bento-span-2 dark-card lp-bento-rtr">
+              <div className="lp-bento-graphic">
+                <div className="lp-dark-kanban">
+                  {[
+                    { title: 'New Reply', color: '#22D3EE', cards: [{ name: 'Owen Dental', value: '£850' }] },
+                    { title: 'Qualified', color: '#4F46E5', cards: [{ name: 'Donovan Sol.', value: '£950' }] },
+                    { title: 'Proposal', color: '#3B82F6', cards: [{ name: 'Carter Law', value: '£1,200' }] },
+                    { title: 'Negotiating', color: '#F59E0B', cards: [{ name: 'Apex Fin.', value: '£2,100' }] },
+                    { title: 'Won', color: '#10B981', cards: [{ name: 'Smile Clinic', value: '£1,500' }] },
+                    { title: 'Lost', color: '#EF4444', cards: [] },
+                  ].map((col, i) => (
+                    <div key={i} className="lp-dark-kanban-col">
+                      <div className="lp-dark-kanban-header" style={{ borderColor: col.color, color: col.color }}>{col.title}</div>
+                      {col.cards.map((c, j) => (
+                        <div key={j} className="lp-dark-kanban-card">
+                          {c.name}
+                          <div className="lp-dark-kanban-value">{c.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <div className="lp-bento-fade-top" />
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">Deal pipeline</div>
+                <div className="lp-bento-title">Built in CRM</div>
+                <p className="lp-bento-desc">Kanban pipeline with 6 stages. £15,600 total pipeline value tracked automatically.</p>
+              </div>
+            </div>
+
+            {/* Dark Card 3 - Keyword Monitor - col-span-2 */}
+            <div className="lp-bento-card lp-bento-span-2 dark-card lp-bento-rbl">
+              <div className="lp-bento-graphic">
+                <div className="lp-keyword-graphic">
+                  <div className="lp-keyword-monitor">
+                    <div className="lp-keyword-monitor-header">Active monitor 1</div>
+                    <div className="lp-keyword-chips">
+                      <span className="lp-keyword-chip">law firm marketing</span>
+                      <span className="lp-keyword-chip">legal SEO</span>
+                    </div>
+                  </div>
+                  <div className="lp-keyword-monitor">
+                    <div className="lp-keyword-monitor-header">Active monitor 2</div>
+                    <div className="lp-keyword-chips">
+                      <span className="lp-keyword-chip">solicitor client acquisition</span>
+                      <span className="lp-keyword-chip">law firm growth</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="lp-bento-fade-top" />
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">Keyword monitor</div>
+                <div className="lp-bento-title">Catch buyers on LinkedIn</div>
+                <p className="lp-bento-desc">Monitor keywords every 2 hours. Prospects posting about your service get auto enrolled as hot leads.</p>
+              </div>
+            </div>
+
+            {/* Dark Card 4 - Performance Analyser - col-span-4 */}
+            <div className="lp-bento-card lp-bento-span-4 dark-card lp-bento-rbr">
+              <div className="lp-bento-graphic">
+                <div className="lp-perf-graphic">
+                  <div className="lp-perf-circle">
+                    <div className="lp-perf-circle-inner">78</div>
+                  </div>
+                  <div className="lp-perf-bars-area">
+                    <div className="lp-perf-bar-row">
+                      <div className="lp-perf-bar-label">Subject lines with questions</div>
+                      <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill indigo" style={{ width: '82%' }} /></div>
+                    </div>
+                    <div className="lp-perf-bar-row">
+                      <div className="lp-perf-bar-label">Personalised openers</div>
+                      <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill cyan" style={{ width: '65%' }} /></div>
+                    </div>
+                    <div className="lp-perf-bar-row">
+                      <div className="lp-perf-bar-label">Generic templates</div>
+                      <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill blue" style={{ width: '30%' }} /></div>
+                    </div>
+                    <div className="lp-perf-insight-pills">
+                      <span className="lp-perf-insight-pill">Tuesday to Thursday best</span>
+                      <span className="lp-perf-insight-pill">More personalisation needed</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="lp-bento-fade-top" />
+              </div>
+              <div className="lp-bento-content">
+                <div className="lp-bento-eyebrow">Performance analyser</div>
+                <div className="lp-bento-title">Gets smarter every campaign</div>
+                <p className="lp-bento-desc">Studies your email data every 6 hours. Sends you personalised improvement reports. The longer you use it, the better your results.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ========== 7. LEAD INTELLIGENCE ========== */}
+      <section className="lp-intel-section" id="intelligence">
         <div className="lp-container">
           <div className="lp-intel-grid">
             <div className="lp-intel-copy">
-              <div className="lp-section-label lp-animate">LEAD INTELLIGENCE</div>
-              <h2 className="lp-section-title lp-animate">Know your lead before you contact them</h2>
-              <p className="lp-intel-desc lp-animate">
+              <div className="lp-section-eyebrow lp-gsap-fade">Lead intelligence</div>
+              <h2 className="lp-section-heading lp-gsap-fade">Know your lead before you contact them</h2>
+              <p className="lp-intel-desc lp-gsap-fade">
                 Lead Intelligence researches every prospect automatically. Pain points, buying signals, outreach angles and a personalised subject line. Generated in seconds.
               </p>
-              <div className="lp-pro-badge lp-animate lp-animate-delay-1">Pro feature</div>
+              <div className="lp-pro-badge lp-gsap-fade">Pro feature</div>
             </div>
-            <div className="lp-intel-card lp-animate lp-animate-delay-2">
+            <div className="lp-intel-card">
               <div className="lp-intel-card-header lp-intel-field">Lead Intelligence Report</div>
               <div className="lp-intel-row lp-intel-field">
                 <div className="lp-intel-row-label">Opportunity Rating</div>
@@ -459,7 +662,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         </div>
       </section>
 
-      {/* ========== 7. SWIRL DIVIDER ========== */}
+      {/* ========== 8. SWIRL DIVIDER ========== */}
       <section className="lp-swirl-divider">
         <div className="lp-swirl-blob lp-swirl-blob-1" />
         <div className="lp-swirl-blob lp-swirl-blob-2" />
@@ -470,61 +673,13 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         </div>
       </section>
 
-      {/* ========== 8. CAMPAIGN PERFORMANCE ========== */}
-      <section className="lp-performance" id="performance">
-        <div className="lp-container">
-          <div className="lp-perf-grid">
-            <div className="lp-perf-card lp-animate">
-              <div className="lp-perf-score">
-                <div className="lp-perf-circle">
-                  <div className="lp-perf-circle-inner">78</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#0F172A' }}>Performance Score</div>
-                  <div className="lp-perf-meta">Based on 1,247 emails analysed</div>
-                </div>
-              </div>
-              <div className="lp-perf-bars">
-                <div>
-                  <div className="lp-perf-bar-label">Subject lines with questions</div>
-                  <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill indigo" style={{ width: '82%' }} /></div>
-                </div>
-                <div>
-                  <div className="lp-perf-bar-label">Personalised openers</div>
-                  <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill cyan" style={{ width: '65%' }} /></div>
-                </div>
-                <div>
-                  <div className="lp-perf-bar-label">Generic templates</div>
-                  <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill blue" style={{ width: '30%' }} /></div>
-                </div>
-              </div>
-              <div className="lp-perf-insights">
-                <div className="lp-perf-insight">
-                  <span>💡</span> Emails sent Tuesday to Thursday perform 34% better
-                </div>
-                <div className="lp-perf-insight">
-                  <span>📝</span> Add more personalisation to follow up #2
-                </div>
-              </div>
-            </div>
-            <div className="lp-intel-copy">
-              <div className="lp-section-label lp-animate">PERFORMANCE INSIGHTS</div>
-              <h2 className="lp-section-title lp-animate">Personalised insights. Delivered automatically.</h2>
-              <p className="lp-intel-desc lp-animate">
-                Every campaign teaches the system what converts for your audience. Your performance profile compounds over time.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ========== 9. PRICING ========== */}
       <section className="lp-pricing" id="pricing">
         <div className="lp-container">
           <div className="lp-pricing-header">
-            <div className="lp-section-label lp-animate">PRICING</div>
-            <h2 className="lp-section-title lp-animate" style={{ marginBottom: 0 }}>Simple, transparent pricing</h2>
-            <div className="lp-pricing-toggle lp-animate lp-animate-delay-1">
+            <div className="lp-section-eyebrow lp-gsap-fade" style={{ textAlign: 'center' }}>Pricing</div>
+            <h2 className="lp-section-heading lp-gsap-fade" style={{ textAlign: 'center', marginBottom: 0, maxWidth: 'none' }}>Simple, transparent pricing</h2>
+            <div className="lp-pricing-toggle lp-gsap-fade">
               <button className={`lp-toggle-option ${!annual ? 'active' : ''}`} onClick={() => setAnnual(false)}>Monthly</button>
               <button className={`lp-toggle-option ${annual ? 'active' : ''}`} onClick={() => setAnnual(true)}>
                 Annual <span className="lp-toggle-save">20% off</span>
@@ -534,14 +689,14 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
 
           <div className="lp-pricing-grid">
             {/* Starter */}
-            <div className="lp-price-card lp-animate">
+            <div className="lp-price-card lp-gsap-fade">
               <div className="lp-price-name">Starter</div>
               <div className="lp-price-amount">
                 <span className="lp-price-currency">&pound;</span>
                 <span className="lp-price-value">{annual ? '47' : '59'}</span>
                 <span className="lp-price-period">/mo</span>
               </div>
-              <div className="lp-price-annual-note">{annual ? 'Billed annually at £566' : 'Billed monthly'}</div>
+              <div className="lp-price-annual-note">{annual ? 'Billed annually at \u00A3566' : 'Billed monthly'}</div>
               <ul className="lp-price-features">
                 {['500 leads per month', 'Email sequences', 'Basic enrichment', 'Lead scoring', 'Email support'].map((f, i) => (
                   <li key={i}><span className="lp-price-check">&#10003;</span> {f}</li>
@@ -551,7 +706,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             </div>
 
             {/* Pro */}
-            <div className="lp-price-card popular lp-animate lp-animate-delay-1">
+            <div className="lp-price-card popular lp-gsap-fade">
               <div className="lp-price-popular-badge">Most popular</div>
               <div className="lp-price-name">Pro</div>
               <div className="lp-price-amount">
@@ -559,7 +714,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                 <span className="lp-price-value">{annual ? '127' : '159'}</span>
                 <span className="lp-price-period">/mo</span>
               </div>
-              <div className="lp-price-annual-note">{annual ? 'Billed annually at £1,526' : 'Billed monthly'}</div>
+              <div className="lp-price-annual-note">{annual ? 'Billed annually at \u00A31,526' : 'Billed monthly'}</div>
               <ul className="lp-price-features">
                 {[
                   '2,000 leads per month',
@@ -578,7 +733,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
             </div>
 
             {/* Scale */}
-            <div className="lp-price-card greyed lp-animate lp-animate-delay-2">
+            <div className="lp-price-card greyed lp-gsap-fade">
               <div className="lp-price-name">Scale</div>
               <div className="lp-price-amount">
                 <span className="lp-price-currency">&pound;</span>
@@ -601,11 +756,11 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       <section className="lp-faq" id="faq">
         <div className="lp-container">
           <div className="lp-faq-header">
-            <h2 className="lp-section-title lp-animate">Frequently asked questions</h2>
+            <h2 className="lp-section-heading lp-gsap-fade" style={{ textAlign: 'center', maxWidth: 'none' }}>Frequently asked questions</h2>
           </div>
           <div className="lp-faq-list">
             {faqs.map((faq, i) => (
-              <div key={i} className={`lp-faq-item lp-animate lp-animate-delay-${Math.min(i + 1, 6)} ${openFaq === i ? 'open' : ''}`}>
+              <div key={i} className={`lp-faq-item lp-gsap-fade ${openFaq === i ? 'open' : ''}`}>
                 <button className="lp-faq-question" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                   {faq.q}
                   <span className="lp-faq-chevron">&#9662;</span>
@@ -622,14 +777,14 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       {/* ========== 11. CTA ========== */}
       <section className="lp-cta">
         <div className="lp-container">
-          <h2 className="lp-animate">Ready to fill your pipeline?</h2>
-          <p className="lp-cta-sub lp-animate lp-animate-delay-1">
+          <h2 className="lp-gsap-fade">Ready to fill your pipeline?</h2>
+          <p className="lp-cta-sub lp-gsap-fade">
             Join hundreds of B2B teams using Leadomation to find leads and close deals automatically.
           </p>
-          <button className="lp-cta-btn lp-animate lp-animate-delay-2" onClick={() => onNavigate('Register')}>
-            Start your free trial &rarr;
+          <button className="lp-cta-btn lp-gsap-fade" onClick={() => onNavigate('Register')}>
+            Start your free trial
           </button>
-          <p className="lp-cta-note lp-animate lp-animate-delay-3">No credit card required for first 7 days</p>
+          <p className="lp-cta-note lp-gsap-fade">No credit card required for first 7 days</p>
         </div>
       </section>
 
@@ -649,7 +804,7 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                 <a href="#features" onClick={(e) => { e.preventDefault(); scrollTo('features'); }}>Features</a>
                 <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollTo('pricing'); }}>Pricing</a>
                 <a href="#how" onClick={(e) => { e.preventDefault(); scrollTo('how'); }}>How it works</a>
-                <a href="/blog">Blog</a>
+                <Link to="/blog">Blog</Link>
               </div>
             </div>
             <div>
