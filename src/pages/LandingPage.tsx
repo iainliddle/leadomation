@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import logoDark from '../assets/logo-full.png';
-import './LandingPage.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,7 +50,6 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         });
       });
 
-      // Problem cards stagger
       const problemCards = document.querySelectorAll('.lp-problem-card');
       if (problemCards.length) {
         gsap.from(problemCards, {
@@ -66,7 +64,6 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         });
       }
 
-      // Persona cards stagger
       const personaCards = document.querySelectorAll('.lp-persona-card');
       if (personaCards.length) {
         gsap.from(personaCards, {
@@ -81,7 +78,6 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
         });
       }
 
-      // Testimonial cards stagger
       const testimonialCards = document.querySelectorAll('.lp-testimonial-card');
       if (testimonialCards.length) {
         gsap.from(testimonialCards, {
@@ -105,30 +101,10 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
           start: 'top 70%',
         },
       });
-
-      gsap.utils.toArray<HTMLElement>('.lp-swirl-blob').forEach((blob) => {
-        gsap.fromTo(blob,
-          { scale: 0.8 },
-          {
-            scale: 1.2,
-            scrollTrigger: {
-              trigger: '.lp-swirl-divider',
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: true,
-            },
-          }
-        );
-      });
     }, pageRef);
 
     return () => ctx.revert();
   }, []);
-
-  const logos = [
-    'Google Maps', 'Hunter.io', 'LinkedIn', 'Microsoft 365',
-    'Stripe', 'Supabase', 'Unipile', 'Vapi.ai', 'Apollo', 'Resend',
-  ];
 
   const faqs = [
     {
@@ -166,155 +142,177 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
   ];
 
   return (
-    <div className="lp-page" ref={pageRef}>
+    <div className="font-[Switzer,system-ui,sans-serif]" ref={pageRef}>
+
       {/* ========== 1. ANNOUNCEMENT BANNER ========== */}
       {!bannerDismissed && (
-        <div className="lp-banner">
-          <span>Leadomation is now live. Start your 7 day free trial today.</span>
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Register'); }}>
-            Get started <span>&rarr;</span>
-          </a>
-          <button className="lp-banner-dismiss" onClick={() => setBannerDismissed(true)} aria-label="Dismiss">&times;</button>
+        <div className="relative isolate flex items-center gap-x-6 overflow-hidden bg-[#4F46E5] px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p className="text-sm text-white">
+              <strong className="font-semibold">Leadomation is now live.</strong> Start your 7 day free trial today.
+            </p>
+            <button
+              onClick={() => onNavigate('Register')}
+              className="flex-none rounded-full bg-white px-3.5 py-1 text-sm font-semibold text-[#4F46E5] hover:bg-gray-100"
+            >
+              Get started &rarr;
+            </button>
+          </div>
+          <div className="flex flex-1 justify-end">
+            <button onClick={() => setBannerDismissed(true)} className="-m-3 p-3">
+              <span className="sr-only">Dismiss</span>
+              <svg className="size-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
       {/* ========== 2. NAV ========== */}
-      <nav className={`lp-nav ${!bannerDismissed ? 'has-banner' : ''}`}>
-        <div className="lp-nav-inner">
-          <a href="/" className="lp-nav-logo">
-            <img src={logoDark} alt="Leadomation" />
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-black/5 h-16">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 h-full flex items-center justify-between">
+          <a href="/" className="flex-shrink-0">
+            <img src={logoDark} alt="Leadomation" className="h-9 w-auto" />
           </a>
-          <div className="lp-nav-links">
-            <a href="#how" onClick={(e) => { e.preventDefault(); scrollTo('how'); }}>How it works</a>
-            <a href="#features" onClick={(e) => { e.preventDefault(); scrollTo('features'); }}>Features</a>
-            <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollTo('pricing'); }}>Pricing</a>
-            <Link to="/blog">Blog</Link>
-            <a href="#faq" onClick={(e) => { e.preventDefault(); scrollTo('faq'); }}>FAQ</a>
+          <div className="hidden lg:flex items-center gap-8">
+            {['How it works', 'Features', 'Pricing', 'FAQ'].map(link => (
+              <button key={link} onClick={() => scrollTo(link.toLowerCase().replace(' ', '-'))}
+                className="text-sm font-medium text-gray-500 hover:text-[#4F46E5] transition-colors">
+                {link}
+              </button>
+            ))}
+            <Link to="/blog" className="text-sm font-medium text-gray-500 hover:text-[#4F46E5]">Blog</Link>
           </div>
-          <div className="lp-nav-actions">
-            <button className="lp-nav-signin" onClick={() => onNavigate('Login')}>Sign in</button>
-            <button className="lp-btn-nav-primary" onClick={() => onNavigate('Register')}>Start free trial</button>
+          <div className="hidden lg:flex items-center gap-4">
+            <button onClick={() => onNavigate('Login')} className="text-sm font-medium text-gray-500 hover:text-[#4F46E5]">Sign in</button>
+            <button onClick={() => onNavigate('Register')} className="rounded-full bg-[#1E1B4B] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#2d2a6e] transition-colors">Start free trial</button>
           </div>
+          {/* Mobile hamburger */}
           <button
-            className={`lp-hamburger ${mobileOpen ? 'open' : ''}`}
+            className="lg:hidden flex flex-col gap-1.5 p-2"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Menu"
           >
-            <span /><span /><span />
+            <span className={`block w-6 h-0.5 bg-gray-700 transition-transform ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-gray-700 transition-opacity ${mobileOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-gray-700 transition-transform ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
           </button>
         </div>
       </nav>
 
       {/* Mobile menu */}
-      <div className={`lp-mobile-menu ${mobileOpen ? 'open' : ''}`}>
-        <a href="#how" onClick={(e) => { e.preventDefault(); scrollTo('how'); }}>How it works</a>
-        <a href="#features" onClick={(e) => { e.preventDefault(); scrollTo('features'); }}>Features</a>
-        <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollTo('pricing'); }}>Pricing</a>
-        <Link to="/blog" onClick={() => setMobileOpen(false)}>Blog</Link>
-        <a href="#faq" onClick={(e) => { e.preventDefault(); scrollTo('faq'); }}>FAQ</a>
-        <button onClick={() => { setMobileOpen(false); onNavigate('Login'); }}>Sign in</button>
-        <button className="lp-btn-nav-primary" onClick={() => { setMobileOpen(false); onNavigate('Register'); }}>Start free trial</button>
-      </div>
+      {mobileOpen && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-200 p-6 flex flex-col gap-4 lg:hidden">
+          {['How it works', 'Features', 'Pricing', 'FAQ'].map(link => (
+            <button key={link} onClick={() => scrollTo(link.toLowerCase().replace(' ', '-'))}
+              className="text-sm font-medium text-gray-700 hover:text-[#4F46E5]">
+              {link}
+            </button>
+          ))}
+          <Link to="/blog" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-gray-700 hover:text-[#4F46E5]">Blog</Link>
+          <button onClick={() => { setMobileOpen(false); onNavigate('Login'); }} className="text-sm font-medium text-gray-700">Sign in</button>
+          <button onClick={() => { setMobileOpen(false); onNavigate('Register'); }} className="rounded-full bg-[#1E1B4B] px-5 py-2.5 text-sm font-semibold text-white">Start free trial</button>
+        </div>
+      )}
 
       {/* ========== 3. HERO ========== */}
-      <section className="lp-hero">
-        <div className="lp-hero-gradient-bg" />
-        <div className="lp-hero-content">
-          <div className="lp-hero-badge">B2B lead generation on autopilot</div>
-          <h1>
-            Your next 100 clients are already out there. Leadomation finds them
-            <span className="lp-hero-accent">automatically.</span>
+      <section className="relative min-h-screen pt-16 overflow-hidden">
+        <div className="absolute inset-0 -z-10" style={{background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79,70,229,0.2) 0%, rgba(34,211,238,0.1) 40%, rgba(207,250,254,0.05) 70%, transparent 100%)'}} />
+
+        <div className="mx-auto max-w-4xl px-6 pt-28 pb-16 text-center">
+          <div className="inline-flex items-center rounded-full bg-[#4F46E5]/8 border border-[#4F46E5]/15 px-4 py-1.5 mb-8">
+            <span className="text-sm font-semibold text-[#4F46E5]">B2B lead generation on autopilot</span>
+          </div>
+
+          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[0.85] text-gray-950 mb-8">
+            Your next 100 clients<br />are already out there.<br />
+            <span className="text-[#4F46E5]">Leadomation finds them.</span>
           </h1>
-          <p className="lp-hero-sub">
+
+          <p className="mx-auto max-w-2xl text-xl text-gray-600 leading-relaxed mb-10">
             Leadomation finds and enriches B2B leads, writes personalised outreach, automates LinkedIn and calls prospects with an AI voice agent. Your pipeline fills while you focus on closing.
           </p>
-          <div className="lp-hero-buttons">
-            <button className="lp-btn-hero-primary" onClick={() => onNavigate('Register')}>Start free trial</button>
-            <button className="lp-btn-hero-secondary" onClick={() => scrollTo('how')}>See how it works</button>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <button onClick={() => onNavigate('Register')} className="rounded-full bg-[#1E1B4B] px-8 py-4 text-base font-semibold text-white hover:bg-[#2d2a6e] transition-all hover:-translate-y-0.5 shadow-lg">
+              Start free trial
+            </button>
+            <button onClick={() => scrollTo('how')} className="rounded-full border-2 border-gray-200 px-8 py-4 text-base font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all">
+              See how it works
+            </button>
           </div>
-          <p className="lp-hero-trust">7 day free trial. Secure with a card. Cancel anytime.</p>
+          <p className="text-sm text-gray-400">7 day free trial. Secure with a card. Cancel anytime.</p>
         </div>
 
         {/* Dashboard mockup */}
-        <div className="lp-dashboard-mockup lp-gsap-fade">
-          <div className="lp-browser-bar">
-            <div className="lp-browser-dots">
-              <div className="lp-browser-dot red" />
-              <div className="lp-browser-dot yellow" />
-              <div className="lp-browser-dot green" />
+        <div className="mx-auto max-w-6xl px-6 pb-0 lp-gsap-fade">
+          <div className="rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-[#1a1a2e]">
+            <div className="flex items-center gap-3 px-4 py-3 bg-[#252540]">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
+                <div className="w-3 h-3 rounded-full bg-[#28CA41]" />
+              </div>
+              <div className="flex-1 bg-white/8 rounded-md px-3 py-1 text-xs text-white/40">app.leadomation.co.uk/dashboard</div>
             </div>
-            <div className="lp-browser-url">app.leadomation.co.uk/dashboard</div>
-          </div>
-          <div className="lp-browser-content">
-            <div className="lp-mock-sidebar">
-              <div className="lp-mock-sidebar-brand">Leadomation</div>
-              {['Dashboard', 'Global Demand', 'New Campaign', 'Lead Database', 'Deal Pipeline', 'Sequence Builder', 'Inbox', 'Call Agent'].map((item, i) => (
-                <div key={i} className={`lp-mock-nav-item ${i === 0 ? 'active' : ''}`}>
-                  <div className="lp-mock-nav-icon" />
-                  {item}
-                </div>
-              ))}
-            </div>
-            <div className="lp-mock-main">
-              <div className="lp-mock-stats">
-                {[
-                  { label: 'Total Leads', value: '271', trend: '+12%' },
-                  { label: 'Leads with Emails', value: '31', trend: '+8%' },
-                  { label: 'Leads Contacted', value: '0', trend: '' },
-                  { label: 'Total Deals', value: '10', trend: '+3' },
-                ].map((s, i) => (
-                  <div key={i} className="lp-mock-stat-card">
-                    <div className="lp-mock-stat-label">{s.label}</div>
-                    <div className="lp-mock-stat-value">{s.value}</div>
-                    {s.trend && <div className="lp-mock-stat-trend">{s.trend}</div>}
+            <div className="bg-[#F8F9FA] p-5 flex gap-4 min-h-[400px]">
+              <div className="w-44 flex-shrink-0 bg-white rounded-xl border border-gray-200 p-4 hidden md:block">
+                <div className="text-sm font-bold text-[#4F46E5] mb-5">Leadomation</div>
+                {['Dashboard', 'Global Demand', 'New Campaign', 'Lead Database', 'Deal Pipeline', 'Sequence Builder', 'Inbox', 'Call Agent'].map((item, i) => (
+                  <div key={i} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg mb-0.5 text-xs font-medium ${i === 0 ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-gray-500'}`}>
+                    <div className={`w-3 h-3 rounded-sm ${i === 0 ? 'bg-[#4F46E5]/30' : 'bg-gray-200'}`} />
+                    {item}
                   </div>
                 ))}
               </div>
-              <div className="lp-mock-bottom">
-                <div className="lp-mock-chart">
-                  <div className="lp-mock-chart-title">Campaign Performance</div>
-                  <div className="lp-mock-chart-area">
-                    <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#22D3EE" stopOpacity={0.3} />
-                          <stop offset="100%" stopColor="#22D3EE" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <line x1="0" y1="30" x2="400" y2="30" stroke="#E5E7EB" strokeWidth="1" />
-                      <line x1="0" y1="60" x2="400" y2="60" stroke="#E5E7EB" strokeWidth="1" />
-                      <line x1="0" y1="90" x2="400" y2="90" stroke="#E5E7EB" strokeWidth="1" />
-                      <line x1="0" y1="120" x2="400" y2="120" stroke="#E5E7EB" strokeWidth="1" />
-                      <path
-                        d="M0,90 C40,85 80,75 120,60 C160,45 200,50 240,35 C280,20 320,25 360,15 C380,12 400,10 400,10 L400,120 L0,120 Z"
-                        fill="url(#chartGradient)"
-                        opacity="0.3"
-                      />
-                      <path
-                        d="M0,90 C40,85 80,75 120,60 C160,45 200,50 240,35 C280,20 320,25 360,15 C380,12 400,10 400,10"
-                        fill="none"
-                        stroke="#22D3EE"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div className="lp-mock-campaigns">
-                  <div className="lp-mock-chart-title">Top Campaigns</div>
+              <div className="flex-1 flex flex-col gap-4 min-w-0">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
-                    { name: 'Dental Clinics', rate: '6.74%', width: '30%' },
-                    { name: 'Law Firms', rate: '11.22%', width: '55%' },
-                    { name: 'Plumbers Edinburgh', rate: '0%', width: '5%' },
-                  ].map((c, i) => (
-                    <div key={i} className="lp-mock-campaign-item">
-                      <div className="lp-mock-campaign-name-row">
-                        <span className="lp-mock-campaign-name">{c.name}</span>
-                        <span className="lp-mock-campaign-rate">{c.rate}</span>
-                      </div>
-                      <div className="lp-mock-campaign-bar" style={{ width: c.width }} />
+                    {label: 'Total Leads', value: '271', trend: '+12%'},
+                    {label: 'Leads with Emails', value: '31', trend: '+8%'},
+                    {label: 'Leads Contacted', value: '0', trend: ''},
+                    {label: 'Total Deals', value: '10', trend: '+3'},
+                  ].map((s, i) => (
+                    <div key={i} className="bg-white rounded-xl border border-gray-200 p-4">
+                      <div className="text-xs text-gray-400 mb-1">{s.label}</div>
+                      <div className="text-2xl font-bold text-gray-900">{s.value}</div>
+                      {s.trend && <div className="text-xs text-emerald-500 mt-0.5">{s.trend}</div>}
                     </div>
                   ))}
+                </div>
+                <div className="flex gap-3 flex-1">
+                  <div className="flex-1 bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="text-sm font-semibold text-gray-800 mb-3">Campaign Performance</div>
+                    <svg viewBox="0 0 400 100" className="w-full h-24">
+                      <defs>
+                        <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.3"/>
+                          <stop offset="100%" stopColor="#22D3EE" stopOpacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M0,80 C40,75 80,65 120,50 C160,35 200,40 240,28 C280,16 320,20 360,12 L400,8 L400,100 L0,100 Z" fill="url(#cg)"/>
+                      <path d="M0,80 C40,75 80,65 120,50 C160,35 200,40 240,28 C280,16 320,20 360,12 L400,8" fill="none" stroke="#22D3EE" strokeWidth="2.5" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <div className="w-52 bg-white rounded-xl border border-gray-200 p-4 hidden md:block">
+                    <div className="text-sm font-semibold text-gray-800 mb-3">Top Campaigns</div>
+                    {[
+                      {name: 'Dental Clinics', rate: '6.74%', w: '30%'},
+                      {name: 'Law Firms', rate: '11.22%', w: '55%'},
+                      {name: 'Plumbers Edinburgh', rate: '0%', w: '3%'},
+                    ].map((c, i) => (
+                      <div key={i} className="mb-2.5">
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs text-gray-700">{c.name}</span>
+                          <span className="text-xs font-bold text-[#4F46E5]">{c.rate}</span>
+                        </div>
+                        <div className="h-1 bg-gray-100 rounded-full">
+                          <div className="h-full bg-[#4F46E5] rounded-full" style={{width: c.w}} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -323,16 +321,14 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       </section>
 
       {/* ========== 4. LOGO BAR ========== */}
-      <section className="lp-logos">
-        <div className="lp-logos-label lp-gsap-fade">POWERED BY INDUSTRY LEADERS</div>
-        <div className="lp-logos-track">
-          {[0, 1].map((set) => (
-            <div key={set} className="lp-logos-set">
-              {logos.map((name, i) => (
-                <div key={`${set}-${i}`} className="lp-logo-item">
-                  <div className="lp-logo-icon">
-                    {name.charAt(0)}
-                  </div>
+      <section className="py-16 overflow-hidden bg-white">
+        <p className="text-center text-xs font-bold tracking-[2px] text-gray-400 uppercase mb-8">Powered by industry leaders</p>
+        <div className="flex w-max animate-[marquee_30s_linear_infinite]">
+          {[0,1].map(set => (
+            <div key={set} className="flex items-center gap-14 px-7">
+              {['Google Maps','Hunter.io','LinkedIn','Microsoft 365','Stripe','Supabase','Unipile','Vapi.ai','Apollo','Resend'].map((name, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm font-semibold text-gray-400">
+                  <div className="w-7 h-7 rounded-lg bg-[#4F46E5]/8 flex items-center justify-center text-xs font-bold text-[#4F46E5]">{name[0]}</div>
                   {name}
                 </div>
               ))}
@@ -342,661 +338,522 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       </section>
 
       {/* ========== 5. THE PROBLEM ========== */}
-      <section className="lp-problem" id="how">
-        <div className="lp-container">
-          <div className="lp-text-centre">
-            <div className="lp-section-eyebrow teal lp-gsap-fade">THE PROBLEM</div>
-            <h2 className="lp-section-heading lp-gsap-fade">B2B lead generation is broken for most businesses.</h2>
-            <p className="lp-section-sub centred lp-gsap-fade">
-              Hours wasted finding leads manually. Generic outreach ignored. Follow ups that never happen. Sound familiar?
-            </p>
+      <section className="py-24 bg-gradient-to-b from-white to-[#F0FFFE]">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-bold tracking-[2px] text-[#06B6D4] uppercase mb-4">The problem</p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-gray-950 mb-6">B2B lead generation is broken<br />for most businesses.</h2>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto">Hours wasted finding leads manually. Generic outreach ignored. Follow-ups that never happen. Sound familiar?</p>
           </div>
-          <div className="lp-problem-cards">
-            <div className="lp-problem-card">
-              <div className="lp-problem-icon red">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-              </div>
-              <h3>You're losing time finding leads</h3>
-              <p>Most businesses spend 3 to 5 hours a week manually searching for prospects. By the time you reach out, your competitor already has.</p>
-            </div>
-            <div className="lp-problem-card">
-              <div className="lp-problem-icon amber">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <line x1="2" y1="10" x2="22" y2="10" />
-                  <line x1="12" y1="4" x2="12" y2="20" stroke="#F59E0B" strokeWidth="2" opacity="0.4" />
-                  <line x1="8" y1="14" x2="16" y2="14" stroke="#F59E0B" strokeWidth="2" />
-                </svg>
-              </div>
-              <h3>Generic outreach gets ignored</h3>
-              <p>Copy paste cold emails have a 1% reply rate. Without personalisation at scale, you are invisible in every inbox you land in.</p>
-            </div>
-            <div className="lp-problem-card">
-              <div className="lp-problem-icon indigo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72" />
-                  <line x1="23" y1="1" x2="17" y2="7" />
-                  <line x1="17" y1="1" x2="23" y2="7" />
-                </svg>
-              </div>
-              <h3>Follow ups fall through the cracks</h3>
-              <p>80% of sales require 5 or more follow ups. Almost nobody does them consistently. Deals die in silence because no one called back.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== 6. SOLUTION STATEMENT ========== */}
-      <section className="lp-solution">
-        <div className="lp-section-eyebrow lp-gsap-fade" style={{ color: 'rgba(34,211,238,0.7)', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '12px', fontWeight: 700, marginBottom: '24px' }}>THE SOLUTION</div>
-        <h2 className="lp-solution-heading lp-gsap-fade">One platform. Every step of outreach. Completely automated.</h2>
-        <p className="lp-solution-sub lp-gsap-fade">
-          Leadomation replaces your lead scraper, email tool, LinkedIn outreach software and sales dialler with a single AI powered system.
-        </p>
-        <div className="lp-solution-steps lp-gsap-fade">
-          {[
-            { num: '1', label: 'Find' },
-            { num: '2', label: 'Enrich' },
-            { num: '3', label: 'Contact' },
-            { num: '4', label: 'Follow up' },
-            { num: '5', label: 'Book' },
-          ].map((step, i, arr) => (
-            <React.Fragment key={i}>
-              <div className="lp-solution-step">
-                <div className="lp-solution-step-circle">{step.num}</div>
-                <div className="lp-solution-step-label">{step.label}</div>
-              </div>
-              {i < arr.length - 1 && <div className="lp-solution-connector" />}
-            </React.Fragment>
-          ))}
-        </div>
-      </section>
-
-      {/* ========== 7. FEATURE SCREENSHOT ========== */}
-      <section className="lp-feature-screenshot">
-        <div className="lp-container">
-          <div className="lp-feature-grid">
-            <div className="lp-feature-sticky">
-              <div className="lp-section-eyebrow indigo lp-gsap-fade">FULL PIPELINE VIEW</div>
-              <h2 className="lp-feature-heading lp-gsap-fade">A complete picture of every lead, every campaign, every deal.</h2>
-              <div className="lp-feature-bullets">
-                <div className="lp-feature-bullet lp-gsap-fade">
-                  <div className="lp-feature-bullet-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <circle cx="12" cy="12" r="6" />
-                      <circle cx="12" cy="12" r="2" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="lp-feature-bullet-title">271 enriched leads per campaign.</div>
-                    <div className="lp-feature-bullet-body">Every lead comes with verified email, phone number, decision maker name and intent score. No manual data entry.</div>
-                  </div>
-                </div>
-                <div className="lp-feature-bullet lp-gsap-fade">
-                  <div className="lp-feature-bullet-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="20" x2="18" y2="10" />
-                      <line x1="12" y1="20" x2="12" y2="4" />
-                      <line x1="6" y1="20" x2="6" y2="14" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="lp-feature-bullet-title">Campaign performance updates every 6 hours.</div>
-                    <div className="lp-feature-bullet-body">The Performance Analyser studies your data and sends personalised improvement reports automatically.</div>
-                  </div>
-                </div>
-                <div className="lp-feature-bullet lp-gsap-fade">
-                  <div className="lp-feature-bullet-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="lp-feature-bullet-title">Hot leads pushed to your pipeline instantly.</div>
-                    <div className="lp-feature-bullet-body">When a prospect replies as Interested, they move to your Deal Pipeline automatically. No manual sorting.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="lp-lead-mockup lp-gsap-fade">
-                <div className="lp-lead-mockup-header">
-                  <div className="lp-lead-search">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="11" cy="11" r="8" />
-                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                    <span>Search leads...</span>
-                  </div>
-                  <div className="lp-lead-filter-pill">Status</div>
-                  <div className="lp-lead-filter-pill">Sort</div>
-                </div>
-                <div className="lp-lead-smart-filters">
-                  <span className="lp-smart-pill hot">Hot (12)</span>
-                  <span className="lp-smart-pill warm">Warm (8)</span>
-                  <span className="lp-smart-pill cool">Cool (5)</span>
-                  <span className="lp-smart-pill grey">Unscored (3)</span>
-                </div>
-                <table className="lp-lead-table">
-                  <thead>
-                    <tr>
-                      <th>Company</th>
-                      <th>Status</th>
-                      <th>Intent</th>
-                      <th>Website</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <span className="company-name">Dunmore Dental Care</span>
-                        <span className="enriched-badge">ENRICHED</span>
-                        <span className="company-role">Practice Owner</span>
-                      </td>
-                      <td><span className="status-badge status-contacted">CONTACTED</span></td>
-                      <td><span className="intent-badge intent-hot">Hot &middot; 63</span></td>
-                      <td style={{ fontSize: '12px', color: '#6B7280' }}>dunmoredental.co.uk</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span className="company-name">Smile Clinic Northwest</span>
-                        <span className="enriched-badge">ENRICHED</span>
-                        <span className="company-role">Clinical Director</span>
-                      </td>
-                      <td><span className="status-badge status-replied">REPLIED</span></td>
-                      <td><span className="intent-badge intent-hot">Hot &middot; 95</span></td>
-                      <td style={{ fontSize: '12px', color: '#6B7280' }}>smileclinicnw.co.uk</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span className="company-name">Bright Smile Kent</span>
-                        <span className="enriched-badge">ENRICHED</span>
-                        <span className="company-role">Practice Owner</span>
-                      </td>
-                      <td><span className="status-badge status-contacted">CONTACTED</span></td>
-                      <td><span className="intent-badge intent-hot">Hot &middot; 76</span></td>
-                      <td style={{ fontSize: '12px', color: '#6B7280' }}>brightsmilekent.co.uk</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== 8. WHO IT'S FOR ========== */}
-      <section className="lp-persona">
-        <div className="lp-container">
-          <div className="lp-text-centre">
-            <div className="lp-section-eyebrow teal lp-gsap-fade">WHO IT'S FOR</div>
-            <h2 className="lp-section-heading lp-gsap-fade">Built for B2B businesses that need a full pipeline, not just a list of names.</h2>
-            <p className="lp-section-sub centred lp-gsap-fade">&nbsp;</p>
-          </div>
-          <div className="lp-persona-cards">
-            <div className="lp-persona-card">
-              <div className="lp-persona-accent a1" />
-              <div className="lp-persona-icon indigo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-                  <line x1="12" y1="18" x2="12" y2="18" />
-                  <line x1="8" y1="6" x2="16" y2="6" />
-                  <line x1="8" y1="10" x2="16" y2="10" />
-                  <line x1="8" y1="14" x2="12" y2="14" />
-                </svg>
-              </div>
-              <h3>Agencies and consultants</h3>
-              <p>You need a steady flow of qualified prospects without hiring a sales team or spending hours on LinkedIn.</p>
-              <div className="lp-persona-outcome indigo">Automate prospecting end to end</div>
-            </div>
-            <div className="lp-persona-card">
-              <div className="lp-persona-accent a2" />
-              <div className="lp-persona-icon teal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-              </div>
-              <h3>Local B2B service businesses</h3>
-              <p>Plumbers, solicitors, accountants, dental practices. High value clients with long relationships. You need more of them consistently.</p>
-              <div className="lp-persona-outcome teal">Fill your diary with qualified calls</div>
-            </div>
-            <div className="lp-persona-card">
-              <div className="lp-persona-accent a3" />
-              <div className="lp-persona-icon indigo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-              <h3>Founders doing their own sales</h3>
-              <p>You are closing deals yourself and every hour counts. You need outreach running in the background while you focus on closing.</p>
-              <div className="lp-persona-outcome indigo">Let AI handle outreach while you close</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== 9. LIGHT BENTO GRID ========== */}
-      <section className="lp-features-section" id="features">
-        <div className="lp-container">
-          <div className="lp-section-eyebrow indigo lp-gsap-fade">FEATURES</div>
-          <h2 className="lp-section-heading lp-gsap-fade">Know more about your prospects than they expect.</h2>
-          <p className="lp-features-sub lp-gsap-fade">
-            One platform replaces your lead scraper, email tool, LinkedIn outreach and AI calling software.
-          </p>
-
-          <div className="lp-bento">
-            {/* Card 1 - Lead Database */}
-            <div className="lp-bento-card lp-bento-span-3 lp-bento-rtl">
-              <div className="lp-bento-graphic" style={{ background: '#fff' }}>
-                <table className="lp-lead-table">
-                  <thead>
-                    <tr>
-                      <th>Company</th>
-                      <th>Status</th>
-                      <th>Intent</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <span className="company-name">Dunmore Dental Care</span>
-                        <span className="enriched-badge">ENRICHED</span>
-                        <br /><span className="company-role">Practice Owner</span>
-                      </td>
-                      <td><span className="status-badge status-contacted">CONTACTED</span></td>
-                      <td><span className="intent-badge intent-hot">Hot &middot; 63</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span className="company-name">Smile Clinic Northwest</span>
-                        <span className="enriched-badge">ENRICHED</span>
-                        <br /><span className="company-role">Clinical Director</span>
-                      </td>
-                      <td><span className="status-badge status-replied">REPLIED</span></td>
-                      <td><span className="intent-badge intent-hot">Hot &middot; 95</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span className="company-name">Bright Smile Kent</span>
-                        <span className="enriched-badge">ENRICHED</span>
-                        <br /><span className="company-role">Practice Owner</span>
-                      </td>
-                      <td><span className="status-badge status-contacted">CONTACTED</span></td>
-                      <td><span className="intent-badge intent-hot">Hot &middot; 76</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div className="lp-bento-fade" />
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">Lead database</div>
-                <div className="lp-bento-title">271 enriched leads ready to contact</div>
-                <p className="lp-bento-desc">Verified emails, phone numbers, intent scores and decision maker contacts. Filter by Hot, Warm or Cool in one click.</p>
-              </div>
-            </div>
-
-            {/* Card 2 - Campaign Builder */}
-            <div className="lp-bento-card lp-bento-span-3 lp-bento-rtr">
-              <div className="lp-bento-graphic" style={{ background: '#fff' }}>
-                <div className="lp-wizard-graphic">
-                  <div className="lp-wizard-steps">
-                    {['Campaign details', 'Advanced targeting', 'Intent filters', 'Data enrichment', 'Outreach config'].map((step, i) => (
-                      <div key={i} className={`lp-wizard-step ${i === 0 ? 'active' : ''}`}>
-                        <span className="lp-wizard-step-num">{i + 1}</span>
-                        {step}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="lp-campaign-types">
-                    <div className="lp-campaign-type">Local Businesses</div>
-                    <div className="lp-campaign-type selected">B2B Services</div>
-                    <div className="lp-campaign-type">Custom Search</div>
-                  </div>
-                </div>
-                <div className="lp-bento-fade" />
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">Campaign builder</div>
-                <div className="lp-bento-title">Launch a campaign in 3 minutes</div>
-                <p className="lp-bento-desc">5 step wizard. Pick industry, location, intent filters, enrichment and outreach strategy. Leadomation handles the rest.</p>
-              </div>
-            </div>
-
-            {/* Card 3 - Intent Scoring */}
-            <div className="lp-bento-card lp-bento-span-2 lp-bento-rbl">
-              <div className="lp-bento-graphic" style={{ background: '#fff' }}>
-                <div className="lp-intent-graphic">
-                  <div className="lp-intent-pill hot">
-                    <span className="lp-intent-emoji">🔥</span> Hot <span className="lp-intent-score">95</span>
-                  </div>
-                  <div className="lp-intent-pill warm">
-                    <span className="lp-intent-emoji">⚡</span> Warm <span className="lp-intent-score">72</span>
-                  </div>
-                  <div className="lp-intent-pill cool">
-                    <span className="lp-intent-emoji">💧</span> Cool <span className="lp-intent-score">45</span>
-                  </div>
-                </div>
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">Intent scoring</div>
-                <div className="lp-bento-title">Know who is ready to buy</div>
-                <p className="lp-bento-desc">Every lead scored automatically based on buying signals, reviews and online presence.</p>
-              </div>
-            </div>
-
-            {/* Card 4 - AI Voice Calling */}
-            <div className="lp-bento-card lp-bento-span-2 navy-card">
-              <div className="lp-bento-graphic">
-                <div className="lp-voice-graphic">
-                  <div className="lp-voice-phone-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                    </svg>
-                    <div className="lp-voice-pulse" />
-                    <div className="lp-voice-pulse-2" />
-                  </div>
-                  <div className="lp-voice-dot" />
-                  <div className="lp-voice-label">AI Call Agent</div>
-                </div>
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">AI voice calling</div>
-                <div className="lp-bento-title">Your AI agent calls prospects 24/7</div>
-                <p className="lp-bento-desc">Handles objections, answers questions and books meetings directly into your calendar.</p>
-              </div>
-            </div>
-
-            {/* Card 5 - LinkedIn Sequencer */}
-            <div className="lp-bento-card lp-bento-span-2 lp-bento-rbr">
-              <div className="lp-bento-graphic" style={{ background: '#fff' }}>
-                <div className="lp-phases-graphic">
-                  {[
-                    { n: '1', label: 'Silent Awareness', active: true },
-                    { n: '2', label: 'Connection', active: false },
-                    { n: '3', label: 'Warm Thanks', active: false },
-                    { n: '4', label: 'Advice Ask', active: false },
-                    { n: '5', label: 'Follow Up', active: false },
-                    { n: '6', label: 'Soft Offer', active: false },
-                  ].map((p, i, arr) => (
-                    <React.Fragment key={i}>
-                      <div className="lp-phase">
-                        <div className={`lp-phase-dot ${p.active ? 'active' : 'inactive'}`}>{p.n}</div>
-                        <span className="lp-phase-label">{p.label}</span>
-                      </div>
-                      {i < arr.length - 1 && <div className="lp-phase-connector" />}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">LinkedIn sequencer</div>
-                <div className="lp-bento-title">35 day LinkedIn funnel on autopilot</div>
-                <p className="lp-bento-desc">Silent Awareness through to Soft Offer. Runs automatically, builds trust before making any ask.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== 10. DARK BENTO SECTION ========== */}
-      <div className="lp-dark-section">
-        <div className="lp-container">
-          <div className="lp-section-eyebrow dark lp-gsap-fade">OUTREACH</div>
-          <h2 className="lp-section-heading white lp-gsap-fade">Close deals faster with AI.</h2>
-
-          <div className="lp-bento">
-            {/* Dark Card 1 - Inbox */}
-            <div className="lp-bento-card lp-bento-span-4 lp-bento-rtl">
-              <div className="lp-bento-graphic">
-                <div className="lp-inbox-graphic">
-                  <div className="lp-inbox-list">
-                    {[
-                      { name: 'London Smile Studio', status: 'interested' },
-                      { name: 'Smile Clinic NW', status: 'interested' },
-                      { name: 'Blackwell Partners', status: 'interested' },
-                      { name: 'Forsyth Family Law', status: 'not-interested' },
-                    ].map((item, i) => (
-                      <div key={i} className="lp-inbox-item">
-                        <div className="lp-inbox-item-name">{item.name}</div>
-                        <span className={`lp-inbox-item-status ${item.status}`}>
-                          {item.status === 'interested' ? 'Interested' : 'Not interested'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="lp-inbox-preview">
-                    <div className="lp-inbox-preview-from">From: London Smile Studio</div>
-                    <div className="lp-inbox-preview-text">
-                      Hi, thanks for reaching out. We have been looking for exactly this kind of service. Could we schedule a call this week?
-                    </div>
-                  </div>
-                </div>
-                <div className="lp-bento-fade-top" />
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">Inbox</div>
-                <div className="lp-bento-title">Every reply classified automatically</div>
-                <p className="lp-bento-desc">AI reads every email and LinkedIn reply. Interested, Not Interested or Out of Office. Hot leads pushed to your pipeline instantly.</p>
-              </div>
-            </div>
-
-            {/* Dark Card 2 - Deal Pipeline */}
-            <div className="lp-bento-card lp-bento-span-2 lp-bento-rtr">
-              <div className="lp-bento-graphic">
-                <div className="lp-dark-kanban">
-                  {[
-                    { title: 'New Reply', color: '#22D3EE', cards: [{ name: 'Owen Dental', value: '£850' }] },
-                    { title: 'Qualified', color: '#4F46E5', cards: [{ name: 'Donovan Sol.', value: '£950' }] },
-                    { title: 'Proposal', color: '#3B82F6', cards: [{ name: 'Carter Law', value: '£1,200' }] },
-                    { title: 'Negotiating', color: '#F59E0B', cards: [{ name: 'Apex Fin.', value: '£2,100' }] },
-                    { title: 'Won', color: '#10B981', cards: [{ name: 'Smile Clinic', value: '£1,500' }] },
-                    { title: 'Lost', color: '#EF4444', cards: [] },
-                  ].map((col, i) => (
-                    <div key={i} className="lp-dark-kanban-col">
-                      <div className="lp-dark-kanban-header" style={{ borderColor: col.color, color: col.color }}>{col.title}</div>
-                      {col.cards.map((c, j) => (
-                        <div key={j} className="lp-dark-kanban-card">
-                          {c.name}
-                          <div className="lp-dark-kanban-value">{c.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-                <div className="lp-bento-fade-top" />
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">Deal pipeline</div>
-                <div className="lp-bento-title">Built in CRM</div>
-                <p className="lp-bento-desc">Kanban pipeline with 6 stages. £15,600 total pipeline value tracked automatically.</p>
-              </div>
-            </div>
-
-            {/* Dark Card 3 - Keyword Monitor */}
-            <div className="lp-bento-card lp-bento-span-2 lp-bento-rbl">
-              <div className="lp-bento-graphic">
-                <div className="lp-keyword-graphic">
-                  <div className="lp-keyword-monitor">
-                    <div className="lp-keyword-monitor-header">Active monitor 1</div>
-                    <div className="lp-keyword-chips">
-                      <span className="lp-keyword-chip">law firm marketing</span>
-                      <span className="lp-keyword-chip">legal SEO</span>
-                    </div>
-                  </div>
-                  <div className="lp-keyword-monitor">
-                    <div className="lp-keyword-monitor-header">Active monitor 2</div>
-                    <div className="lp-keyword-chips">
-                      <span className="lp-keyword-chip">solicitor client acquisition</span>
-                      <span className="lp-keyword-chip">law firm growth</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="lp-bento-fade-top" />
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">Keyword monitor</div>
-                <div className="lp-bento-title">Catch buyers on LinkedIn</div>
-                <p className="lp-bento-desc">Monitor keywords every 2 hours. Prospects posting about your service get auto enrolled as hot leads.</p>
-              </div>
-            </div>
-
-            {/* Dark Card 4 - Performance Analyser */}
-            <div className="lp-bento-card lp-bento-span-4 lp-bento-rbr">
-              <div className="lp-bento-graphic">
-                <div className="lp-perf-graphic">
-                  <div className="lp-perf-circle">
-                    <div className="lp-perf-circle-inner">78</div>
-                  </div>
-                  <div className="lp-perf-bars-area">
-                    <div className="lp-perf-bar-row">
-                      <div className="lp-perf-bar-label">Subject lines with questions</div>
-                      <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill indigo" style={{ width: '82%' }} /></div>
-                    </div>
-                    <div className="lp-perf-bar-row">
-                      <div className="lp-perf-bar-label">Personalised openers</div>
-                      <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill cyan" style={{ width: '65%' }} /></div>
-                    </div>
-                    <div className="lp-perf-bar-row">
-                      <div className="lp-perf-bar-label">Generic templates</div>
-                      <div className="lp-perf-bar-track"><div className="lp-perf-bar-fill blue" style={{ width: '30%' }} /></div>
-                    </div>
-                    <div className="lp-perf-insight-pills">
-                      <span className="lp-perf-insight-pill">Tuesday to Thursday best</span>
-                      <span className="lp-perf-insight-pill">More personalisation needed</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="lp-bento-fade-top" />
-              </div>
-              <div className="lp-bento-content">
-                <div className="lp-bento-eyebrow">Performance analyser</div>
-                <div className="lp-bento-title">Gets smarter every campaign</div>
-                <p className="lp-bento-desc">Studies your email data every 6 hours. Sends personalised improvement reports. The longer you use it, the better your results.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ========== 11. LEAD INTELLIGENCE ========== */}
-      <section className="lp-intel-section" id="intelligence">
-        <div className="lp-container">
-          <div className="lp-intel-grid">
-            <div className="lp-intel-copy">
-              <div className="lp-section-eyebrow indigo lp-gsap-fade">LEAD INTELLIGENCE</div>
-              <h2 className="lp-intel-heading lp-gsap-fade">Stop guessing what to say. Know everything before you reach out.</h2>
-              <p className="lp-intel-desc lp-gsap-fade">
-                Before you send a single word, Leadomation already knows your prospect's pain point, their Google rating, their recent business expansion and exactly what subject line will get them to open. Lead Intelligence generates a full research report for every prospect in seconds.
-              </p>
-              <div className="lp-pro-badge lp-gsap-fade">Pro feature</div>
-            </div>
-            <div className="lp-intel-card">
-              <div className="lp-intel-card-header lp-intel-field">LEAD INTELLIGENCE REPORT</div>
-              <div className="lp-intel-row lp-intel-field">
-                <div className="lp-intel-row-label">OPPORTUNITY RATING</div>
-                <div className="lp-intel-row-value"><span className="lp-intel-hot-badge">Hot</span></div>
-              </div>
-              <div className="lp-intel-row lp-intel-field">
-                <div className="lp-intel-row-label">PAIN INTENSITY</div>
-                <div className="lp-intel-row-value">7 / 10</div>
-                <div className="lp-intel-progress-bar">
-                  <div className="lp-intel-progress-fill" style={{ width: '70%' }} />
-                </div>
-              </div>
-              <div className="lp-intel-row lp-intel-field">
-                <div className="lp-intel-row-label">PAIN POINT</div>
-                <div className="lp-intel-row-value">No online booking system. Losing walk in customers to competitors with digital scheduling.</div>
-              </div>
-              <div className="lp-intel-row lp-intel-field">
-                <div className="lp-intel-row-label">OUTREACH ANGLE</div>
-                <div className="lp-intel-row-value">Position as a quick win digital upgrade. Reference their 4.8 star Google rating.</div>
-              </div>
-              <div className="lp-intel-row lp-intel-field">
-                <div className="lp-intel-row-label">PERSONALISATION HOOK</div>
-                <div className="lp-intel-row-value">Mention their recent expansion to a second location.</div>
-              </div>
-              <div className="lp-intel-row lp-intel-field">
-                <div className="lp-intel-row-label">SUGGESTED SUBJECT LINE</div>
-                <div className="lp-intel-row-value lp-intel-subject">Quick fix for your booking gap</div>
-              </div>
-              <div className="lp-intel-row lp-intel-field">
-                <div className="lp-intel-row-label">SUGGESTED OPENING LINE</div>
-                <div className="lp-intel-row-value lp-intel-opening">I noticed your second location just opened...</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== 12. STATS BAR ========== */}
-      <section className="lp-stats-bar">
-        <div className="lp-container">
-          <div className="lp-stats-grid lp-gsap-fade">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lp-problem-cards">
             {[
-              { value: '500+', label: 'Leads found per campaign' },
-              { value: '35', label: 'Day LinkedIn relationship funnel' },
-              { value: '6hrs', label: 'Between performance report updates' },
-              { value: '8', label: 'Step AI call script builder' },
-            ].map((stat, i) => (
-              <div key={i} className="lp-stat-item">
-                <div className="lp-stat-value">{stat.value}</div>
-                <div className="lp-stat-label">{stat.label}</div>
+              {
+                icon: '\u23F0',
+                color: 'bg-red-50',
+                title: "You're losing time finding leads",
+                body: "Most businesses spend 3 to 5 hours a week manually searching for prospects. By the time you reach out, your competitor already has."
+              },
+              {
+                icon: '\u{1F4E7}',
+                color: 'bg-amber-50',
+                title: "Generic outreach gets ignored",
+                body: "Copy-paste cold emails have a 1% reply rate. Without personalisation at scale, you are invisible in every inbox you land in."
+              },
+              {
+                icon: '\u{1F4DE}',
+                color: 'bg-[#EEF2FF]',
+                title: "Follow-ups fall through the cracks",
+                body: "80% of sales require 5 or more follow-ups. Almost nobody does them consistently. Deals die in silence because no one called back."
+              }
+            ].map((card, i) => (
+              <div key={i} className="bg-white rounded-[2rem] border border-black/5 p-10 shadow-sm lp-problem-card">
+                <div className={`w-14 h-14 ${card.color} rounded-2xl flex items-center justify-center text-2xl mb-6`}>{card.icon}</div>
+                <h3 className="text-xl font-bold text-gray-950 mb-4">{card.title}</h3>
+                <p className="text-base text-gray-500 leading-relaxed">{card.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ========== 13. TESTIMONIALS ========== */}
-      <section className="lp-testimonials">
-        <div className="lp-container">
-          <div className="lp-text-centre" style={{ marginBottom: '60px' }}>
-            <div className="lp-section-eyebrow indigo lp-gsap-fade">WHAT PEOPLE ARE SAYING</div>
-            <h2 className="lp-section-heading lp-gsap-fade">Real results from real businesses.</h2>
+      {/* ========== 6. SOLUTION STATEMENT ========== */}
+      <section className="py-24 bg-[#1E1B4B]">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+          <p className="text-sm font-bold tracking-[2px] text-[#22D3EE]/70 uppercase mb-6">The solution</p>
+          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight mb-6">
+            One platform. Every step<br />of outreach. Completely automated.
+          </h2>
+          <p className="text-lg text-white/55 max-w-2xl mx-auto mb-16">
+            Leadomation replaces your lead scraper, email tool, LinkedIn outreach software and sales dialler with a single AI powered system.
+          </p>
+          <div className="flex items-center justify-center max-w-3xl mx-auto flex-wrap gap-y-4">
+            {['Find','Enrich','Contact','Follow up','Book'].map((step, i, arr) => (
+              <React.Fragment key={step}>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/10 border-2 border-[#22D3EE]/30 flex items-center justify-center text-lg font-bold text-[#22D3EE]">{i+1}</div>
+                  <span className="text-sm font-semibold text-white/65 whitespace-nowrap">{step}</span>
+                </div>
+                {i < arr.length - 1 && <div className="w-12 h-px bg-[#22D3EE]/20 mb-6 mx-1" />}
+              </React.Fragment>
+            ))}
           </div>
-          <div className="lp-testimonial-grid">
-            {[
-              {
-                accent: 'indigo',
-                text: 'We booked 14 discovery calls in our first month. We had been trying to do this manually for two years and never got close to those numbers.',
-                initials: 'SM',
-                avatarClass: 'indigo',
-                name: 'Sarah Mitchell',
-                role: 'Director, Apex Digital Agency',
-              },
-              {
-                accent: 'cyan',
-                text: 'The intent scoring alone is worth the subscription. We stopped wasting time on leads that were never going to buy and focused only on Hot prospects.',
-                initials: 'JH',
-                avatarClass: 'teal',
-                name: 'James Hartley',
-                role: 'Partner, Hartley Commercial Solicitors',
-              },
-              {
-                accent: 'teal',
-                text: 'I set up one campaign on a Monday morning. By Wednesday my AI agent had already booked two calls. I have never seen anything work that fast.',
-                initials: 'PA',
-                avatarClass: 'blue',
-                name: 'Priya Anand',
-                role: 'Founder, Anand Consulting',
-              },
-            ].map((t, i) => (
-              <div key={i} className="lp-testimonial-card">
-                <div className={`lp-testimonial-accent ${t.accent}`} />
-                <div className="lp-testimonial-quote-mark">&ldquo;</div>
-                <p className="lp-testimonial-text">{t.text}</p>
-                <div className="lp-testimonial-divider" />
-                <div className="lp-testimonial-author">
-                  <div className={`lp-testimonial-avatar ${t.avatarClass}`}>{t.initials}</div>
+        </div>
+      </section>
+
+      {/* ========== 7. FEATURE SCREENSHOT ========== */}
+      <section className="py-24 bg-white" id="how">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <div className="lg:sticky lg:top-24">
+              <p className="text-sm font-bold tracking-[2px] text-[#4F46E5] uppercase mb-4">Full pipeline view</p>
+              <h2 className="text-4xl font-black tracking-tight text-gray-950 leading-tight mb-6">A complete picture of every lead, every campaign, every deal.</h2>
+              <dl className="space-y-8">
+                {[
+                  {icon: '\u{1F3AF}', title: '271 enriched leads per campaign.', body: 'Every lead comes with verified email, phone number, decision maker name and intent score. No manual data entry.'},
+                  {icon: '\u{1F4CA}', title: 'Campaign performance updates every 6 hours.', body: 'The Performance Analyser studies your data and sends personalised improvement reports automatically.'},
+                  {icon: '\u26A1', title: 'Hot leads pushed to your pipeline instantly.', body: 'When a prospect replies as Interested, they move to your Deal Pipeline automatically. No manual sorting.'},
+                ].map((f, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] flex items-center justify-center text-lg flex-shrink-0">{f.icon}</div>
+                    <div>
+                      <dt className="font-bold text-gray-900 mb-1">{f.title}</dt>
+                      <dd className="text-gray-500 text-sm leading-relaxed">{f.body}</dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
+            </div>
+            <div className="rounded-[2rem] overflow-hidden shadow-xl ring-1 ring-black/5 bg-white">
+              <div className="p-4 border-b border-gray-100 flex gap-3 items-center">
+                <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  <span className="text-sm text-gray-400">Search leads...</span>
+                </div>
+                <div className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600">Status</div>
+                <div className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600">Sort</div>
+              </div>
+              <div className="px-4 py-3 flex gap-2 border-b border-gray-100">
+                <span className="px-3 py-1 rounded-full bg-red-50 border border-red-100 text-xs font-semibold text-red-600">Hot (12)</span>
+                <span className="px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-xs font-semibold text-amber-600">Warm (8)</span>
+                <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-600">Cool (5)</span>
+                <span className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-500">Unscored (3)</span>
+              </div>
+              <div className="grid grid-cols-4 px-4 py-2 bg-gray-50 border-b border-gray-100">
+                {['Company','Status','Intent','Website'].map(h => (
+                  <div key={h} className="text-xs font-bold text-[#4F46E5] uppercase tracking-wide">{h}</div>
+                ))}
+              </div>
+              {[
+                {company: 'Dunmore Dental Care', role: 'Practice Owner', status: 'CONTACTED', statusColor: 'bg-amber-50 text-amber-700', intent: 'Hot - 63', intentColor: 'bg-red-50 text-red-600', site: 'dunmoredental.co.uk'},
+                {company: 'Smile Clinic Northwest', role: 'Clinical Director', status: 'REPLIED', statusColor: 'bg-emerald-50 text-emerald-700', intent: 'Hot - 95', intentColor: 'bg-red-50 text-red-600', site: 'smileclinicnw.co.uk'},
+                {company: 'Bright Smile Kent', role: 'Practice Owner', status: 'CONTACTED', statusColor: 'bg-amber-50 text-amber-700', intent: 'Hot - 76', intentColor: 'bg-red-50 text-red-600', site: 'brightsmilekent.co.uk'},
+              ].map((row, i) => (
+                <div key={i} className="grid grid-cols-4 px-4 py-3 border-b border-gray-50 hover:bg-gray-50 items-center">
                   <div>
-                    <div className="lp-testimonial-name">{t.name}</div>
-                    <div className="lp-testimonial-role">{t.role}</div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-bold text-gray-900">{row.company}</span>
+                      <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-bold rounded uppercase">Enriched</span>
+                    </div>
+                    <div className="text-xs text-[#4F46E5] font-medium mt-0.5">{row.role}</div>
+                  </div>
+                  <div><span className={`px-2 py-1 rounded text-xs font-bold ${row.statusColor}`}>{row.status}</span></div>
+                  <div><span className={`px-2 py-1 rounded-md text-xs font-bold ${row.intentColor}`}>{row.intent}</span></div>
+                  <div className="text-xs text-[#4F46E5] font-medium truncate">{row.site}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========== 8. WHO IT'S FOR ========== */}
+      <section className="py-24 bg-gray-50" id="features">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-bold tracking-[2px] text-[#06B6D4] uppercase mb-4">Who it's for</p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-gray-950 mb-6">Built for B2B businesses that need<br />a full pipeline, not just a list of names.</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lp-persona-cards">
+            {[
+              {accent: 'from-[#4F46E5] to-[#22D3EE]', icon: '\u{1F3E2}', iconBg: 'bg-[#EEF2FF]', title: 'Agencies and consultants', pain: 'You need a steady flow of qualified prospects without hiring a sales team or spending hours on LinkedIn.', pill: 'Automate prospecting end to end', pillColor: 'bg-[#EEF2FF] text-[#4F46E5]'},
+              {accent: 'from-[#06B6D4] to-[#3B82F6]', icon: '\u{1F3EA}', iconBg: 'bg-[#F0FFFE]', title: 'Local B2B service businesses', pain: 'Plumbers, solicitors, accountants, dental practices. High value clients with long relationships. You need more of them consistently.', pill: 'Fill your diary with qualified calls', pillColor: 'bg-[#F0FFFE] text-[#06B6D4]'},
+              {accent: 'from-[#1E1B4B] to-[#4F46E5]', icon: '\u{1F464}', iconBg: 'bg-[#EEF2FF]', title: 'Founders doing their own sales', pain: 'You are closing deals yourself and every hour counts. You need outreach running in the background while you focus on closing.', pill: 'Let AI handle outreach while you close', pillColor: 'bg-[#EEF2FF] text-[#4F46E5]'},
+            ].map((card, i) => (
+              <div key={i} className="relative bg-white rounded-[2rem] border border-black/5 p-10 shadow-sm overflow-hidden lp-persona-card">
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${card.accent}`} />
+                <div className={`w-12 h-12 ${card.iconBg} rounded-xl flex items-center justify-center text-xl mb-5`}>{card.icon}</div>
+                <h3 className="text-xl font-bold text-gray-950 mb-3">{card.title}</h3>
+                <p className="text-gray-500 leading-relaxed mb-6 text-sm">{card.pain}</p>
+                <span className={`inline-flex px-3 py-1.5 rounded-full text-xs font-semibold ${card.pillColor}`}>{card.pill}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== 9. LIGHT BENTO GRID ========== */}
+      <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-[2px] text-[#4F46E5] uppercase mb-4">Features</p>
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-gray-950 mb-4 max-w-3xl">Know more about your prospects than they expect.</h2>
+          <p className="text-lg text-gray-500 mb-12 max-w-2xl">One platform replaces your lead scraper, email tool, LinkedIn outreach and AI calling software.</p>
+
+          <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-6 lg:grid-rows-2 lp-bento">
+
+            {/* Card 1: Lead Database */}
+            <div className="relative lg:col-span-3 rounded-tl-[2rem] rounded-tr-[2rem] lg:rounded-tr-none rounded-bl-[2rem] rounded-br-[2rem] lg:rounded-bl-[2rem] lg:rounded-br-none overflow-hidden bg-white ring-1 ring-black/5 shadow-sm flex flex-col lp-bento-card">
+              <div className="absolute inset-px rounded-tl-[2rem] lg:rounded-tr-none lg:rounded-bl-[2rem] bg-white" />
+              <div className="relative h-80 flex-shrink-0 overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      {['Company','Status','Intent'].map(h => <th key={h} className="px-4 py-3 text-[10px] font-bold text-[#4F46E5] uppercase tracking-wide">{h}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      {company:'Dunmore Dental Care',role:'Practice Owner',status:'CONTACTED',sc:'bg-amber-50 text-amber-700',intent:'Hot - 63',ic:'bg-red-50 text-red-600'},
+                      {company:'Smile Clinic Northwest',role:'Clinical Director',status:'REPLIED',sc:'bg-emerald-50 text-emerald-700',intent:'Hot - 95',ic:'bg-red-50 text-red-600'},
+                      {company:'Bright Smile Kent',role:'Practice Owner',status:'CONTACTED',sc:'bg-amber-50 text-amber-700',intent:'Hot - 76',ic:'bg-red-50 text-red-600'},
+                    ].map((row,i) => (
+                      <tr key={i} className="border-b border-gray-50">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-gray-900">{row.company}</span>
+                            <span className="px-1 py-0.5 bg-emerald-50 text-emerald-700 text-[8px] font-bold rounded">ENRICHED</span>
+                          </div>
+                          <div className="text-[10px] text-[#4F46E5] font-medium">{row.role}</div>
+                        </td>
+                        <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-[10px] font-bold ${row.sc}`}>{row.status}</span></td>
+                        <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${row.ic}`}>{row.intent}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-50% pointer-events-none" />
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-1">Lead database</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-950 mb-2">271 enriched leads ready to contact</p>
+                <p className="text-sm text-gray-500 leading-relaxed">Verified emails, phone numbers, intent scores and decision maker contacts. Filter by Hot, Warm or Cool in one click.</p>
+              </div>
+            </div>
+
+            {/* Card 2: Campaign Builder */}
+            <div className="relative lg:col-span-3 rounded-[2rem] lg:rounded-tl-none lg:rounded-bl-none overflow-hidden bg-white ring-1 ring-black/5 shadow-sm flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 overflow-hidden p-5">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {['1 Campaign details','2 Advanced targeting','3 Intent filters','4 Data enrichment','5 Outreach config'].map((step,i) => (
+                    <div key={i} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold ${i===0 ? 'bg-[#4F46E5] text-white' : 'bg-[#EEF2FF] text-[#4F46E5]'}`}>
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${i===0 ? 'bg-white/20 text-white' : 'bg-[#4F46E5]/15 text-[#4F46E5]'}`}>{i+1}</span>
+                      {step.slice(2)}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  {['Local Businesses','B2B Services','Custom Search'].map((t,i) => (
+                    <div key={i} className={`flex-1 py-3 px-3 rounded-xl border text-xs font-semibold text-center ${i===1 ? 'border-[#4F46E5] bg-[#EEF2FF] text-[#4F46E5]' : 'border-gray-200 text-gray-500'}`}>{t}</div>
+                  ))}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-50% pointer-events-none" />
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-1">Campaign builder</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-950 mb-2">Launch a campaign in 3 minutes</p>
+                <p className="text-sm text-gray-500 leading-relaxed">5 step wizard. Pick industry, location, intent filters, enrichment and outreach strategy. Leadomation handles the rest.</p>
+              </div>
+            </div>
+
+            {/* Card 3: Intent Scoring */}
+            <div className="relative lg:col-span-2 rounded-[2rem] lg:rounded-tl-none lg:rounded-tr-none lg:rounded-br-none overflow-hidden bg-white ring-1 ring-black/5 shadow-sm flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                <div className="flex flex-col gap-3">
+                  {[
+                    {label:'Hot',score:'95',bg:'bg-red-50',border:'border-red-100',color:'text-red-600',emoji:'\u{1F525}'},
+                    {label:'Warm',score:'72',bg:'bg-amber-50',border:'border-amber-100',color:'text-amber-600',emoji:'\u26A1'},
+                    {label:'Cool',score:'45',bg:'bg-blue-50',border:'border-blue-100',color:'text-blue-600',emoji:'\u{1F4A7}'},
+                  ].map((pill,i) => (
+                    <div key={i} className={`w-56 h-14 rounded-2xl ${pill.bg} border ${pill.border} flex items-center px-5 gap-3`}>
+                      <span className="text-xl">{pill.emoji}</span>
+                      <span className={`text-lg font-bold ${pill.color} flex-1`}>{pill.label}</span>
+                      <span className={`text-lg font-bold ${pill.color}`}>{pill.score}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-50% pointer-events-none" />
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-1">Intent scoring</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-950 mb-2">Know who is ready to buy</p>
+                <p className="text-sm text-gray-500 leading-relaxed">Every lead scored automatically based on buying signals, reviews and online presence.</p>
+              </div>
+            </div>
+
+            {/* Card 4: AI Voice */}
+            <div className="relative lg:col-span-2 rounded-[2rem] lg:rounded-none overflow-hidden bg-[#1E1B4B] ring-1 ring-white/10 shadow-sm flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative w-16 h-16 rounded-full bg-[#22D3EE]/15 flex items-center justify-center">
+                    <svg className="w-8 h-8 text-[#22D3EE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                    </svg>
+                    <div className="absolute inset-[-8px] rounded-full border-2 border-[#22D3EE]/25 animate-ping" />
+                  </div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-sm font-semibold text-white">AI Call Agent</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B4B] to-transparent to-50% pointer-events-none" />
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-white/40 uppercase mb-1">AI voice calling</p>
+                <p className="text-2xl font-bold tracking-tight text-white mb-2">Your AI agent calls prospects 24/7</p>
+                <p className="text-sm text-white/60 leading-relaxed">Handles objections, answers questions and books meetings directly into your calendar.</p>
+              </div>
+            </div>
+
+            {/* Card 5: LinkedIn */}
+            <div className="relative lg:col-span-2 rounded-[2rem] lg:rounded-tl-none lg:rounded-tr-none lg:rounded-bl-none overflow-hidden bg-white ring-1 ring-black/5 shadow-sm flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 flex items-center justify-center overflow-hidden px-4">
+                <div className="flex items-center gap-0">
+                  {[
+                    {n:'1',label:'Silent\nAwareness',active:true},
+                    {n:'2',label:'Connection',active:false},
+                    {n:'3',label:'Warm\nThanks',active:false},
+                    {n:'4',label:'Advice\nAsk',active:false},
+                    {n:'5',label:'Follow\nUp',active:false},
+                    {n:'6',label:'Soft\nOffer',active:false},
+                  ].map((p,i,arr) => (
+                    <React.Fragment key={p.n}>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white ${p.active ? 'bg-[#4F46E5]' : 'bg-gray-200'}`}>{p.n}</div>
+                        <span className="text-[9px] text-gray-400 text-center whitespace-pre-line leading-tight max-w-[52px]">{p.label}</span>
+                      </div>
+                      {i < arr.length-1 && <div className="w-4 h-px bg-gray-200 mb-5 flex-shrink-0" />}
+                    </React.Fragment>
+                  ))}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-50% pointer-events-none" />
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-1">LinkedIn sequencer</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-950 mb-2">35 day LinkedIn funnel on autopilot</p>
+                <p className="text-sm text-gray-500 leading-relaxed">Silent Awareness through to Soft Offer. Runs automatically, builds trust before making any ask.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ========== 10. DARK BENTO GRID ========== */}
+      <div className="mx-2 mt-2 rounded-[2rem] bg-[#0F172A] py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-[2px] text-white/40 uppercase mb-4">Outreach</p>
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white mb-12 max-w-2xl">Close deals faster with AI.</h2>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-6 lg:grid-rows-2 lp-bento">
+
+            {/* Inbox */}
+            <div className="relative lg:col-span-4 rounded-tl-[2rem] rounded-tr-[2rem] lg:rounded-tr-none rounded-bl-[2rem] lg:rounded-bl-[2rem] rounded-br-[2rem] lg:rounded-br-none overflow-hidden bg-[#1E293B] ring-1 ring-white/8 flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1E293B] to-transparent to-40% z-10 pointer-events-none" />
+                <div className="flex h-full m-3 rounded-lg overflow-hidden bg-white/5">
+                  <div className="w-[45%] border-r border-white/5">
+                    {[
+                      {name:'London Smile Studio',status:'Interested',sc:'text-emerald-400 bg-emerald-400/15',active:true},
+                      {name:'Smile Clinic NW',status:'Interested',sc:'text-emerald-400 bg-emerald-400/15',active:false},
+                      {name:'Blackwell Partners',status:'Interested',sc:'text-emerald-400 bg-emerald-400/15',active:false},
+                      {name:'Forsyth Family Law',status:'Not interested',sc:'text-red-400 bg-red-400/15',active:false},
+                    ].map((item,i) => (
+                      <div key={i} className={`px-3 py-2.5 border-b border-white/5 ${item.active ? 'bg-[#4F46E5]/15' : ''}`}>
+                        <div className="text-xs font-semibold text-white mb-1">{item.name}</div>
+                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${item.sc}`}>{item.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex-1 p-3 bg-white/2">
+                    <div className="text-xs font-semibold text-white mb-2">From: London Smile Studio</div>
+                    <p className="text-[11px] text-white/40 leading-relaxed">Hi, thanks for reaching out. We have been looking for exactly this kind of service. Could we schedule a call this week?</p>
+                  </div>
+                </div>
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-white/35 uppercase mb-1">Inbox</p>
+                <p className="text-2xl font-bold text-white mb-2">Every reply classified automatically</p>
+                <p className="text-sm text-white/50 leading-relaxed">AI reads every email and LinkedIn reply. Interested, Not Interested or Out of Office. Hot leads pushed to your pipeline instantly.</p>
+              </div>
+            </div>
+
+            {/* Deal Pipeline */}
+            <div className="relative lg:col-span-2 rounded-[2rem] lg:rounded-tl-none lg:rounded-bl-none overflow-hidden bg-[#1E293B] ring-1 ring-white/8 flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1E293B] to-transparent to-40% z-10 pointer-events-none" />
+                <div className="flex gap-1.5 p-3 h-full">
+                  {[
+                    {title:'New Reply',color:'#22D3EE',card:'Owen Dental',val:'\u00A3850'},
+                    {title:'Qualified',color:'#4F46E5',card:'Donovan Sol.',val:'\u00A3950'},
+                    {title:'Proposal',color:'#3B82F6',card:'Carter Law',val:'\u00A31,200'},
+                    {title:'Negotiating',color:'#F59E0B',card:'Apex Fin.',val:'\u00A32,100'},
+                    {title:'Won',color:'#10B981',card:'Smile Clinic',val:'\u00A31,500'},
+                    {title:'Lost',color:'#EF4444',card:'',val:''},
+                  ].map((col,i) => (
+                    <div key={i} className="flex-1 min-w-0">
+                      <div className="text-[7px] font-bold uppercase tracking-wide pb-1 mb-1 truncate" style={{borderBottom: `2px solid ${col.color}`, color: col.color}}>{col.title}</div>
+                      {col.card && (
+                        <div className="bg-white/6 rounded p-1.5">
+                          <div className="text-[8px] text-white/65">{col.card}</div>
+                          <div className="text-[8px] font-bold text-[#22D3EE]">{col.val}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-white/35 uppercase mb-1">Deal pipeline</p>
+                <p className="text-2xl font-bold text-white mb-2">Built in CRM</p>
+                <p className="text-sm text-white/50 leading-relaxed">Kanban pipeline with 6 stages. \u00A315,600 total pipeline value tracked automatically.</p>
+              </div>
+            </div>
+
+            {/* Keyword Monitor */}
+            <div className="relative lg:col-span-2 rounded-[2rem] lg:rounded-tl-none lg:rounded-tr-none lg:rounded-br-none overflow-hidden bg-[#1E293B] ring-1 ring-white/8 flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 flex flex-col justify-center gap-3 p-5 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1E293B] to-transparent to-40% z-10 pointer-events-none" />
+                {[
+                  {header:'Active monitor 1', chips:['law firm marketing','legal SEO']},
+                  {header:'Active monitor 2', chips:['solicitor client acquisition','law firm growth']},
+                ].map((monitor,i) => (
+                  <div key={i} className="bg-white/6 rounded-xl p-3">
+                    <div className="text-[10px] font-semibold text-white/35 uppercase tracking-wide mb-2">{monitor.header}</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {monitor.chips.map(chip => (
+                        <span key={chip} className="px-2.5 py-1 bg-[#4F46E5]/20 border border-[#4F46E5]/30 rounded-full text-[11px] text-white/75">{chip}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-white/35 uppercase mb-1">Keyword monitor</p>
+                <p className="text-2xl font-bold text-white mb-2">Catch buyers on LinkedIn</p>
+                <p className="text-sm text-white/50 leading-relaxed">Monitor keywords every 2 hours. Prospects posting about your service get auto enrolled as hot leads.</p>
+              </div>
+            </div>
+
+            {/* Performance Analyser */}
+            <div className="relative lg:col-span-4 rounded-bl-[2rem] rounded-br-[2rem] lg:rounded-tl-none lg:rounded-bl-none overflow-hidden bg-[#1E293B] ring-1 ring-white/8 flex flex-col lp-bento-card">
+              <div className="relative h-80 flex-shrink-0 flex items-center gap-8 p-8 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1E293B] to-transparent to-40% z-10 pointer-events-none" />
+                <div className="relative w-24 h-24 flex-shrink-0">
+                  <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
+                    <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8"/>
+                    <circle cx="48" cy="48" r="40" fill="none" stroke="#4F46E5" strokeWidth="8" strokeDasharray="251.2" strokeDashoffset="55.3" strokeLinecap="round"/>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white">78</div>
+                </div>
+                <div className="flex-1 space-y-3">
+                  {[
+                    {label:'Subject lines with questions',color:'bg-[#4F46E5]',w:'w-[82%]'},
+                    {label:'Personalised openers',color:'bg-[#22D3EE]',w:'w-[65%]'},
+                    {label:'Generic templates',color:'bg-[#3B82F6]',w:'w-[30%]'},
+                  ].map((bar,i) => (
+                    <div key={i}>
+                      <div className="text-[10px] text-white/45 mb-1">{bar.label}</div>
+                      <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
+                        <div className={`h-full ${bar.color} ${bar.w} rounded-full`} />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex gap-2 pt-1">
+                    {['Tuesday to Thursday best','More personalisation needed'].map(pill => (
+                      <span key={pill} className="px-2.5 py-1 bg-[#4F46E5]/15 rounded-full text-[10px] text-white/60">{pill}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="relative p-8">
+                <p className="text-xs font-bold tracking-wider text-white/35 uppercase mb-1">Performance analyser</p>
+                <p className="text-2xl font-bold text-white mb-2">Gets smarter every campaign</p>
+                <p className="text-sm text-white/50 leading-relaxed">Studies your email data every 6 hours. Sends personalised improvement reports. The longer you use it, the better your results.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {/* ========== 11. LEAD INTELLIGENCE ========== */}
+      <section className="py-24 bg-gradient-to-br from-[#F8FAFF] via-[#EEF2FF] to-[#F0FFFE] lp-intel-section">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div>
+              <p className="text-sm font-bold tracking-[2px] text-[#4F46E5] uppercase mb-4">Lead intelligence</p>
+              <h2 className="text-4xl font-black tracking-tight text-gray-950 leading-tight mb-6">Stop guessing what to say. Know everything before you reach out.</h2>
+              <p className="text-gray-500 leading-relaxed mb-6">Before you send a single word, Leadomation already knows your prospect's pain point, their Google rating, their recent business expansion and exactly what subject line will get them to open. Lead Intelligence generates a full research report for every prospect in seconds.</p>
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-[#22D3EE]/10 border border-[#22D3EE]/25 text-sm font-semibold text-[#097B8F]">Pro feature</span>
+            </div>
+            <div className="bg-white rounded-[2rem] p-8 shadow-xl ring-1 ring-[#4F46E5]/8">
+              <p className="text-xs font-bold tracking-[1.5px] text-gray-400 uppercase mb-5">Lead Intelligence Report</p>
+              {[
+                {label:'Opportunity rating', value: <span className="px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold">Hot</span>},
+                {label:'Pain intensity', value: <div><div className="text-sm text-gray-800 mb-2">7 / 10</div><div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full w-[70%] bg-gradient-to-r from-[#4F46E5] to-[#22D3EE] rounded-full"/></div></div>},
+                {label:'Pain point', value: 'No online booking system. Losing walk in customers to competitors with digital scheduling.'},
+                {label:'Outreach angle', value: 'Position as a quick win digital upgrade. Reference their 4.8 star Google rating.'},
+                {label:'Personalisation hook', value: 'Mention their recent expansion to a second location.'},
+                {label:'Suggested subject line', value: <span className="text-[#06B6D4] font-semibold">Quick fix for your booking gap</span>},
+                {label:'Suggested opening line', value: <span className="text-[#4F46E5] font-semibold">I noticed your second location just opened...</span>},
+              ].map((row,i) => (
+                <div key={i} className="mb-4 lp-intel-field">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">{row.label}</div>
+                  <div className="text-sm text-gray-700 leading-relaxed">{row.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========== 12. STATS BAR ========== */}
+      <section className="py-20 bg-gradient-to-r from-[#4F46E5] to-[#1E1B4B]">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <dl className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            {[
+              {value:'500+', label:'Leads found per campaign'},
+              {value:'35', label:'Day LinkedIn relationship funnel'},
+              {value:'6hrs', label:'Between performance report updates'},
+              {value:'8', label:'Step AI call script builder'},
+            ].map((stat,i) => (
+              <div key={i} className="flex flex-col gap-2">
+                <dd className="text-5xl sm:text-6xl font-black text-white tracking-tight">{stat.value}</dd>
+                <dt className="text-sm text-white/60 leading-snug max-w-[160px] mx-auto">{stat.label}</dt>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* ========== 13. TESTIMONIALS ========== */}
+      <section className="py-24 bg-white">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-bold tracking-[2px] text-[#4F46E5] uppercase mb-4">What people are saying</p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-gray-950">Real results from real businesses.</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lp-testimonial-grid">
+            {[
+              {accent:'bg-[#4F46E5]', quote:'We booked 14 discovery calls in our first month. We had been trying to do this manually for two years and never got close to those numbers.', name:'Sarah Mitchell', role:'Director, Apex Digital Agency', initials:'SM', avatarBg:'bg-[#4F46E5]'},
+              {accent:'bg-[#22D3EE]', quote:'The intent scoring alone is worth the subscription. We stopped wasting time on leads that were never going to buy and focused only on Hot prospects.', name:'James Hartley', role:'Partner, Hartley Commercial Solicitors', initials:'JH', avatarBg:'bg-[#06B6D4]'},
+              {accent:'bg-[#3B82F6]', quote:'I set up one campaign on a Monday morning. By Wednesday my AI agent had already booked two calls. I have never seen anything work that fast.', name:'Priya Anand', role:'Founder, Anand Consulting', initials:'PA', avatarBg:'bg-[#3B82F6]'},
+            ].map((t,i) => (
+              <div key={i} className="relative bg-white rounded-[2rem] border border-black/5 p-10 shadow-sm overflow-hidden lp-testimonial-card">
+                <div className={`absolute top-0 left-0 right-0 h-1 ${t.accent}`} />
+                <div className="absolute top-5 right-6 text-7xl leading-none text-[#4F46E5]/8 font-serif select-none">"</div>
+                <p className="text-base text-gray-600 leading-relaxed italic mb-8">{t.quote}</p>
+                <div className="border-t border-gray-100 pt-5 flex items-center gap-4">
+                  <div className={`w-11 h-11 rounded-full ${t.avatarBg} flex items-center justify-center text-sm font-bold text-white flex-shrink-0`}>{t.initials}</div>
+                  <div>
+                    <div className="font-bold text-gray-900 text-sm">{t.name}</div>
+                    <div className="text-xs text-gray-500">{t.role}</div>
                   </div>
                 </div>
               </div>
@@ -1006,62 +863,64 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       </section>
 
       {/* ========== 14. SWIRL DIVIDER ========== */}
-      <section className="lp-swirl-divider">
-        <div className="lp-swirl-blob lp-swirl-blob-1" />
-        <div className="lp-swirl-blob lp-swirl-blob-2" />
-        <div className="lp-swirl-blob lp-swirl-blob-3" />
-        <div className="lp-swirl-text">
-          <p className="lp-swirl-quote">"The longer you use Leadomation, the better your results get."</p>
-          <p className="lp-swirl-sub">Campaign Performance Analyser studies your data every 6 hours and sends personalised improvement reports.</p>
+      <section className="relative h-64 overflow-hidden bg-gradient-to-r from-[#1E1B4B] via-[#0F172A] to-[#097B8F] flex items-center justify-center">
+        <div className="absolute w-96 h-96 rounded-full bg-[#4F46E5]/20 blur-3xl -top-20 left-[10%]" />
+        <div className="absolute w-80 h-80 rounded-full bg-[#22D3EE]/15 blur-3xl -bottom-20 right-[20%]" />
+        <div className="relative z-10 text-center px-6">
+          <p className="text-xl sm:text-2xl font-bold italic text-white mb-3">"The longer you use Leadomation, the better your results get."</p>
+          <p className="text-sm text-white/50">Campaign Performance Analyser studies your data every 6 hours and sends personalised improvement reports.</p>
         </div>
       </section>
 
       {/* ========== 15. PRICING ========== */}
-      <section className="lp-pricing" id="pricing">
-        <div className="lp-container">
-          <div className="lp-pricing-header">
-            <div className="lp-section-eyebrow indigo lp-gsap-fade" style={{ textAlign: 'center' }}>PRICING</div>
-            <h2 className="lp-section-heading lp-gsap-fade" style={{ textAlign: 'center', maxWidth: 'none' }}>Simple, transparent pricing.</h2>
-            <p className="lp-pricing-sub lp-gsap-fade">Start free. Upgrade when you are ready. No lock in contracts.</p>
-            <div className="lp-pricing-toggle lp-gsap-fade">
-              <button className={`lp-toggle-option ${!annual ? 'active' : ''}`} onClick={() => setAnnual(false)}>Monthly</button>
-              <button className={`lp-toggle-option ${annual ? 'active' : ''}`} onClick={() => setAnnual(true)}>
-                Annual <span className="lp-toggle-save">20% off</span>
+      <section className="py-24 bg-gray-50" id="pricing">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-bold tracking-[2px] text-[#4F46E5] uppercase mb-4 lp-gsap-fade">Pricing</p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-gray-950 mb-6 lp-gsap-fade">Simple, transparent pricing.</h2>
+            <p className="text-lg text-gray-500 mb-8 lp-gsap-fade">Start free. Upgrade when you are ready. No lock in contracts.</p>
+            <div className="inline-flex items-center bg-white rounded-full p-1 border border-gray-200 lp-gsap-fade">
+              <button className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${!annual ? 'bg-[#4F46E5] text-white' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => setAnnual(false)}>Monthly</button>
+              <button className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${annual ? 'bg-[#4F46E5] text-white' : 'text-gray-500 hover:text-gray-700'}`} onClick={() => setAnnual(true)}>
+                Annual <span className="text-xs ml-1 text-emerald-500 font-bold">20% off</span>
               </button>
             </div>
           </div>
 
-          <div className="lp-pricing-grid">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Starter */}
-            <div className="lp-price-card lp-gsap-fade">
-              <div className="lp-price-who">Perfect for individuals and small teams</div>
-              <div className="lp-price-name">Starter</div>
-              <div className="lp-price-amount">
-                <span className="lp-price-currency">&pound;</span>
-                <span className="lp-price-value">{annual ? '47' : '59'}</span>
-                <span className="lp-price-period">/mo</span>
+            <div className="bg-white rounded-[2rem] ring-1 ring-black/5 shadow-sm p-8 flex flex-col lp-gsap-fade">
+              <p className="text-xs text-gray-500 mb-2">Perfect for individuals and small teams</p>
+              <h3 className="text-xl font-bold text-gray-950 mb-4">Starter</h3>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-sm font-medium text-gray-500">&pound;</span>
+                <span className="text-5xl font-black text-gray-950 tracking-tight">{annual ? '47' : '59'}</span>
+                <span className="text-sm text-gray-500">/mo</span>
               </div>
-              <div className="lp-price-annual-note">{annual ? 'Billed annually at \u00A3566' : 'Billed monthly'}</div>
-              <ul className="lp-price-features">
+              <p className="text-xs text-gray-400 mb-6">{annual ? 'Billed annually at \u00A3566' : 'Billed monthly'}</p>
+              <ul className="space-y-3 mb-8 flex-1">
                 {['500 leads per month', 'Email sequences', 'Basic enrichment', 'Lead scoring', 'Email support'].map((f, i) => (
-                  <li key={i}><span className="lp-price-check">&#10003;</span> {f}</li>
+                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-[#4F46E5] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                    {f}
+                  </li>
                 ))}
               </ul>
-              <button className="lp-price-cta outline" onClick={() => onNavigate('Register')}>Start free trial</button>
+              <button className="w-full rounded-full border-2 border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors" onClick={() => onNavigate('Register')}>Start free trial</button>
             </div>
 
             {/* Pro */}
-            <div className="lp-price-card popular lp-gsap-fade">
-              <div className="lp-price-popular-badge">Most popular</div>
-              <div className="lp-price-who">For growing businesses serious about outreach</div>
-              <div className="lp-price-name">Pro</div>
-              <div className="lp-price-amount">
-                <span className="lp-price-currency">&pound;</span>
-                <span className="lp-price-value">{annual ? '127' : '159'}</span>
-                <span className="lp-price-period">/mo</span>
+            <div className="bg-white rounded-[2rem] ring-2 ring-[#4F46E5] shadow-sm p-8 flex flex-col relative lp-gsap-fade">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#4F46E5] text-xs font-bold text-white">Most popular</div>
+              <p className="text-xs text-gray-500 mb-2">For growing businesses serious about outreach</p>
+              <h3 className="text-xl font-bold text-gray-950 mb-4">Pro</h3>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-sm font-medium text-gray-500">&pound;</span>
+                <span className="text-5xl font-black text-gray-950 tracking-tight">{annual ? '127' : '159'}</span>
+                <span className="text-sm text-gray-500">/mo</span>
               </div>
-              <div className="lp-price-annual-note">{annual ? 'Billed annually at \u00A31,526' : 'Billed monthly'}</div>
-              <ul className="lp-price-features">
+              <p className="text-xs text-gray-400 mb-6">{annual ? 'Billed annually at \u00A31,526' : 'Billed monthly'}</p>
+              <ul className="space-y-3 mb-8 flex-1">
                 {[
                   '2,000 leads per month',
                   'Everything in Starter',
@@ -1072,49 +931,55 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
                   'Campaign Performance Analyser',
                   'Priority support',
                 ].map((f, i) => (
-                  <li key={i}><span className="lp-price-check">&#10003;</span> {f}</li>
+                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-[#4F46E5] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                    {f}
+                  </li>
                 ))}
               </ul>
-              <button className="lp-price-cta primary" onClick={() => onNavigate('Register')}>Start free trial</button>
+              <button className="w-full rounded-full bg-[#4F46E5] px-6 py-3 text-sm font-semibold text-white hover:bg-[#4338CA] transition-colors" onClick={() => onNavigate('Register')}>Start free trial</button>
             </div>
 
             {/* Scale */}
-            <div className="lp-price-card greyed lp-gsap-fade">
-              <div className="lp-price-who">For agencies and high volume teams</div>
-              <div className="lp-price-name">Scale</div>
-              <div className="lp-price-amount">
-                <span className="lp-price-currency">&pound;</span>
-                <span className="lp-price-value">{annual ? '287' : '359'}</span>
-                <span className="lp-price-period">/mo</span>
+            <div className="bg-white rounded-[2rem] ring-1 ring-black/5 shadow-sm p-8 flex flex-col opacity-60 lp-gsap-fade">
+              <p className="text-xs text-gray-500 mb-2">For agencies and high volume teams</p>
+              <h3 className="text-xl font-bold text-gray-950 mb-4">Scale</h3>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-sm font-medium text-gray-500">&pound;</span>
+                <span className="text-5xl font-black text-gray-950 tracking-tight">{annual ? '287' : '359'}</span>
+                <span className="text-sm text-gray-500">/mo</span>
               </div>
-              <div className="lp-price-annual-note">Coming soon</div>
-              <ul className="lp-price-features">
+              <p className="text-xs text-gray-400 mb-6">Coming soon</p>
+              <ul className="space-y-3 mb-8 flex-1">
                 {['Unlimited leads', 'Everything in Pro', 'Dedicated account manager', 'Custom integrations', 'SLA guarantee'].map((f, i) => (
-                  <li key={i}><span className="lp-price-check">&#10003;</span> {f}</li>
+                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                    {f}
+                  </li>
                 ))}
               </ul>
-              <button className="lp-price-cta waitlist">Join waitlist</button>
+              <button className="w-full rounded-full border-2 border-gray-200 px-6 py-3 text-sm font-semibold text-gray-400 cursor-not-allowed">Join waitlist</button>
             </div>
           </div>
         </div>
       </section>
 
       {/* ========== 16. FAQ ========== */}
-      <section className="lp-faq" id="faq">
-        <div className="lp-container">
-          <div className="lp-faq-header">
-            <h2 className="lp-section-heading lp-gsap-fade" style={{ textAlign: 'center', maxWidth: 'none' }}>Frequently asked questions</h2>
-          </div>
-          <div className="lp-faq-list">
+      <section className="py-24 bg-white" id="faq">
+        <div className="mx-auto max-w-3xl px-6 lg:px-8">
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-gray-950 text-center mb-16 lp-gsap-fade">Frequently asked questions</h2>
+          <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <div key={i} className={`lp-faq-item lp-gsap-fade ${openFaq === i ? 'open' : ''}`}>
-                <button className="lp-faq-question" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                  {faq.q}
-                  <span className="lp-faq-chevron">&#9662;</span>
+              <div key={i} className={`rounded-xl border border-gray-200 overflow-hidden lp-gsap-fade`}>
+                <button className="w-full flex items-center justify-between px-6 py-4 text-left" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                  <span className="text-sm font-semibold text-gray-900">{faq.q}</span>
+                  <svg className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
                 </button>
-                <div className="lp-faq-answer">
-                  <p>{faq.a}</p>
-                </div>
+                {openFaq === i && (
+                  <div className="px-6 pb-4">
+                    <p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -1122,58 +987,56 @@ const LandingPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => 
       </section>
 
       {/* ========== 17. FINAL CTA ========== */}
-      <div className="lp-cta-wrapper">
-        <section className="lp-cta">
-          <div className="lp-cta-eyebrow lp-gsap-fade">GET STARTED</div>
-          <h2 className="lp-gsap-fade">Your pipeline won't fill itself.</h2>
-          <p className="lp-cta-sub lp-gsap-fade">
-            Start your 7 day free trial today. No credit card required for the first 7 days.
-          </p>
-          <button className="lp-cta-btn lp-gsap-fade" onClick={() => onNavigate('Register')}>
+      <section className="px-2 pb-2">
+        <div className="rounded-[2rem] overflow-hidden bg-gradient-to-br from-[#4F46E5] to-[#1E1B4B] py-24 px-6 text-center">
+          <p className="text-sm font-bold tracking-[2px] text-white/50 uppercase mb-6">Get started</p>
+          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight mb-6">Your pipeline<br />won't fill itself.</h2>
+          <p className="text-lg text-white/65 max-w-md mx-auto mb-10">Start your 7 day free trial today. No credit card required for the first 7 days.</p>
+          <button onClick={() => onNavigate('Register')} className="rounded-full bg-white px-10 py-4 text-base font-bold text-[#4F46E5] hover:bg-gray-50 transition-all hover:-translate-y-0.5 shadow-lg">
             Start your free trial
           </button>
-          <p className="lp-cta-note lp-gsap-fade">No credit card required for first 7 days</p>
-        </section>
-      </div>
+          <p className="text-xs text-white/35 mt-5">No credit card required for first 7 days</p>
+        </div>
+      </section>
 
       {/* ========== 18. FOOTER ========== */}
-      <footer className="lp-footer">
-        <div className="lp-container">
-          <div className="lp-footer-grid">
-            <div className="lp-footer-brand">
-              <img src={logoDark} alt="Leadomation" />
-              <p className="lp-footer-tagline">
+      <footer className="bg-[#0F172A] py-16 px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div className="col-span-2 lg:col-span-1">
+              <img src={logoDark} alt="Leadomation" className="h-8 w-auto mb-4 brightness-0 invert" />
+              <p className="text-sm text-white/40 leading-relaxed">
                 B2B lead generation and outreach automation. Find leads, enrich contacts and close deals on autopilot.
               </p>
             </div>
             <div>
-              <div className="lp-footer-col-title">Product</div>
-              <div className="lp-footer-links">
-                <a href="#features" onClick={(e) => { e.preventDefault(); scrollTo('features'); }}>Features</a>
-                <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollTo('pricing'); }}>Pricing</a>
-                <a href="#how" onClick={(e) => { e.preventDefault(); scrollTo('how'); }}>How it works</a>
-                <Link to="/blog">Blog</Link>
+              <h4 className="text-xs font-bold tracking-wider text-white/60 uppercase mb-4">Product</h4>
+              <div className="flex flex-col gap-2.5">
+                <button onClick={() => scrollTo('features')} className="text-sm text-white/40 hover:text-white transition-colors text-left">Features</button>
+                <button onClick={() => scrollTo('pricing')} className="text-sm text-white/40 hover:text-white transition-colors text-left">Pricing</button>
+                <button onClick={() => scrollTo('how')} className="text-sm text-white/40 hover:text-white transition-colors text-left">How it works</button>
+                <Link to="/blog" className="text-sm text-white/40 hover:text-white transition-colors">Blog</Link>
               </div>
             </div>
             <div>
-              <div className="lp-footer-col-title">Company</div>
-              <div className="lp-footer-links">
-                <a href="#" onClick={(e) => e.preventDefault()}>About</a>
-                <a href="#" onClick={(e) => e.preventDefault()}>Contact</a>
-                <a href="#" onClick={(e) => e.preventDefault()}>Careers</a>
+              <h4 className="text-xs font-bold tracking-wider text-white/60 uppercase mb-4">Company</h4>
+              <div className="flex flex-col gap-2.5">
+                <a href="#" onClick={(e) => e.preventDefault()} className="text-sm text-white/40 hover:text-white transition-colors">About</a>
+                <a href="#" onClick={(e) => e.preventDefault()} className="text-sm text-white/40 hover:text-white transition-colors">Contact</a>
+                <a href="#" onClick={(e) => e.preventDefault()} className="text-sm text-white/40 hover:text-white transition-colors">Careers</a>
               </div>
             </div>
             <div>
-              <div className="lp-footer-col-title">Legal</div>
-              <div className="lp-footer-links">
-                <button onClick={() => onNavigate('Privacy')}>Privacy Policy</button>
-                <button onClick={() => onNavigate('Terms')}>Terms of Service</button>
-                <a href="#" onClick={(e) => e.preventDefault()}>Cookie Policy</a>
+              <h4 className="text-xs font-bold tracking-wider text-white/60 uppercase mb-4">Legal</h4>
+              <div className="flex flex-col gap-2.5">
+                <button onClick={() => onNavigate('Privacy')} className="text-sm text-white/40 hover:text-white transition-colors text-left">Privacy Policy</button>
+                <button onClick={() => onNavigate('Terms')} className="text-sm text-white/40 hover:text-white transition-colors text-left">Terms of Service</button>
+                <a href="#" onClick={(e) => e.preventDefault()} className="text-sm text-white/40 hover:text-white transition-colors">Cookie Policy</a>
               </div>
             </div>
           </div>
-          <div className="lp-footer-bottom">
-            &copy; 2026 Leadomation by Lumarr Ltd. All rights reserved.
+          <div className="border-t border-white/10 pt-8 text-center">
+            <p className="text-xs text-white/30">&copy; 2026 Leadomation by Lumarr Ltd. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -21,6 +21,8 @@
   --color-border-color: #E2E8F0;
 
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --radius-4xl: 2rem;
+  --font-display: 'Switzer', system-ui, sans-serif;
 
   --shadow-subtle: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -200,6 +202,11 @@
 
   .pulse-soft {
     animation: pulse-soft 2s ease-in-out infinite;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 }
 
