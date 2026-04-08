@@ -54,32 +54,29 @@
 
 @keyframes block-float {
   0%, 100% {
-    transform: translateY(0px) translateX(0px);
+    transform: translateY(0px);
     filter: brightness(1);
   }
-  25% {
-    transform: translateY(-10px) translateX(3px);
-    filter: brightness(1.08);
+  40% {
+    transform: translateY(-7px);
+    filter: brightness(1.06);
   }
-  50% {
-    transform: translateY(-6px) translateX(-2px);
-    filter: brightness(0.96);
-  }
-  75% {
-    transform: translateY(-14px) translateX(4px);
-    filter: brightness(1.04);
+  70% {
+    transform: translateY(-3px);
+    filter: brightness(0.97);
   }
 }
 
 .color-block {
   animation: block-float 7s ease-in-out infinite;
+  transition: transform 0.3s ease;
 }
-.color-block-0 { animation-duration: 5.8s; }
-.color-block-1 { animation-duration: 7.4s; }
-.color-block-2 { animation-duration: 6.6s; }
-.color-block-3 { animation-duration: 8.1s; }
-.color-block-4 { animation-duration: 5.4s; }
-.color-block-5 { animation-duration: 7.9s; }
+.color-block-0 { animation-duration: 5.6s; }
+.color-block-1 { animation-duration: 7.2s; }
+.color-block-2 { animation-duration: 6.4s; }
+.color-block-3 { animation-duration: 8.0s; }
+.color-block-4 { animation-duration: 5.9s; }
+.color-block-5 { animation-duration: 7.6s; }
 
 @media (prefers-reduced-motion: reduce) {
   .blob-1, .blob-2, .blob-3, .float-a, .float-b, .float-c,

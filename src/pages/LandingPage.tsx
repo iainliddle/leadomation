@@ -3,128 +3,206 @@ import '../components/landing/landing.css'
 export default function LandingPage() {
   return (
     <div className="lp-body antialiased overflow-x-hidden">
-      {/* Section 1: Sticky Navigation */}
-      <header className="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm transition-all duration-300">
-        <nav className="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
-          <div className="flex items-center gap-8">
-            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-              <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'linear-gradient(135deg, #4F46E5, #22D3EE)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:'14px', color:'#fff', fontFamily:'Switzer, sans-serif'}}>L</div>
-              <span style={{fontWeight:700, fontSize:'18px', color:'#0f172a'}}>Leadomation</span>
-            </div>
-            <div className="hidden md:flex items-center gap-6">
-              <a className="font-['Switzer'] font-medium text-sm antialiased text-indigo-600 font-semibold transition-colors duration-200" href="#">Features</a>
-              <a className="font-['Switzer'] font-medium text-sm antialiased text-slate-600 hover:text-indigo-600 transition-colors duration-200" href="#">How it works</a>
-              <a className="font-['Switzer'] font-medium text-sm antialiased text-slate-600 hover:text-indigo-600 transition-colors duration-200" href="#">Pricing</a>
-              <a className="font-['Switzer'] font-medium text-sm antialiased text-slate-600 hover:text-indigo-600 transition-colors duration-200" href="#">FAQ</a>
+      {/* Section 1: Pill Navigation */}
+      <header style={{
+        position:'sticky', top:0, zIndex:50,
+        padding:'16px 24px',
+        background:'transparent',
+      }}>
+        <div style={{
+          maxWidth:'1200px',
+          margin:'0 auto',
+          display:'flex',
+          alignItems:'center',
+          justifyContent:'space-between',
+          background:'rgba(255,255,255,0.85)',
+          backdropFilter:'blur(16px)',
+          WebkitBackdropFilter:'blur(16px)',
+          borderRadius:'40px',
+          padding:'10px 10px 10px 20px',
+          border:'1px solid rgba(226,232,240,0.8)',
+          boxShadow:'0 4px 24px rgba(0,0,0,0.06)',
+        }}>
+          {/* Logo */}
+          <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+            <img
+              src="/src/assets/logo-full.png"
+              alt="Leadomation"
+              style={{height:'32px', width:'auto', objectFit:'contain'}}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.nextSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
+            />
+            {/* Fallback if image fails */}
+            <div style={{display:'none', alignItems:'center', gap:'8px'}}>
+              <div style={{width:'28px', height:'28px', borderRadius:'7px', background:'linear-gradient(135deg,#4F46E5,#22D3EE)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'13px', fontWeight:800, color:'#fff'}}>L</div>
+              <span style={{fontWeight:700, fontSize:'17px', color:'#0f172a'}}>Leadomation</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="text-slate-600 text-sm font-medium hover:text-indigo-600 active:scale-95 transition-all">Sign in</button>
-            <button className="bg-navy text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-ambient hover:opacity-90 active:scale-95 transition-all">Start free trial</button>
+          {/* Centre nav links in a pill */}
+          <div style={{
+            display:'flex', alignItems:'center', gap:'4px',
+            background:'rgba(248,250,252,0.8)',
+            borderRadius:'30px',
+            padding:'4px',
+            border:'1px solid rgba(226,232,240,0.6)',
+          }}>
+            {[
+              {label:'Home', active:true},
+              {label:'Features', active:false},
+              {label:'Pricing', active:false},
+              {label:'FAQ', active:false},
+            ].map(link => (
+              <a
+                key={link.label}
+                href={`#${link.label.toLowerCase()}`}
+                style={{
+                  padding:'7px 18px',
+                  borderRadius:'24px',
+                  fontSize:'14px',
+                  fontWeight:500,
+                  textDecoration:'none',
+                  background: link.active ? '#ffffff' : 'transparent',
+                  color: link.active ? '#0f172a' : '#64748b',
+                  boxShadow: link.active ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+                  transition:'all 0.15s ease',
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
-        </nav>
+          {/* Right side CTAs */}
+          <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+            <button style={{
+              padding:'8px 18px',
+              fontSize:'14px', fontWeight:500,
+              background:'transparent', border:'none',
+              color:'#64748b', cursor:'pointer',
+              fontFamily:'Switzer, sans-serif',
+            }}>Sign in</button>
+            <button style={{
+              padding:'10px 20px',
+              fontSize:'14px', fontWeight:600,
+              background:'#1E1B4B', color:'#fff',
+              border:'none', borderRadius:'30px',
+              cursor:'pointer', fontFamily:'Switzer, sans-serif',
+              boxShadow:'0 2px 8px rgba(30,27,75,0.25)',
+            }}>Start free trial</button>
+          </div>
+        </div>
       </header>
 
       {/* Section 2: Hero Section */}
-      <section className="relative overflow-hidden pt-24 pb-32">
-        <div style={{position:'absolute', inset:0, overflow:'hidden', zIndex:0, pointerEvents:'none'}}>
-          {/* Main block grid - bottom right, large, richly coloured like Synthio */}
+      <section className="relative overflow-hidden pb-32">
+        {/* TOP COLOUR BLOCK BAND - full width, positioned at very top of hero */}
+        <div style={{
+          position:'absolute',
+          top:0, left:0, right:0,
+          height:'340px',
+          overflow:'hidden',
+          zIndex:0,
+          pointerEvents:'none',
+        }}>
+          {/* Block grid - full width, top-aligned */}
           <div style={{
             position:'absolute',
-            right:'-80px',
-            bottom:'-40px',
+            top:'-20px',
+            left:'-20px',
+            right:'-20px',
             display:'grid',
-            gridTemplateColumns:'repeat(7, 100px)',
-            gridTemplateRows:'repeat(6, 100px)',
-            gap:'12px',
-            transform:'rotate(-2deg)',
+            gridTemplateColumns:'repeat(12, 1fr)',
+            gridTemplateRows:'repeat(3, 100px)',
+            gap:'10px',
+            padding:'0 10px',
           }}>
             {[
-              // Row 1
-              {g:'linear-gradient(135deg, rgba(199,210,254,0.6), rgba(167,139,250,0.4))', delay:0, scale:0.9},
-              {g:'linear-gradient(135deg, rgba(147,197,253,0.5), rgba(99,179,237,0.3))', delay:0.4, scale:0.85},
-              {g:'linear-gradient(135deg, rgba(167,243,208,0.3), rgba(110,231,183,0.2))', delay:0.8, scale:0.8},
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.5), rgba(167,139,250,0.6))', delay:0.2, scale:0.9},
-              {g:'linear-gradient(135deg, rgba(147,197,253,0.4), rgba(96,165,250,0.3))', delay:0.6, scale:0.85},
-              {g:'linear-gradient(135deg, rgba(199,210,254,0.3), rgba(167,139,250,0.2))', delay:1.0, scale:0.7},
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.2), rgba(147,197,253,0.15))', delay:0.3, scale:0.6},
-              // Row 2
-              {g:'linear-gradient(135deg, rgba(129,140,248,0.7), rgba(99,102,241,0.5))', delay:0.5, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(34,211,238,0.6), rgba(6,182,212,0.4))', delay:0.1, scale:0.95},
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.7), rgba(167,139,250,0.8))', delay:0.7, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(99,102,241,0.5), rgba(79,70,229,0.4))', delay:0.3, scale:0.9},
-              {g:'linear-gradient(135deg, rgba(34,211,238,0.5), rgba(6,182,212,0.6))', delay:0.9, scale:0.85},
-              {g:'linear-gradient(135deg, rgba(167,139,250,0.4), rgba(196,181,253,0.3))', delay:0.2, scale:0.8},
-              {g:'linear-gradient(135deg, rgba(147,197,253,0.3), rgba(99,179,237,0.2))', delay:0.6, scale:0.65},
-              // Row 3
-              {g:'linear-gradient(135deg, rgba(79,70,229,0.8), rgba(99,102,241,0.6))', delay:0.2, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(167,139,250,0.9), rgba(196,181,253,0.7))', delay:0.8, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(6,182,212,0.7), rgba(34,211,238,0.5))', delay:0.4, scale:0.95},
-              {g:'linear-gradient(135deg, rgba(99,102,241,0.8), rgba(79,70,229,0.9))', delay:0.1, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.8), rgba(167,139,250,0.6))', delay:0.6, scale:0.9},
-              {g:'linear-gradient(135deg, rgba(34,211,238,0.6), rgba(6,182,212,0.4))', delay:1.1, scale:0.8},
-              {g:'linear-gradient(135deg, rgba(129,140,248,0.3), rgba(99,102,241,0.2))', delay:0.4, scale:0.6},
-              // Row 4
-              {g:'linear-gradient(135deg, rgba(167,139,250,0.7), rgba(196,181,253,0.9))', delay:0.6, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(79,70,229,0.9), rgba(67,56,202,0.8))', delay:0.2, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.8), rgba(167,139,250,0.7))', delay:0.9, scale:0.95},
-              {g:'linear-gradient(135deg, rgba(6,182,212,0.6), rgba(34,211,238,0.8))', delay:0.3, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(99,102,241,0.7), rgba(79,70,229,0.6))', delay:0.7, scale:0.85},
-              {g:'linear-gradient(135deg, rgba(167,139,250,0.5), rgba(196,181,253,0.4))', delay:0.1, scale:0.75},
-              {g:'linear-gradient(135deg, rgba(34,211,238,0.25), rgba(6,182,212,0.15))', delay:0.5, scale:0.55},
-              // Row 5
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.6), rgba(167,139,250,0.8))', delay:0.4, scale:0.95},
-              {g:'linear-gradient(135deg, rgba(129,140,248,0.8), rgba(99,102,241,0.7))', delay:0.9, scale:1.0},
-              {g:'linear-gradient(135deg, rgba(167,139,250,0.9), rgba(79,70,229,0.7))', delay:0.2, scale:0.9},
-              {g:'linear-gradient(135deg, rgba(34,211,238,0.7), rgba(6,182,212,0.5))', delay:0.6, scale:0.85},
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.5), rgba(167,139,250,0.4))', delay:0.1, scale:0.75},
-              {g:'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(79,70,229,0.2))', delay:0.8, scale:0.6},
-              {g:'linear-gradient(135deg, rgba(34,211,238,0.15), rgba(6,182,212,0.10))', delay:0.3, scale:0.45},
-              // Row 6
-              {g:'linear-gradient(135deg, rgba(129,140,248,0.5), rgba(99,102,241,0.4))', delay:0.7, scale:0.85},
-              {g:'linear-gradient(135deg, rgba(167,139,250,0.6), rgba(196,181,253,0.5))', delay:0.3, scale:0.8},
-              {g:'linear-gradient(135deg, rgba(79,70,229,0.5), rgba(99,102,241,0.4))', delay:0.8, scale:0.75},
-              {g:'linear-gradient(135deg, rgba(6,182,212,0.4), rgba(34,211,238,0.3))', delay:0.2, scale:0.65},
-              {g:'linear-gradient(135deg, rgba(196,181,253,0.3), rgba(167,139,250,0.2))', delay:0.6, scale:0.55},
-              {g:'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))', delay:0.4, scale:0.45},
-              {g:'linear-gradient(135deg, rgba(34,211,238,0.10), rgba(6,182,212,0.08))', delay:0.9, scale:0.35},
+              // Row 1 - top row, richest colours
+              {g:'linear-gradient(135deg,rgba(147,197,253,0.55),rgba(99,102,241,0.35))', d:0.0},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.65),rgba(167,139,250,0.75))', d:0.3},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.40),rgba(6,182,212,0.30))', d:0.6},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.70),rgba(99,102,241,0.55))', d:0.1},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.80),rgba(167,139,250,0.90))', d:0.8},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.50),rgba(99,102,241,0.40))', d:0.4},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.55),rgba(6,182,212,0.45))', d:1.0},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.85),rgba(196,181,253,0.70))', d:0.2},
+              {g:'linear-gradient(135deg,rgba(99,102,241,0.60),rgba(79,70,229,0.50))', d:0.7},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.55),rgba(34,211,238,0.35))', d:0.5},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.45),rgba(167,139,250,0.60))', d:0.9},
+              {g:'linear-gradient(135deg,rgba(6,182,212,0.40),rgba(34,211,238,0.55))', d:0.3},
+              // Row 2 - middle row
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.70),rgba(167,139,250,0.80))', d:0.4},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.45),rgba(6,182,212,0.35))', d:0.7},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.75),rgba(99,102,241,0.65))', d:0.1},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.60),rgba(196,181,253,0.50))', d:0.9},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.80),rgba(67,56,202,0.70))', d:0.2},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.60),rgba(6,182,212,0.50))', d:0.6},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.75),rgba(167,139,250,0.65))', d:0.0},
+              {g:'linear-gradient(135deg,rgba(99,102,241,0.55),rgba(79,70,229,0.45))', d:0.8},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.70),rgba(34,211,238,0.40))', d:0.3},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.50),rgba(196,181,253,0.60))', d:0.5},
+              {g:'linear-gradient(135deg,rgba(6,182,212,0.45),rgba(34,211,238,0.35))', d:1.1},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.40),rgba(99,102,241,0.30))', d:0.4},
+              // Row 3 - fading out toward bottom
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.35),rgba(167,139,250,0.25))', d:0.6},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.25),rgba(6,182,212,0.15))', d:0.2},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.40),rgba(99,102,241,0.30))', d:0.8},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.30),rgba(196,181,253,0.20))', d:0.1},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.35),rgba(67,56,202,0.25))', d:0.5},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.20),rgba(6,182,212,0.12))', d:0.9},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.25),rgba(167,139,250,0.18))', d:0.3},
+              {g:'linear-gradient(135deg,rgba(99,102,241,0.20),rgba(79,70,229,0.15))', d:0.7},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.15),rgba(34,211,238,0.10))', d:0.4},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.12),rgba(196,181,253,0.08))', d:0.6},
+              {g:'linear-gradient(135deg,rgba(6,182,212,0.10),rgba(34,211,238,0.07))', d:0.2},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.08),rgba(99,102,241,0.05))', d:0.8},
             ].map((block, i) => (
               <div
                 key={i}
                 className={`color-block color-block-${i % 6}`}
                 style={{
-                  width:'100px',
-                  height:'100px',
-                  borderRadius:'20px',
+                  borderRadius:'18px',
                   background: block.g,
-                  backdropFilter:'blur(12px)',
-                  WebkitBackdropFilter:'blur(12px)',
-                  border:'1px solid rgba(255,255,255,0.5)',
-                  boxShadow:'0 8px 32px rgba(79,70,229,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
-                  transform:`scale(${block.scale})`,
-                  animationDelay:`${block.delay}s`,
-                  transition:'transform 0.3s ease',
+                  backdropFilter:'blur(8px)',
+                  WebkitBackdropFilter:'blur(8px)',
+                  border:'1px solid rgba(255,255,255,0.45)',
+                  boxShadow:'0 4px 20px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  animationDelay:`${block.d}s`,
                 }}
               />
             ))}
           </div>
-
-          {/* Bottom-left fade so content stays clean */}
+          {/* Fade to white at the bottom of the block band */}
           <div style={{
-            position:'absolute', inset:0,
-            background:'radial-gradient(ellipse 60% 80% at 25% 50%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.7) 60%, transparent 100%)',
-            zIndex:1,
+            position:'absolute',
+            bottom:0, left:0, right:0,
+            height:'160px',
+            background:'linear-gradient(to bottom, transparent, #ffffff)',
+            zIndex:2,
           }}></div>
-          {/* Bottom fade to white */}
+          {/* Subtle left fade so nav logo stays clean */}
           <div style={{
-            position:'absolute', bottom:0, left:0, right:0, height:'180px',
-            background:'linear-gradient(to bottom, transparent, white)',
+            position:'absolute',
+            top:0, left:0, bottom:0,
+            width:'120px',
+            background:'linear-gradient(to right, rgba(255,255,255,0.6), transparent)',
+            zIndex:2,
+          }}></div>
+          {/* Subtle right fade */}
+          <div style={{
+            position:'absolute',
+            top:0, right:0, bottom:0,
+            width:'120px',
+            background:'linear-gradient(to left, rgba(255,255,255,0.6), transparent)',
             zIndex:2,
           }}></div>
         </div>
 
-        {/* Hero content - above colour blocks */}
-        <div className="max-w-7xl mx-auto px-6 text-center" style={{position:'relative', zIndex:2}}>
+        {/* Hero content - below colour block band */}
+        <div className="max-w-7xl mx-auto px-6 text-center" style={{position:'relative', zIndex:2, paddingTop:'200px'}}>
           <div style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#EEF2FF', border:'1px solid #c7d2fe', borderRadius:'9999px', padding:'4px 14px', fontSize:'13px', fontWeight:500, color:'#4F46E5', marginBottom:'24px'}}>
             <span style={{width:'6px', height:'6px', borderRadius:'50%', background:'#4F46E5', display:'inline-block'}}></span>
             B2B lead generation, automated
@@ -816,7 +894,11 @@ export default function LandingPage() {
       <footer className="bg-slate-900 w-full rounded-t-[3rem] mt-20 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-8 py-20 grid grid-cols-2 md:grid-cols-5 gap-12">
           <div className="col-span-2">
-            <span className="text-2xl font-bold text-white mb-4 block">Leadomation</span>
+            <img
+              src="/src/assets/logo-full.png"
+              alt="Leadomation"
+              style={{height:'28px', width:'auto', objectFit:'contain', filter:'brightness(0) invert(1)', marginBottom:'16px', display:'block'}}
+            />
             <p className="font-['Switzer'] text-slate-400 leading-relaxed max-w-sm">The world's most advanced AI-powered multi-channel outreach engine for modern sales teams.</p>
           </div>
           <div>
