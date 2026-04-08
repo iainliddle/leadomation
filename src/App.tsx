@@ -447,9 +447,7 @@ const App: React.FC = () => {
 
   if (!session) {
     return (
-      <LandingPage onNavigate={(page) => {
-        setActivePage(page);
-      }} />
+      <LandingPage />
     );
   }
 
