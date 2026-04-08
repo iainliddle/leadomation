@@ -98,111 +98,166 @@ export default function LandingPage() {
 
       {/* Section 2: Hero Section */}
       <section className="relative overflow-hidden pb-32">
-        {/* TOP COLOUR BLOCK BAND - full width, positioned at very top of hero */}
-        <div style={{
-          position:'absolute',
-          top:0, left:0, right:0,
-          height:'340px',
-          overflow:'hidden',
-          zIndex:0,
-          pointerEvents:'none',
-        }}>
-          {/* Block grid - full width, top-aligned */}
+        {/* ===== COLOUR BLOCK FRAME - top + both sides ===== */}
+        <div style={{position:'absolute', inset:0, zIndex:0, pointerEvents:'none', overflow:'hidden'}}>
+
+          {/* TOP ROW - full width across the top */}
           <div style={{
-            position:'absolute',
-            top:'-20px',
-            left:'-20px',
-            right:'-20px',
+            position:'absolute', top:0, left:0, right:0,
             display:'grid',
             gridTemplateColumns:'repeat(12, 1fr)',
-            gridTemplateRows:'repeat(3, 100px)',
             gap:'10px',
-            padding:'0 10px',
+            padding:'10px',
+            height:'120px',
           }}>
             {[
-              // Row 1 - top row, richest colours
-              {g:'linear-gradient(135deg,rgba(147,197,253,0.55),rgba(99,102,241,0.35))', d:0.0},
-              {g:'linear-gradient(135deg,rgba(196,181,253,0.65),rgba(167,139,250,0.75))', d:0.3},
-              {g:'linear-gradient(135deg,rgba(34,211,238,0.40),rgba(6,182,212,0.30))', d:0.6},
-              {g:'linear-gradient(135deg,rgba(129,140,248,0.70),rgba(99,102,241,0.55))', d:0.1},
-              {g:'linear-gradient(135deg,rgba(196,181,253,0.80),rgba(167,139,250,0.90))', d:0.8},
-              {g:'linear-gradient(135deg,rgba(79,70,229,0.50),rgba(99,102,241,0.40))', d:0.4},
-              {g:'linear-gradient(135deg,rgba(34,211,238,0.55),rgba(6,182,212,0.45))', d:1.0},
-              {g:'linear-gradient(135deg,rgba(167,139,250,0.85),rgba(196,181,253,0.70))', d:0.2},
-              {g:'linear-gradient(135deg,rgba(99,102,241,0.60),rgba(79,70,229,0.50))', d:0.7},
-              {g:'linear-gradient(135deg,rgba(196,181,253,0.55),rgba(34,211,238,0.35))', d:0.5},
-              {g:'linear-gradient(135deg,rgba(129,140,248,0.45),rgba(167,139,250,0.60))', d:0.9},
-              {g:'linear-gradient(135deg,rgba(6,182,212,0.40),rgba(34,211,238,0.55))', d:0.3},
-              // Row 2 - middle row
-              {g:'linear-gradient(135deg,rgba(196,181,253,0.70),rgba(167,139,250,0.80))', d:0.4},
-              {g:'linear-gradient(135deg,rgba(34,211,238,0.45),rgba(6,182,212,0.35))', d:0.7},
-              {g:'linear-gradient(135deg,rgba(129,140,248,0.75),rgba(99,102,241,0.65))', d:0.1},
-              {g:'linear-gradient(135deg,rgba(167,139,250,0.60),rgba(196,181,253,0.50))', d:0.9},
-              {g:'linear-gradient(135deg,rgba(79,70,229,0.80),rgba(67,56,202,0.70))', d:0.2},
-              {g:'linear-gradient(135deg,rgba(34,211,238,0.60),rgba(6,182,212,0.50))', d:0.6},
-              {g:'linear-gradient(135deg,rgba(196,181,253,0.75),rgba(167,139,250,0.65))', d:0.0},
-              {g:'linear-gradient(135deg,rgba(99,102,241,0.55),rgba(79,70,229,0.45))', d:0.8},
-              {g:'linear-gradient(135deg,rgba(167,139,250,0.70),rgba(34,211,238,0.40))', d:0.3},
-              {g:'linear-gradient(135deg,rgba(129,140,248,0.50),rgba(196,181,253,0.60))', d:0.5},
-              {g:'linear-gradient(135deg,rgba(6,182,212,0.45),rgba(34,211,238,0.35))', d:1.1},
-              {g:'linear-gradient(135deg,rgba(79,70,229,0.40),rgba(99,102,241,0.30))', d:0.4},
-              // Row 3 - fading out toward bottom
-              {g:'linear-gradient(135deg,rgba(196,181,253,0.35),rgba(167,139,250,0.25))', d:0.6},
-              {g:'linear-gradient(135deg,rgba(34,211,238,0.25),rgba(6,182,212,0.15))', d:0.2},
-              {g:'linear-gradient(135deg,rgba(129,140,248,0.40),rgba(99,102,241,0.30))', d:0.8},
-              {g:'linear-gradient(135deg,rgba(167,139,250,0.30),rgba(196,181,253,0.20))', d:0.1},
-              {g:'linear-gradient(135deg,rgba(79,70,229,0.35),rgba(67,56,202,0.25))', d:0.5},
-              {g:'linear-gradient(135deg,rgba(34,211,238,0.20),rgba(6,182,212,0.12))', d:0.9},
-              {g:'linear-gradient(135deg,rgba(196,181,253,0.25),rgba(167,139,250,0.18))', d:0.3},
-              {g:'linear-gradient(135deg,rgba(99,102,241,0.20),rgba(79,70,229,0.15))', d:0.7},
-              {g:'linear-gradient(135deg,rgba(167,139,250,0.15),rgba(34,211,238,0.10))', d:0.4},
-              {g:'linear-gradient(135deg,rgba(129,140,248,0.12),rgba(196,181,253,0.08))', d:0.6},
-              {g:'linear-gradient(135deg,rgba(6,182,212,0.10),rgba(34,211,238,0.07))', d:0.2},
-              {g:'linear-gradient(135deg,rgba(79,70,229,0.08),rgba(99,102,241,0.05))', d:0.8},
-            ].map((block, i) => (
-              <div
-                key={i}
-                className={`color-block color-block-${i % 6}`}
+              {g:'linear-gradient(135deg,rgba(147,197,253,0.55),rgba(99,102,241,0.35))',d:0.0},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.75),rgba(167,139,250,0.85))',d:0.3},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.50),rgba(6,182,212,0.40))',d:0.6},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.80),rgba(99,102,241,0.65))',d:0.1},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.90),rgba(167,139,250,1.0))',d:0.8},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.60),rgba(99,102,241,0.50))',d:0.4},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.65),rgba(6,182,212,0.55))',d:1.0},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.85),rgba(196,181,253,0.75))',d:0.2},
+              {g:'linear-gradient(135deg,rgba(99,102,241,0.70),rgba(79,70,229,0.60))',d:0.7},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.65),rgba(34,211,238,0.45))',d:0.5},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.55),rgba(167,139,250,0.70))',d:0.9},
+              {g:'linear-gradient(135deg,rgba(6,182,212,0.50),rgba(34,211,238,0.65))',d:0.3},
+            ].map((b,i) => (
+              <div key={`top-${i}`} className={`color-block color-block-${i%6}`}
                 style={{
                   borderRadius:'18px',
-                  background: block.g,
+                  background:b.g,
                   backdropFilter:'blur(8px)',
                   WebkitBackdropFilter:'blur(8px)',
-                  border:'1px solid rgba(255,255,255,0.45)',
-                  boxShadow:'0 4px 20px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.5)',
-                  animationDelay:`${block.d}s`,
+                  border:'1px solid rgba(255,255,255,0.5)',
+                  boxShadow:'0 4px 20px rgba(79,70,229,0.12), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  animationDelay:`${b.d}s`,
                 }}
               />
             ))}
           </div>
-          {/* Fade to white at the bottom of the block band */}
+
+          {/* SECOND ROW - full width */}
           <div style={{
-            position:'absolute',
-            bottom:0, left:0, right:0,
-            height:'160px',
+            position:'absolute', top:'130px', left:0, right:0,
+            display:'grid',
+            gridTemplateColumns:'repeat(12, 1fr)',
+            gap:'10px',
+            padding:'0 10px',
+            height:'110px',
+          }}>
+            {[
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.80),rgba(167,139,250,0.70))',d:0.4},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.55),rgba(6,182,212,0.45))',d:0.7},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.85),rgba(99,102,241,0.75))',d:0.1},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.70),rgba(196,181,253,0.60))',d:0.9},
+              {g:'linear-gradient(135deg,rgba(255,255,255,0.60),rgba(255,255,255,0.40))',d:0.2},
+              {g:'linear-gradient(135deg,rgba(255,255,255,0.70),rgba(255,255,255,0.50))',d:0.6},
+              {g:'linear-gradient(135deg,rgba(255,255,255,0.65),rgba(255,255,255,0.45))',d:0.0},
+              {g:'linear-gradient(135deg,rgba(255,255,255,0.55),rgba(255,255,255,0.35))',d:0.8},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.50),rgba(34,211,238,0.30))',d:0.3},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.60),rgba(196,181,253,0.70))',d:0.5},
+              {g:'linear-gradient(135deg,rgba(6,182,212,0.45),rgba(34,211,238,0.35))',d:1.1},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.50),rgba(99,102,241,0.40))',d:0.4},
+            ].map((b,i) => (
+              <div key={`row2-${i}`} className={`color-block color-block-${(i+2)%6}`}
+                style={{
+                  borderRadius:'18px',
+                  background:b.g,
+                  backdropFilter:'blur(8px)',
+                  WebkitBackdropFilter:'blur(8px)',
+                  border:'1px solid rgba(255,255,255,0.5)',
+                  boxShadow:'0 4px 20px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.4)',
+                  animationDelay:`${b.d}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* LEFT COLUMN - comes down the left side */}
+          <div style={{
+            position:'absolute', top:'250px', left:0,
+            display:'grid',
+            gridTemplateColumns:'repeat(2, 110px)',
+            gridAutoRows:'110px',
+            gap:'10px',
+            padding:'0 10px',
+          }}>
+            {[
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.55),rgba(167,139,250,0.45))',d:0.5},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.35),rgba(6,182,212,0.25))',d:0.2},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.45),rgba(99,102,241,0.35))',d:0.8},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.35),rgba(196,181,253,0.25))',d:0.1},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.30),rgba(99,102,241,0.20))',d:0.6},
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.20),rgba(6,182,212,0.12))',d:0.9},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.20),rgba(167,139,250,0.12))',d:0.3},
+              {g:'linear-gradient(135deg,rgba(99,102,241,0.12),rgba(79,70,229,0.08))',d:0.7},
+            ].map((b,i) => (
+              <div key={`left-${i}`} className={`color-block color-block-${(i+1)%6}`}
+                style={{
+                  borderRadius:'18px',
+                  background:b.g,
+                  backdropFilter:'blur(6px)',
+                  WebkitBackdropFilter:'blur(6px)',
+                  border:'1px solid rgba(255,255,255,0.4)',
+                  boxShadow:'0 4px 16px rgba(79,70,229,0.08)',
+                  animationDelay:`${b.d}s`,
+                  opacity: 1 - (i * 0.10),
+                }}
+              />
+            ))}
+          </div>
+
+          {/* RIGHT COLUMN - comes down the right side */}
+          <div style={{
+            position:'absolute', top:'250px', right:0,
+            display:'grid',
+            gridTemplateColumns:'repeat(2, 110px)',
+            gridAutoRows:'110px',
+            gap:'10px',
+            padding:'0 10px',
+          }}>
+            {[
+              {g:'linear-gradient(135deg,rgba(34,211,238,0.45),rgba(6,182,212,0.35))',d:0.3},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.55),rgba(167,139,250,0.65))',d:0.7},
+              {g:'linear-gradient(135deg,rgba(99,102,241,0.40),rgba(79,70,229,0.30))',d:0.1},
+              {g:'linear-gradient(135deg,rgba(167,139,250,0.45),rgba(34,211,238,0.25))',d:0.5},
+              {g:'linear-gradient(135deg,rgba(129,140,248,0.30),rgba(196,181,253,0.20))',d:0.9},
+              {g:'linear-gradient(135deg,rgba(6,182,212,0.20),rgba(34,211,238,0.12))',d:0.2},
+              {g:'linear-gradient(135deg,rgba(79,70,229,0.15),rgba(99,102,241,0.10))',d:0.6},
+              {g:'linear-gradient(135deg,rgba(196,181,253,0.10),rgba(167,139,250,0.06))',d:0.4},
+            ].map((b,i) => (
+              <div key={`right-${i}`} className={`color-block color-block-${(i+3)%6}`}
+                style={{
+                  borderRadius:'18px',
+                  background:b.g,
+                  backdropFilter:'blur(6px)',
+                  WebkitBackdropFilter:'blur(6px)',
+                  border:'1px solid rgba(255,255,255,0.4)',
+                  boxShadow:'0 4px 16px rgba(79,70,229,0.08)',
+                  animationDelay:`${b.d}s`,
+                  opacity: 1 - (i * 0.10),
+                }}
+              />
+            ))}
+          </div>
+
+          {/* FADE OVERLAYS - protect headline readability */}
+          <div style={{
+            position:'absolute', inset:0,
+            background:'radial-gradient(ellipse 55% 45% at 50% 55%, rgba(255,255,255,1) 30%, rgba(255,255,255,0.85) 55%, transparent 80%)',
+            zIndex:1,
+          }}></div>
+          <div style={{
+            position:'absolute', bottom:0, left:0, right:0, height:'200px',
             background:'linear-gradient(to bottom, transparent, #ffffff)',
-            zIndex:2,
-          }}></div>
-          {/* Subtle left fade so nav logo stays clean */}
-          <div style={{
-            position:'absolute',
-            top:0, left:0, bottom:0,
-            width:'120px',
-            background:'linear-gradient(to right, rgba(255,255,255,0.6), transparent)',
-            zIndex:2,
-          }}></div>
-          {/* Subtle right fade */}
-          <div style={{
-            position:'absolute',
-            top:0, right:0, bottom:0,
-            width:'120px',
-            background:'linear-gradient(to left, rgba(255,255,255,0.6), transparent)',
             zIndex:2,
           }}></div>
         </div>
 
-        {/* Hero content - below colour block band */}
-        <div className="max-w-7xl mx-auto px-6 text-center" style={{position:'relative', zIndex:2, paddingTop:'200px'}}>
+        {/* Hero content - above colour block frame */}
+        <div className="max-w-7xl mx-auto px-6 text-center" style={{position:'relative', zIndex:3, paddingTop:'200px'}}>
           <div style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#EEF2FF', border:'1px solid #c7d2fe', borderRadius:'9999px', padding:'4px 14px', fontSize:'13px', fontWeight:500, color:'#4F46E5', marginBottom:'24px'}}>
             <span style={{width:'6px', height:'6px', borderRadius:'50%', background:'#4F46E5', display:'inline-block'}}></span>
             B2B lead generation, automated
