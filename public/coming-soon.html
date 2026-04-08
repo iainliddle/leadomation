@@ -1,254 +1,376 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leadomation - Coming Soon</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Outfit', sans-serif;
-  background: #ffffff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
-.swirl-right {
-  position: fixed;
-  top: -100px;
-  right: -150px;
-  width: 600px;
-  height: 800px;
-  background:
-    radial-gradient(ellipse 220px 500px at 55% 25%, rgba(34,211,238,0.35) 0%, transparent 65%),
-    radial-gradient(ellipse 180px 400px at 65% 55%, rgba(59,130,246,0.3) 0%, transparent 65%),
-    radial-gradient(ellipse 220px 450px at 75% 80%, rgba(79,70,229,0.3) 0%, transparent 65%);
-  border-radius: 45% 55% 60% 40% / 40% 50% 60% 50%;
-  animation: swirlMove 10s ease-in-out infinite;
-  pointer-events: none;
-  filter: blur(30px);
-}
-.swirl-left {
-  position: fixed;
-  bottom: -200px;
-  left: -150px;
-  width: 500px;
-  height: 600px;
-  background:
-    radial-gradient(ellipse 200px 400px at 40% 30%, rgba(79,70,229,0.2) 0%, transparent 65%),
-    radial-gradient(ellipse 150px 350px at 60% 70%, rgba(34,211,238,0.15) 0%, transparent 65%);
-  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
-  animation: swirlMove2 13s ease-in-out infinite;
-  pointer-events: none;
-  filter: blur(40px);
-}
-@keyframes swirlMove {
-  0%, 100% { transform: translateY(0) rotate(0deg); border-radius: 45% 55% 60% 40% / 40% 50% 60% 50%; }
-  33% { transform: translateY(-30px) rotate(6deg); border-radius: 55% 45% 40% 60% / 60% 40% 60% 40%; }
-  66% { transform: translateY(20px) rotate(-4deg); border-radius: 35% 65% 55% 45% / 45% 55% 45% 55%; }
-}
-@keyframes swirlMove2 {
-  0%, 100% { transform: translateY(0) rotate(0deg); border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; }
-  50% { transform: translateY(-40px) rotate(-8deg); border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; }
-}
-.content {
-  position: relative;
-  z-index: 10;
-  text-align: center;
-  padding: 40px 24px;
-  max-width: 580px;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 48px;
-}
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(79,70,229,0.08);
-  border: 1px solid rgba(79,70,229,0.2);
-  color: #4F46E5;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 20px;
-  border-radius: 100px;
-  margin-bottom: 32px;
-  letter-spacing: 0.3px;
-}
-.badge-dot {
-  width: 7px;
-  height: 7px;
-  background: #4F46E5;
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-h1 {
-  font-size: clamp(36px, 6vw, 58px);
-  font-weight: 800;
-  color: #0F172A;
-  line-height: 1.08;
-  letter-spacing: -2px;
-  margin-bottom: 20px;
-}
-.gradient-text {
-  background: linear-gradient(135deg, #4F46E5, #22D3EE);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-p {
-  font-size: 17px;
-  color: #475569;
-  line-height: 1.7;
-  margin-bottom: 40px;
-  max-width: 440px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #4F46E5;
-  color: #ffffff;
-  font-family: 'Outfit', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  padding: 14px 32px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(79,70,229,0.25);
-}
-.cta:hover {
-  background: #4338CA;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(79,70,229,0.35);
-}
-.features {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 48px;
-}
-.feature-chip {
-  background: #F8FAFC;
-  border: 1px solid #E2E4ED;
-  color: #475569;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 100px;
-}
-.footer-text {
-  font-size: 13px;
-  color: #94A3B8;
-}
-.footer-text a {
-  color: #4F46E5;
-  text-decoration: none;
-}
-.email-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 48px;
-  width: 100%;
-  max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.email-input {
-  width: 100%;
-  padding: 14px 20px;
-  border: 1.5px solid #E2E4ED;
-  border-radius: 12px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 15px;
-  color: #0F172A;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.email-input:focus {
-  border-color: #4F46E5;
-}
-.email-input::placeholder {
-  color: #94A3B8;
-}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leadomation — Coming Soon</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700,800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Switzer', -apple-system, sans-serif;
+      background: #ffffff;
+      color: #0f172a;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Colour block grid - top */
+    .blocks-top {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 220px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(2, 100px);
+      gap: 10px;
+      padding: 10px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .block {
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 4px 20px rgba(79,70,229,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+      animation: block-float 7s ease-in-out infinite;
+    }
+
+    .blocks-left {
+      position: fixed;
+      top: 230px; left: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 100px);
+      grid-auto-rows: 100px;
+      gap: 10px;
+      padding: 10px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .blocks-right {
+      position: fixed;
+      top: 230px; right: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 100px);
+      grid-auto-rows: 100px;
+      gap: 10px;
+      padding: 10px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @keyframes block-float {
+      0%, 100% { transform: translateY(0px); filter: brightness(1); }
+      40% { transform: translateY(-8px); filter: brightness(1.06); }
+      70% { transform: translateY(-3px); filter: brightness(0.97); }
+    }
+
+    .b0 { animation-duration: 5.6s; }
+    .b1 { animation-duration: 7.2s; }
+    .b2 { animation-duration: 6.4s; }
+    .b3 { animation-duration: 8.0s; }
+    .b4 { animation-duration: 5.9s; }
+    .b5 { animation-duration: 7.6s; }
+
+    /* Centre fade so content is readable */
+    .centre-fade {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,255,255,1) 35%, rgba(255,255,255,0.85) 60%, transparent 85%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Main content */
+    .content {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 48px;
+    }
+
+    .logo-mark {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4F46E5, #22D3EE);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #fff;
+    }
+
+    .logo-text {
+      font-size: 22px; font-weight: 700; color: #0f172a;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EEF2FF;
+      border: 1px solid #c7d2fe;
+      border-radius: 100px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4F46E5;
+      margin-bottom: 28px;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4F46E5;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: #0f172a;
+      max-width: 700px;
+      margin-bottom: 20px;
+    }
+
+    h1 span { color: #4F46E5; }
+
+    .sub {
+      font-size: 18px;
+      color: #475569;
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 44px;
+    }
+
+    /* Email capture */
+    .email-form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 100px;
+      padding: 6px 6px 6px 20px;
+      box-shadow: 0 4px 24px rgba(79,70,229,0.10);
+      max-width: 420px;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .email-form input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: 'Switzer', sans-serif;
+      font-size: 14px;
+      color: #0f172a;
+      background: transparent;
+    }
+
+    .email-form input::placeholder { color: #94a3b8; }
+
+    .email-form button {
+      background: #1E1B4B;
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Switzer', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+
+    .email-form button:hover { opacity: 0.9; }
+
+    .form-note {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 56px;
+    }
+
+    /* Stats row */
+    .stats {
+      display: flex;
+      gap: 48px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #4F46E5;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 36px;
+      background: #e2e8f0;
+    }
+
+    /* Footer */
+    .footer {
+      position: relative;
+      z-index: 10;
+      padding: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .footer a { color: #4F46E5; text-decoration: none; }
+  </style>
 </head>
 <body>
 
-<div class="swirl-right"></div>
-<div class="swirl-left"></div>
-
-<div class="content">
-  <div class="logo">
-    <img src="/logo-full.png" alt="Leadomation" style="height: 42px; width: auto;" />
+  <!-- Colour blocks top -->
+  <div class="blocks-top">
+    <div class="block b0" style="background:linear-gradient(135deg,rgba(147,197,253,0.55),rgba(99,102,241,0.35));animation-delay:0s"></div>
+    <div class="block b1" style="background:linear-gradient(135deg,rgba(196,181,253,0.75),rgba(167,139,250,0.85));animation-delay:0.3s"></div>
+    <div class="block b2" style="background:linear-gradient(135deg,rgba(34,211,238,0.50),rgba(6,182,212,0.40));animation-delay:0.6s"></div>
+    <div class="block b3" style="background:linear-gradient(135deg,rgba(129,140,248,0.80),rgba(99,102,241,0.65));animation-delay:0.1s"></div>
+    <div class="block b4" style="background:linear-gradient(135deg,rgba(196,181,253,0.90),rgba(167,139,250,1.0));animation-delay:0.8s"></div>
+    <div class="block b5" style="background:linear-gradient(135deg,rgba(79,70,229,0.60),rgba(99,102,241,0.50));animation-delay:0.4s"></div>
+    <div class="block b0" style="background:linear-gradient(135deg,rgba(34,211,238,0.65),rgba(6,182,212,0.55));animation-delay:1.0s"></div>
+    <div class="block b1" style="background:linear-gradient(135deg,rgba(167,139,250,0.85),rgba(196,181,253,0.75));animation-delay:0.2s"></div>
+    <div class="block b2" style="background:linear-gradient(135deg,rgba(99,102,241,0.70),rgba(79,70,229,0.60));animation-delay:0.7s"></div>
+    <div class="block b3" style="background:linear-gradient(135deg,rgba(196,181,253,0.65),rgba(34,211,238,0.45));animation-delay:0.5s"></div>
+    <div class="block b4" style="background:linear-gradient(135deg,rgba(129,140,248,0.55),rgba(167,139,250,0.70));animation-delay:0.9s"></div>
+    <div class="block b5" style="background:linear-gradient(135deg,rgba(6,182,212,0.50),rgba(34,211,238,0.65));animation-delay:0.3s"></div>
+    <!-- Row 2 -->
+    <div class="block b1" style="background:linear-gradient(135deg,rgba(196,181,253,0.70),rgba(167,139,250,0.60));animation-delay:0.4s"></div>
+    <div class="block b2" style="background:linear-gradient(135deg,rgba(34,211,238,0.45),rgba(6,182,212,0.35));animation-delay:0.7s"></div>
+    <div class="block b3" style="background:linear-gradient(135deg,rgba(129,140,248,0.75),rgba(99,102,241,0.65));animation-delay:0.1s"></div>
+    <div class="block b4" style="background:linear-gradient(135deg,rgba(167,139,250,0.60),rgba(196,181,253,0.50));animation-delay:0.9s"></div>
+    <div class="block b5" style="background:linear-gradient(135deg,rgba(255,255,255,0.70),rgba(255,255,255,0.50));animation-delay:0.2s"></div>
+    <div class="block b0" style="background:linear-gradient(135deg,rgba(255,255,255,0.80),rgba(255,255,255,0.60));animation-delay:0.6s"></div>
+    <div class="block b1" style="background:linear-gradient(135deg,rgba(255,255,255,0.75),rgba(255,255,255,0.55));animation-delay:0.0s"></div>
+    <div class="block b2" style="background:linear-gradient(135deg,rgba(255,255,255,0.65),rgba(255,255,255,0.45));animation-delay:0.8s"></div>
+    <div class="block b3" style="background:linear-gradient(135deg,rgba(167,139,250,0.50),rgba(34,211,238,0.30));animation-delay:0.3s"></div>
+    <div class="block b4" style="background:linear-gradient(135deg,rgba(129,140,248,0.60),rgba(196,181,253,0.70));animation-delay:0.5s"></div>
+    <div class="block b5" style="background:linear-gradient(135deg,rgba(6,182,212,0.45),rgba(34,211,238,0.35));animation-delay:1.1s"></div>
+    <div class="block b0" style="background:linear-gradient(135deg,rgba(79,70,229,0.40),rgba(99,102,241,0.30));animation-delay:0.4s"></div>
   </div>
 
-  <div class="badge">
-    <span class="badge-dot"></span>
-    Something big is coming
+  <!-- Left side blocks -->
+  <div class="blocks-left">
+    <div class="block b2" style="background:linear-gradient(135deg,rgba(196,181,253,0.45),rgba(167,139,250,0.35));animation-delay:0.5s;opacity:0.8"></div>
+    <div class="block b3" style="background:linear-gradient(135deg,rgba(34,211,238,0.30),rgba(6,182,212,0.20));animation-delay:0.2s;opacity:0.7"></div>
+    <div class="block b4" style="background:linear-gradient(135deg,rgba(129,140,248,0.30),rgba(99,102,241,0.20));animation-delay:0.8s;opacity:0.55"></div>
+    <div class="block b5" style="background:linear-gradient(135deg,rgba(167,139,250,0.20),rgba(196,181,253,0.12));animation-delay:0.1s;opacity:0.40"></div>
+    <div class="block b0" style="background:linear-gradient(135deg,rgba(79,70,229,0.15),rgba(99,102,241,0.10));animation-delay:0.6s;opacity:0.25"></div>
+    <div class="block b1" style="background:linear-gradient(135deg,rgba(34,211,238,0.10),rgba(6,182,212,0.06));animation-delay:0.9s;opacity:0.15"></div>
   </div>
 
-  <h1>B2B outreach.<br><span class="gradient-text">On autopilot.</span></h1>
-
-  <p>We are putting the finishing touches on Leadomation. Find leads, run AI outreach and close deals automatically. Be the first to know when we go live.</p>
-
-  <form class="email-form" onsubmit="handleSubmit(event)">
-    <input
-      type="email"
-      id="email-input"
-      placeholder="Enter your email address"
-      required
-      class="email-input"
-    />
-    <button type="submit" class="cta">Notify me at launch →</button>
-  </form>
-  <p id="success-msg" style="display:none; color:#4F46E5; font-weight:600; font-size:15px; margin-bottom:40px;">You are on the list. We will be in touch soon.</p>
-
-  <div class="features">
-    <span class="feature-chip">Lead scraping</span>
-    <span class="feature-chip">AI email outreach</span>
-    <span class="feature-chip">LinkedIn sequences</span>
-    <span class="feature-chip">AI voice calling</span>
-    <span class="feature-chip">Intent scoring</span>
-    <span class="feature-chip">Lead intelligence</span>
+  <!-- Right side blocks -->
+  <div class="blocks-right">
+    <div class="block b1" style="background:linear-gradient(135deg,rgba(34,211,238,0.45),rgba(6,182,212,0.35));animation-delay:0.3s;opacity:0.8"></div>
+    <div class="block b2" style="background:linear-gradient(135deg,rgba(196,181,253,0.55),rgba(167,139,250,0.65));animation-delay:0.7s;opacity:0.7"></div>
+    <div class="block b3" style="background:linear-gradient(135deg,rgba(99,102,241,0.30),rgba(79,70,229,0.20));animation-delay:0.1s;opacity:0.55"></div>
+    <div class="block b4" style="background:linear-gradient(135deg,rgba(167,139,250,0.20),rgba(34,211,238,0.12));animation-delay:0.5s;opacity:0.40"></div>
+    <div class="block b5" style="background:linear-gradient(135deg,rgba(129,140,248,0.12),rgba(196,181,253,0.08));animation-delay:0.9s;opacity:0.25"></div>
+    <div class="block b0" style="background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(34,211,238,0.05));animation-delay:0.2s;opacity:0.15"></div>
   </div>
 
-  <p class="footer-text">© 2026 Leadomation by Lumarr Ltd &nbsp;·&nbsp; <a href="mailto:iainliddle@leadomation.co.uk">Contact us</a></p>
-</div>
+  <!-- Centre radial fade -->
+  <div class="centre-fade"></div>
 
-<script>
-function handleSubmit(e) {
-  e.preventDefault();
-  const email = document.getElementById('email-input').value;
-  fetch('https://hook.eu1.make.com/placeholder', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, source: 'coming_soon' })
-  }).catch(() => {});
-  document.querySelector('.email-form').style.display = 'none';
-  document.getElementById('success-msg').style.display = 'block';
-}
-</script>
+  <!-- Main content -->
+  <main class="content">
+    <div class="logo">
+      <div class="logo-mark">L</div>
+      <span class="logo-text">Leadomation</span>
+    </div>
+
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Something big is coming
+    </div>
+
+    <h1>Your pipeline is about to <span>fill itself.</span></h1>
+
+    <p class="sub">Leadomation finds and enriches B2B leads, writes personalised outreach, automates LinkedIn and calls prospects with an AI voice agent.</p>
+
+    <form class="email-form" onsubmit="handleSubmit(event)">
+      <input type="email" id="email-input" placeholder="Enter your email for early access" required/>
+      <button type="submit">Notify me</button>
+    </form>
+
+    <p class="form-note">Be first to know when we launch. No spam, ever.</p>
+
+    <div class="stats">
+      <div>
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Leads per campaign</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div>
+        <div class="stat-num">35 day</div>
+        <div class="stat-label">LinkedIn funnel</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div>
+        <div class="stat-num">AI</div>
+        <div class="stat-label">Voice calling included</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div>
+        <div class="stat-num">£59</div>
+        <div class="stat-label">Starting from per month</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    © 2026 Lumarr Ltd. All rights reserved.
+    &nbsp;·&nbsp; <a href="mailto:hello@leadomation.co.uk">hello@leadomation.co.uk</a>
+    &nbsp;·&nbsp; <a href="https://lumarr.io">lumarr.io</a>
+  </footer>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('email-input').value;
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'You\'re on the list!';
+      btn.style.background = '#06B6D4';
+      btn.disabled = true;
+      document.getElementById('email-input').value = '';
+      console.log('Email captured:', email);
+    }
+  </script>
 
 </body>
 </html>

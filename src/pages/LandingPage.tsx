@@ -1,6 +1,12 @@
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
+  // Redirect to coming soon page while landing page is in development
+  if (typeof window !== 'undefined') {
+    window.location.replace('/coming-soon.html');
+  }
+  return null;
+
   return (
     <div className="lp-body antialiased overflow-x-hidden">
       {/* Section 1: Pill Navigation */}
