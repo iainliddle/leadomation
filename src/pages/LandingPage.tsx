@@ -7,7 +7,10 @@ export default function LandingPage() {
       <header className="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm transition-all duration-300">
         <nav className="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
           <div className="flex items-center gap-8">
-            <span className="text-xl font-bold tracking-tight text-slate-900">Leadomation</span>
+            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+              <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'linear-gradient(135deg, #4F46E5, #22D3EE)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:'14px', color:'#fff', fontFamily:'Switzer, sans-serif'}}>L</div>
+              <span style={{fontWeight:700, fontSize:'18px', color:'#0f172a'}}>Leadomation</span>
+            </div>
             <div className="hidden md:flex items-center gap-6">
               <a className="font-['Switzer'] font-medium text-sm antialiased text-indigo-600 font-semibold transition-colors duration-200" href="#">Features</a>
               <a className="font-['Switzer'] font-medium text-sm antialiased text-slate-600 hover:text-indigo-600 transition-colors duration-200" href="#">How it works</a>
@@ -29,80 +32,123 @@ export default function LandingPage() {
         <div className="blob blob-2" style={{ top: '10%', right: '-10%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 70%)', filter: 'blur(50px)', zIndex: -1 }} />
         <div className="blob blob-3" style={{ bottom: '0%', left: '-5%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)', filter: 'blur(40px)', zIndex: -1 }} />
         <div className="max-w-7xl mx-auto px-6 text-center">
+          <div style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#EEF2FF', border:'1px solid #c7d2fe', borderRadius:'9999px', padding:'4px 14px', fontSize:'13px', fontWeight:500, color:'#4F46E5', marginBottom:'24px'}}>
+            <span style={{width:'6px', height:'6px', borderRadius:'50%', background:'#4F46E5', display:'inline-block'}}></span>
+            B2B lead generation, automated
+          </div>
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-navy mb-8 max-w-5xl mx-auto">
             Your next 100 clients are already out there. Leadomation finds them automatically.
           </h1>
           <p className="text-lg text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Leadomation orchestrates multi-channel outreach that feels human, acts intelligently, and scales infinitely. Stop hunting, start closing.
+            Leadomation finds and enriches B2B leads, writes personalised outreach, automates LinkedIn and calls prospects with an AI voice agent. Your pipeline fills while you focus on closing.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
-            <button className="bg-navy text-white px-10 py-5 rounded-xl text-lg font-bold shadow-ambient hover:translate-y-[-2px] transition-all">Get started for free</button>
-            <button className="bg-white border border-outline-variant/30 text-navy px-10 py-5 rounded-xl text-lg font-bold hover:bg-slate-50 transition-all">Book a demo</button>
+            <button className="bg-navy text-white px-10 py-5 rounded-xl text-lg font-bold shadow-ambient hover:translate-y-[-2px] transition-all">Start free trial</button>
+            <button className="bg-white border border-outline-variant/30 text-navy px-10 py-5 rounded-xl text-lg font-bold hover:bg-slate-50 transition-all">See how it works</button>
           </div>
+          <p style={{fontSize:'13px', color:'#94a3b8', marginTop:'12px'}}>7 day free trial. Secure with a card. Cancel anytime.</p>
 
           {/* Dashboard UI Illustration */}
           <div className="relative max-w-5xl mx-auto mt-16" style={{ transform: 'perspective(1000px) rotateX(4deg) rotateY(-2deg) rotateZ(1deg)' }}>
-            <div className="bg-white rounded-xl shadow-ambient p-6 border border-slate-100 min-h-[500px]">
-              <div className="flex items-center gap-4 border-b border-slate-50 pb-6 mb-6">
-                <div className="w-3 h-3 rounded-full bg-red-400" />
-                <div className="w-3 h-3 rounded-full bg-amber-400" />
-                <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                <div className="flex-1" />
-                <div className="h-8 w-48 bg-slate-50 rounded-lg" />
-              </div>
-              <div className="grid grid-cols-12 gap-6">
-                <div className="col-span-3 space-y-4">
-                  <div className="h-10 bg-indigo-50 rounded-lg w-full" />
-                  <div className="h-10 bg-slate-50 rounded-lg w-full" />
-                  <div className="h-10 bg-slate-50 rounded-lg w-full" />
-                  <div className="h-10 bg-slate-50 rounded-lg w-full" />
+            <div className="bg-white rounded-xl shadow-ambient border border-slate-100 overflow-hidden">
+              {/* Browser chrome */}
+              <div style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0', padding:'12px 16px', display:'flex', alignItems:'center', gap:'6px'}}>
+                <div style={{width:'10px', height:'10px', borderRadius:'50%', background:'#fca5a5'}}></div>
+                <div style={{width:'10px', height:'10px', borderRadius:'50%', background:'#fcd34d'}}></div>
+                <div style={{width:'10px', height:'10px', borderRadius:'50%', background:'#86efac'}}></div>
+                <div style={{flex:1, height:'24px', background:'#f1f5f9', borderRadius:'6px', marginLeft:'12px', display:'flex', alignItems:'center', paddingLeft:'12px'}}>
+                  <span style={{fontSize:'11px', color:'#94a3b8'}}>app.leadomation.co.uk</span>
                 </div>
-                <div className="col-span-9 space-y-6">
-                  <div className="grid grid-cols-3 gap-6">
-                    <div className="bg-indigo-600 p-6 rounded-lg text-left text-white">
-                      <span className="block text-sm opacity-80">Total Leads</span>
-                      <span className="text-3xl font-bold">12,482</span>
-                    </div>
-                    <div className="bg-white border border-slate-100 p-6 rounded-lg text-left">
-                      <span className="block text-sm text-slate-500">Positive Replies</span>
-                      <span className="text-3xl font-bold text-navy">842</span>
-                    </div>
-                    <div className="bg-white border border-slate-100 p-6 rounded-lg text-left">
-                      <span className="block text-sm text-slate-500">Meetings Set</span>
-                      <span className="text-3xl font-bold text-navy">156</span>
-                    </div>
+              </div>
+              {/* Dashboard body */}
+              <div style={{display:'grid', gridTemplateColumns:'200px 1fr', minHeight:'420px'}}>
+                {/* Sidebar */}
+                <div style={{background:'#4F46E5', padding:'20px 16px', display:'flex', flexDirection:'column' as const, gap:'4px'}}>
+                  <div style={{color:'#fff', fontWeight:700, fontSize:'14px', marginBottom:'20px', display:'flex', alignItems:'center', gap:'8px'}}>
+                    <div style={{width:'24px', height:'24px', background:'rgba(255,255,255,0.2)', borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'11px', fontWeight:800}}>L</div>
+                    Leadomation
                   </div>
-                  <div className="h-64 bg-slate-50 rounded-lg relative overflow-hidden">
-                    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-indigo-100/50 to-transparent" />
-                    <div className="absolute inset-0 flex items-end px-12 gap-8">
-                      <div className="w-full bg-indigo-600 h-1/3 rounded-t-lg" />
-                      <div className="w-full bg-indigo-600 h-2/3 rounded-t-lg" />
-                      <div className="w-full bg-indigo-600 h-1/2 rounded-t-lg" />
-                      <div className="w-full bg-indigo-600 h-5/6 rounded-t-lg" />
-                      <div className="w-full bg-indigo-600 h-2/5 rounded-t-lg" />
+                  {['Dashboard','Leads','Campaigns','Inbox','Pipeline','Templates','Settings'].map((item, i) => (
+                    <div key={item} style={{padding:'8px 12px', borderRadius:'8px', fontSize:'13px', fontWeight:500, color: i === 0 ? '#fff' : 'rgba(255,255,255,0.6)', background: i === 0 ? 'rgba(255,255,255,0.15)' : 'transparent', cursor:'pointer'}}>
+                      {item}
                     </div>
+                  ))}
+                </div>
+                {/* Main content */}
+                <div style={{padding:'20px', background:'#fff'}}>
+                  {/* Metric cards */}
+                  <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px', marginBottom:'20px'}}>
+                    {[
+                      {label:'Leads found', value:'271', color:'#4F46E5'},
+                      {label:'Replies', value:'14', color:'#06B6D4'},
+                      {label:'Calls booked', value:'6', color:'#22D3EE'},
+                      {label:'Deliverability', value:'94%', color:'#4F46E5'},
+                    ].map(m => (
+                      <div key={m.label} style={{background:'#f8fafc', borderRadius:'10px', padding:'12px', border:'1px solid #f1f5f9'}}>
+                        <div style={{fontSize:'11px', color:'#94a3b8', marginBottom:'4px'}}>{m.label}</div>
+                        <div style={{fontSize:'22px', fontWeight:800, color:m.color}}>{m.value}</div>
+                      </div>
+                    ))}
                   </div>
+                  {/* Lead table */}
+                  <div style={{background:'#fff', border:'1px solid #f1f5f9', borderRadius:'10px', overflow:'hidden'}}>
+                    <div style={{display:'grid', gridTemplateColumns:'2fr 1.5fr 1fr', padding:'8px 16px', borderBottom:'1px solid #f1f5f9', gap:'12px'}}>
+                      {['Name','Company','Intent'].map(h => (
+                        <div key={h} style={{fontSize:'10px', fontWeight:600, textTransform:'uppercase' as const, letterSpacing:'0.08em', color:'#94a3b8'}}>{h}</div>
+                      ))}
+                    </div>
+                    {[
+                      {name:'Sarah Mitchell', company:'Apex Digital', intent:'Hot 95', color:'#fef2f2', text:'#dc2626'},
+                      {name:'James Hartley', company:'Hartley Sols', intent:'Warm 72', color:'#fff7ed', text:'#ea580c'},
+                      {name:'Priya Anand', company:'Anand Consulting', intent:'Cool 48', color:'#eff6ff', text:'#2563eb'},
+                      {name:'David Clarke', company:'Clarke & Sons', intent:'Hot 88', color:'#fef2f2', text:'#dc2626'},
+                    ].map(row => (
+                      <div key={row.name} style={{display:'grid', gridTemplateColumns:'2fr 1.5fr 1fr', padding:'10px 16px', borderBottom:'1px solid #f8fafc', gap:'12px', alignItems:'center'}}>
+                        <div style={{fontSize:'13px', fontWeight:600, color:'#0f172a'}}>{row.name}</div>
+                        <div style={{fontSize:'12px', color:'#64748b'}}>{row.company}</div>
+                        <div style={{display:'inline-flex', padding:'2px 8px', borderRadius:'100px', background:row.color, color:row.text, fontSize:'11px', fontWeight:700}}>{row.intent}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Bar chart */}
+                  <div style={{marginTop:'16px', display:'flex', alignItems:'flex-end', gap:'8px', height:'60px', padding:'0 4px'}}>
+                    {[40,65,45,80,55,70,90].map((h, i) => (
+                      <div key={i} style={{flex:1, background: i === 6 ? '#4F46E5' : '#EEF2FF', borderRadius:'4px 4px 0 0', height:`${h}%`, transition:'height 0.3s ease'}}></div>
+                    ))}
+                  </div>
+                  <div style={{fontSize:'11px', color:'#94a3b8', marginTop:'6px', textAlign:'center' as const}}>Weekly email sends</div>
                 </div>
               </div>
             </div>
 
-            {/* Floating Stat Cards */}
-            <div className="absolute -top-10 -right-10 bg-white p-4 rounded-lg shadow-ambient border border-slate-100 flex items-center gap-4 max-w-[200px] float-a">
-              <div className="bg-emerald-100 p-2 rounded-full text-emerald-600">
-                <span className="material-symbols-outlined">trending_up</span>
+            {/* Floating card 1 - top right */}
+            <div className="float-a" style={{position:'absolute', top:'-16px', right:'-16px', background:'#fff', borderRadius:'12px', boxShadow:'0 20px 40px -12px rgba(79,70,229,0.15)', border:'1px solid #e2e8f0', padding:'12px 16px', display:'flex', alignItems:'center', gap:'10px', minWidth:'160px'}}>
+              <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'#EEF2FF', display:'flex', alignItems:'center', justifyContent:'center'}}>
+                <span style={{fontSize:'16px'}}>📈</span>
               </div>
-              <div className="text-left">
-                <p className="text-xs text-slate-500">Conversion</p>
-                <p className="font-bold">+24%</p>
+              <div>
+                <div style={{fontSize:'11px', color:'#94a3b8'}}>Pipeline value</div>
+                <div style={{fontSize:'15px', fontWeight:800, color:'#4F46E5'}}>£15,600</div>
               </div>
             </div>
-            <div className="absolute top-1/2 -left-12 bg-white p-4 rounded-lg shadow-ambient border border-slate-100 flex items-center gap-4 float-b">
-              <div className="bg-indigo-100 p-2 rounded-full text-indigo-600">
-                <span className="material-symbols-outlined">mail</span>
+            {/* Floating card 2 - left */}
+            <div className="float-b" style={{position:'absolute', top:'40%', left:'-20px', background:'#fff', borderRadius:'12px', boxShadow:'0 20px 40px -12px rgba(79,70,229,0.15)', border:'1px solid #e2e8f0', padding:'12px 16px', display:'flex', alignItems:'center', gap:'10px'}}>
+              <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'#F0FFFE', display:'flex', alignItems:'center', justifyContent:'center'}}>
+                <span style={{fontSize:'16px'}}>🎯</span>
               </div>
-              <div className="text-left">
-                <p className="text-xs text-slate-500">Campaigns</p>
-                <p className="font-bold">Active Now</p>
+              <div>
+                <div style={{fontSize:'11px', color:'#94a3b8'}}>Hot leads</div>
+                <div style={{fontSize:'15px', fontWeight:800, color:'#06B6D4'}}>Hot 95</div>
+              </div>
+            </div>
+            {/* Floating card 3 - bottom right */}
+            <div className="float-c" style={{position:'absolute', bottom:'16px', right:'-16px', background:'#fff', borderRadius:'12px', boxShadow:'0 20px 40px -12px rgba(79,70,229,0.15)', border:'1px solid #e2e8f0', padding:'12px 16px', display:'flex', alignItems:'center', gap:'10px'}}>
+              <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'#EEF2FF', display:'flex', alignItems:'center', justifyContent:'center'}}>
+                <span style={{fontSize:'16px'}}>📬</span>
+              </div>
+              <div>
+                <div style={{fontSize:'11px', color:'#94a3b8'}}>Reply rate</div>
+                <div style={{fontSize:'15px', fontWeight:800, color:'#22D3EE'}}>18%</div>
               </div>
             </div>
           </div>
