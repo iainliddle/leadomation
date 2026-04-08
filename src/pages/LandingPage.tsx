@@ -27,11 +27,108 @@ export default function LandingPage() {
 
       {/* Section 2: Hero Section */}
       <section className="relative overflow-hidden pt-24 pb-32">
-        {/* Ambient gradient blobs */}
-        <div className="blob blob-1" style={{ top: '-20%', left: '30%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(79,70,229,0.10) 0%, transparent 70%)', filter: 'blur(40px)', zIndex: -1 }} />
-        <div className="blob blob-2" style={{ top: '10%', right: '-10%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 70%)', filter: 'blur(50px)', zIndex: -1 }} />
-        <div className="blob blob-3" style={{ bottom: '0%', left: '-5%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)', filter: 'blur(40px)', zIndex: -1 }} />
-        <div className="max-w-7xl mx-auto px-6 text-center">
+        {/* Animated colour block grid - Synthio style */}
+        <div style={{position:'absolute', inset:0, overflow:'hidden', zIndex:0, pointerEvents:'none'}}>
+          {/* Colour block grid */}
+          <div style={{position:'absolute', right:'-60px', top:'-40px', display:'grid', gridTemplateColumns:'repeat(6, 72px)', gridTemplateRows:'repeat(7, 72px)', gap:'10px', transform:'rotate(-4deg)', opacity:0.85}}>
+            {[
+              {c:'rgba(79,70,229,0.18)', delay:0},
+              {c:'rgba(34,211,238,0.12)', delay:0.3},
+              {c:'rgba(79,70,229,0.08)', delay:0.6},
+              {c:'rgba(6,182,212,0.15)', delay:0.2},
+              {c:'rgba(79,70,229,0.22)', delay:0.8},
+              {c:'rgba(34,211,238,0.10)', delay:0.4},
+              {c:'rgba(34,211,238,0.20)', delay:0.5},
+              {c:'rgba(79,70,229,0.14)', delay:0.1},
+              {c:'rgba(6,182,212,0.25)', delay:0.7},
+              {c:'rgba(34,211,238,0.08)', delay:0.3},
+              {c:'rgba(79,70,229,0.16)', delay:0.9},
+              {c:'rgba(6,182,212,0.12)', delay:0.2},
+              {c:'rgba(79,70,229,0.25)', delay:0.4},
+              {c:'rgba(6,182,212,0.18)', delay:0.6},
+              {c:'rgba(34,211,238,0.22)', delay:0.1},
+              {c:'rgba(79,70,229,0.10)', delay:0.5},
+              {c:'rgba(34,211,238,0.28)', delay:0.3},
+              {c:'rgba(79,70,229,0.14)', delay:0.7},
+              {c:'rgba(6,182,212,0.20)', delay:0.2},
+              {c:'rgba(79,70,229,0.30)', delay:0.8},
+              {c:'rgba(34,211,238,0.16)', delay:0.4},
+              {c:'rgba(6,182,212,0.22)', delay:0.1},
+              {c:'rgba(79,70,229,0.12)', delay:0.6},
+              {c:'rgba(34,211,238,0.18)', delay:0.9},
+              {c:'rgba(34,211,238,0.25)', delay:0.3},
+              {c:'rgba(6,182,212,0.14)', delay:0.5},
+              {c:'rgba(79,70,229,0.20)', delay:0.7},
+              {c:'rgba(34,211,238,0.10)', delay:0.2},
+              {c:'rgba(6,182,212,0.28)', delay:0.4},
+              {c:'rgba(79,70,229,0.16)', delay:0.8},
+              {c:'rgba(79,70,229,0.12)', delay:0.6},
+              {c:'rgba(34,211,238,0.22)', delay:0.1},
+              {c:'rgba(6,182,212,0.16)', delay:0.3},
+              {c:'rgba(79,70,229,0.26)', delay:0.7},
+              {c:'rgba(34,211,238,0.14)', delay:0.5},
+              {c:'rgba(6,182,212,0.20)', delay:0.2},
+              {c:'rgba(34,211,238,0.18)', delay:0.4},
+              {c:'rgba(79,70,229,0.22)', delay:0.9},
+              {c:'rgba(6,182,212,0.10)', delay:0.6},
+              {c:'rgba(34,211,238,0.24)', delay:0.1},
+              {c:'rgba(79,70,229,0.14)', delay:0.3},
+              {c:'rgba(6,182,212,0.18)', delay:0.7},
+            ].map((block, i) => (
+              <div
+                key={i}
+                className={`color-block color-block-${i % 6}`}
+                style={{
+                  width:'72px',
+                  height:'72px',
+                  borderRadius:'16px',
+                  background:block.c,
+                  backdropFilter:'blur(8px)',
+                  border:'1px solid rgba(255,255,255,0.4)',
+                  animationDelay:`${block.delay}s`,
+                }}
+              />
+            ))}
+          </div>
+          {/* Left side smaller blocks */}
+          <div style={{position:'absolute', left:'-30px', bottom:'60px', display:'grid', gridTemplateColumns:'repeat(3, 56px)', gridTemplateRows:'repeat(4, 56px)', gap:'8px', transform:'rotate(3deg)', opacity:0.6}}>
+            {[
+              {c:'rgba(79,70,229,0.15)', delay:0.2},
+              {c:'rgba(34,211,238,0.20)', delay:0.5},
+              {c:'rgba(6,182,212,0.12)', delay:0.8},
+              {c:'rgba(34,211,238,0.18)', delay:0.1},
+              {c:'rgba(79,70,229,0.22)', delay:0.4},
+              {c:'rgba(6,182,212,0.16)', delay:0.7},
+              {c:'rgba(6,182,212,0.20)', delay:0.3},
+              {c:'rgba(79,70,229,0.14)', delay:0.6},
+              {c:'rgba(34,211,238,0.24)', delay:0.9},
+              {c:'rgba(79,70,229,0.18)', delay:0.2},
+              {c:'rgba(6,182,212,0.22)', delay:0.5},
+              {c:'rgba(34,211,238,0.16)', delay:0.8},
+            ].map((block, i) => (
+              <div
+                key={i}
+                className={`color-block color-block-${(i + 2) % 6}`}
+                style={{
+                  width:'56px',
+                  height:'56px',
+                  borderRadius:'14px',
+                  background:block.c,
+                  backdropFilter:'blur(6px)',
+                  border:'1px solid rgba(255,255,255,0.3)',
+                  animationDelay:`${block.delay}s`,
+                }}
+              />
+            ))}
+          </div>
+          {/* White fade overlay - bottom */}
+          <div style={{position:'absolute', bottom:0, left:0, right:0, height:'200px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.95))', zIndex:1}}></div>
+          {/* White fade overlay - left side */}
+          <div style={{position:'absolute', top:0, left:0, bottom:0, width:'55%', background:'linear-gradient(to right, rgba(255,255,255,1) 40%, transparent)', zIndex:1}}></div>
+        </div>
+
+        {/* Hero content - above colour blocks */}
+        <div className="max-w-7xl mx-auto px-6 text-center" style={{position:'relative', zIndex:2}}>
           <div style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#EEF2FF', border:'1px solid #c7d2fe', borderRadius:'9999px', padding:'4px 14px', fontSize:'13px', fontWeight:500, color:'#4F46E5', marginBottom:'24px'}}>
             <span style={{width:'6px', height:'6px', borderRadius:'50%', background:'#4F46E5', display:'inline-block'}}></span>
             B2B lead generation, automated
@@ -50,73 +147,106 @@ export default function LandingPage() {
 
           {/* Dashboard UI Illustration */}
           <div className="relative max-w-5xl mx-auto mt-16" style={{ transform: 'perspective(1000px) rotateX(4deg) rotateY(-2deg) rotateZ(1deg)' }}>
-            <div className="bg-white rounded-xl shadow-ambient border border-slate-100 overflow-hidden">
-              {/* Browser chrome */}
-              <div style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0', padding:'12px 16px', display:'flex', alignItems:'center', gap:'6px'}}>
+            <div className="bg-white rounded-xl shadow-ambient border border-slate-100 overflow-hidden" style={{borderRadius:'20px'}}>
+              {/* Browser chrome bar */}
+              <div style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0', padding:'10px 16px', display:'flex', alignItems:'center', gap:'6px', borderRadius:'20px 20px 0 0'}}>
                 <div style={{width:'10px', height:'10px', borderRadius:'50%', background:'#fca5a5'}}></div>
                 <div style={{width:'10px', height:'10px', borderRadius:'50%', background:'#fcd34d'}}></div>
                 <div style={{width:'10px', height:'10px', borderRadius:'50%', background:'#86efac'}}></div>
-                <div style={{flex:1, height:'24px', background:'#f1f5f9', borderRadius:'6px', marginLeft:'12px', display:'flex', alignItems:'center', paddingLeft:'12px'}}>
-                  <span style={{fontSize:'11px', color:'#94a3b8'}}>app.leadomation.co.uk</span>
+                <div style={{flex:1, height:'22px', background:'#f1f5f9', borderRadius:'6px', marginLeft:'8px', display:'flex', alignItems:'center', paddingLeft:'10px', gap:'6px'}}>
+                  <div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#e2e8f0'}}></div>
+                  <span style={{fontSize:'10px', color:'#94a3b8', fontFamily:'monospace'}}>app.leadomation.co.uk</span>
                 </div>
               </div>
-              {/* Dashboard body */}
-              <div style={{display:'grid', gridTemplateColumns:'200px 1fr', minHeight:'420px'}}>
+              {/* App layout */}
+              <div style={{display:'grid', gridTemplateColumns:'180px 1fr', height:'460px', overflow:'hidden'}}>
                 {/* Sidebar */}
-                <div style={{background:'#4F46E5', padding:'20px 16px', display:'flex', flexDirection:'column' as const, gap:'4px'}}>
-                  <div style={{color:'#fff', fontWeight:700, fontSize:'14px', marginBottom:'20px', display:'flex', alignItems:'center', gap:'8px'}}>
-                    <div style={{width:'24px', height:'24px', background:'rgba(255,255,255,0.2)', borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'11px', fontWeight:800}}>L</div>
-                    Leadomation
+                <div style={{background:'#4F46E5', padding:'16px 12px', display:'flex', flexDirection:'column', gap:'2px', overflowY:'hidden'}}>
+                  <div style={{display:'flex', alignItems:'center', gap:'8px', padding:'8px', marginBottom:'12px'}}>
+                    <div style={{width:'28px', height:'28px', background:'rgba(255,255,255,0.2)', borderRadius:'8px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', fontWeight:800, color:'#fff'}}>L</div>
+                    <span style={{color:'#fff', fontWeight:700, fontSize:'13px'}}>Leadomation</span>
                   </div>
-                  {['Dashboard','Leads','Campaigns','Inbox','Pipeline','Templates','Settings'].map((item, i) => (
-                    <div key={item} style={{padding:'8px 12px', borderRadius:'8px', fontSize:'13px', fontWeight:500, color: i === 0 ? '#fff' : 'rgba(255,255,255,0.6)', background: i === 0 ? 'rgba(255,255,255,0.15)' : 'transparent', cursor:'pointer'}}>
-                      {item}
+                  {[
+                    {label:'Dashboard', icon:'\u25A6', active:true},
+                    {label:'Leads', icon:'\u25C9', active:false},
+                    {label:'Campaigns', icon:'\u25C8', active:false},
+                    {label:'Inbox', icon:'\u2709', active:false},
+                    {label:'Pipeline', icon:'\u2B21', active:false},
+                    {label:'Templates', icon:'\u25E7', active:false},
+                    {label:'Call agent', icon:'\u25CE', active:false},
+                    {label:'Settings', icon:'\u25CC', active:false},
+                  ].map(item => (
+                    <div key={item.label} style={{
+                      display:'flex', alignItems:'center', gap:'8px',
+                      padding:'8px 10px', borderRadius:'8px',
+                      background: item.active ? 'rgba(255,255,255,0.18)' : 'transparent',
+                      cursor:'pointer'
+                    }}>
+                      <span style={{fontSize:'12px', color: item.active ? '#fff' : 'rgba(255,255,255,0.55)'}}>{item.icon}</span>
+                      <span style={{fontSize:'12px', fontWeight: item.active ? 600 : 400, color: item.active ? '#fff' : 'rgba(255,255,255,0.55)'}}>{item.label}</span>
                     </div>
                   ))}
                 </div>
                 {/* Main content */}
-                <div style={{padding:'20px', background:'#fff'}}>
-                  {/* Metric cards */}
-                  <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px', marginBottom:'20px'}}>
+                <div style={{background:'#F8F9FA', padding:'16px', overflowY:'hidden', display:'flex', flexDirection:'column', gap:'12px'}}>
+                  {/* Page header */}
+                  <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                    <div>
+                      <div style={{fontSize:'16px', fontWeight:700, color:'#0f172a'}}>Dashboard</div>
+                      <div style={{fontSize:'11px', color:'#94a3b8'}}>Good morning, Iain</div>
+                    </div>
+                    <div style={{background:'#4F46E5', color:'#fff', fontSize:'11px', fontWeight:600, padding:'6px 12px', borderRadius:'8px', cursor:'pointer'}}>+ New campaign</div>
+                  </div>
+                  {/* Metric cards row */}
+                  <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'8px'}}>
                     {[
-                      {label:'Leads found', value:'271', color:'#4F46E5'},
-                      {label:'Replies', value:'14', color:'#06B6D4'},
-                      {label:'Calls booked', value:'6', color:'#22D3EE'},
-                      {label:'Deliverability', value:'94%', color:'#4F46E5'},
+                      {label:'Leads found', value:'271', delta:'+12%', color:'#4F46E5', bg:'#EEF2FF'},
+                      {label:'Replies', value:'14', delta:'+8%', color:'#06B6D4', bg:'#F0FFFE'},
+                      {label:'Calls booked', value:'6', delta:'+3', color:'#22D3EE', bg:'#F0FFFE'},
+                      {label:'Deliverability', value:'94%', delta:'\u2191 2%', color:'#4F46E5', bg:'#EEF2FF'},
                     ].map(m => (
-                      <div key={m.label} style={{background:'#f8fafc', borderRadius:'10px', padding:'12px', border:'1px solid #f1f5f9'}}>
-                        <div style={{fontSize:'11px', color:'#94a3b8', marginBottom:'4px'}}>{m.label}</div>
-                        <div style={{fontSize:'22px', fontWeight:800, color:m.color}}>{m.value}</div>
+                      <div key={m.label} style={{background:'#fff', borderRadius:'10px', padding:'10px', border:'1px solid #e2e8f0', boxShadow:'0 1px 3px rgba(0,0,0,0.04)'}}>
+                        <div style={{fontSize:'10px', color:'#94a3b8', marginBottom:'4px'}}>{m.label}</div>
+                        <div style={{fontSize:'20px', fontWeight:800, color:m.color, lineHeight:1}}>{m.value}</div>
+                        <div style={{fontSize:'10px', color:'#22c55e', marginTop:'2px'}}>{m.delta}</div>
                       </div>
                     ))}
                   </div>
                   {/* Lead table */}
-                  <div style={{background:'#fff', border:'1px solid #f1f5f9', borderRadius:'10px', overflow:'hidden'}}>
-                    <div style={{display:'grid', gridTemplateColumns:'2fr 1.5fr 1fr', padding:'8px 16px', borderBottom:'1px solid #f1f5f9', gap:'12px'}}>
-                      {['Name','Company','Intent'].map(h => (
-                        <div key={h} style={{fontSize:'10px', fontWeight:600, textTransform:'uppercase' as const, letterSpacing:'0.08em', color:'#94a3b8'}}>{h}</div>
+                  <div style={{background:'#fff', borderRadius:'12px', border:'1px solid #e2e8f0', overflow:'hidden', flex:1}}>
+                    <div style={{display:'grid', gridTemplateColumns:'1.5fr 1.2fr 0.8fr 0.8fr', padding:'8px 12px', borderBottom:'1px solid #f1f5f9', background:'#fafafa', gap:'8px'}}>
+                      {['Lead name','Company','Score','Status'].map(h => (
+                        <div key={h} style={{fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'0.08em', color:'#94a3b8'}}>{h}</div>
                       ))}
                     </div>
                     {[
-                      {name:'Sarah Mitchell', company:'Apex Digital', intent:'Hot 95', color:'#fef2f2', text:'#dc2626'},
-                      {name:'James Hartley', company:'Hartley Sols', intent:'Warm 72', color:'#fff7ed', text:'#ea580c'},
-                      {name:'Priya Anand', company:'Anand Consulting', intent:'Cool 48', color:'#eff6ff', text:'#2563eb'},
-                      {name:'David Clarke', company:'Clarke & Sons', intent:'Hot 88', color:'#fef2f2', text:'#dc2626'},
-                    ].map(row => (
-                      <div key={row.name} style={{display:'grid', gridTemplateColumns:'2fr 1.5fr 1fr', padding:'10px 16px', borderBottom:'1px solid #f8fafc', gap:'12px', alignItems:'center'}}>
-                        <div style={{fontSize:'13px', fontWeight:600, color:'#0f172a'}}>{row.name}</div>
-                        <div style={{fontSize:'12px', color:'#64748b'}}>{row.company}</div>
-                        <div style={{display:'inline-flex', padding:'2px 8px', borderRadius:'100px', background:row.color, color:row.text, fontSize:'11px', fontWeight:700}}>{row.intent}</div>
+                      {name:'Sarah Mitchell', co:'Apex Digital', score:'95', badge:'Hot', bc:'#fef2f2', bt:'#dc2626', status:'Emailed'},
+                      {name:'James Hartley', co:'Hartley Sols', score:'72', badge:'Warm', bc:'#fff7ed', bt:'#ea580c', status:'Connected'},
+                      {name:'Priya Anand', co:'Anand Consulting', score:'48', badge:'Cool', bc:'#eff6ff', bt:'#2563eb', status:'New'},
+                      {name:'David Clarke', co:'Clarke & Sons', score:'88', badge:'Hot', bc:'#fef2f2', bt:'#dc2626', status:'Replied'},
+                    ].map((row, i) => (
+                      <div key={i} style={{display:'grid', gridTemplateColumns:'1.5fr 1.2fr 0.8fr 0.8fr', padding:'8px 12px', borderBottom:'1px solid #f8fafc', gap:'8px', alignItems:'center'}}>
+                        <div style={{fontSize:'11px', fontWeight:600, color:'#0f172a'}}>{row.name}</div>
+                        <div style={{fontSize:'11px', color:'#64748b'}}>{row.co}</div>
+                        <div style={{display:'inline-flex', padding:'2px 6px', borderRadius:'100px', background:row.bc, color:row.bt, fontSize:'10px', fontWeight:700, width:'fit-content'}}>{row.badge} {row.score}</div>
+                        <div style={{fontSize:'10px', color:'#64748b', background:'#f8fafc', padding:'2px 6px', borderRadius:'6px', width:'fit-content'}}>{row.status}</div>
                       </div>
                     ))}
                   </div>
-                  {/* Bar chart */}
-                  <div style={{marginTop:'16px', display:'flex', alignItems:'flex-end', gap:'8px', height:'60px', padding:'0 4px'}}>
-                    {[40,65,45,80,55,70,90].map((h, i) => (
-                      <div key={i} style={{flex:1, background: i === 6 ? '#4F46E5' : '#EEF2FF', borderRadius:'4px 4px 0 0', height:`${h}%`, transition:'height 0.3s ease'}}></div>
-                    ))}
+                  {/* Mini bar chart */}
+                  <div style={{background:'#fff', borderRadius:'10px', border:'1px solid #e2e8f0', padding:'10px 12px'}}>
+                    <div style={{fontSize:'10px', fontWeight:600, color:'#64748b', marginBottom:'8px'}}>Weekly email sends</div>
+                    <div style={{display:'flex', alignItems:'flex-end', gap:'6px', height:'40px'}}>
+                      {[35,58,42,76,51,68,90].map((h, i) => (
+                        <div key={i} style={{flex:1, borderRadius:'3px 3px 0 0', height:`${h}%`, background: i === 6 ? '#4F46E5' : i === 4 ? '#22D3EE' : '#EEF2FF', transition:'height 0.3s ease'}}></div>
+                      ))}
+                    </div>
+                    <div style={{display:'flex', justifyContent:'space-between', marginTop:'4px'}}>
+                      {['M','T','W','T','F','S','S'].map((d, i) => (
+                        <div key={i} style={{flex:1, fontSize:'9px', color:'#94a3b8', textAlign:'center' as const}}>{d}</div>
+                      ))}
+                    </div>
                   </div>
-                  <div style={{fontSize:'11px', color:'#94a3b8', marginTop:'6px', textAlign:'center' as const}}>Weekly email sends</div>
                 </div>
               </div>
             </div>

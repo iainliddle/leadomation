@@ -52,8 +52,25 @@
 .float-b { animation: float-card 6s ease-in-out infinite 1.5s; }
 .float-c { animation: float-card 7s ease-in-out infinite 3s; }
 
+@keyframes block-float {
+  0%, 100% { transform: translateY(0px) scale(1); opacity: var(--block-opacity, 0.8); }
+  33% { transform: translateY(-8px) scale(1.02); opacity: calc(var(--block-opacity, 0.8) * 1.2); }
+  66% { transform: translateY(4px) scale(0.99); opacity: calc(var(--block-opacity, 0.8) * 0.9); }
+}
+
+.color-block {
+  animation: block-float 6s ease-in-out infinite;
+}
+.color-block-0 { animation-duration: 5.5s; }
+.color-block-1 { animation-duration: 7.2s; }
+.color-block-2 { animation-duration: 6.8s; }
+.color-block-3 { animation-duration: 5.8s; }
+.color-block-4 { animation-duration: 7.5s; }
+.color-block-5 { animation-duration: 6.2s; }
+
 @media (prefers-reduced-motion: reduce) {
-  .blob-1, .blob-2, .blob-3, .float-a, .float-b, .float-c {
+  .blob-1, .blob-2, .blob-3, .float-a, .float-b, .float-c,
+  .color-block {
     animation: none;
   }
 }
