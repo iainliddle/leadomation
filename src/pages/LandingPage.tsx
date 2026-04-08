@@ -27,104 +27,100 @@ export default function LandingPage() {
 
       {/* Section 2: Hero Section */}
       <section className="relative overflow-hidden pt-24 pb-32">
-        {/* Animated colour block grid - Synthio style */}
         <div style={{position:'absolute', inset:0, overflow:'hidden', zIndex:0, pointerEvents:'none'}}>
-          {/* Colour block grid */}
-          <div style={{position:'absolute', right:'-60px', top:'-40px', display:'grid', gridTemplateColumns:'repeat(6, 72px)', gridTemplateRows:'repeat(7, 72px)', gap:'10px', transform:'rotate(-4deg)', opacity:0.85}}>
+          {/* Main block grid - bottom right, large, richly coloured like Synthio */}
+          <div style={{
+            position:'absolute',
+            right:'-80px',
+            bottom:'-40px',
+            display:'grid',
+            gridTemplateColumns:'repeat(7, 100px)',
+            gridTemplateRows:'repeat(6, 100px)',
+            gap:'12px',
+            transform:'rotate(-2deg)',
+          }}>
             {[
-              {c:'rgba(79,70,229,0.18)', delay:0},
-              {c:'rgba(34,211,238,0.12)', delay:0.3},
-              {c:'rgba(79,70,229,0.08)', delay:0.6},
-              {c:'rgba(6,182,212,0.15)', delay:0.2},
-              {c:'rgba(79,70,229,0.22)', delay:0.8},
-              {c:'rgba(34,211,238,0.10)', delay:0.4},
-              {c:'rgba(34,211,238,0.20)', delay:0.5},
-              {c:'rgba(79,70,229,0.14)', delay:0.1},
-              {c:'rgba(6,182,212,0.25)', delay:0.7},
-              {c:'rgba(34,211,238,0.08)', delay:0.3},
-              {c:'rgba(79,70,229,0.16)', delay:0.9},
-              {c:'rgba(6,182,212,0.12)', delay:0.2},
-              {c:'rgba(79,70,229,0.25)', delay:0.4},
-              {c:'rgba(6,182,212,0.18)', delay:0.6},
-              {c:'rgba(34,211,238,0.22)', delay:0.1},
-              {c:'rgba(79,70,229,0.10)', delay:0.5},
-              {c:'rgba(34,211,238,0.28)', delay:0.3},
-              {c:'rgba(79,70,229,0.14)', delay:0.7},
-              {c:'rgba(6,182,212,0.20)', delay:0.2},
-              {c:'rgba(79,70,229,0.30)', delay:0.8},
-              {c:'rgba(34,211,238,0.16)', delay:0.4},
-              {c:'rgba(6,182,212,0.22)', delay:0.1},
-              {c:'rgba(79,70,229,0.12)', delay:0.6},
-              {c:'rgba(34,211,238,0.18)', delay:0.9},
-              {c:'rgba(34,211,238,0.25)', delay:0.3},
-              {c:'rgba(6,182,212,0.14)', delay:0.5},
-              {c:'rgba(79,70,229,0.20)', delay:0.7},
-              {c:'rgba(34,211,238,0.10)', delay:0.2},
-              {c:'rgba(6,182,212,0.28)', delay:0.4},
-              {c:'rgba(79,70,229,0.16)', delay:0.8},
-              {c:'rgba(79,70,229,0.12)', delay:0.6},
-              {c:'rgba(34,211,238,0.22)', delay:0.1},
-              {c:'rgba(6,182,212,0.16)', delay:0.3},
-              {c:'rgba(79,70,229,0.26)', delay:0.7},
-              {c:'rgba(34,211,238,0.14)', delay:0.5},
-              {c:'rgba(6,182,212,0.20)', delay:0.2},
-              {c:'rgba(34,211,238,0.18)', delay:0.4},
-              {c:'rgba(79,70,229,0.22)', delay:0.9},
-              {c:'rgba(6,182,212,0.10)', delay:0.6},
-              {c:'rgba(34,211,238,0.24)', delay:0.1},
-              {c:'rgba(79,70,229,0.14)', delay:0.3},
-              {c:'rgba(6,182,212,0.18)', delay:0.7},
+              // Row 1
+              {g:'linear-gradient(135deg, rgba(199,210,254,0.6), rgba(167,139,250,0.4))', delay:0, scale:0.9},
+              {g:'linear-gradient(135deg, rgba(147,197,253,0.5), rgba(99,179,237,0.3))', delay:0.4, scale:0.85},
+              {g:'linear-gradient(135deg, rgba(167,243,208,0.3), rgba(110,231,183,0.2))', delay:0.8, scale:0.8},
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.5), rgba(167,139,250,0.6))', delay:0.2, scale:0.9},
+              {g:'linear-gradient(135deg, rgba(147,197,253,0.4), rgba(96,165,250,0.3))', delay:0.6, scale:0.85},
+              {g:'linear-gradient(135deg, rgba(199,210,254,0.3), rgba(167,139,250,0.2))', delay:1.0, scale:0.7},
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.2), rgba(147,197,253,0.15))', delay:0.3, scale:0.6},
+              // Row 2
+              {g:'linear-gradient(135deg, rgba(129,140,248,0.7), rgba(99,102,241,0.5))', delay:0.5, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(34,211,238,0.6), rgba(6,182,212,0.4))', delay:0.1, scale:0.95},
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.7), rgba(167,139,250,0.8))', delay:0.7, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(99,102,241,0.5), rgba(79,70,229,0.4))', delay:0.3, scale:0.9},
+              {g:'linear-gradient(135deg, rgba(34,211,238,0.5), rgba(6,182,212,0.6))', delay:0.9, scale:0.85},
+              {g:'linear-gradient(135deg, rgba(167,139,250,0.4), rgba(196,181,253,0.3))', delay:0.2, scale:0.8},
+              {g:'linear-gradient(135deg, rgba(147,197,253,0.3), rgba(99,179,237,0.2))', delay:0.6, scale:0.65},
+              // Row 3
+              {g:'linear-gradient(135deg, rgba(79,70,229,0.8), rgba(99,102,241,0.6))', delay:0.2, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(167,139,250,0.9), rgba(196,181,253,0.7))', delay:0.8, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(6,182,212,0.7), rgba(34,211,238,0.5))', delay:0.4, scale:0.95},
+              {g:'linear-gradient(135deg, rgba(99,102,241,0.8), rgba(79,70,229,0.9))', delay:0.1, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.8), rgba(167,139,250,0.6))', delay:0.6, scale:0.9},
+              {g:'linear-gradient(135deg, rgba(34,211,238,0.6), rgba(6,182,212,0.4))', delay:1.1, scale:0.8},
+              {g:'linear-gradient(135deg, rgba(129,140,248,0.3), rgba(99,102,241,0.2))', delay:0.4, scale:0.6},
+              // Row 4
+              {g:'linear-gradient(135deg, rgba(167,139,250,0.7), rgba(196,181,253,0.9))', delay:0.6, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(79,70,229,0.9), rgba(67,56,202,0.8))', delay:0.2, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.8), rgba(167,139,250,0.7))', delay:0.9, scale:0.95},
+              {g:'linear-gradient(135deg, rgba(6,182,212,0.6), rgba(34,211,238,0.8))', delay:0.3, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(99,102,241,0.7), rgba(79,70,229,0.6))', delay:0.7, scale:0.85},
+              {g:'linear-gradient(135deg, rgba(167,139,250,0.5), rgba(196,181,253,0.4))', delay:0.1, scale:0.75},
+              {g:'linear-gradient(135deg, rgba(34,211,238,0.25), rgba(6,182,212,0.15))', delay:0.5, scale:0.55},
+              // Row 5
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.6), rgba(167,139,250,0.8))', delay:0.4, scale:0.95},
+              {g:'linear-gradient(135deg, rgba(129,140,248,0.8), rgba(99,102,241,0.7))', delay:0.9, scale:1.0},
+              {g:'linear-gradient(135deg, rgba(167,139,250,0.9), rgba(79,70,229,0.7))', delay:0.2, scale:0.9},
+              {g:'linear-gradient(135deg, rgba(34,211,238,0.7), rgba(6,182,212,0.5))', delay:0.6, scale:0.85},
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.5), rgba(167,139,250,0.4))', delay:0.1, scale:0.75},
+              {g:'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(79,70,229,0.2))', delay:0.8, scale:0.6},
+              {g:'linear-gradient(135deg, rgba(34,211,238,0.15), rgba(6,182,212,0.10))', delay:0.3, scale:0.45},
+              // Row 6
+              {g:'linear-gradient(135deg, rgba(129,140,248,0.5), rgba(99,102,241,0.4))', delay:0.7, scale:0.85},
+              {g:'linear-gradient(135deg, rgba(167,139,250,0.6), rgba(196,181,253,0.5))', delay:0.3, scale:0.8},
+              {g:'linear-gradient(135deg, rgba(79,70,229,0.5), rgba(99,102,241,0.4))', delay:0.8, scale:0.75},
+              {g:'linear-gradient(135deg, rgba(6,182,212,0.4), rgba(34,211,238,0.3))', delay:0.2, scale:0.65},
+              {g:'linear-gradient(135deg, rgba(196,181,253,0.3), rgba(167,139,250,0.2))', delay:0.6, scale:0.55},
+              {g:'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))', delay:0.4, scale:0.45},
+              {g:'linear-gradient(135deg, rgba(34,211,238,0.10), rgba(6,182,212,0.08))', delay:0.9, scale:0.35},
             ].map((block, i) => (
               <div
                 key={i}
                 className={`color-block color-block-${i % 6}`}
                 style={{
-                  width:'72px',
-                  height:'72px',
-                  borderRadius:'16px',
-                  background:block.c,
-                  backdropFilter:'blur(8px)',
-                  border:'1px solid rgba(255,255,255,0.4)',
+                  width:'100px',
+                  height:'100px',
+                  borderRadius:'20px',
+                  background: block.g,
+                  backdropFilter:'blur(12px)',
+                  WebkitBackdropFilter:'blur(12px)',
+                  border:'1px solid rgba(255,255,255,0.5)',
+                  boxShadow:'0 8px 32px rgba(79,70,229,0.15), inset 0 1px 0 rgba(255,255,255,0.4)',
+                  transform:`scale(${block.scale})`,
                   animationDelay:`${block.delay}s`,
+                  transition:'transform 0.3s ease',
                 }}
               />
             ))}
           </div>
-          {/* Left side smaller blocks */}
-          <div style={{position:'absolute', left:'-30px', bottom:'60px', display:'grid', gridTemplateColumns:'repeat(3, 56px)', gridTemplateRows:'repeat(4, 56px)', gap:'8px', transform:'rotate(3deg)', opacity:0.6}}>
-            {[
-              {c:'rgba(79,70,229,0.15)', delay:0.2},
-              {c:'rgba(34,211,238,0.20)', delay:0.5},
-              {c:'rgba(6,182,212,0.12)', delay:0.8},
-              {c:'rgba(34,211,238,0.18)', delay:0.1},
-              {c:'rgba(79,70,229,0.22)', delay:0.4},
-              {c:'rgba(6,182,212,0.16)', delay:0.7},
-              {c:'rgba(6,182,212,0.20)', delay:0.3},
-              {c:'rgba(79,70,229,0.14)', delay:0.6},
-              {c:'rgba(34,211,238,0.24)', delay:0.9},
-              {c:'rgba(79,70,229,0.18)', delay:0.2},
-              {c:'rgba(6,182,212,0.22)', delay:0.5},
-              {c:'rgba(34,211,238,0.16)', delay:0.8},
-            ].map((block, i) => (
-              <div
-                key={i}
-                className={`color-block color-block-${(i + 2) % 6}`}
-                style={{
-                  width:'56px',
-                  height:'56px',
-                  borderRadius:'14px',
-                  background:block.c,
-                  backdropFilter:'blur(6px)',
-                  border:'1px solid rgba(255,255,255,0.3)',
-                  animationDelay:`${block.delay}s`,
-                }}
-              />
-            ))}
-          </div>
-          {/* White fade overlay - bottom */}
-          <div style={{position:'absolute', bottom:0, left:0, right:0, height:'200px', background:'linear-gradient(to bottom, transparent, rgba(255,255,255,0.95))', zIndex:1}}></div>
-          {/* White fade overlay - left side */}
-          <div style={{position:'absolute', top:0, left:0, bottom:0, width:'55%', background:'linear-gradient(to right, rgba(255,255,255,1) 40%, transparent)', zIndex:1}}></div>
+
+          {/* Bottom-left fade so content stays clean */}
+          <div style={{
+            position:'absolute', inset:0,
+            background:'radial-gradient(ellipse 60% 80% at 25% 50%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.7) 60%, transparent 100%)',
+            zIndex:1,
+          }}></div>
+          {/* Bottom fade to white */}
+          <div style={{
+            position:'absolute', bottom:0, left:0, right:0, height:'180px',
+            background:'linear-gradient(to bottom, transparent, white)',
+            zIndex:2,
+          }}></div>
         </div>
 
         {/* Hero content - above colour blocks */}
