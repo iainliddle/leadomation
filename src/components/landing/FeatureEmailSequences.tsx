@@ -166,52 +166,13 @@ export default function FeatureEmailSequences() {
   return (
     <section ref={ref} style={{
       position: 'relative',
-      overflow: 'hidden',
+      overflow: 'visible',
       zIndex: 1,
-      background: 'linear-gradient(180deg, #f0f4ff 0%, #f8faff 50%, #ffffff 100%)',
-      marginTop: 0,
-      borderTop: 'none',
-      boxShadow: 'none',
+      background: 'transparent',
       paddingTop: '120px',
       paddingBottom: '120px',
       fontFamily: 'Switzer, sans-serif',
     }}>
-      {/* Ambient blobs */}
-      <div style={{
-        position: 'absolute',
-        top: '-200px',
-        left: '-200px',
-        width: '600px',
-        height: '600px',
-        background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%)',
-        filter: 'blur(60px)',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }} />
-      <div style={{
-        position: 'absolute',
-        top: '-80px',
-        right: '-150px',
-        width: '500px',
-        height: '500px',
-        background: 'radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%)',
-        filter: 'blur(80px)',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '800px',
-        height: '300px',
-        background: 'radial-gradient(ellipse, rgba(34,211,238,0.08) 0%, transparent 70%)',
-        filter: 'blur(60px)',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }} />
-
       <div style={{ position: 'relative', zIndex: 1 }}>
       <div style={{
         maxWidth: '1200px', margin: '0 auto',
