@@ -1,5 +1,6 @@
 import Nav from '../components/landing/Nav'
 import Hero from '../components/landing/Hero'
+import IntegrationMarquee from '../components/landing/IntegrationMarquee'
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
@@ -15,6 +16,7 @@ export default function LandingPage() {
     <div className="landing-page">
       <Nav />
       <Hero />
+      <IntegrationMarquee />
     </div>
   )
 }

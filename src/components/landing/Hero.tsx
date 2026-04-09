@@ -121,7 +121,7 @@ export default function Hero() {
       setClicking(false)
     }
 
-    const loop = () => sequence().then(() => loop())
+    const loop = (): Promise<void> => sequence().then((): void => { loop() })
     const startDelay = setTimeout(loop, 1500)
     return () => clearTimeout(startDelay)
   }, [])
