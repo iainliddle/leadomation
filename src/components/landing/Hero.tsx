@@ -116,7 +116,12 @@ export default function Hero() {
           <br />
           are already out there.
           <br />
-          <span style={{ color: '#4F46E5' }}>
+          <span style={{
+            background: 'linear-gradient(90deg, #4F46E5 0%, #06B6D4 50%, #22D3EE 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}>
             Leadomation finds them.
           </span>
         </motion.h1>
@@ -267,228 +272,393 @@ export default function Hero() {
             </div>
 
             {/* Dashboard layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', minHeight: '520px' }}>
+            {/* Dashboard layout - matches real app */}
+            <div style={{display:'grid', gridTemplateColumns:'220px 1fr', minHeight:'540px'}}>
 
-              {/* Sidebar */}
+              {/* Sidebar - WHITE like real app, not indigo */}
               <div style={{
-                background: '#4F46E5',
-                padding: '20px 14px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2px',
+                background:'#ffffff',
+                borderRight:'1px solid #e2e8f0',
+                padding:'16px 12px',
+                display:'flex',
+                flexDirection:'column',
+                gap:'2px',
               }}>
+                {/* Logo area */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px',
-                  marginBottom: '16px',
+                  display:'flex',
+                  alignItems:'center',
+                  gap:'8px',
+                  padding:'8px 12px',
+                  marginBottom:'20px',
                 }}>
-                  <div style={{
-                    width: '26px', height: '26px',
-                    background: 'rgba(255,255,255,0.2)',
-                    borderRadius: '7px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '12px', fontWeight: 800, color: '#fff',
-                    fontFamily: 'Switzer, sans-serif',
-                  }}>L</div>
-                  <span style={{ color: '#fff', fontWeight: 700, fontSize: '13px', fontFamily: 'Switzer, sans-serif' }}>
-                    Leadomation
-                  </span>
+                  <img
+                    src="/src/assets/logo-full.png"
+                    alt="Leadomation"
+                    style={{height:'24px', width:'auto', objectFit:'contain'}}
+                    onError={(e) => {
+                      const t = e.target as HTMLImageElement
+                      t.style.display = 'none'
+                      const next = t.nextElementSibling as HTMLElement
+                      if(next) next.style.display = 'flex'
+                    }}
+                  />
+                  <div style={{display:'none', flexDirection:'column'}}>
+                    <div style={{fontSize:'13px', fontWeight:700, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>Leadomation</div>
+                    <div style={{fontSize:'10px', color:'#94a3b8', fontFamily:'Switzer, sans-serif'}}>B2B Outreach Platform</div>
+                  </div>
                 </div>
+
+                {/* MAIN */}
+                <div style={{fontSize:'10px', fontWeight:600, color:'#94a3b8', padding:'0 12px 6px', letterSpacing:'0.08em', fontFamily:'Switzer, sans-serif'}}>MAIN</div>
+
+                {/* Dashboard - active */}
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'8px', background:'#EEF2FF', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                  </svg>
+                  <span style={{fontSize:'13px', fontWeight:600, color:'#4F46E5', fontFamily:'Switzer, sans-serif'}}>Dashboard</span>
+                </div>
+
+                {/* Global Demand */}
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif'}}>Global Demand</span>
+                </div>
+
+                {/* CAMPAIGNS */}
+                <div style={{fontSize:'10px', fontWeight:600, color:'#94a3b8', padding:'10px 12px 6px', letterSpacing:'0.08em', fontFamily:'Switzer, sans-serif'}}>CAMPAIGNS</div>
+
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif'}}>New Campaign</span>
+                </div>
+
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif'}}>Active Campaigns</span>
+                </div>
+
+                {/* LEADS */}
+                <div style={{fontSize:'10px', fontWeight:600, color:'#94a3b8', padding:'10px 12px 6px', letterSpacing:'0.08em', fontFamily:'Switzer, sans-serif'}}>LEADS</div>
+
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif', flex:1}}>Lead Database</span>
+                  <span style={{background:'#4F46E5', color:'#fff', fontSize:'10px', fontWeight:700, padding:'2px 7px', borderRadius:'100px', fontFamily:'Switzer, sans-serif'}}>271</span>
+                </div>
+
+                {/* CRM */}
+                <div style={{fontSize:'10px', fontWeight:600, color:'#94a3b8', padding:'10px 12px 6px', letterSpacing:'0.08em', fontFamily:'Switzer, sans-serif'}}>CRM</div>
+
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif', flex:1}}>Deal Pipeline</span>
+                  <span style={{background:'#4F46E5', color:'#fff', fontSize:'10px', fontWeight:700, padding:'2px 7px', borderRadius:'100px', fontFamily:'Switzer, sans-serif'}}>10</span>
+                </div>
+
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif'}}>Calendar</span>
+                </div>
+
+                {/* OUTREACH */}
+                <div style={{fontSize:'10px', fontWeight:600, color:'#94a3b8', padding:'10px 12px 6px', letterSpacing:'0.08em', fontFamily:'Switzer, sans-serif'}}>OUTREACH</div>
+
                 {[
-                  { label: 'Dashboard', active: true },
-                  { label: 'Leads', active: false },
-                  { label: 'Campaigns', active: false },
-                  { label: 'Inbox', active: false },
-                  { label: 'Pipeline', active: false },
-                  { label: 'Templates', active: false },
-                  { label: 'Call agent', active: false },
-                  { label: 'Settings', active: false },
+                  {label:'Sequence Builder', icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>},
+                  {label:'Keyword Monitor', icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>},
+                  {label:'Call Agent', icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.18 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.29 6.29l1.45-1.45a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>},
                 ].map(item => (
-                  <div key={item.label} style={{
-                    padding: '9px 12px',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: item.active ? 600 : 400,
-                    color: item.active ? '#fff' : 'rgba(255,255,255,0.58)',
-                    background: item.active ? 'rgba(255,255,255,0.16)' : 'transparent',
-                    fontFamily: 'Switzer, sans-serif',
-                    cursor: 'pointer',
-                  }}>
-                    {item.label}
+                  <div key={item.label} style={{display:'flex', alignItems:'center', gap:'10px', padding:'7px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                    {item.icon}
+                    <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif'}}>{item.label}</span>
                   </div>
                 ))}
+
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'7px 12px', borderRadius:'8px', marginBottom:'2px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif', flex:1}}>Inbox</span>
+                  <span style={{background:'#4F46E5', color:'#fff', fontSize:'10px', fontWeight:700, padding:'2px 7px', borderRadius:'100px', fontFamily:'Switzer, sans-serif'}}>12</span>
+                </div>
+
+                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'7px 12px', borderRadius:'8px', cursor:'pointer'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                  </svg>
+                  <span style={{fontSize:'13px', color:'#475569', fontFamily:'Switzer, sans-serif'}}>Email Templates</span>
+                </div>
               </div>
 
-              {/* Main content */}
-              <div style={{ background: '#F8F9FA', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Main content area */}
+              <div style={{background:'#f8f9fa', padding:'20px', display:'flex', flexDirection:'column', gap:'14px', overflow:'hidden'}}>
 
-                {/* Header row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {/* Top bar */}
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
                   <div>
-                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>
-                      Dashboard
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>
-                      Good morning, Iain
-                    </div>
+                    <div style={{fontSize:'20px', fontWeight:700, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>Dashboard</div>
+                    <div style={{fontSize:'12px', color:'#64748b', fontFamily:'Switzer, sans-serif'}}>Overview of your outreach performance</div>
                   </div>
-                  <div style={{
-                    background: '#4F46E5',
-                    color: '#fff',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    fontFamily: 'Switzer, sans-serif',
-                    cursor: 'pointer',
-                  }}>
-                    + New campaign
+                  <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
+                    <div style={{
+                      background:'#fff', border:'1px solid #e2e8f0',
+                      borderRadius:'8px', padding:'6px 12px',
+                      fontSize:'12px', color:'#64748b',
+                      fontFamily:'Switzer, sans-serif',
+                      display:'flex', alignItems:'center', gap:'6px',
+                    }}>
+                      <span>📅</span> 4 Mar 2026 - 3 Apr 2026
+                    </div>
+                    <div style={{
+                      background:'#4F46E5', color:'#fff',
+                      borderRadius:'8px', padding:'8px 16px',
+                      fontSize:'12px', fontWeight:600,
+                      fontFamily:'Switzer, sans-serif', cursor:'pointer',
+                    }}>+ New Campaign</div>
                   </div>
                 </div>
 
-                {/* Metric cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                {/* Greeting */}
+                <div>
+                  <div style={{fontSize:'18px', fontWeight:700, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>
+                    Good morning, Iain 👋
+                  </div>
+                  <div style={{fontSize:'12px', color:'#64748b', fontFamily:'Switzer, sans-serif'}}>
+                    Friday, 3 April 2026 · Let's make today count.
+                  </div>
+                </div>
+
+                {/* Metric cards - 4 across + plan card */}
+                <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr) 1.3fr', gap:'10px'}}>
                   {[
-                    { label: 'Leads found', value: '271', delta: '+12%', color: '#4F46E5', bg: '#EEF2FF' },
-                    { label: 'Replies', value: '14', delta: '+8%', color: '#06B6D4', bg: '#F0FFFE' },
-                    { label: 'Calls booked', value: '6', delta: '+3', color: '#22D3EE', bg: '#F0FFFE' },
-                    { label: 'Deliverability', value: '94%', delta: '↑ 2%', color: '#4F46E5', bg: '#EEF2FF' },
+                    {
+                      label:'Total Leads',
+                      value:'271',
+                      delta:'+12% in last 30 days',
+                      color:'#06B6D4',
+                      bars:[20,35,28,45,38,52,48,60,55,70,65,80],
+                      type:'bar',
+                    },
+                    {
+                      label:'Leads with Emails',
+                      value:'31',
+                      delta:'+8% verified emails',
+                      color:'#22D3EE',
+                      bars:[10,15,12,20,18,25,22,30,28,35,32,31],
+                      type:'line',
+                    },
+                    {
+                      label:'Leads Contacted',
+                      value:'847',
+                      delta:'+24% outreach initiated',
+                      color:'#8B5CF6',
+                      bars:[40,55,48,62,58,70,65,78,72,85,80,90],
+                      type:'line',
+                    },
+                    {
+                      label:'Total Deals',
+                      value:'10',
+                      delta:'+5% in pipeline',
+                      color:'#F59E0B',
+                      bars:[2,4,3,5,4,6,5,7,6,8,7,10],
+                      type:'bar',
+                    },
                   ].map(m => (
                     <div key={m.label} style={{
-                      background: '#fff',
-                      borderRadius: '12px',
-                      padding: '14px',
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                      background:'#fff', borderRadius:'12px',
+                      padding:'14px', border:'1px solid #e2e8f0',
+                      boxShadow:'0 1px 3px rgba(0,0,0,0.04)',
                     }}>
-                      <div style={{ fontSize: '11px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif', marginBottom: '6px' }}>
-                        {m.label}
-                      </div>
-                      <div style={{ fontSize: '24px', fontWeight: 800, color: m.color, fontFamily: 'Switzer, sans-serif', lineHeight: 1 }}>
-                        {m.value}
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#22c55e', fontFamily: 'Switzer, sans-serif', marginTop: '4px' }}>
-                        {m.delta}
+                      <div style={{fontSize:'11px', color:'#64748b', fontFamily:'Switzer, sans-serif', marginBottom:'6px'}}>{m.label}</div>
+                      <div style={{fontSize:'26px', fontWeight:800, color:'#0f172a', fontFamily:'Switzer, sans-serif', lineHeight:1}}>{m.value}</div>
+                      <div style={{fontSize:'10px', color:'#22c55e', fontFamily:'Switzer, sans-serif', marginTop:'4px'}}>↑ {m.delta}</div>
+                      {/* Sparkline */}
+                      <div style={{marginTop:'10px', height:'32px'}}>
+                        {m.type === 'bar' ? (
+                          <div style={{display:'flex', alignItems:'flex-end', gap:'2px', height:'100%'}}>
+                            {m.bars.map((h, i) => (
+                              <div key={i} style={{
+                                flex:1, borderRadius:'2px 2px 0 0',
+                                height:`${(h / Math.max(...m.bars)) * 100}%`,
+                                background: i === m.bars.length - 1 ? m.color : `${m.color}40`,
+                              }}/>
+                            ))}
+                          </div>
+                        ) : (
+                          <svg viewBox={`0 0 ${m.bars.length * 10} 32`} style={{width:'100%', height:'100%', overflow:'visible'}}>
+                            <defs>
+                              <linearGradient id={`grad-${m.label}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={m.color} stopOpacity={0.3}/>
+                                <stop offset="100%" stopColor={m.color} stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <polyline
+                              points={m.bars.map((v, i) => `${i * 10},${32 - (v / Math.max(...m.bars)) * 28}`).join(' ')}
+                              fill="none" stroke={m.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
                       </div>
                     </div>
                   ))}
-                </div>
 
-                {/* Lead table */}
-                <div style={{
-                  background: '#fff',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  overflow: 'hidden',
-                  flex: 1,
-                }}>
+                  {/* Plan card */}
                   <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.8fr 1.4fr 1fr 0.9fr',
-                    padding: '10px 16px',
-                    borderBottom: '1px solid #f1f5f9',
-                    background: '#fafafa',
-                    gap: '8px',
+                    background:'#EEF2FF', borderRadius:'12px',
+                    padding:'14px', border:'1px solid #c7d2fe',
+                    display:'flex', flexDirection:'column', justifyContent:'space-between',
                   }}>
-                    {['Lead name', 'Company', 'Intent', 'Status'].map(h => (
-                      <div key={h} style={{
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase' as const,
-                        letterSpacing: '0.08em',
-                        color: '#94a3b8',
-                        fontFamily: 'Switzer, sans-serif',
-                      }}>{h}</div>
-                    ))}
-                  </div>
-                  {[
-                    { name: 'Sarah Mitchell', co: 'Apex Digital', intent: 'Hot 95', bc: '#fef2f2', bt: '#dc2626', status: 'Emailed' },
-                    { name: 'James Hartley', co: 'Hartley Solicitors', intent: 'Warm 72', bc: '#fff7ed', bt: '#ea580c', status: 'Connected' },
-                    { name: 'Priya Anand', co: 'Anand Consulting', intent: 'Cool 48', bc: '#eff6ff', bt: '#2563eb', status: 'New' },
-                    { name: 'David Clarke', co: 'Clarke & Sons', intent: 'Hot 88', bc: '#fef2f2', bt: '#dc2626', status: 'Replied' },
-                    { name: 'Emma Wilson', co: 'Wilson Digital', intent: 'Warm 65', bc: '#fff7ed', bt: '#ea580c', status: 'Emailed' },
-                  ].map((row, i) => (
-                    <div key={i} style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1.8fr 1.4fr 1fr 0.9fr',
-                      padding: '11px 16px',
-                      borderBottom: '1px solid #f8fafc',
-                      gap: '8px',
-                      alignItems: 'center',
-                    }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>
-                        {row.name}
+                    <div>
+                      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'4px'}}>
+                        <div style={{fontSize:'10px', fontWeight:700, color:'#4F46E5', letterSpacing:'0.08em', fontFamily:'Switzer, sans-serif'}}>CURRENT PLAN</div>
+                        <div style={{fontSize:'11px', fontWeight:700, color:'#4F46E5', fontFamily:'Switzer, sans-serif'}}>14%</div>
                       </div>
-                      <div style={{ fontSize: '12px', color: '#64748b', fontFamily: 'Switzer, sans-serif' }}>
-                        {row.co}
-                      </div>
-                      <div style={{
-                        display: 'inline-flex',
-                        padding: '3px 8px',
-                        borderRadius: '100px',
-                        background: row.bc,
-                        color: row.bt,
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        fontFamily: 'Switzer, sans-serif',
-                        width: 'fit-content',
-                      }}>
-                        {row.intent}
-                      </div>
-                      <div style={{
-                        fontSize: '11px',
-                        color: '#64748b',
-                        background: '#f8fafc',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        fontFamily: 'Switzer, sans-serif',
-                        width: 'fit-content',
-                      }}>
-                        {row.status}
-                      </div>
+                      <div style={{fontSize:'10px', color:'#94a3b8', fontFamily:'Switzer, sans-serif', marginBottom:'8px'}}>Leads used</div>
+                      <div style={{fontSize:'22px', fontWeight:800, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>Pro</div>
+                      <div style={{fontSize:'11px', color:'#64748b', fontFamily:'Switzer, sans-serif', marginBottom:'12px'}}>Pro plan active</div>
                     </div>
-                  ))}
+                    <div style={{
+                      background:'#4F46E5', color:'#fff',
+                      borderRadius:'8px', padding:'8px',
+                      fontSize:'12px', fontWeight:600,
+                      fontFamily:'Switzer, sans-serif',
+                      textAlign:'center' as const, cursor:'pointer',
+                    }}>Manage plan</div>
+                  </div>
                 </div>
 
-                {/* Bar chart */}
-                <div style={{
-                  background: '#fff',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  padding: '14px 16px',
-                }}>
+                {/* Campaign performance chart + Top campaigns */}
+                <div style={{display:'grid', gridTemplateColumns:'1.4fr 1fr', gap:'12px', flex:1}}>
+                  {/* Campaign performance */}
                   <div style={{
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: '#64748b',
-                    fontFamily: 'Switzer, sans-serif',
-                    marginBottom: '12px',
+                    background:'#fff', borderRadius:'12px',
+                    border:'1px solid #e2e8f0', padding:'16px',
                   }}>
-                    Weekly email sends
+                    <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px'}}>
+                      <span style={{fontSize:'14px'}}>📊</span>
+                      <div style={{fontSize:'14px', fontWeight:700, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>Campaign Performance</div>
+                    </div>
+                    <div style={{fontSize:'11px', color:'#94a3b8', fontFamily:'Switzer, sans-serif', marginBottom:'16px'}}>Last 14 days</div>
+                    {/* Chart area */}
+                    <div style={{position:'relative', height:'100px'}}>
+                      <svg viewBox="0 0 300 80" style={{width:'100%', height:'100%', overflow:'visible'}}>
+                        {/* Grid lines */}
+                        {[0,25,50,75].map(y => (
+                          <line key={y} x1="0" y1={y} x2="300" y2={y} stroke="#f1f5f9" strokeWidth="1"/>
+                        ))}
+                        {/* AI Calls line - purple */}
+                        <polyline
+                          points="0,60 40,55 80,45 120,50 160,30 200,40 240,35 280,45 300,42"
+                          fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        />
+                        {/* Emails line - cyan */}
+                        <polyline
+                          points="0,70 40,65 80,60 120,40 160,20 200,35 240,50 280,55 300,52"
+                          fill="none" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        />
+                        <defs>
+                          <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#22c55e" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#22c55e" stopOpacity="0"/>
+                          </linearGradient>
+                        </defs>
+                        {/* New Leads area - green */}
+                        <polyline
+                          points="0,50 40,30 80,55 120,60 160,65 200,62 240,68 280,70 300,70"
+                          fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    {/* Legend */}
+                    <div style={{display:'flex', gap:'16px', marginTop:'8px'}}>
+                      {[
+                        {label:'AI Calls', color:'#8B5CF6'},
+                        {label:'Emails', color:'#22D3EE'},
+                        {label:'New Leads', color:'#22c55e'},
+                      ].map(l => (
+                        <div key={l.label} style={{display:'flex', alignItems:'center', gap:'4px'}}>
+                          <div style={{width:'8px', height:'8px', borderRadius:'50%', background:l.color}}/>
+                          <span style={{fontSize:'10px', color:'#64748b', fontFamily:'Switzer, sans-serif'}}>{l.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Bottom stats bar - matches real app */}
+                    <div style={{
+                      display:'grid', gridTemplateColumns:'repeat(4,1fr)',
+                      borderTop:'1px solid #f1f5f9', marginTop:'16px', paddingTop:'14px',
+                      gap:'8px',
+                    }}>
+                      {[
+                        {label:'TOTAL LEADS', value:'271'},
+                        {label:'CONTACTED', value:'184'},
+                        {label:'QUALIFIED', value:'47'},
+                        {label:'DEALS', value:'10'},
+                      ].map(s => (
+                        <div key={s.label} style={{textAlign:'center' as const}}>
+                          <div style={{fontSize:'20px', fontWeight:800, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>{s.value}</div>
+                          <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', marginTop:'2px'}}>
+                            <div style={{fontSize:'10px', fontWeight:600, color:'#94a3b8', letterSpacing:'0.06em', fontFamily:'Switzer, sans-serif'}}>{s.label}</div>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '48px' }}>
-                    {[35, 58, 42, 76, 51, 68, 90].map((h, i) => (
-                      <div key={i} style={{
-                        flex: 1,
-                        borderRadius: '4px 4px 0 0',
-                        height: `${h}%`,
-                        background: i === 6 ? '#4F46E5' : i === 3 ? '#22D3EE' : '#EEF2FF',
-                        transition: 'height 0.3s ease',
-                      }} />
+
+                  {/* Top performing campaigns */}
+                  <div style={{
+                    background:'#fff', borderRadius:'12px',
+                    border:'1px solid #e2e8f0', padding:'16px',
+                  }}>
+                    <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'16px'}}>
+                      <span style={{fontSize:'14px'}}>🏆</span>
+                      <div style={{fontSize:'14px', fontWeight:700, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>Top Performing Campaigns</div>
+                    </div>
+                    {[
+                      {name:'Dental Clinics - LinkedIn', type:'SPECIFIER', rate:'6.74%', color:'#8B5CF6', width:'35%'},
+                      {name:'Law Firms - Full Pipeline', type:'DIRECT', rate:'11.22%', color:'#4F46E5', width:'75%'},
+                      {name:'Plumbers in Edinburgh', type:'DIRECT', rate:'0%', color:'#4F46E5', width:'5%'},
+                      {name:'Solicitors in Edinburgh', type:'DIRECT', rate:'0%', color:'#4F46E5', width:'5%'},
+                    ].map((c,i) => (
+                      <div key={i} style={{marginBottom:'14px'}}>
+                        <div style={{display:'flex', justifyContent:'space-between', marginBottom:'4px'}}>
+                          <div style={{fontSize:'12px', fontWeight:600, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>{c.name}</div>
+                          <div style={{fontSize:'12px', fontWeight:700, color:'#0f172a', fontFamily:'Switzer, sans-serif'}}>{c.rate}</div>
+                        </div>
+                        <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                          <span style={{
+                            fontSize:'9px', fontWeight:700,
+                            color:c.color, background:`${c.color}15`,
+                            padding:'2px 6px', borderRadius:'4px',
+                            fontFamily:'Switzer, sans-serif',
+                          }}>{c.type}</span>
+                          <div style={{flex:1, height:'4px', background:'#f1f5f9', borderRadius:'100px', overflow:'hidden'}}>
+                            <div style={{width:c.width, height:'100%', background:c.color, borderRadius:'100px'}}/>
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </div>
-                  <div style={{ display: 'flex', marginTop: '6px' }}>
-                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                      <div key={i} style={{
-                        flex: 1,
-                        fontSize: '10px',
-                        color: '#94a3b8',
-                        textAlign: 'center' as const,
-                        fontFamily: 'Switzer, sans-serif',
-                      }}>{d}</div>
-                    ))}
+                    <div style={{
+                      fontSize:'12px', color:'#4F46E5', fontWeight:600,
+                      fontFamily:'Switzer, sans-serif', cursor:'pointer',
+                      textAlign:'center' as const, marginTop:'8px',
+                    }}>VIEW ALL CAMPAIGNS</div>
                   </div>
                 </div>
               </div>

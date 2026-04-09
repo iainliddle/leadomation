@@ -87,6 +87,7 @@ export default function Nav() {
             {label: 'How it works', href: '#how-it-works'},
             {label: 'Pricing', href: '#pricing'},
             {label: 'FAQ', href: '#faq'},
+            {label: 'Blog', href: '/blog'},
           ].map(link => (
             <a
               key={link.label}
