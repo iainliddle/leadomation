@@ -175,7 +175,8 @@ export default function createGlobe(
       const { uniforms } = self
       let state: Record<string, any> = {}
       if (opts.onRender) {
-        state = opts.onRender(state) || state
+        const result = opts.onRender(state) as any
+        if (result) state = result
         for (const key in UNIFORM_MAP) {
           if (state[key] !== undefined) {
             uniforms[UNIFORM_MAP[key]].value = state[key]
