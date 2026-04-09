@@ -3,11 +3,13 @@ import Hero from '../components/landing/Hero'
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
-  // Coming soon redirect - remove this block when landing page is ready to go live
+  // Coming soon redirect - disabled for preview
+  /*
   if (typeof window !== 'undefined') {
     window.location.replace('/coming-soon.html')
     return null
   }
+  */
 
   return (
     <div className="landing-page">
