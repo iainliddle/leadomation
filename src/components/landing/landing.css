@@ -1,86 +1,17 @@
-/* Landing page custom styles */
+/* Leadomation Landing Page Styles */
+/* Switzer font loaded via index.html */
 
-.lp-body {
-  font-family: 'Switzer', sans-serif;
-  background: linear-gradient(180deg, #ffffff 0%, #fafbff 40%, #f8faff 100%);
-  color: #1E1B4B;
+.landing-page {
+  font-family: 'Switzer', -apple-system, sans-serif;
+  background: #ffffff;
+  color: #0f172a;
+  overflow-x: hidden;
 }
 
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.glass-nav {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.marquee-animation {
-  animation: scroll 30s linear infinite;
-}
-
-@keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-@keyframes blob-drift {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(20px, -15px) scale(1.03); }
-  66% { transform: translate(-10px, 12px) scale(0.98); }
-}
-
-@keyframes float-card {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.blob-1 { animation: blob-drift 14s ease-in-out infinite; }
-.blob-2 { animation: blob-drift 18s ease-in-out infinite 3s; }
-.blob-3 { animation: blob-drift 16s ease-in-out infinite 6s; }
-.float-a { animation: float-card 5s ease-in-out infinite; }
-.float-b { animation: float-card 6s ease-in-out infinite 1.5s; }
-.float-c { animation: float-card 7s ease-in-out infinite 3s; }
-
-@keyframes block-float {
-  0%, 100% {
-    transform: translateY(0px);
-    filter: brightness(1);
-  }
-  40% {
-    transform: translateY(-7px);
-    filter: brightness(1.06);
-  }
-  70% {
-    transform: translateY(-3px);
-    filter: brightness(0.97);
-  }
-}
-
-.color-block {
-  animation: block-float 7s ease-in-out infinite;
-  transition: transform 0.3s ease;
-}
-.color-block-0 { animation-duration: 5.6s; }
-.color-block-1 { animation-duration: 7.2s; }
-.color-block-2 { animation-duration: 6.4s; }
-.color-block-3 { animation-duration: 8.0s; }
-.color-block-4 { animation-duration: 5.9s; }
-.color-block-5 { animation-duration: 7.6s; }
-
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .blob-1, .blob-2, .blob-3, .float-a, .float-b, .float-c,
-  .color-block {
-    animation: none;
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
