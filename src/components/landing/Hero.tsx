@@ -14,16 +14,16 @@ export default function Hero() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const rotate = useTransform(scrollYProgress, [0, 1], [18, 0])
-  const scale = useTransform(scrollYProgress, [0, 1], isMobile ? [0.7, 0.9] : [1.05, 1])
-  const translateY = useTransform(scrollYProgress, [0, 1], [0, -80])
+  const rotate = useTransform(scrollYProgress, [0, 0.6], [18, 0])
+  const scale = useTransform(scrollYProgress, [0, 0.6], isMobile ? [0.7, 0.95] : [1.05, 0.98])
+  const translateY = useTransform(scrollYProgress, [0, 0.6], [0, -40])
 
   return (
     <div
       ref={containerRef}
       style={{
         position: 'relative',
-        minHeight: '150vh',
+        minHeight: '200vh',
         overflow: 'hidden',
       }}
     >
@@ -63,7 +63,7 @@ export default function Hero() {
         textAlign: 'center',
         maxWidth: '900px',
         margin: '0 auto',
-        padding: '140px 24px 60px',
+        padding: '120px 24px 40px',
       }}>
 
         {/* Pill badge */}
@@ -221,12 +221,13 @@ export default function Hero() {
 
       {/* Container scroll animation - dashboard card */}
       <div style={{
-        position: 'relative',
+        position: 'sticky',
+        top: '100px',
         zIndex: 2,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        paddingBottom: '120px',
+        paddingBottom: '60px',
       }}>
         <div style={{ perspective: '1200px', width: '100%', maxWidth: '1100px', padding: '0 24px' }}>
           <motion.div
