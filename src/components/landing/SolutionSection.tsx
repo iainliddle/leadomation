@@ -156,7 +156,7 @@ export default function SolutionSection() {
               letterSpacing: '-0.03em',
               lineHeight: 1.1,
               marginBottom: '16px',
-              background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 60%, #22D3EE 100%)',
+              background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -217,7 +217,7 @@ export default function SolutionSection() {
             initial={{ opacity: 0, x: 30 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-            style={{ position: 'relative' }}
+            style={{ position: 'relative', overflow: 'visible' }}
           >
             {/* Glow behind card */}
             <div style={{
@@ -253,7 +253,7 @@ export default function SolutionSection() {
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
               style={{
-                position: 'absolute', bottom: '-16px', left: '-16px',
+                position: 'absolute', bottom: '-24px', left: '-32px',
                 background: '#fff', borderRadius: '12px',
                 padding: '10px 14px', zIndex: 2,
                 boxShadow: '0 8px 24px rgba(34,211,238,0.15)',
