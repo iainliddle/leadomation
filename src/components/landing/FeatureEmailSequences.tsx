@@ -165,16 +165,24 @@ export default function FeatureEmailSequences() {
 
   return (
     <section ref={ref} style={{
-      background: 'linear-gradient(180deg, #ffffff 0%, #f8faff 100%)',
+      position: 'relative',
+      zIndex: 1,
+      background: '#ffffff',
+      marginTop: 0,
+      paddingTop: '120px',
+      paddingBottom: '120px',
       fontFamily: 'Switzer, sans-serif',
-      marginTop: '-2px',
     }}>
       <div style={{
-        background: 'linear-gradient(180deg, transparent 0%, #ffffff 80px, #ffffff 100%)',
-      }}>
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(180deg, #f0f4ff 0%, #ffffff 60px, #ffffff 100%)',
+        zIndex: 0,
+      }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
       <div style={{
         maxWidth: '1200px', margin: '0 auto',
-        padding: '120px 48px',
+        padding: '0 48px',
       }}>
         <div style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr',
@@ -194,6 +202,7 @@ export default function FeatureEmailSequences() {
             initial={{ opacity: 0, x: 30 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+            style={{ background: 'transparent', position: 'relative', zIndex: 2 }}
           >
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -202,7 +211,7 @@ export default function FeatureEmailSequences() {
             }}>
               <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#4F46E5', display: 'inline-block' }} />
               <span style={{
-                fontSize: '12px', fontWeight: 700, color: '#4F46E5',
+                fontSize: '12px', fontWeight: 700, color: '#4F46E5', opacity: 1,
                 letterSpacing: '0.08em', textTransform: 'uppercase' as const,
                 fontFamily: 'Switzer, sans-serif',
               }}>Email sequences</span>
@@ -216,6 +225,7 @@ export default function FeatureEmailSequences() {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
               display: 'block',
+              opacity: 1,
               fontFamily: 'Switzer, sans-serif',
             }}>
               Write once. Follow up forever.
