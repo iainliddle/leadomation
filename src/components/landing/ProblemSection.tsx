@@ -94,11 +94,11 @@ function ManualProspectingIllustration() {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
-        <span style={{ fontSize: '12px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>Searching for leads manually...</span>
+        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontFamily: 'Switzer, sans-serif' }}>Searching for leads manually...</span>
         <motion.div
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 1, repeat: Infinity }}
-          style={{ width: '2px', height: '14px', background: '#4F46E5', marginLeft: '2px' }}
+          style={{ width: '2px', height: '14px', background: '#ffffff', marginLeft: '2px' }}
         />
       </div>
 
@@ -128,7 +128,7 @@ function ManualProspectingIllustration() {
               <span style={{ fontSize: '9px', fontWeight: 700, color: '#4F46E5', fontFamily: 'Switzer, sans-serif' }}>{lead.name[0]}</span>
             </div>
             <div>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>{lead.name}</div>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: '#1e293b', fontFamily: 'Switzer, sans-serif' }}>{lead.name}</div>
               <div style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>{lead.email}</div>
             </div>
           </div>
@@ -150,10 +150,10 @@ function ManualProspectingIllustration() {
         gap: '6px',
         marginTop: '4px',
       }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round">
           <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
         </svg>
-        <span style={{ fontSize: '11px', color: '#dc2626', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>3.5 hours spent today</span>
+        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.95)', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>3.5 hours spent today</span>
       </div>
     </div>
   )
@@ -171,17 +171,17 @@ function IgnoredEmailsIllustration() {
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'Switzer, sans-serif' }}>Campaign open rate</span>
+          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', fontFamily: 'Switzer, sans-serif' }}>Campaign open rate</span>
           <motion.span
             animate={{ opacity: [1, 0.4, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            style={{ fontSize: '14px', fontWeight: 800, color: '#dc2626', fontFamily: 'Switzer, sans-serif' }}
+            style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', fontFamily: 'Switzer, sans-serif' }}
           >
             2.1%
           </motion.span>
         </div>
-        <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '100px', overflow: 'hidden' }}>
-          <div style={{ width: '2.1%', height: '100%', background: '#dc2626', borderRadius: '100px' }} />
+        <div style={{ height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '100px', overflow: 'hidden' }}>
+          <div style={{ width: '2.1%', height: '100%', background: 'rgba(255,255,255,0.9)', borderRadius: '100px' }} />
         </div>
       </div>
 
@@ -219,7 +219,7 @@ function IgnoredEmailsIllustration() {
       ))}
 
       <div style={{ textAlign: 'center' as const, marginTop: '2px' }}>
-        <span style={{ fontSize: '11px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>No replies received</span>
+        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.75)', fontFamily: 'Switzer, sans-serif' }}>No replies received</span>
       </div>
     </div>
   )
@@ -256,13 +256,13 @@ function BlindOutreachIllustration() {
         padding: '12px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif', marginBottom: '8px' }}>Performance over time</div>
+        <div style={{ fontSize: '10px', color: '#475569', fontFamily: 'Switzer, sans-serif', marginBottom: '8px' }}>Performance over time</div>
         <svg viewBox="0 0 200 50" style={{ width: '100%', height: '50px' }}>
           {/* Flat line with tiny random bumps */}
           <polyline
             points="0,40 20,39 40,41 60,38 80,40 100,39 120,41 140,38 160,40 180,39 200,40"
             fill="none"
-            stroke="#cbd5e1"
+            stroke="#94a3b8"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -270,13 +270,13 @@ function BlindOutreachIllustration() {
           {/* Question mark circles */}
           {[50, 120, 175].map((x, i) => (
             <g key={i}>
-              <circle cx={x} cy="20" r="10" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1"/>
+              <circle cx={x} cy="20" r="10" fill="rgba(255,255,255,0.8)" stroke="#e2e8f0" strokeWidth="1"/>
               <text x={x} y="24" textAnchor="middle" fontSize="10" fill="#94a3b8" fontFamily="sans-serif">?</text>
             </g>
           ))}
         </svg>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
-          <span style={{ fontSize: '10px', color: '#dc2626', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>No actionable data</span>
+          <span style={{ fontSize: '10px', color: '#0f172a', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>No actionable data</span>
         </div>
       </div>
     </div>
@@ -342,12 +342,15 @@ export default function ProblemSection() {
           <h2 style={{
             fontSize: 'clamp(32px, 5vw, 52px)',
             fontWeight: 800,
-            color: '#0f172a',
             fontFamily: 'Switzer, sans-serif',
             letterSpacing: '-0.03em',
             lineHeight: 1.1,
             margin: '0 auto 16px',
             maxWidth: '720px',
+            background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
           }}>
             You're spending more time finding leads than closing them.
           </h2>
@@ -373,7 +376,7 @@ export default function ProblemSection() {
           <ProblemCard
             delay={0.1}
             accentColor="#dc2626"
-            bgGradient="linear-gradient(135deg, #fff5f5 0%, #fef2f2 50%, #fff7ed 100%)"
+            bgGradient="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
             title="Hours lost to manual prospecting"
             description="Searching for leads one by one, verifying contact details by hand, and building lists manually takes hours every day. Time you should be spending on closing."
             illustration={<ManualProspectingIllustration />}
@@ -381,7 +384,7 @@ export default function ProblemSection() {
           <ProblemCard
             delay={0.2}
             accentColor="#f59e0b"
-            bgGradient="linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%)"
+            bgGradient="linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)"
             title="Generic emails that never get replies"
             description="Copy-paste templates feel exactly like what they are. Without personalisation, real intent signals and proper deliverability, your emails go straight to spam."
             illustration={<IgnoredEmailsIllustration />}
@@ -389,7 +392,7 @@ export default function ProblemSection() {
           <ProblemCard
             delay={0.3}
             accentColor="#6366f1"
-            bgGradient="linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #f0f4ff 100%)"
+            bgGradient="linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%)"
             title="No idea which outreach is actually working"
             description="Without proper analytics you're guessing. Which campaigns, sequences and messages are driving replies? You have no way to know what to fix or double down on."
             illustration={<BlindOutreachIllustration />}
