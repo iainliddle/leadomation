@@ -80,29 +80,29 @@ function ProblemCard({
 // Illustration 1: Clock and crawling progress bar
 function ManualProspectingIllustration() {
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '10px', padding: '12px 8px 8px' }}>
-      {/* Fake browser search bar */}
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '7px', padding: '8px 6px 4px' }}>
+      {/* Search bar */}
       <div style={{
         background: 'rgba(255,255,255,0.95)',
-        borderRadius: '10px',
-        padding: '10px 14px',
+        borderRadius: '8px',
+        padding: '7px 10px',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        gap: '6px',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
       }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
-        <span style={{ fontSize: '12px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>Searching for leads manually...</span>
+        <span style={{ fontSize: '11px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>Searching for leads manually...</span>
         <motion.div
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 1, repeat: Infinity }}
-          style={{ width: '2px', height: '14px', background: '#4F46E5', marginLeft: '2px' }}
+          style={{ width: '1.5px', height: '12px', background: '#4F46E5' }}
         />
       </div>
 
-      {/* Lead rows loading one by one */}
+      {/* Lead rows */}
       {[
         { name: 'Acme Corp', email: 'info@acme...', delay: 0 },
         { name: 'BlueSky Ltd', email: 'contact@blue...', delay: 0.4 },
@@ -110,33 +110,33 @@ function ManualProspectingIllustration() {
       ].map((lead, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, x: -10 }}
+          initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: lead.delay, repeat: Infinity, repeatDelay: 2.4 }}
           style={{
-            background: 'rgba(255,255,255,0.85)',
-            borderRadius: '8px',
-            padding: '8px 12px',
+            background: 'rgba(255,255,255,0.88)',
+            borderRadius: '7px',
+            padding: '6px 10px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '9px', fontWeight: 700, color: '#4F46E5', fontFamily: 'Switzer, sans-serif' }}>{lead.name[0]}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: '8px', fontWeight: 700, color: '#4F46E5', fontFamily: 'Switzer, sans-serif' }}>{lead.name[0]}</span>
             </div>
             <div>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: '#1e293b', fontFamily: 'Switzer, sans-serif' }}>{lead.name}</div>
-              <div style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>{lead.email}</div>
+              <div style={{ fontSize: '10px', fontWeight: 600, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>{lead.name}</div>
+              <div style={{ fontSize: '9px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>{lead.email}</div>
             </div>
           </div>
-          <div style={{ width: '48px', height: '4px', background: '#f1f5f9', borderRadius: '100px', overflow: 'hidden' }}>
+          <div style={{ width: '40px', height: '3px', background: 'rgba(255,255,255,0.4)', borderRadius: '100px', overflow: 'hidden' }}>
             <motion.div
               animate={{ width: ['0%', '100%'] }}
               transition={{ duration: 1.5, delay: lead.delay, repeat: Infinity, repeatDelay: 1.7 }}
-              style={{ height: '100%', background: '#cbd5e1', borderRadius: '100px' }}
+              style={{ height: '100%', background: 'rgba(255,255,255,0.9)', borderRadius: '100px' }}
             />
           </div>
         </motion.div>
@@ -147,16 +147,17 @@ function ManualProspectingIllustration() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '6px',
-        marginTop: '4px',
-        background: 'rgba(0,0,0,0.15)',
+        gap: '5px',
+        background: 'rgba(0,0,0,0.18)',
         borderRadius: '100px',
         padding: '4px 10px',
+        marginTop: '2px',
+        alignSelf: 'center' as const,
       }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round">
           <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
         </svg>
-        <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>3.5 hours spent today</span>
+        <span style={{ fontSize: '10px', color: '#ffffff', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>3.5 hours spent today</span>
       </div>
     </div>
   )
@@ -168,23 +169,33 @@ function IgnoredEmailsIllustration() {
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '8px', padding: '12px 8px 8px' }}>
       {/* Open rate gauge */}
       <div style={{
-        background: 'rgba(255,255,255,0.9)',
+        background: 'rgba(255,255,255,0.92)',
         borderRadius: '10px',
-        padding: '12px 16px',
+        padding: '10px 14px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
           <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'Switzer, sans-serif' }}>Campaign open rate</span>
           <motion.span
-            animate={{ opacity: [1, 0.4, 1] }}
+            animate={{ opacity: [1, 0.5, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
             style={{ fontSize: '14px', fontWeight: 800, color: '#dc2626', fontFamily: 'Switzer, sans-serif' }}
           >
             2.1%
           </motion.span>
         </div>
-        <div style={{ height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '100px', overflow: 'hidden' }}>
-          <div style={{ width: '2.1%', height: '100%', background: 'rgba(255,255,255,0.9)', borderRadius: '100px' }} />
+        {/* Progress bar track */}
+        <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '100px', overflow: 'hidden' }}>
+          <motion.div
+            initial={{ width: '0%' }}
+            animate={{ width: '2.1%' }}
+            transition={{ duration: 1.5, ease: 'easeOut', delay: 0.5 }}
+            style={{ height: '100%', background: '#dc2626', borderRadius: '100px' }}
+          />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+          <span style={{ fontSize: '9px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>0%</span>
+          <span style={{ fontSize: '9px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>Industry avg: 21%</span>
         </div>
       </div>
 
