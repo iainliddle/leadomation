@@ -305,7 +305,7 @@ export default function ProblemSection() {
     <section style={{
       position: 'relative',
       padding: '80px 24px 100px',
-      background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #f8faff 40%, #f0f4ff 100%)',
+      background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 70%, transparent 100%)',
       overflow: 'hidden',
     }}>
       {/* Ambient background blobs */}
