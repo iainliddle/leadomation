@@ -98,38 +98,11 @@ export default function IntegrationMarquee() {
   return (
     <section style={{
       position: 'relative',
-      background: '#ffffff',
+      background: 'transparent',
       paddingBottom: '48px',
+      paddingTop: '24px',
       overflow: 'hidden',
     }}>
-      {/* Top fade - blends hero gradient into this section */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: '80px',
-        background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%)',
-        pointerEvents: 'none',
-        zIndex: 1,
-      }} />
-
-      {/* Label */}
-      <div style={{
-        textAlign: 'center',
-        paddingTop: '16px',
-        paddingBottom: '28px',
-        position: 'relative',
-        zIndex: 2,
-      }}>
-        <p style={{
-          fontSize: '13px',
-          fontWeight: 500,
-          color: '#94a3b8',
-          fontFamily: 'Switzer, sans-serif',
-          letterSpacing: '0.02em',
-        }}>
-          Works seamlessly with the tools you already use
-        </p>
-      </div>
 
       {/* Carousel */}
       <div style={{ position: 'relative', zIndex: 2 }}>
@@ -166,17 +139,13 @@ export default function IntegrationMarquee() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  padding: '10px 16px',
+                  padding: '8px 12px',
                   whiteSpace: 'nowrap' as const,
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                 }}>
                   {/* Logo mark */}
                   <div style={{
-                    width: '22px',
-                    height: '22px',
+                    width: '24px',
+                    height: '24px',
                     borderRadius: '6px',
                     background: integration.bg,
                     display: 'flex',
@@ -198,11 +167,10 @@ export default function IntegrationMarquee() {
                       </span>
                     )}
                   </div>
-                  {/* Name */}
                   <span style={{
-                    fontSize: '13px',
+                    fontSize: '14px',
                     fontWeight: 600,
-                    color: '#374151',
+                    color: '#64748b',
                     fontFamily: 'Switzer, sans-serif',
                   }}>
                     {integration.name}
@@ -214,14 +182,6 @@ export default function IntegrationMarquee() {
         </div>
       </div>
 
-      {/* Bottom divider - very subtle */}
-      <div style={{
-        height: '1px',
-        background: 'linear-gradient(to right, transparent, #e2e8f0 20%, #e2e8f0 80%, transparent)',
-        marginTop: '48px',
-        marginLeft: '48px',
-        marginRight: '48px',
-      }} />
     </section>
   )
 }
