@@ -13,9 +13,9 @@ function CheckRow({ label, description }: { label: string; description: string }
           <path d="M1 4.5L3.5 7L10 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
-      <div style={{ fontSize: '15px', fontFamily: 'Switzer, sans-serif', lineHeight: 1.6 }}>
-        <span style={{ fontWeight: 600, color: '#0f172a' }}>{label}</span>{' '}
-        <span style={{ fontWeight: 400, color: '#64748b' }}>{description}</span>
+      <div style={{ fontSize: '15px', fontFamily: 'Switzer, sans-serif', lineHeight: 1.6, opacity: 1 }}>
+        <span style={{ fontWeight: 600, color: '#0f172a', opacity: 1 }}>{label}</span>{' '}
+        <span style={{ fontWeight: 400, color: '#64748b', opacity: 1 }}>{description}</span>
       </div>
     </div>
   )
@@ -91,7 +91,7 @@ function SequenceIllustration({ inView }: { inView: boolean }) {
           fontFamily: 'Switzer, sans-serif',
         }}
       >
-        \u2709 12 new replies today
+        ✉ 12 new replies today
       </motion.div>
 
       <div style={{
@@ -165,9 +165,13 @@ export default function FeatureEmailSequences() {
 
   return (
     <section ref={ref} style={{
-      background: 'linear-gradient(180deg, #f8faff 0%, #ffffff 100%)',
+      background: 'linear-gradient(180deg, #ffffff 0%, #f8faff 100%)',
       fontFamily: 'Switzer, sans-serif',
+      marginTop: '-2px',
     }}>
+      <div style={{
+        background: 'linear-gradient(180deg, transparent 0%, #ffffff 80px, #ffffff 100%)',
+      }}>
       <div style={{
         maxWidth: '1200px', margin: '0 auto',
         padding: '120px 48px',
@@ -176,9 +180,18 @@ export default function FeatureEmailSequences() {
           display: 'grid', gridTemplateColumns: '1fr 1fr',
           gap: '80px', alignItems: 'center',
         }}>
-          {/* Left — text */}
+          {/* Left — illustration */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            <SequenceIllustration inView={inView} />
+          </motion.div>
+
+          {/* Right — text */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
           >
@@ -202,13 +215,14 @@ export default function FeatureEmailSequences() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
+              display: 'block',
               fontFamily: 'Switzer, sans-serif',
             }}>
               Write once. Follow up forever.
             </h2>
 
             <p style={{
-              fontSize: '17px', color: '#64748b', lineHeight: 1.7,
+              fontSize: '17px', color: '#475569', lineHeight: 1.7, opacity: 1,
               marginTop: '16px', marginBottom: 0,
               fontFamily: 'Switzer, sans-serif',
             }}>
@@ -224,9 +238,9 @@ export default function FeatureEmailSequences() {
             <div style={{ display: 'flex', gap: '12px', marginTop: '40px' }}>
               <a href="/app/signup" style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
-                background: '#1E1B4B', color: '#fff', textDecoration: 'none',
+                background: '#1E1B4B', color: '#ffffff', textDecoration: 'none',
                 borderRadius: '10px', padding: '14px 28px',
-                fontSize: '15px', fontWeight: 600, fontFamily: 'Switzer, sans-serif',
+                fontSize: '15px', fontWeight: 600, fontFamily: 'Switzer, sans-serif', opacity: 1,
               }}>
                 Start free trial
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -238,22 +252,14 @@ export default function FeatureEmailSequences() {
                 background: '#ECFEFF', color: '#06B6D4', textDecoration: 'none',
                 borderRadius: '10px', padding: '14px 28px',
                 fontSize: '15px', fontWeight: 600, fontFamily: 'Switzer, sans-serif',
-                border: '1px solid #22D3EE',
+                border: '1px solid #22D3EE', opacity: 1,
               }}>
                 See all features
               </a>
             </div>
           </motion.div>
-
-          {/* Right — illustration */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-          >
-            <SequenceIllustration inView={inView} />
-          </motion.div>
         </div>
+      </div>
       </div>
     </section>
   )
