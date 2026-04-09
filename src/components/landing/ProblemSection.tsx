@@ -38,14 +38,14 @@ function ProblemCard({
     >
       {/* Illustration area */}
       <div style={{
-        height: '220px',
+        height: '240px',
         background: bgGradient,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
-        padding: '24px',
+        padding: '32px 24px 24px',
       }}>
         {illustration}
       </div>
@@ -80,7 +80,7 @@ function ProblemCard({
 // Illustration 1: Clock and crawling progress bar
 function ManualProspectingIllustration() {
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px', padding: '8px' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '10px', padding: '12px 8px 8px' }}>
       {/* Fake browser search bar */}
       <div style={{
         background: 'rgba(255,255,255,0.9)',
@@ -162,7 +162,7 @@ function ManualProspectingIllustration() {
 // Illustration 2: Inbox with unread/ignored emails
 function IgnoredEmailsIllustration() {
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px', padding: '8px' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '8px', padding: '12px 8px 8px' }}>
       {/* Open rate gauge */}
       <div style={{
         background: 'rgba(255,255,255,0.9)',
@@ -276,7 +276,7 @@ function BlindOutreachIllustration() {
           ))}
         </svg>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
-          <span style={{ fontSize: '10px', color: '#0f172a', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>No actionable data</span>
+          <span style={{ fontSize: '10px', color: '#0f172a', fontWeight: 700, fontFamily: 'Switzer, sans-serif' }}>No actionable data</span>
         </div>
       </div>
     </div>

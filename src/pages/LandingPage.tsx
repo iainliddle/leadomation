@@ -2,6 +2,7 @@ import Nav from '../components/landing/Nav'
 import Hero from '../components/landing/Hero'
 import IntegrationMarquee from '../components/landing/IntegrationMarquee'
 import ProblemSection from '../components/landing/ProblemSection'
+import SolutionSection from '../components/landing/SolutionSection'
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
@@ -19,6 +20,7 @@ export default function LandingPage() {
       <Hero />
       <IntegrationMarquee />
       <ProblemSection />
+      <SolutionSection />
     </div>
   )
 }
