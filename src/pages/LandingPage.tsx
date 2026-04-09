@@ -3,6 +3,7 @@ import Hero from '../components/landing/Hero'
 import IntegrationMarquee from '../components/landing/IntegrationMarquee'
 import ProblemSection from '../components/landing/ProblemSection'
 import SolutionSection from '../components/landing/SolutionSection'
+import FeatureEmailSequences from '../components/landing/FeatureEmailSequences'
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
@@ -21,6 +22,7 @@ export default function LandingPage() {
       <IntegrationMarquee />
       <ProblemSection />
       <SolutionSection />
+      <FeatureEmailSequences />
     </div>
   )
 }
