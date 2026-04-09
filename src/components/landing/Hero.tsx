@@ -1,38 +1,23 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef } from 'react'
 import { useScroll, useTransform, motion } from 'framer-motion'
 import { GradFlow } from 'gradflow'
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: containerRef })
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
-
-  const rotate = useTransform(scrollYProgress, [0, 0.6], [18, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.6], isMobile ? [0.7, 0.95] : [1.05, 0.98])
-  const translateY = useTransform(scrollYProgress, [0, 0.6], [0, -40])
+  const rotate = useTransform(scrollYProgress, [0, 0.5], [16, 0])
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1.04, 1])
+  const translateY = useTransform(scrollYProgress, [0, 1], [0, 0])
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: 'relative',
-        minHeight: '200vh',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Gradient shader background - full coverage */}
+    <div style={{position: 'relative'}}>
+
+      {/* Fixed gradient background - stays behind everything */}
       <div style={{
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
         zIndex: 0,
-        opacity: 0.6,
+        opacity: 0.65,
       }}>
         <GradFlow config={{
           color1: { r: 255, g: 255, b: 255 },
@@ -45,25 +30,23 @@ export default function Hero() {
         }} />
       </div>
 
-      {/* White overlay to keep background soft and text readable */}
+      {/* White overlay */}
       <div style={{
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
         zIndex: 1,
-        background: 'rgba(255,255,255,0.45)',
+        background: 'rgba(255,255,255,0.42)',
         pointerEvents: 'none',
       }} />
 
-      {/* Hero content */}
+      {/* Hero text content - normal flow, not inside scroll container */}
       <div style={{
         position: 'relative',
         zIndex: 2,
-        paddingTop: '140px',
-        paddingBottom: '60px',
         textAlign: 'center',
+        padding: '120px 24px 60px',
         maxWidth: '900px',
         margin: '0 auto',
-        padding: '120px 24px 40px',
       }}>
 
         {/* Pill badge */}
@@ -212,24 +195,36 @@ export default function Hero() {
             fontSize: '13px',
             color: '#94a3b8',
             fontFamily: 'Switzer, sans-serif',
-            marginBottom: '60px',
           }}
         >
           7 day free trial. Secure with a card. Cancel anytime.
         </motion.p>
       </div>
 
-      {/* Container scroll animation - dashboard card */}
-      <div style={{
-        position: 'sticky',
-        top: '100px',
-        zIndex: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        paddingBottom: '60px',
-      }}>
-        <div style={{ perspective: '1200px', width: '100%', maxWidth: '1100px', padding: '0 24px' }}>
+      {/* Scroll animation container - dashboard card only */}
+      <div
+        ref={containerRef}
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          height: '160vh',
+        }}
+      >
+        {/* Sticky wrapper - card sticks below nav and stays put */}
+        <div style={{
+          position: 'sticky',
+          top: '88px',
+          paddingBottom: '40px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+        }}>
+          <div style={{
+            perspective: '1200px',
+            width: '100%',
+            maxWidth: '1100px',
+            padding: '0 24px',
+          }}>
           <motion.div
             style={{
               rotateX: rotate,
@@ -738,6 +733,7 @@ export default function Hero() {
               </div>
             </div>
           </motion.div>
+          </div>
         </div>
       </div>
     </div>
