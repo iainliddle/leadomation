@@ -34,96 +34,96 @@ export default function Hero() {
   }, [])
 
   useEffect(() => {
-    // Main scene sequence controller
-    let cancelled = false
-
     const sequence = async () => {
-      // Scene 1: Dashboard (0-5s) - cursor rests on dashboard
+      // SCENE 1: Dashboard
+      // Cursor rests on Dashboard sidebar item
       setScene('dashboard')
       setShowPanel(false)
-      setCursorPos({ x: 80, y: 165 })
-      await sleep(4000)
-      if (cancelled) return
+      setCursorPos({ x: 100, y: 218 })
+      await sleep(3500)
 
-      // Move cursor to Lead Database
-      setCursorPos({ x: 80, y: 330 })
-      await sleep(600)
-      if (cancelled) return
+      // Cursor moves to Lead Database in sidebar
+      setCursorPos({ x: 100, y: 400 })
+      await sleep(700)
+      // Click Lead Database
       setClicking(true)
-      await sleep(200)
+      await sleep(150)
       setClicking(false)
 
-      // Scene 2: Lead Database
+      // SCENE 2: Lead Database loads
       setScene('leads')
       setShowPanel(false)
-      await sleep(1500)
-      if (cancelled) return
+      await sleep(1200)
 
-      // Cursor moves to first lead row
-      setCursorPos({ x: 500, y: 295 })
+      // Cursor moves to second lead row (Smile Clinic Northwest)
+      setCursorPos({ x: 420, y: 310 })
       await sleep(800)
-      if (cancelled) return
+      // Click the lead row
       setClicking(true)
-      await sleep(200)
+      await sleep(150)
       setClicking(false)
 
-      // Side panel opens
+      // Side panel slides in
       setShowPanel(true)
-      await sleep(3000)
-      if (cancelled) return
+      await sleep(800)
 
-      // Move cursor to Deal Pipeline
-      setCursorPos({ x: 80, y: 425 })
-      await sleep(600)
-      if (cancelled) return
+      // Cursor moves to AI CALL AGENT button in side panel
+      setCursorPos({ x: 820, y: 422 })
+      await sleep(1200)
+
+      // Cursor moves back to Deal Pipeline in sidebar
+      setCursorPos({ x: 100, y: 458 })
+      await sleep(700)
+      // Click Deal Pipeline
       setClicking(true)
-      await sleep(200)
+      await sleep(150)
       setClicking(false)
 
-      // Scene 3: Deal Pipeline
+      // SCENE 3: Deal Pipeline loads
       setScene('pipeline')
       setShowPanel(false)
-      await sleep(1000)
-      if (cancelled) return
-      setCursorPos({ x: 400, y: 380 })
-      await sleep(3500)
-      if (cancelled) return
+      await sleep(1200)
 
-      // Move cursor to Active Campaigns
-      setCursorPos({ x: 80, y: 293 })
-      await sleep(600)
-      if (cancelled) return
+      // Cursor moves to a deal card in Qualified column
+      setCursorPos({ x: 390, y: 360 })
+      await sleep(1000)
+
+      // Cursor moves to a deal card in Won column
+      setCursorPos({ x: 820, y: 340 })
+      await sleep(1500)
+
+      // Cursor moves to Active Campaigns in sidebar
+      setCursorPos({ x: 100, y: 341 })
+      await sleep(700)
+      // Click Active Campaigns
       setClicking(true)
-      await sleep(200)
+      await sleep(150)
       setClicking(false)
 
-      // Scene 4: Active Campaigns
+      // SCENE 4: Active Campaigns loads
       setScene('campaigns')
-      await sleep(1000)
-      if (cancelled) return
-      setCursorPos({ x: 600, y: 320 })
-      await sleep(3000)
-      if (cancelled) return
+      await sleep(1200)
 
-      // Back to dashboard
-      setCursorPos({ x: 80, y: 165 })
-      await sleep(600)
-      if (cancelled) return
+      // Cursor moves to View Leads on first campaign card
+      setCursorPos({ x: 340, y: 306 })
+      await sleep(1000)
+
+      // Cursor moves to View Full Analytics on second campaign
+      setCursorPos({ x: 790, y: 306 })
+      await sleep(1200)
+
+      // Cursor moves back to Dashboard in sidebar
+      setCursorPos({ x: 100, y: 218 })
+      await sleep(700)
+      // Click Dashboard
       setClicking(true)
-      await sleep(200)
+      await sleep(150)
       setClicking(false)
     }
 
-    const loop = () => {
-      if (cancelled) return
-      sequence().then(() => { if (!cancelled) loop() })
-    }
-
-    const startDelay = setTimeout(loop, 2000)
-    return () => {
-      cancelled = true
-      clearTimeout(startDelay)
-    }
+    const loop = () => sequence().then(() => loop())
+    const startDelay = setTimeout(loop, 1500)
+    return () => clearTimeout(startDelay)
   }, [])
 
   return (
@@ -333,13 +333,13 @@ export default function Hero() {
                   <motion.div key="dashboard"
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    style={{ padding: '20px', height: '100%' }}
+                    style={{ padding: '20px', height: '100%', overflowY: 'hidden' as const }}
                   >
                     {/* Top bar */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                       <div>
                         <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>Dashboard</div>
-                        <div style={{ fontSize: '11px', color: '#64748b', fontFamily: 'Switzer, sans-serif' }}>Good morning, Iain</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', fontFamily: 'Switzer, sans-serif' }}>Good morning, Iain 👋</div>
                       </div>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                         <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '7px', padding: '5px 10px', fontSize: '11px', color: '#64748b', fontFamily: 'Switzer, sans-serif', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -351,13 +351,13 @@ export default function Hero() {
                       </div>
                     </div>
 
-                    {/* Metric cards */}
+                    {/* Metric cards row - 4 cards + plan card */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr) 1.2fr', gap: '10px', marginBottom: '14px' }}>
                       {[
                         { label: 'Total Leads', value: counts.leads, color: '#06B6D4', bars: [20,35,28,45,38,52,48,60,55,70,65,80] },
-                        { label: 'Leads with Emails', value: counts.replies, color: '#22D3EE', bars: [10,15,12,20,18,22,25,28,24,30,28,31] },
-                        { label: 'Leads Contacted', value: counts.calls * 100, color: '#8B5CF6', bars: [40,55,48,62,58,70,65,78,72,85,80,90] },
-                        { label: 'Total Deals', value: counts.delivery, color: '#F59E0B', bars: [2,4,3,5,4,6,5,7,6,8,7,10] },
+                        { label: 'Leads with Emails', value: 14, color: '#22D3EE', bars: [10,15,12,20,18,22,25,28,24,30,28,31] },
+                        { label: 'Leads Contacted', value: 600, color: '#8B5CF6', bars: [40,55,48,62,58,70,65,78,72,85,80,90] },
+                        { label: 'Total Deals', value: 94, color: '#F59E0B', bars: [2,4,3,5,4,6,5,7,6,8,7,10] },
                       ].map((m, idx) => (
                         <div key={idx} style={{ background: '#fff', borderRadius: '10px', padding: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                           <div style={{ fontSize: '10px', color: '#64748b', fontFamily: 'Switzer, sans-serif', marginBottom: '4px' }}>{m.label}</div>
@@ -374,26 +374,30 @@ export default function Hero() {
                           </div>
                         </div>
                       ))}
-                      <div style={{ background: '#EEF2FF', borderRadius: '10px', padding: '12px', border: '1px solid #c7d2fe' }}>
-                        <div style={{ fontSize: '9px', fontWeight: 700, color: '#4F46E5', letterSpacing: '0.08em', fontFamily: 'Switzer, sans-serif', marginBottom: '4px' }}>CURRENT PLAN</div>
-                        <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>Pro</div>
-                        <div style={{ fontSize: '10px', color: '#64748b', fontFamily: 'Switzer, sans-serif', marginBottom: '10px' }}>Pro plan active</div>
-                        <div style={{ background: '#4F46E5', color: '#fff', borderRadius: '6px', padding: '5px 8px', fontSize: '10px', fontWeight: 600, fontFamily: 'Switzer, sans-serif', textAlign: 'center' as const }}>Manage plan</div>
+                      {/* Plan card */}
+                      <div style={{ background: '#EEF2FF', borderRadius: '10px', padding: '12px', border: '1px solid #c7d2fe', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontSize: '9px', fontWeight: 700, color: '#4F46E5', letterSpacing: '0.08em', fontFamily: 'Switzer, sans-serif', marginBottom: '4px' }}>CURRENT PLAN</div>
+                          <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>Pro</div>
+                          <div style={{ fontSize: '10px', color: '#64748b', fontFamily: 'Switzer, sans-serif', marginBottom: '10px' }}>Pro plan active</div>
+                        </div>
+                        <div style={{ background: '#4F46E5', color: '#fff', borderRadius: '6px', padding: '6px 8px', fontSize: '10px', fontWeight: 600, fontFamily: 'Switzer, sans-serif', textAlign: 'center' as const }}>Manage plan</div>
                       </div>
                     </div>
 
-                    {/* Chart + campaigns */}
+                    {/* Chart + Top campaigns - two column */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '12px' }}>
+                      {/* Campaign performance */}
                       <div style={{ background: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '14px' }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', fontFamily: 'Switzer, sans-serif', marginBottom: '4px' }}>Campaign Performance</div>
-                        <div style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif', marginBottom: '12px' }}>Last 14 days</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', fontFamily: 'Switzer, sans-serif', marginBottom: '2px' }}>Campaign Performance</div>
+                        <div style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif', marginBottom: '10px' }}>Last 14 days</div>
                         <svg viewBox="0 0 300 70" style={{ width: '100%', height: '70px' }}>
                           {[0,25,50].map(y => <line key={y} x1="0" y1={y} x2="300" y2={y} stroke="#f1f5f9" strokeWidth="1"/>)}
                           <polyline points="0,55 40,50 80,40 120,45 160,25 200,35 240,30 280,40 300,38" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           <polyline points="0,65 40,58 80,52 120,35 160,15 200,28 240,42 280,48 300,46" fill="none" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           <polyline points="0,45 40,25 80,48 120,52 160,58 200,55 240,62 280,64 300,64" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '6px', marginBottom: '10px' }}>
                           {[{ label: 'AI Calls', color: '#8B5CF6' }, { label: 'Emails', color: '#22D3EE' }, { label: 'New Leads', color: '#22c55e' }].map(l => (
                             <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: l.color }} />
@@ -401,15 +405,18 @@ export default function Hero() {
                             </div>
                           ))}
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderTop: '1px solid #f1f5f9', marginTop: '12px', paddingTop: '12px' }}>
+                        {/* Bottom stats bar */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
                           {[{ label: 'TOTAL LEADS', value: '271' }, { label: 'CONTACTED', value: '184' }, { label: 'QUALIFIED', value: '47' }, { label: 'DEALS', value: '10' }].map(s => (
                             <div key={s.label} style={{ textAlign: 'center' as const }}>
-                              <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>{s.value}</div>
-                              <div style={{ fontSize: '9px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif', letterSpacing: '0.05em' }}>{s.label}</div>
+                              <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', fontFamily: 'Switzer, sans-serif' }}>{s.value}</div>
+                              <div style={{ fontSize: '8px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif', letterSpacing: '0.05em' }}>{s.label}</div>
                             </div>
                           ))}
                         </div>
                       </div>
+
+                      {/* Top performing campaigns */}
                       <div style={{ background: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '14px' }}>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', fontFamily: 'Switzer, sans-serif', marginBottom: '14px' }}>Top Performing Campaigns</div>
                         {[
@@ -731,31 +738,85 @@ export default function Hero() {
                 )}
               </AnimatePresence>
 
-              {/* Animated cursor */}
+              {/* Animated cursor with cyan click effect */}
               <motion.div
-                animate={{ x: cursorPos.x, y: cursorPos.y }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
+                animate={{
+                  left: cursorPos.x,
+                  top: cursorPos.y,
+                }}
+                transition={{ type: 'spring', stiffness: 100, damping: 18 }}
                 style={{
                   position: 'absolute',
-                  top: 0, left: 0,
-                  zIndex: 50,
                   pointerEvents: 'none',
+                  zIndex: 50,
+                  transformOrigin: 'top left',
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M4 1L4 15L8 11L13 18L15 17L10 10L16 10L4 1Z" fill="#0f172a" stroke="#fff" strokeWidth="1"/>
-                </svg>
+                {/* Cursor arrow */}
+                <motion.div
+                  animate={{ scale: clicking ? 0.82 : 1 }}
+                  transition={{ duration: 0.1 }}
+                >
+                  <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
+                    <path
+                      d="M2 2L8 19L11 13L18 11L2 2Z"
+                      fill="#1E1B4B"
+                      stroke="white"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.div>
+
+                {/* Cyan radial burst on click */}
                 {clicking && (
-                  <motion.div
-                    initial={{ scale: 0, opacity: 1 }}
-                    animate={{ scale: 2, opacity: 0 }}
-                    transition={{ duration: 0.4 }}
-                    style={{
-                      position: 'absolute', top: -4, left: -4,
-                      width: 12, height: 12, borderRadius: '50%',
-                      border: '2px solid #4F46E5',
-                    }}
-                  />
+                  <>
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0.8 }}
+                      animate={{ scale: 3, opacity: 0 }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                      style={{
+                        position: 'absolute',
+                        top: '-12px',
+                        left: '-12px',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(34,211,238,0.6) 0%, rgba(34,211,238,0.2) 50%, transparent 70%)',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0.5 }}
+                      animate={{ scale: 4.5, opacity: 0 }}
+                      transition={{ duration: 0.6, ease: 'easeOut', delay: 0.05 }}
+                      style={{
+                        position: 'absolute',
+                        top: '-12px',
+                        left: '-12px',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        border: '1.5px solid rgba(34,211,238,0.4)',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0.3 }}
+                      animate={{ scale: 6, opacity: 0 }}
+                      transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
+                      style={{
+                        position: 'absolute',
+                        top: '-12px',
+                        left: '-12px',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        border: '1px solid rgba(6,182,212,0.3)',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  </>
                 )}
               </motion.div>
             </div>
