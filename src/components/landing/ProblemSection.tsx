@@ -83,7 +83,7 @@ function ManualProspectingIllustration() {
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '10px', padding: '12px 8px 8px' }}>
       {/* Fake browser search bar */}
       <div style={{
-        background: 'rgba(255,255,255,0.9)',
+        background: 'rgba(255,255,255,0.95)',
         borderRadius: '10px',
         padding: '10px 14px',
         display: 'flex',
@@ -94,11 +94,11 @@ function ManualProspectingIllustration() {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
-        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontFamily: 'Switzer, sans-serif' }}>Searching for leads manually...</span>
+        <span style={{ fontSize: '12px', color: '#94a3b8', fontFamily: 'Switzer, sans-serif' }}>Searching for leads manually...</span>
         <motion.div
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 1, repeat: Infinity }}
-          style={{ width: '2px', height: '14px', background: '#ffffff', marginLeft: '2px' }}
+          style={{ width: '2px', height: '14px', background: '#4F46E5', marginLeft: '2px' }}
         />
       </div>
 
@@ -149,11 +149,14 @@ function ManualProspectingIllustration() {
         justifyContent: 'center',
         gap: '6px',
         marginTop: '4px',
+        background: 'rgba(0,0,0,0.15)',
+        borderRadius: '100px',
+        padding: '4px 10px',
       }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round">
           <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
         </svg>
-        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.95)', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>3.5 hours spent today</span>
+        <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 600, fontFamily: 'Switzer, sans-serif' }}>3.5 hours spent today</span>
       </div>
     </div>
   )
@@ -171,11 +174,11 @@ function IgnoredEmailsIllustration() {
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', fontFamily: 'Switzer, sans-serif' }}>Campaign open rate</span>
+          <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'Switzer, sans-serif' }}>Campaign open rate</span>
           <motion.span
             animate={{ opacity: [1, 0.4, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', fontFamily: 'Switzer, sans-serif' }}
+            style={{ fontSize: '14px', fontWeight: 800, color: '#dc2626', fontFamily: 'Switzer, sans-serif' }}
           >
             2.1%
           </motion.span>

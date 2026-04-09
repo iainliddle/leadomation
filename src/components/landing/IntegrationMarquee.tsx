@@ -55,9 +55,13 @@ const integrations = [
     id: 'stripe',
     name: 'Stripe',
     logo: (
-      <svg height="22" viewBox="0 0 60 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5.45 10.18c0-.76.62-1.06 1.65-1.06 1.48 0 3.35.45 4.83 1.24V6.54C10.42 5.88 8.85 5.6 7.1 5.6 3.07 5.6.5 7.7.5 10.38c0 4.16 5.73 3.5 5.73 5.3 0 .9-.78 1.19-1.87 1.19-1.62 0-3.69-.67-5.32-1.57v3.87c1.81.78 3.64 1.1 5.32 1.1 4.05 0 6.83-2 6.83-4.72-.02-4.49-5.74-3.7-5.74-5.37zm13.6-4.2l-3.9.83V9.6l3.9-.84V5.98zm-3.9 3.98H19v9.9h-3.85V9.96zm8.56 1.04l-.25-1.04H20.3v9.9h3.85v-6.7c.9-1.18 2.44-.96 2.92-.8V9.96c-.5-.17-2.35-.49-3.36 1.04zm7.22-3.78l-3.87.82v2.88l3.87-.83V7.22zM26.93 9.96h3.88v9.9h-3.88v-9.9zm12.4-.27c-1.5 0-2.47.7-3.08 1.19l-.2-1.04h-3.46v13.5l3.88-.82.01-3.28c.57.42 1.42.99 2.82.99 2.85 0 5.44-2.29 5.44-7.34-.02-4.61-2.64-7.2-5.41-7.2zm-.95 11.08c-.94 0-1.49-.33-1.87-.74l-.02-5.85c.41-.46.98-.77 1.89-.77 1.45 0 2.44 1.62 2.44 3.67 0 2.1-.97 3.69-2.44 3.69zm14.09-3.88c0-3.97-1.92-7.2-5.6-7.2-3.7 0-5.94 3.23-5.94 7.17 0 4.73 2.67 7.12 6.45 7.12 1.85 0 3.25-.42 4.3-1.01v-3.13c-1.05.53-2.26.84-3.78.84-1.5 0-2.82-.53-2.99-2.35h7.52c.02-.2.04-.98.04-1.44zm-7.57-1.5c0-1.75.99-3.12 2.38-3.12 1.36 0 2.26 1.37 2.26 3.12h-4.64z" fill="#635BFF"/>
-      </svg>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="6" fill="#635BFF"/>
+          <path d="M13.5 13c0-.8.7-1.1 1.8-1.1 1.6 0 3.6.5 5.2 1.4V9.2C18.8 8.4 17 8 15.3 8c-3.7 0-6.3 2-6.3 5.2 0 5.1 6.5 4.3 6.5 6.5 0 .9-.8 1.2-1.9 1.2-1.7 0-3.8-.7-5.5-1.7v4.4c1.9.8 3.7 1.1 5.5 1.1 3.8 0 6.4-1.9 6.4-5.1C20 14.2 13.5 15.2 13.5 13z" fill="white"/>
+        </svg>
+        <span style={{ fontSize: '15px', fontWeight: 700, color: '#635BFF', fontFamily: 'system-ui, sans-serif', letterSpacing: '-0.01em' }}>Stripe</span>
+      </div>
     ),
   },
   {
@@ -169,11 +173,11 @@ export default function IntegrationMarquee() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 padding: '12px 32px',
-                opacity: 0.75,
+                opacity: 0.9,
                 transition: 'opacity 0.2s ease',
               }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '0.75')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '0.9')}
             >
               {integration.logo}
             </div>
