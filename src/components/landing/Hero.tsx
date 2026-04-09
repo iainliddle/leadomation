@@ -170,23 +170,26 @@ export default function Hero() {
         </motion.div>
 
         <motion.h1
-          initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           style={{
             fontFamily: 'Switzer, sans-serif',
             fontSize: 'clamp(40px, 6vw, 72px)',
-            fontWeight: 800, lineHeight: 1.08,
-            letterSpacing: '-0.03em', color: '#0f172a',
-            margin: '0 auto 24px', maxWidth: '820px',
+            fontWeight: 800,
+            lineHeight: 1.08,
+            letterSpacing: '-0.03em',
+            margin: '0 auto 24px',
+            maxWidth: '820px',
+            background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
           }}
         >
-          Your next 100 clients<br />are already out there.<br />
-          <span style={{
-            background: 'linear-gradient(90deg, #4F46E5 0%, #06B6D4 50%, #22D3EE 100%)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-          }}>
-            Leadomation finds them.
-          </span>
+          Your next 100 clients<br />
+          are already out there.<br />
+          Leadomation finds them.
         </motion.h1>
 
         <motion.p
