@@ -8,29 +8,43 @@ import FeatureGlobalDemand from '../components/landing/FeatureGlobalDemand'
 import FeatureExpandingCards from '../components/landing/FeatureExpandingCards'
 import FeatureBentoCard from '../components/landing/FeatureBentoCard'
 import StatsAndTestimonials from '../components/landing/StatsAndTestimonials'
+import PricingSection from '../components/landing/PricingSection'
+import FAQSection from '../components/landing/FAQSection'
+import CTASection from '../components/landing/CTASection'
+import Footer from '../components/landing/Footer'
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
-  // Coming soon redirect - disabled for preview
-  /*
-  if (typeof window !== 'undefined') {
-    window.location.replace('/coming-soon.html')
-    return null
-  }
-  */
-
   return (
     <div className="landing-page">
       <Nav />
-      <Hero />
-      <IntegrationMarquee />
-      <ProblemSection />
-      <SolutionSection />
-      <FeatureEmailSequences />
-      <FeatureGlobalDemand />
-      <FeatureExpandingCards />
-      <FeatureBentoCard />
-      <StatsAndTestimonials />
+      <div style={{
+        position: 'relative',
+        background: 'linear-gradient(180deg, #f0e8ff 0%, #e8e4ff 5%, #eef2ff 15%, #f8faff 40%, #ffffff 65%)',
+        overflow: 'hidden',
+      }}>
+        {/* Fixed ambient blobs */}
+        <div style={{ position: 'fixed', top: '-200px', left: '-300px', width: '900px', height: '900px', background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'fixed', top: '-100px', right: '-200px', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(79,70,229,0.13) 0%, transparent 65%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'fixed', top: '30%', left: '55%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+
+        {/* All sections */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <Hero />
+          <IntegrationMarquee />
+          <ProblemSection />
+          <SolutionSection />
+          <FeatureEmailSequences />
+          <FeatureGlobalDemand />
+          <FeatureExpandingCards />
+          <FeatureBentoCard />
+          <StatsAndTestimonials />
+          <PricingSection />
+          <FAQSection />
+          <CTASection />
+        </div>
+      </div>
+      <Footer />
     </div>
   )
 }

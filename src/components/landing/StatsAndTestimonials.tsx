@@ -173,12 +173,12 @@ export default function StatsAndTestimonials() {
       <div
         ref={sectionRef}
         style={{
-          background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.95) 10%, #ffffff 30%, #ffffff 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, #ffffff 120px, #ffffff 100%)',
           position: 'relative',
+          overflow: 'hidden',
           paddingTop: isMobile ? '60px' : '120px',
           paddingBottom: isMobile ? '40px' : '80px',
           fontFamily: 'Switzer, sans-serif',
-          overflow: 'hidden',
         }}
       >
         {/* Stats row */}
@@ -190,6 +190,8 @@ export default function StatsAndTestimonials() {
             paddingLeft: isMobile ? '16px' : '48px',
             paddingRight: isMobile ? '16px' : '48px',
             marginBottom: isMobile ? '48px' : '80px',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <motion.div
@@ -223,7 +225,7 @@ export default function StatsAndTestimonials() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.3 }}
-          style={{ textAlign: 'center', marginBottom: '40px', paddingLeft: '24px', paddingRight: '24px' }}
+          style={{ textAlign: 'center', marginBottom: '40px', paddingLeft: '24px', paddingRight: '24px', position: 'relative', zIndex: 1 }}
         >
           <div style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 500 }}>
             Trusted by B2B teams across the UK and beyond
@@ -231,7 +233,7 @@ export default function StatsAndTestimonials() {
         </motion.div>
 
         {/* Marquee rows */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', zIndex: 1 }}>
           <MarqueeRow items={TESTIMONIALS_ROW1} reverse={false} isMobile={isMobile} />
           <MarqueeRow items={TESTIMONIALS_ROW2} reverse={true} isMobile={isMobile} />
         </div>

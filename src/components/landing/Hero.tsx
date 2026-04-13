@@ -130,7 +130,7 @@ export default function Hero() {
   }, [isMobile])
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', overflow: 'hidden', background: 'transparent' }}>
       {/* Fixed gradient background */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,

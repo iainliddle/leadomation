@@ -164,7 +164,7 @@ export default function IntegrationMarquee() {
         zIndex: 3, pointerEvents: 'none',
       }} />
 
-      <div ref={emblaRef} style={{ overflow: 'hidden' }}>
+      <div ref={emblaRef} style={{ overflow: 'hidden', position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {allIntegrations.map((integration, index) => (
             <div

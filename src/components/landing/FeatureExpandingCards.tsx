@@ -201,11 +201,12 @@ export default function FeatureExpandingCards() {
     <div
       ref={sectionRef}
       style={{
-        background: 'linear-gradient(180deg, transparent 0%, rgba(238,242,255,0.35) 15%, rgba(238,242,255,0.35) 85%, transparent 100%)',
+        background: 'linear-gradient(180deg, #ffffff 0%, transparent 120px, transparent 100%)',
         position: 'relative',
         paddingTop: '120px',
         paddingBottom: '120px',
         fontFamily: 'Switzer, sans-serif',
+        overflow: 'hidden',
       }}
     >
       {/* Ambient blobs */}

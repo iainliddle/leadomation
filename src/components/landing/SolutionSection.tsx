@@ -112,7 +112,7 @@ export default function SolutionSection() {
     <section style={{
       position: 'relative',
       padding: isMobile ? '60px 16px' : '100px 24px',
-      background: 'linear-gradient(180deg, transparent 0%, rgba(240,244,255,0.5) 30%, transparent 100%)',
+      background: 'linear-gradient(180deg, #ffffff 0%, transparent 120px, transparent 100%)',
       overflow: 'hidden',
     }}>
       {/* Ambient blobs */}
@@ -120,13 +120,13 @@ export default function SolutionSection() {
         position: 'absolute', top: '20%', right: '-8%',
         width: isMobile ? '250px' : '500px', height: isMobile ? '250px' : '500px',
         background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)',
-        borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none',
+        borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0,
       }} />
       <div style={{
         position: 'absolute', bottom: '10%', left: '-5%',
         width: isMobile ? '200px' : '400px', height: isMobile ? '200px' : '400px',
         background: 'radial-gradient(circle, rgba(34,211,238,0.07) 0%, transparent 70%)',
-        borderRadius: '50%', filter: 'blur(50px)', pointerEvents: 'none',
+        borderRadius: '50%', filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0,
       }} />
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>

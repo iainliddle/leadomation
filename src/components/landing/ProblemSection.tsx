@@ -309,7 +309,7 @@ export default function ProblemSection() {
     <section style={{
       position: 'relative',
       padding: isMobile ? '60px 16px' : '80px 24px 100px',
-      background: 'linear-gradient(180deg, transparent 0%, #ffffff 15%, #ffffff 85%, transparent 100%)',
+      background: 'linear-gradient(180deg, transparent 0%, #ffffff 120px, #ffffff 100%)',
       overflow: 'hidden',
     }}>
       {/* Ambient background blobs */}
@@ -318,14 +318,14 @@ export default function ProblemSection() {
         width: isMobile ? '200px' : '400px', height: isMobile ? '200px' : '400px',
         background: 'radial-gradient(circle, rgba(34,211,238,0.06) 0%, transparent 70%)',
         borderRadius: '50%', filter: 'blur(40px)',
-        pointerEvents: 'none',
+        pointerEvents: 'none', zIndex: 0,
       }} />
       <div style={{
         position: 'absolute', bottom: '5%', left: '-5%',
         width: isMobile ? '175px' : '350px', height: isMobile ? '175px' : '350px',
         background: 'radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%)',
         borderRadius: '50%', filter: 'blur(40px)',
-        pointerEvents: 'none',
+        pointerEvents: 'none', zIndex: 0,
       }} />
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>

@@ -177,14 +177,15 @@ export default function FeatureBentoCard() {
     <div
       ref={sectionRef}
       style={{
-        background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
+        background: 'transparent',
         position: 'relative',
+        overflow: 'hidden',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',
         fontFamily: 'Switzer, sans-serif',
       }}
     >
-      <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: isMobile ? '16px' : '48px', paddingRight: isMobile ? '16px' : '48px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: isMobile ? '16px' : '48px', paddingRight: isMobile ? '16px' : '48px', position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '40px' : '80px', alignItems: 'center' }}>
 
           {/* LEFT - text */}

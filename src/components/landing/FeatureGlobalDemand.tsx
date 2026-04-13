@@ -25,7 +25,7 @@ export default function FeatureGlobalDemand() {
     <div
       ref={sectionRef}
       style={{
-        background: 'linear-gradient(180deg, transparent 0%, #ffffff 12%, #ffffff 100%)',
+        background: 'linear-gradient(180deg, transparent 0%, #ffffff 120px, #ffffff 100%)',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',
@@ -42,6 +42,8 @@ export default function FeatureGlobalDemand() {
         gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
         gap: isMobile ? '40px' : '80px',
         alignItems: 'center',
+        position: 'relative',
+        zIndex: 1,
       }}>
 
         {/* LEFT - text */}

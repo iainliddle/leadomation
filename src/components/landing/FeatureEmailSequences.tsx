@@ -168,8 +168,7 @@ export default function FeatureEmailSequences() {
   return (
     <section ref={ref} style={{
       position: 'relative',
-      overflow: 'visible',
-      zIndex: 1,
+      overflow: 'hidden',
       background: 'transparent',
       paddingTop: isMobile ? '60px' : '120px',
       paddingBottom: isMobile ? '60px' : '120px',
