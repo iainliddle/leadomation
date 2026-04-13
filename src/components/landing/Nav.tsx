@@ -63,7 +63,7 @@ export default function Nav() {
           flexShrink: 0,
         }}>
           <img
-            src="/src/assets/logo-full.png"
+            src="/logo-full.png"
             alt="Leadomation"
             style={{ height: '28px', width: 'auto', objectFit: 'contain' }}
             onError={(e) => {
