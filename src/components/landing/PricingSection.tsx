@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 const PLANS = [
   {
@@ -90,6 +91,7 @@ export default function PricingSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' })
   const [annual, setAnnual] = useState(false)
+  const { isMobile } = useBreakpoint()
   const ease = [0.21, 0.47, 0.32, 0.98] as any
 
   return (
@@ -99,12 +101,12 @@ export default function PricingSection() {
         background: 'linear-gradient(180deg, #ffffff 0%, transparent 120px, transparent 100%)',
         position: 'relative',
         overflow: 'hidden',
-        paddingTop: '120px',
-        paddingBottom: '120px',
+        paddingTop: isMobile ? '60px' : '120px',
+        paddingBottom: isMobile ? '60px' : '120px',
         fontFamily: 'Switzer, sans-serif',
       }}
     >
-      <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: '48px', paddingRight: '48px', position: 'relative', zIndex: 1 }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', paddingLeft: isMobile ? '16px' : '48px', paddingRight: isMobile ? '16px' : '48px', position: 'relative', zIndex: 1 }}>
 
         {/* Header */}
         <motion.div
@@ -116,7 +118,7 @@ export default function PricingSection() {
           <div style={{ display: 'inline-block', background: '#EEF2FF', color: '#4F46E5', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', borderRadius: '100px', padding: '6px 14px', marginBottom: '24px' }}>
             • PRICING
           </div>
-          <div style={{ fontWeight: 800, fontSize: '48px', letterSpacing: '-0.03em', lineHeight: 1.1, background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block', marginBottom: '16px' }}>
+          <div style={{ fontWeight: 800, fontSize: 'clamp(28px, 5vw, 48px)', letterSpacing: '-0.03em', lineHeight: 1.1, background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block', marginBottom: '16px' }}>
             Simple, transparent pricing.
           </div>
           <p style={{ color: '#475569', fontSize: '18px', lineHeight: 1.7, margin: '0 auto 32px', maxWidth: '500px' }}>
@@ -160,7 +162,7 @@ export default function PricingSection() {
         </motion.div>
 
         {/* Pricing cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '24px', alignItems: 'start' }}>
           {PLANS.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -176,7 +178,7 @@ export default function PricingSection() {
                   ? '0 24px 80px rgba(79,70,229,0.35), 0 8px 24px rgba(79,70,229,0.2)'
                   : '0 4px 24px rgba(0,0,0,0.06)',
                 position: 'relative',
-                marginTop: plan.featured ? '-16px' : '0',
+                marginTop: plan.featured && !isMobile ? '-16px' : '0',
                 overflow: 'hidden',
               }}
             >
@@ -208,7 +210,7 @@ export default function PricingSection() {
               {annual ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '48px', fontWeight: 800, letterSpacing: '-0.03em', color: plan.featured ? 'white' : '#0f172a', lineHeight: 1 }}>
+                    <span style={{ fontSize: isMobile ? '36px' : '48px', fontWeight: 800, letterSpacing: '-0.03em', color: plan.featured ? 'white' : '#0f172a', lineHeight: 1 }}>
                       £{plan.annualTotal}
                     </span>
                     <span style={{ fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.5)' : '#94a3b8', marginBottom: '8px' }}>/yr</span>
@@ -222,7 +224,7 @@ export default function PricingSection() {
                 </>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '48px', fontWeight: 800, letterSpacing: '-0.03em', color: plan.featured ? 'white' : '#0f172a', lineHeight: 1 }}>
+                  <span style={{ fontSize: isMobile ? '36px' : '48px', fontWeight: 800, letterSpacing: '-0.03em', color: plan.featured ? 'white' : '#0f172a', lineHeight: 1 }}>
                     £{plan.monthlyPrice}
                   </span>
                   <span style={{ fontSize: '14px', color: plan.featured ? 'rgba(255,255,255,0.5)' : '#94a3b8', marginBottom: '8px' }}>/mo</span>

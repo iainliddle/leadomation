@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 const cards = [
   {
@@ -195,6 +196,7 @@ export default function FeatureExpandingCards() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' })
   const [activeIndex, setActiveIndex] = useState(0)
+  const { isMobile } = useBreakpoint()
   const ease = [0.21, 0.47, 0.32, 0.98] as any
 
   return (
@@ -203,8 +205,8 @@ export default function FeatureExpandingCards() {
       style={{
         background: 'linear-gradient(180deg, #ffffff 0%, transparent 120px, transparent 100%)',
         position: 'relative',
-        paddingTop: '120px',
-        paddingBottom: '120px',
+        paddingTop: isMobile ? '60px' : '120px',
+        paddingBottom: isMobile ? '60px' : '120px',
         fontFamily: 'Switzer, sans-serif',
         overflow: 'hidden',
       }}
@@ -223,7 +225,7 @@ export default function FeatureExpandingCards() {
         <div style={{ display: 'inline-block', background: '#EEF2FF', color: '#4F46E5', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', borderRadius: '100px', padding: '6px 14px', marginBottom: '24px' }}>
           EVERYTHING YOU NEED
         </div>
-        <h2 style={{ fontWeight: 800, fontSize: '48px', letterSpacing: '-0.03em', lineHeight: 1.1, background: 'linear-gradient(135deg, #0a0e1a 0%, #3730a3 40%, #4F46E5 60%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block', margin: '0 0 16px 0' }}>
+        <h2 style={{ fontWeight: 800, fontSize: 'clamp(28px, 5vw, 48px)', letterSpacing: '-0.03em', lineHeight: 1.1, background: 'linear-gradient(135deg, #0a0e1a 0%, #3730a3 40%, #4F46E5 60%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block', margin: '0 0 16px 0' }}>
           Five tools. One platform. Zero manual work.
         </h2>
         <p style={{ color: '#334155', fontSize: '18px', lineHeight: 1.7, margin: 0 }}>
@@ -236,7 +238,7 @@ export default function FeatureExpandingCards() {
         initial={{ opacity: 0, y: 30 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7, ease, delay: 0.2 }}
-        style={{ display: 'flex', gap: '12px', maxWidth: '1200px', margin: '0 auto', paddingLeft: '24px', paddingRight: '24px', height: '480px', position: 'relative', zIndex: 1 }}
+        style={{ display: 'flex', flexDirection: isMobile ? 'column' as const : 'row' as const, gap: isMobile ? '8px' : '12px', maxWidth: '1200px', margin: '0 auto', paddingLeft: isMobile ? '16px' : '24px', paddingRight: isMobile ? '16px' : '24px', height: isMobile ? 'auto' : '480px', position: 'relative', zIndex: 1 }}
       >
         {cards.map((card, index) => {
           const Illustration = illustrations[index]
@@ -248,11 +250,12 @@ export default function FeatureExpandingCards() {
               style={{
                 position: 'relative',
                 overflow: 'hidden',
-                borderRadius: '20px',
+                borderRadius: isMobile ? '16px' : '20px',
                 cursor: 'pointer',
-                flex: isActive ? '5' : '1',
-                minWidth: isActive ? '0' : '68px',
-                transition: 'flex 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                ...(isMobile
+                  ? { flex: 'none', width: '100%', height: isActive ? '380px' : '56px', minWidth: 'auto', transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }
+                  : { flex: isActive ? '5' : '1', minWidth: isActive ? '0' : '68px', transition: 'flex 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }
+                ),
                 background: card.bgGradient,
                 border: `1px solid ${isActive ? card.accentColor + '60' : 'rgba(255,255,255,0.10)'}`,
                 boxShadow: isActive ? `0 20px 60px ${card.accentColor}30` : '0 4px 20px rgba(0,0,0,0.2)',
@@ -279,11 +282,15 @@ export default function FeatureExpandingCards() {
 
               {/* Collapsed label - shown when card is narrow */}
               <div style={{
-                position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
+                position: 'absolute',
+                ...(isMobile
+                  ? { top: '50%', left: '16px', transform: 'translateY(-50%)' }
+                  : { bottom: '20px', left: '50%', transform: 'translateX(-50%)' }
+                ),
                 zIndex: 5, opacity: isActive ? 0 : 1, transition: 'opacity 0.3s ease',
                 pointerEvents: 'none', whiteSpace: 'nowrap',
               }}>
-                <span style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{card.eyebrow}</span>
+                <span style={{ ...(isMobile ? {} : { writingMode: 'vertical-rl' as const, textOrientation: 'mixed' as const }), fontSize: isMobile ? '13px' : '11px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{card.eyebrow}</span>
               </div>
 
               {/* Expanded text content - pushed to bottom */}

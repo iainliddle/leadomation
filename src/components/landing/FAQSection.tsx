@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 const FAQS = [
   {
@@ -124,6 +125,7 @@ function FAQItem({ faq }: { faq: typeof FAQS[0] }) {
 export default function FAQSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' })
+  const { isMobile } = useBreakpoint()
   const ease = [0.21, 0.47, 0.32, 0.98] as any
 
   const left = FAQS.slice(0, 3)
@@ -136,16 +138,16 @@ export default function FAQSection() {
         background: 'transparent',
         position: 'relative',
         overflow: 'hidden',
-        paddingTop: '120px',
-        paddingBottom: '120px',
+        paddingTop: isMobile ? '60px' : '120px',
+        paddingBottom: isMobile ? '60px' : '120px',
         fontFamily: 'Switzer, sans-serif',
       }}
     >
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',
-        paddingLeft: '48px',
-        paddingRight: '48px',
+        paddingLeft: isMobile ? '16px' : '48px',
+        paddingRight: isMobile ? '16px' : '48px',
         position: 'relative',
         zIndex: 1,
       }}>
@@ -172,7 +174,7 @@ export default function FAQSection() {
           </div>
           <div style={{
             fontWeight: 800,
-            fontSize: '48px',
+            fontSize: 'clamp(28px, 5vw, 48px)',
             letterSpacing: '-0.03em',
             lineHeight: 1.1,
             background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)',
@@ -198,8 +200,8 @@ export default function FAQSection() {
         {/* Two column FAQ grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '0 80px',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: isMobile ? '0' : '0 80px',
         }}>
           {/* Left column */}
           <motion.div
