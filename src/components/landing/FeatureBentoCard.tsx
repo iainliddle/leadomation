@@ -177,7 +177,7 @@ export default function FeatureBentoCard() {
     <div
       ref={sectionRef}
       style={{
-        background: 'transparent',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',
@@ -196,10 +196,10 @@ export default function FeatureBentoCard() {
             <div style={{ display: 'inline-block', background: '#EEF2FF', color: '#4F46E5', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', borderRadius: '100px', padding: '6px 14px', marginBottom: '24px' }}>
               SEE IT IN ACTION
             </div>
-            <div style={{ fontWeight: 800, fontSize: 'clamp(28px, 5vw, 44px)', letterSpacing: '-0.03em', lineHeight: 1.15, background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block', marginBottom: '16px' }}>
+            <h2 style={{ fontWeight: 800, fontSize: 'clamp(28px, 5vw, 44px)', letterSpacing: '-0.03em', lineHeight: 1.15, background: 'linear-gradient(135deg, #0a0e1a 0%, #3730a3 40%, #4F46E5 60%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block', margin: '0 0 16px 0' }}>
               One dashboard. Every tool you need.
-            </div>
-            <p style={{ color: '#475569', fontSize: '17px', lineHeight: 1.7, marginBottom: '32px' }}>
+            </h2>
+            <p style={{ color: '#334155', fontSize: '17px', lineHeight: 1.7, marginBottom: '32px' }}>
               Campaigns, leads, call scripts and analytics all live in one place. No switching between tools, no copy-pasting data, no wasted time.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
@@ -216,7 +216,7 @@ export default function FeatureBentoCard() {
                       {i === 2 && <><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>}
                     </svg>
                   </div>
-                  <span style={{ fontSize: '15px', color: '#0f172a', fontWeight: 500 }}>{item.label}</span>
+                  <span style={{ fontSize: '15px', color: '#020617', fontWeight: 500 }}>{item.label}</span>
                 </div>
               ))}
             </div>

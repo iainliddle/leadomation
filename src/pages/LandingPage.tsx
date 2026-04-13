@@ -7,6 +7,7 @@ import FeatureEmailSequences from '../components/landing/FeatureEmailSequences'
 import FeatureGlobalDemand from '../components/landing/FeatureGlobalDemand'
 import FeatureExpandingCards from '../components/landing/FeatureExpandingCards'
 import FeatureBentoCard from '../components/landing/FeatureBentoCard'
+import StatsAndTestimonials from '../components/landing/StatsAndTestimonials'
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
@@ -29,6 +30,7 @@ export default function LandingPage() {
       <FeatureGlobalDemand />
       <FeatureExpandingCards />
       <FeatureBentoCard />
+      <StatsAndTestimonials />
     </div>
   )
 }
