@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { CobeGlobe } from '../ui/cobe-globe'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 const GLOBE_MARKERS = [
   { location: [40.7128, -74.006] as [number, number], size: 0.08 },
@@ -18,6 +19,7 @@ export default function FeatureGlobalDemand() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' })
   const ease = [0.21, 0.47, 0.32, 0.98] as any
+  const { isMobile } = useBreakpoint()
 
   return (
     <div
@@ -25,8 +27,8 @@ export default function FeatureGlobalDemand() {
       style={{
         background: 'linear-gradient(180deg, transparent 0%, #ffffff 12%, #ffffff 100%)',
         position: 'relative',
-        paddingTop: '120px',
-        paddingBottom: '120px',
+        paddingTop: isMobile ? '60px' : '120px',
+        paddingBottom: isMobile ? '60px' : '120px',
         fontFamily: 'Switzer, sans-serif',
         overflow: 'hidden',
       }}
@@ -34,11 +36,11 @@ export default function FeatureGlobalDemand() {
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',
-        paddingLeft: '48px',
-        paddingRight: '48px',
+        paddingLeft: isMobile ? '16px' : '48px',
+        paddingRight: isMobile ? '16px' : '48px',
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '80px',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap: isMobile ? '40px' : '80px',
         alignItems: 'center',
       }}>
 
@@ -65,7 +67,7 @@ export default function FeatureGlobalDemand() {
 
           <div style={{
             fontWeight: 800,
-            fontSize: '44px',
+            fontSize: 'clamp(28px, 5vw, 44px)',
             letterSpacing: '-0.03em',
             lineHeight: 1.15,
             background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)',
@@ -99,12 +101,12 @@ export default function FeatureGlobalDemand() {
           <div style={{ display: 'flex', gap: '12px' }}>
             <button style={{
               background: '#1E1B4B', color: 'white', borderRadius: '10px',
-              padding: '14px 28px', fontWeight: 600, fontSize: '15px',
+              padding: isMobile ? '12px 20px' : '14px 28px', fontWeight: 600, fontSize: '15px',
               border: 'none', cursor: 'pointer', fontFamily: 'Switzer, sans-serif',
             }}>Start free trial →</button>
             <button style={{
               background: '#ECFEFF', color: '#06B6D4', border: '1px solid #22D3EE',
-              borderRadius: '10px', padding: '14px 28px', fontWeight: 600,
+              borderRadius: '10px', padding: isMobile ? '12px 20px' : '14px 28px', fontWeight: 600,
               fontSize: '15px', cursor: 'pointer', fontFamily: 'Switzer, sans-serif',
             }}>Explore regions</button>
           </div>
@@ -120,11 +122,12 @@ export default function FeatureGlobalDemand() {
           <div style={{ position: 'relative', width: '100%', maxWidth: '500px' }}>
             <CobeGlobe
               markers={GLOBE_MARKERS}
-              size={480}
+              size={isMobile ? 300 : 480}
               speed={0.004}
             />
 
             {/* Floating card - US East Coast */}
+            {!isMobile && (
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -144,8 +147,10 @@ export default function FeatureGlobalDemand() {
                 <span style={{ fontSize: '10px', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', borderRadius: '4px', padding: '2px 6px' }}>Very High</span>
               </div>
             </motion.div>
+            )}
 
             {/* Floating card - United Kingdom */}
+            {!isMobile && (
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
@@ -165,8 +170,10 @@ export default function FeatureGlobalDemand() {
                 <span style={{ fontSize: '10px', fontWeight: 700, color: '#2563eb', background: '#eff6ff', borderRadius: '4px', padding: '2px 6px' }}>High</span>
               </div>
             </motion.div>
+            )}
 
             {/* Floating card - Dubai */}
+            {!isMobile && (
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
@@ -186,6 +193,7 @@ export default function FeatureGlobalDemand() {
                 <span style={{ fontSize: '10px', fontWeight: 700, color: '#d97706', background: '#fffbeb', borderRadius: '4px', padding: '2px 6px' }}>Emerging</span>
               </div>
             </motion.div>
+            )}
           </div>
         </motion.div>
 

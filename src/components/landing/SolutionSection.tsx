@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 function CheckRow({ title, description }: { title: string; description: string }) {
   return (
@@ -105,30 +106,31 @@ function LeadDatabaseIllustration() {
 export default function SolutionSection() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
+  const { isMobile } = useBreakpoint()
 
   return (
     <section style={{
       position: 'relative',
-      padding: '100px 24px',
+      padding: isMobile ? '60px 16px' : '100px 24px',
       background: 'linear-gradient(180deg, transparent 0%, rgba(240,244,255,0.5) 30%, transparent 100%)',
       overflow: 'hidden',
     }}>
       {/* Ambient blobs */}
       <div style={{
         position: 'absolute', top: '20%', right: '-8%',
-        width: '500px', height: '500px',
+        width: isMobile ? '250px' : '500px', height: isMobile ? '250px' : '500px',
         background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)',
         borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none',
       }} />
       <div style={{
         position: 'absolute', bottom: '10%', left: '-5%',
-        width: '400px', height: '400px',
+        width: isMobile ? '200px' : '400px', height: isMobile ? '200px' : '400px',
         background: 'radial-gradient(circle, rgba(34,211,238,0.07) 0%, transparent 70%)',
         borderRadius: '50%', filter: 'blur(50px)', pointerEvents: 'none',
       }} />
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '80px', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.4fr', gap: isMobile ? '40px' : '80px', alignItems: 'center' }}>
 
           {/* Left — text */}
           <motion.div
@@ -228,6 +230,7 @@ export default function SolutionSection() {
             }} />
 
             {/* Floating stat badges */}
+            {!isMobile && (
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -248,7 +251,9 @@ export default function SolutionSection() {
                 <div style={{ fontSize: '16px', fontWeight: 800, color: '#4F46E5', fontFamily: 'Switzer, sans-serif', lineHeight: 1 }}>271</div>
               </div>
             </motion.div>
+            )}
 
+            {!isMobile && (
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
@@ -269,8 +274,9 @@ export default function SolutionSection() {
                 <div style={{ fontSize: '16px', fontWeight: 800, color: '#06B6D4', fontFamily: 'Switzer, sans-serif', lineHeight: 1 }}>18%</div>
               </div>
             </motion.div>
+            )}
 
-            <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ position: 'relative', zIndex: 1, transform: isMobile ? 'scale(0.85)' : 'none', transformOrigin: 'top center' }}>
               <LeadDatabaseIllustration />
             </div>
           </motion.div>

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 function ProblemCard({
   illustration,
@@ -8,6 +9,7 @@ function ProblemCard({
   description,
   delay,
   bgGradient,
+  isMobile,
 }: {
   illustration: React.ReactNode
   title: string
@@ -15,6 +17,7 @@ function ProblemCard({
   delay: number
   accentColor?: string
   bgGradient: string
+  isMobile?: boolean
 }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
@@ -51,7 +54,7 @@ function ProblemCard({
       </div>
 
       {/* Text content */}
-      <div style={{ padding: '28px 28px 32px' }}>
+      <div style={{ padding: isMobile ? '20px 20px 24px' : '28px 28px 32px' }}>
         <h3 style={{
           fontSize: '18px',
           fontWeight: 700,
@@ -300,25 +303,26 @@ function BlindOutreachIllustration() {
 export default function ProblemSection() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
+  const { isMobile } = useBreakpoint()
 
   return (
     <section style={{
       position: 'relative',
-      padding: '80px 24px 100px',
+      padding: isMobile ? '60px 16px' : '80px 24px 100px',
       background: 'linear-gradient(180deg, transparent 0%, #ffffff 15%, #ffffff 85%, transparent 100%)',
       overflow: 'hidden',
     }}>
       {/* Ambient background blobs */}
       <div style={{
         position: 'absolute', top: '10%', right: '-5%',
-        width: '400px', height: '400px',
+        width: isMobile ? '200px' : '400px', height: isMobile ? '200px' : '400px',
         background: 'radial-gradient(circle, rgba(34,211,238,0.06) 0%, transparent 70%)',
         borderRadius: '50%', filter: 'blur(40px)',
         pointerEvents: 'none',
       }} />
       <div style={{
         position: 'absolute', bottom: '5%', left: '-5%',
-        width: '350px', height: '350px',
+        width: isMobile ? '175px' : '350px', height: isMobile ? '175px' : '350px',
         background: 'radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%)',
         borderRadius: '50%', filter: 'blur(40px)',
         pointerEvents: 'none',
@@ -332,7 +336,7 @@ export default function ProblemSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
-          style={{ textAlign: 'center', marginBottom: '64px' }}
+          style={{ textAlign: 'center', marginBottom: isMobile ? '40px' : '64px' }}
         >
           <div style={{
             display: 'inline-flex',
@@ -384,6 +388,7 @@ export default function ProblemSection() {
         {/* Three cards */}
         <div style={{
           display: 'flex',
+          flexDirection: isMobile ? 'column' as const : 'row' as const,
           gap: '20px',
           alignItems: 'stretch',
         }}>
@@ -394,6 +399,7 @@ export default function ProblemSection() {
             title="Hours lost to manual prospecting"
             description="Searching for leads one by one, verifying contact details by hand, and building lists manually takes hours every day. Time you should be spending on closing."
             illustration={<ManualProspectingIllustration />}
+            isMobile={isMobile}
           />
           <ProblemCard
             delay={0.2}
@@ -402,6 +408,7 @@ export default function ProblemSection() {
             title="Generic emails that never get replies"
             description="Copy-paste templates feel exactly like what they are. Without personalisation, real intent signals and proper deliverability, your emails go straight to spam."
             illustration={<IgnoredEmailsIllustration />}
+            isMobile={isMobile}
           />
           <ProblemCard
             delay={0.3}
@@ -410,6 +417,7 @@ export default function ProblemSection() {
             title="No idea which outreach is actually working"
             description="Without proper analytics you're guessing. Which campaigns, sequences and messages are driving replies? You have no way to know what to fix or double down on."
             illustration={<BlindOutreachIllustration />}
+            isMobile={isMobile}
           />
         </div>
       </div>

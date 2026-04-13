@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GradFlow } from 'gradflow'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 type Scene = 'dashboard' | 'leads' | 'pipeline' | 'campaigns'
 
 export default function Hero() {
+  const { isMobile, isTablet } = useBreakpoint()
   const [scene, setScene] = useState<Scene>('dashboard')
   const [showPanel, setShowPanel] = useState(false)
   const [cursorPos, setCursorPos] = useState({ x: 120, y: 300 })
@@ -34,6 +36,7 @@ export default function Hero() {
   }, [])
 
   useEffect(() => {
+    if (isMobile) return
     const sequence = async () => {
       // SCENE 1: Dashboard
       // Cursor rests on Dashboard sidebar item
@@ -124,7 +127,7 @@ export default function Hero() {
     const loop = (): Promise<void> => sequence().then((): void => { loop() })
     const startDelay = setTimeout(loop, 1500)
     return () => clearTimeout(startDelay)
-  }, [])
+  }, [isMobile])
 
   return (
     <div style={{ position: 'relative' }}>
@@ -150,7 +153,7 @@ export default function Hero() {
       {/* Hero text content */}
       <div style={{
         position: 'relative', zIndex: 2,
-        textAlign: 'center', padding: '120px 24px 60px',
+        textAlign: 'center', padding: isMobile ? '80px 16px 40px' : '120px 24px 60px',
         maxWidth: '900px', margin: '0 auto',
       }}>
         <motion.div
@@ -242,13 +245,14 @@ export default function Hero() {
       </div>
 
       {/* Animated dashboard card */}
+      {!isMobile && (
       <div style={{
         position: 'relative', zIndex: 2,
         display: 'flex', justifyContent: 'center',
         padding: '0 24px 100px',
       }}>
         <div style={{
-          width: '100%', maxWidth: '1100px',
+          width: '100%', maxWidth: isTablet ? '900px' : '1100px',
           borderRadius: '20px', overflow: 'hidden',
           border: '1px solid rgba(226,232,240,0.8)',
           boxShadow: '0 25px 60px rgba(0,0,0,0.14), 0 8px 24px rgba(79,70,229,0.10)',
@@ -274,7 +278,7 @@ export default function Hero() {
           </div>
 
           {/* App layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', minHeight: '520px', position: 'relative' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '160px 1fr' : '200px 1fr', minHeight: '520px', position: 'relative' }}>
 
             {/* Sidebar */}
             <div style={{
@@ -826,6 +830,7 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      )}
     </div>
   )
 }

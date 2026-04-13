@@ -1,5 +1,6 @@
 import AutoScroll from 'embla-carousel-auto-scroll'
 import useEmblaCarousel from 'embla-carousel-react'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 const integrations = [
   {
@@ -138,6 +139,7 @@ export default function IntegrationMarquee() {
     { loop: true, dragFree: true, align: 'start' },
     [AutoScroll({ playOnInit: true, speed: 0.9, stopOnInteraction: false })]
   )
+  const { isMobile } = useBreakpoint()
 
   return (
     <section style={{
@@ -150,14 +152,14 @@ export default function IntegrationMarquee() {
       {/* Left fade mask */}
       <div style={{
         position: 'absolute', top: 0, left: 0, bottom: 0,
-        width: '140px',
+        width: isMobile ? '60px' : '140px',
         background: 'linear-gradient(to right, rgba(255,255,255,0.95), transparent)',
         zIndex: 3, pointerEvents: 'none',
       }} />
       {/* Right fade mask */}
       <div style={{
         position: 'absolute', top: 0, right: 0, bottom: 0,
-        width: '140px',
+        width: isMobile ? '60px' : '140px',
         background: 'linear-gradient(to left, rgba(255,255,255,0.95), transparent)',
         zIndex: 3, pointerEvents: 'none',
       }} />
@@ -172,7 +174,7 @@ export default function IntegrationMarquee() {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: '12px 32px',
+                padding: isMobile ? '10px 16px' : '12px 32px',
                 opacity: 0.9,
                 transition: 'opacity 0.2s ease',
               }}

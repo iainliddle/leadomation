@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 function CheckRow({ label, description }: { label: string; description: string }) {
   return (
@@ -162,6 +163,7 @@ function SequenceIllustration({ inView }: { inView: boolean }) {
 export default function FeatureEmailSequences() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
+  const { isMobile } = useBreakpoint()
 
   return (
     <section ref={ref} style={{
@@ -169,18 +171,18 @@ export default function FeatureEmailSequences() {
       overflow: 'visible',
       zIndex: 1,
       background: 'transparent',
-      paddingTop: '120px',
-      paddingBottom: '120px',
+      paddingTop: isMobile ? '60px' : '120px',
+      paddingBottom: isMobile ? '60px' : '120px',
       fontFamily: 'Switzer, sans-serif',
     }}>
       <div style={{ position: 'relative', zIndex: 1 }}>
       <div style={{
         maxWidth: '1200px', margin: '0 auto',
-        padding: '0 48px',
+        padding: isMobile ? '0 16px' : '0 48px',
       }}>
         <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          gap: '80px', alignItems: 'center',
+          display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: isMobile ? '40px' : '80px', alignItems: 'center',
         }}>
           {/* Left — illustration */}
           <motion.div
@@ -196,7 +198,7 @@ export default function FeatureEmailSequences() {
             initial={{ opacity: 0, x: 30 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
-            style={{ background: 'transparent', position: 'relative', zIndex: 2 }}
+            style={{ background: 'transparent', position: 'relative', zIndex: 2, order: isMobile ? -1 : 0 }}
           >
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -212,7 +214,7 @@ export default function FeatureEmailSequences() {
             </div>
 
             <h2 style={{
-              fontSize: '44px', fontWeight: 800, letterSpacing: '-0.03em',
+              fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, letterSpacing: '-0.03em',
               lineHeight: 1.15, margin: 0,
               background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)',
               WebkitBackgroundClip: 'text',
@@ -243,7 +245,7 @@ export default function FeatureEmailSequences() {
               <a href="/app/signup" style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
                 background: '#1E1B4B', color: '#ffffff', textDecoration: 'none',
-                borderRadius: '10px', padding: '14px 28px',
+                borderRadius: '10px', padding: isMobile ? '12px 20px' : '14px 28px',
                 fontSize: '15px', fontWeight: 600, fontFamily: 'Switzer, sans-serif', opacity: 1,
               }}>
                 Start free trial
@@ -254,7 +256,7 @@ export default function FeatureEmailSequences() {
               <a href="#features" style={{
                 display: 'inline-flex', alignItems: 'center',
                 background: '#ECFEFF', color: '#06B6D4', textDecoration: 'none',
-                borderRadius: '10px', padding: '14px 28px',
+                borderRadius: '10px', padding: isMobile ? '12px 20px' : '14px 28px',
                 fontSize: '15px', fontWeight: 600, fontFamily: 'Switzer, sans-serif',
                 border: '1px solid #22D3EE', opacity: 1,
               }}>
