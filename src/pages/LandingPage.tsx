@@ -5,6 +5,7 @@ import ProblemSection from '../components/landing/ProblemSection'
 import SolutionSection from '../components/landing/SolutionSection'
 import FeatureEmailSequences from '../components/landing/FeatureEmailSequences'
 import FeatureGlobalDemand from '../components/landing/FeatureGlobalDemand'
+import FeatureExpandingCards from '../components/landing/FeatureExpandingCards'
 import '../components/landing/landing.css'
 
 export default function LandingPage() {
@@ -25,6 +26,7 @@ export default function LandingPage() {
       <SolutionSection />
       <FeatureEmailSequences />
       <FeatureGlobalDemand />
+      <FeatureExpandingCards />
     </div>
   )
 }
