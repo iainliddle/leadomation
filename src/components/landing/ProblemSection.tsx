@@ -133,7 +133,7 @@ export default function ProblemSection() {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  objectPosition: i === 0 ? 'center 20%' : i === 1 ? 'center 40%' : 'center 30%',
+                  objectPosition: i === 0 ? 'center 5%' : i === 1 ? 'center 25%' : 'center 15%',
                 }}
               />
 
