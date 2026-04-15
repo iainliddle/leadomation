@@ -458,12 +458,12 @@ export default function Hero(): ReactElement {
             }}>
               <div style={{
                 position: 'absolute',
-                top: '4.8%',
-                left: '11.8%',
-                width: '76.4%',
-                height: '77%',
+                top: '16%',
+                left: '11.25%',
+                width: '77.75%',
+                height: '67.3%',
                 zIndex: 1,
-                borderRadius: '6px',
+                borderRadius: '8px',
                 overflow: 'hidden',
                 background: 'white',
               }}>
