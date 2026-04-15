@@ -400,7 +400,7 @@ export default function Hero(): ReactElement {
       {/* Hero content */}
       <div style={{ position: 'relative', zIndex: 2 }}>
         {/* Hero text */}
-        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: isMobile ? '80px 16px 32px' : '120px 24px 40px', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: isMobile ? '60px 16px 20px' : '80px 24px 24px', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(238,242,255,0.9)', border: '1px solid #c7d2fe', borderRadius: '9999px', padding: '5px 16px', fontSize: '13px', fontWeight: 500, color: '#4F46E5', fontFamily: 'Switzer, sans-serif', marginBottom: '28px', backdropFilter: 'blur(8px)' }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4F46E5', display: 'inline-block' }} />
@@ -446,7 +446,7 @@ export default function Hero(): ReactElement {
             position: 'relative',
             width: '1300px',
             maxWidth: '100%',
-            margin: '60px auto 0',
+            margin: '0px auto 0',
             overflow: 'visible',
             zIndex: 2,
           }}>
