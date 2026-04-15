@@ -472,12 +472,12 @@ export default function Hero(): ReactElement {
               {/* Dashboard overlay — sits ON TOP of PNG, clipped to screen cavity */}
               <div style={{
                 position: 'absolute',
-                top: '16%',
-                left: '11.25%',
-                width: '77.75%',
-                height: '67.3%',
+                top: '16.8%',
+                left: '12.2%',
+                width: '75.8%',
+                height: '65.8%',
                 zIndex: 2,
-                borderRadius: '8px',
+                borderRadius: '6px',
                 overflow: 'hidden',
                 background: 'white',
                 boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.08)',
