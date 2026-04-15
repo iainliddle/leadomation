@@ -20,7 +20,7 @@ function LeadDiscoveryIllustration() {
       {/* Browser bar */}
       <div style={{ height: '22px', background: '#f8fafc', display: 'flex', alignItems: 'center', padding: '0 8px', gap: '6px', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ display: 'flex', gap: '3px' }}>
-          {[0, 1, 2].map((i) => <div key={i} style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#d1d5db' }} />)}
+          {['#FF5F57', '#FEBC2E', '#28C840'].map((c) => <div key={c} style={{ width: '5px', height: '5px', borderRadius: '50%', background: c }} />)}
         </div>
         <div style={{ flex: 1, fontSize: '6px', color: '#94a3b8' }}>
           app.leadomation.co.uk/lead-database
