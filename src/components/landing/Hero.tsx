@@ -456,20 +456,7 @@ export default function Hero(): ReactElement {
               width: '860px',
               margin: '0 auto',
             }}>
-              <div style={{
-                position: 'absolute',
-                top: '16%',
-                left: '11.25%',
-                width: '77.75%',
-                height: '67.3%',
-                zIndex: 1,
-                borderRadius: '8px',
-                overflow: 'hidden',
-                background: 'white',
-              }}>
-                <HeroDashboardMockup />
-              </div>
-
+              {/* MacBook PNG — no blend mode, renders naturally */}
               <img
                 src="/screenshots/laptop-mockup.png"
                 alt="Leadomation App"
@@ -477,12 +464,26 @@ export default function Hero(): ReactElement {
                   width: '100%',
                   display: 'block',
                   position: 'relative',
-                  zIndex: 2,
-                  mixBlendMode: 'multiply' as const,
+                  zIndex: 1,
                   filter: 'drop-shadow(0 40px 80px rgba(79,70,229,0.20)) drop-shadow(0 20px 40px rgba(0,0,0,0.12))',
-                  pointerEvents: 'none',
                 }}
               />
+
+              {/* Dashboard overlay — sits ON TOP of PNG, clipped to screen cavity */}
+              <div style={{
+                position: 'absolute',
+                top: '16%',
+                left: '11.25%',
+                width: '77.75%',
+                height: '67.3%',
+                zIndex: 2,
+                borderRadius: '8px',
+                overflow: 'hidden',
+                background: 'white',
+                boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.08)',
+              }}>
+                <HeroDashboardMockup />
+              </div>
             </div>
 
             <IntentScoringCard cardVisible={cardVisible} />
