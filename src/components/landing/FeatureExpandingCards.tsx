@@ -263,6 +263,8 @@ type FeatureCardProps = {
   gridColumn: string
   gridRow: string
   minHeight: number
+  cardBg: string
+  cardBorder: string
   illustrationBg: string
   accentColor: string
   eyebrow: string
@@ -272,7 +274,7 @@ type FeatureCardProps = {
   delay: number
 }
 
-function FeatureCard({ gridColumn, gridRow, minHeight, illustrationBg, accentColor, eyebrow, title, description, illustration, delay }: FeatureCardProps) {
+function FeatureCard({ gridColumn, gridRow, minHeight, cardBg, cardBorder, illustrationBg, accentColor, eyebrow, title, description, illustration, delay }: FeatureCardProps) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
   return (
@@ -287,8 +289,8 @@ function FeatureCard({ gridColumn, gridRow, minHeight, illustrationBg, accentCol
         borderRadius: '20px',
         overflow: 'hidden',
         position: 'relative',
-        border: '1px solid rgba(226,232,240,0.8)',
-        background: '#ffffff',
+        border: cardBorder,
+        background: cardBg,
         boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
         display: 'flex',
         flexDirection: 'column',
@@ -306,16 +308,16 @@ function FeatureCard({ gridColumn, gridRow, minHeight, illustrationBg, accentCol
         {illustration}
       </div>
 
-      {/* Text block — white */}
+      {/* Text block */}
       <div style={{
         background: 'transparent',
-        borderTop: '1px solid rgba(226,232,240,0.6)',
-        padding: '16px 20px',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
+        padding: '16px 20px 20px',
       }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          background: `${accentColor}12`,
+          background: `${accentColor}15`,
           border: `1px solid ${accentColor}30`,
           color: accentColor,
           fontSize: '10px',
@@ -337,7 +339,7 @@ function FeatureCard({ gridColumn, gridRow, minHeight, illustrationBg, accentCol
         }}>{title}</div>
         <div style={{
           fontSize: '12px',
-          color: '#64748b',
+          color: '#475569',
           lineHeight: 1.5,
           fontFamily: 'Switzer, sans-serif',
         }}>{description}</div>
@@ -756,7 +758,9 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '1'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={380}
-            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)"
+            cardBg="#f5f3ff"
+            cardBorder="1px solid rgba(79,70,229,0.12)"
+            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%)"
             accentColor="#4f46e5"
             eyebrow="Lead Discovery"
             title="Find and enrich 500+ leads per campaign"
@@ -768,7 +772,9 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '2'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={300}
-            illustrationBg="linear-gradient(135deg, #0c4a6e 0%, #097b8f 100%)"
+            cardBg="#ecfeff"
+            cardBorder="1px solid rgba(34,211,238,0.15)"
+            illustrationBg="linear-gradient(135deg, #097b8f 0%, #06b6d4 100%)"
             accentColor="#06b6d4"
             eyebrow="Email Sequences"
             title="Write once. Follow up automatically."
@@ -780,7 +786,9 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '3'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={380}
-            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #0c4a6e 100%)"
+            cardBg="#eff6ff"
+            cardBorder="1px solid rgba(59,130,246,0.12)"
+            illustrationBg="linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
             accentColor="#097b8f"
             eyebrow="AI Voice Calling"
             title="An AI agent that calls your prospects."
@@ -792,7 +800,9 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '1'}
             gridRow={isMobile ? 'auto' : '2'}
             minHeight={380}
-            illustrationBg="linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%)"
+            cardBg="#eef2ff"
+            cardBorder="1px solid rgba(79,70,229,0.12)"
+            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #3b82f6 100%)"
             accentColor="#0077b5"
             eyebrow="LinkedIn Outreach"
             title="A 35-day LinkedIn funnel on autopilot."
@@ -813,6 +823,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '3'}
             gridRow={isMobile ? 'auto' : '2'}
             minHeight={380}
+            cardBg="#f0fdfa"
+            cardBorder="1px solid rgba(6,182,212,0.15)"
             illustrationBg="linear-gradient(135deg, #064e3b 0%, #097b8f 100%)"
             accentColor="#22d3ee"
             eyebrow="Keyword Monitor"
