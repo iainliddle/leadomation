@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type ReactElement, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type ReactElement, type CSSProperties, type RefObject } from 'react'
 import {
   LayoutGrid, Globe, Plus, Activity, Users, TrendingUp, Calendar as CalendarIcon,
   Mail, Search, Phone, MessageSquare, FileText, BarChart2, User, Link as LinkIcon,
-  Settings, Shield, CreditCard, LogOut, Bell, Play, Download, ChevronDown, Info, Linkedin,
+  Settings, Shield, CreditCard, LogOut, Play, Info, Linkedin,
 } from 'lucide-react'
 
 /* ─────────────── TYPES ─────────────── */
@@ -59,63 +59,104 @@ const URLS = [
   'app.leadomation.co.uk/sequence-builder',
 ]
 
-// Cursor coordinates are from the top-left of the whole mockup (including chrome bar).
-const CURSOR_POSITIONS: Record<number, { top: number; left: number }> = {
-  0: { top: 58, left: 20 },   // Dashboard nav item
-  1: { top: 152, left: 20 },  // Lead Database nav item
-  2: { top: 200, left: 20 },  // Sequence Builder nav item
-  3: { top: 200, left: 20 },  // Sequence Builder nav item (LinkedIn tab)
-}
-
 const SWITZER: CSSProperties = { fontFamily: 'Switzer, sans-serif' }
 
-/* ─────────────── TOP BAR ─────────────── */
+/* ─────────────── DASHBOARD — merged header row ─────────────── */
 
-function TopBar(): ReactElement {
-  const pill: CSSProperties = {
-    border: '1px solid #e2e8f0', borderRadius: 5, padding: '2px 7px',
-    fontSize: 6.5, color: '#475569', display: 'flex', alignItems: 'center', gap: 3,
-    background: 'white',
-  }
-  const iconCircle: CSSProperties = {
-    width: 20, height: 20, borderRadius: '50%', background: '#f8fafc',
-    border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  }
+function DashboardHeader(): ReactElement {
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6,
-      marginBottom: 8, paddingBottom: 6, borderBottom: '1px solid #f1f5f9',
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+      flexShrink: 0,
     }}>
-      <div style={pill}>
-        <CalendarIcon size={8} strokeWidth={2} />
-        4 Mar 2026 - 3 Apr 2026
+      {/* Left: page title */}
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+          Dashboard
+        </div>
+        <div style={{ fontSize: 6.5, color: '#94a3b8', marginTop: 1 }}>
+          Overview of your outreach performance
+        </div>
       </div>
-      <div style={pill}>
-        <Download size={8} strokeWidth={2} />
-        Export
-      </div>
-      <div style={iconCircle}><Search size={9} color="#64748b" strokeWidth={2} /></div>
-      <div style={iconCircle}><Bell size={9} color="#64748b" strokeWidth={2} /></div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-        <div style={{ fontSize: 6.5, fontWeight: 600, color: '#475569' }}>Iain L.</div>
+
+      {/* Right: controls inline */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
         <div style={{
-          width: 18, height: 18, borderRadius: '50%', background: '#4F46E5', color: 'white',
-          fontSize: 7, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>IL</div>
-        <ChevronDown size={8} color="#94a3b8" strokeWidth={2} />
-      </div>
-      <div style={{
-        background: '#4F46E5', color: 'white', fontSize: 7, fontWeight: 600,
-        borderRadius: 5, padding: '3px 8px', display: 'flex', alignItems: 'center', gap: 3,
-      }}>
-        <Plus size={8} strokeWidth={2.5} />
-        New Campaign
+          display: 'flex', alignItems: 'center', gap: 3,
+          border: '1px solid #e2e8f0', borderRadius: 5,
+          padding: '2px 6px', fontSize: 6, color: '#475569',
+        }}>
+          <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          4 Mar 2026 - 3 Apr 2026
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 3,
+          border: '1px solid #e2e8f0', borderRadius: 5,
+          padding: '2px 6px', fontSize: 6, color: '#475569',
+        }}>
+          <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export
+        </div>
+        <div style={{
+          width: 18, height: 18, borderRadius: '50%',
+          background: '#f8fafc', border: '1px solid #e2e8f0',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </div>
+        <div style={{
+          width: 18, height: 18, borderRadius: '50%',
+          background: '#f8fafc', border: '1px solid #e2e8f0',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 01-3.46 0" />
+          </svg>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 6, fontWeight: 600, color: '#475569' }}>Iain L.</span>
+          <div style={{
+            width: 18, height: 18, borderRadius: '50%',
+            background: '#4F46E5', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: 6, fontWeight: 700, color: 'white',
+          }}>IL</div>
+          <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 3,
+          background: '#4F46E5', color: 'white', borderRadius: 5,
+          padding: '3px 7px', fontSize: 6.5, fontWeight: 600,
+        }}>
+          <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          New Campaign
+        </div>
       </div>
     </div>
   )
 }
 
-/* ─────────────── DASHBOARD COMPONENTS ─────────────── */
+/* ─────────────── DASHBOARD SUB-COMPONENTS ─────────────── */
 
 function MiniBars({ color }: { color: string }): ReactElement {
   const heights = [4, 6, 3, 8]
@@ -169,7 +210,7 @@ function PlanCard(): ReactElement {
     <div style={{
       background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
       border: '1px solid #c7d2fe', borderRadius: 5, padding: '7px 8px',
-      flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1, position: 'relative',
+      flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ fontSize: 5.5, color: '#4F46E5', fontWeight: 700, letterSpacing: '0.06em' }}>CURRENT PLAN</div>
@@ -197,7 +238,6 @@ function PlanCard(): ReactElement {
 }
 
 function CampaignPerformanceChart(): ReactElement {
-  // Exact paths from the spec — bell curve on green, gentle hump on cyan, near-flat indigo
   const greenFill = 'M0,60 C20,58 40,50 60,35 C80,18 100,22 120,40 C140,55 160,62 180,68 C200,70 240,72 280,72 L280,80 L0,80 Z'
   const greenStroke = 'M0,60 C20,58 40,50 60,35 C80,18 100,22 120,40 C140,55 160,62 180,68 C200,70 240,72 280,72'
   const cyanFill = 'M0,72 C20,70 40,65 60,60 C80,55 100,52 120,54 C140,56 160,60 180,64 C200,67 240,70 280,70 L280,80 L0,80 Z'
@@ -208,52 +248,53 @@ function CampaignPerformanceChart(): ReactElement {
   return (
     <div style={{
       background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 8,
-      flex: 3, display: 'flex', flexDirection: 'column', minWidth: 0,
+      flex: 3, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, flexShrink: 0 }}>
         <div style={{ fontSize: 8, fontWeight: 700, color: '#0f172a' }}>Campaign Performance</div>
         <div style={{ fontSize: 5.5, color: '#94a3b8', marginLeft: 'auto' }}>Last 14 days</div>
       </div>
 
-      <svg viewBox="0 0 280 80" preserveAspectRatio="none" style={{ width: '100%', flex: 1, minHeight: 80, display: 'block' }}>
-        <defs>
-          <linearGradient id="gradIndigo" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="gradCyan" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-          </linearGradient>
-        </defs>
+      {/* SVG wrapper fills remaining height */}
+      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
+        <svg viewBox="0 0 280 80" preserveAspectRatio="none" width="100%" height="100%" style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id="gradIndigo" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="gradCyan" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+            </linearGradient>
+          </defs>
 
-        {/* gridlines */}
-        {[0, 1, 2, 3, 4].map(i => (
-          <line key={i} x1="10" y1={10 + i * 14} x2="280" y2={10 + i * 14} stroke="#f1f5f9" strokeWidth="0.5" />
-        ))}
-        {/* y-axis labels */}
-        {['8', '6', '4', '2', '0'].map((y, i) => (
-          <text key={i} x="2" y={12 + i * 14} fontSize="5" fill="#94a3b8">{y}</text>
-        ))}
+          {[0, 1, 2, 3, 4].map(i => (
+            <line key={i} x1="10" y1={10 + i * 14} x2="280" y2={10 + i * 14} stroke="#f1f5f9" strokeWidth="0.5" />
+          ))}
+          {['8', '6', '4', '2', '0'].map((y, i) => (
+            <text key={i} x="2" y={12 + i * 14} fontSize="5" fill="#94a3b8">{y}</text>
+          ))}
 
-        <path d={indigoFill} fill="url(#gradIndigo)" />
-        <path d={cyanFill} fill="url(#gradCyan)" />
-        <path d={greenFill} fill="url(#gradGreen)" />
+          <path d={indigoFill} fill="url(#gradIndigo)" />
+          <path d={cyanFill} fill="url(#gradCyan)" />
+          <path d={greenFill} fill="url(#gradGreen)" />
 
-        <path d={indigoStroke} fill="none" stroke="#4F46E5" strokeWidth="1.5" strokeLinejoin="round" />
-        <path d={cyanStroke} fill="none" stroke="#22D3EE" strokeWidth="1.5" strokeLinejoin="round" />
-        <path d={greenStroke} fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinejoin="round" />
-      </svg>
+          <path d={indigoStroke} fill="none" stroke="#4F46E5" strokeWidth="1.5" strokeLinejoin="round" />
+          <path d={cyanStroke} fill="none" stroke="#22D3EE" strokeWidth="1.5" strokeLinejoin="round" />
+          <path d={greenStroke} fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinejoin="round" />
+        </svg>
+      </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 5, color: '#94a3b8', marginTop: 2, paddingLeft: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 5, color: '#94a3b8', marginTop: 2, paddingLeft: 10, flexShrink: 0 }}>
         {['21 Mar', '23 Mar', '25 Mar', '27 Mar', '29 Mar', '1 Apr', '3 Apr'].map((d, i) => <span key={i}>{d}</span>)}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 4, flexShrink: 0 }}>
         {[
           { label: 'AI Calls', color: '#4F46E5' },
           { label: 'Emails', color: '#22D3EE' },
@@ -266,7 +307,7 @@ function CampaignPerformanceChart(): ReactElement {
         ))}
       </div>
 
-      <div style={{ display: 'flex', borderTop: '1px solid #f1f5f9', marginTop: 4, paddingTop: 4 }}>
+      <div style={{ display: 'flex', borderTop: '1px solid #f1f5f9', marginTop: 4, paddingTop: 4, flexShrink: 0 }}>
         {[
           { v: '271', l: 'TOTAL LEADS' },
           { v: '0', l: 'CONTACTED' },
@@ -296,10 +337,10 @@ function TopCampaigns(): ReactElement {
   return (
     <div style={{
       background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 8,
-      flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0,
+      flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0,
     }}>
-      <div style={{ fontSize: 8, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>Top Performing Campaigns</div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div style={{ fontSize: 8, fontWeight: 700, color: '#0f172a', marginBottom: 6, flexShrink: 0 }}>Top Performing Campaigns</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 0 }}>
         {rows.map((r, i) => (
           <div key={i} style={{
             paddingBottom: 5,
@@ -319,7 +360,7 @@ function TopCampaigns(): ReactElement {
           </div>
         ))}
       </div>
-      <div style={{ fontSize: 6, color: '#4F46E5', textAlign: 'right', marginTop: 'auto', paddingTop: 4, fontWeight: 600 }}>VIEW ALL CAMPAIGNS</div>
+      <div style={{ fontSize: 6, color: '#4F46E5', textAlign: 'right', paddingTop: 4, fontWeight: 600, flexShrink: 0 }}>VIEW ALL CAMPAIGNS</div>
     </div>
   )
 }
@@ -336,9 +377,9 @@ function RecentActivity(): ReactElement {
   return (
     <div style={{
       background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 7,
-      flex: 3, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden',
+      flex: 3, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', minHeight: 0,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexShrink: 0 }}>
         <Activity size={8} color="#4F46E5" strokeWidth={2.2} />
         <div style={{ fontSize: 8, fontWeight: 700, color: '#0f172a' }}>Recent Activity</div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 3 }}>
@@ -377,8 +418,8 @@ function UpcomingAndLeads(): ReactElement {
     { i: 'S', name: 'Surrey Dental Specialists', date: '25/03/2026' },
   ]
   return (
-    <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
-      <div style={{ background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 6, flex: 1 }}>
+    <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, minHeight: 0 }}>
+      <div style={{ background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 6, flex: 1, overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
           <CalendarIcon size={8} color="#4F46E5" strokeWidth={2.2} />
           <div style={{ fontSize: 7.5, fontWeight: 700, color: '#0f172a' }}>Upcoming events</div>
@@ -392,7 +433,7 @@ function UpcomingAndLeads(): ReactElement {
         ))}
       </div>
 
-      <div style={{ background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 6, flex: 1 }}>
+      <div style={{ background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 6, flex: 1, overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
           <Users size={8} color="#4F46E5" strokeWidth={2.2} />
           <div style={{ fontSize: 7.5, fontWeight: 700, color: '#0f172a' }}>Recent leads</div>
@@ -417,26 +458,22 @@ function UpcomingAndLeads(): ReactElement {
   )
 }
 
+/* ─────────────── SCREEN 0: DASHBOARD ─────────────── */
+
 function DashboardScreen(): ReactElement {
   return (
     <div style={{
       ...SWITZER, background: '#f8fafc', padding: 10, height: '100%',
       display: 'flex', flexDirection: 'column', gap: 5, overflow: 'hidden',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>Dashboard</div>
-          <div style={{ fontSize: 6.5, color: '#94a3b8' }}>Overview of your outreach performance</div>
-        </div>
-      </div>
-      <TopBar />
+      <DashboardHeader />
 
-      <div>
+      <div style={{ flexShrink: 0 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>Good evening, Iain 👋</div>
         <div style={{ fontSize: 6.5, color: '#6b7280' }}>Friday, 3 April 2026 · Let's make today count.</div>
       </div>
 
-      <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 5, flexShrink: 0, height: 70 }}>
         <StatCard label="Total Leads" value="271" delta="+0% in last 30 days"
           sparkColor="#22D3EE" type="bars" IconCmp={Users} iconColor="#22D3EE" />
         <StatCard label="Leads with Emails" value="31" delta="+0% verified emails"
@@ -448,12 +485,12 @@ function DashboardScreen(): ReactElement {
         <PlanCard />
       </div>
 
-      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 120 }}>
+      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0 }}>
         <CampaignPerformanceChart />
         <TopCampaigns />
       </div>
 
-      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 100 }}>
+      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0, maxHeight: 140 }}>
         <RecentActivity />
         <UpcomingAndLeads />
       </div>
@@ -461,7 +498,7 @@ function DashboardScreen(): ReactElement {
   )
 }
 
-/* ─────────────── LEAD DATABASE SCREEN ─────────────── */
+/* ─────────────── SCREEN 1: LEAD DATABASE ─────────────── */
 
 function LeadDatabaseScreen(): ReactElement {
   const cols = [
@@ -494,23 +531,27 @@ function LeadDatabaseScreen(): ReactElement {
       ...SWITZER, background: 'white', padding: 10, height: '100%',
       display: 'flex', flexDirection: 'column', gap: 6, overflow: 'hidden',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>Lead Database</div>
-          <div style={{ fontSize: 6.5, color: '#94a3b8' }}>Manage and track all your leads</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Lead Database</div>
+          <div style={{ fontSize: 6.5, color: '#94a3b8', marginTop: 1 }}>Manage and track all your leads</div>
         </div>
+        <div style={{
+          background: '#4F46E5', color: 'white', fontSize: 7, fontWeight: 600,
+          borderRadius: 5, padding: '3px 8px',
+        }}>+ Add Lead</div>
       </div>
-      <TopBar />
 
       <div style={{
         width: '100%', border: '1px solid #e2e8f0', borderRadius: 5,
-        padding: '4px 8px', fontSize: 7, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 5,
+        padding: '4px 8px', fontSize: 7, color: '#94a3b8',
+        display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
       }}>
         <Search size={9} color="#94a3b8" strokeWidth={2} />
         Search leads by name, email, company...
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 3, alignItems: 'center' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 5, alignItems: 'center', flexShrink: 0 }}>
         <div style={{ fontSize: 5.5, fontWeight: 700, color: '#94a3b8' }}>SMART</div>
         <div style={pill}>⚡ New Business (271)</div>
         <div style={pill}>⭐ Low Rating (126)</div>
@@ -520,8 +561,6 @@ function LeadDatabaseScreen(): ReactElement {
         <div style={{ fontSize: 5.5, fontWeight: 700, color: '#94a3b8', marginLeft: 3 }}>INTENT</div>
         <div style={pill}>🔥 Hot (11)</div>
         <div style={pill}>🌡 Warm (9)</div>
-        <div style={pill}>❄ Cool (0)</div>
-        <div style={pill}>? Unscored (251)</div>
       </div>
 
       <div style={{
@@ -529,7 +568,7 @@ function LeadDatabaseScreen(): ReactElement {
         border: '1px solid #e5e7eb', borderRadius: 5, overflow: 'hidden',
       }}>
         <div style={{
-          display: 'flex', padding: '5px 8px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc',
+          display: 'flex', padding: '4px 8px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0,
         }}>
           {cols.map((c, i) => (
             <div key={i} style={{
@@ -541,7 +580,7 @@ function LeadDatabaseScreen(): ReactElement {
 
         {rows.map((r, i) => (
           <div key={i} style={{
-            display: 'flex', alignItems: 'center', padding: '4px 8px',
+            display: 'flex', alignItems: 'center', padding: '3px 8px',
             borderBottom: i < rows.length - 1 ? '1px solid #f8fafc' : 'none', flex: 1,
           }}>
             <div style={{ flex: 2, minWidth: 0 }}>
@@ -573,11 +612,11 @@ function LeadDatabaseScreen(): ReactElement {
   )
 }
 
-/* ─────────────── SEQUENCE BUILDER TABS (shared) ─────────────── */
+/* ─────────────── SEQUENCE TABS (shared) ─────────────── */
 
 function SequenceTabs({ activeTab }: { activeTab: 'email' | 'linkedin' }): ReactElement {
   return (
-    <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', marginBottom: 2 }}>
+    <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', marginBottom: 2, flexShrink: 0 }}>
       <div style={{
         padding: '5px 10px', fontSize: 7.5, fontWeight: 500,
         color: activeTab === 'email' ? '#4F46E5' : '#64748b',
@@ -611,7 +650,7 @@ function SequenceTabs({ activeTab }: { activeTab: 'email' | 'linkedin' }): React
   )
 }
 
-/* ─────────────── SEQUENCE BUILDER — EMAIL TAB ─────────────── */
+/* ─────────────── SCREEN 2: SEQUENCE BUILDER (EMAIL) ─────────────── */
 
 function SequenceBuilderScreen(): ReactElement {
   const sequences = [
@@ -625,13 +664,16 @@ function SequenceBuilderScreen(): ReactElement {
       ...SWITZER, background: '#f8fafc', padding: 10, height: '100%',
       display: 'flex', flexDirection: 'column', gap: 6, overflow: 'hidden',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>Sequence Builder</div>
-          <div style={{ fontSize: 6.5, color: '#94a3b8' }}>Build automated outreach sequences</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Sequence Builder</div>
+          <div style={{ fontSize: 6.5, color: '#94a3b8', marginTop: 1 }}>Build automated outreach sequences</div>
         </div>
+        <div style={{
+          background: '#4F46E5', color: 'white', fontSize: 7, fontWeight: 600,
+          borderRadius: 5, padding: '3px 8px',
+        }}>+ New Sequence</div>
       </div>
-      <TopBar />
 
       <SequenceTabs activeTab="email" />
 
@@ -672,7 +714,7 @@ function SequenceBuilderScreen(): ReactElement {
   )
 }
 
-/* ─────────────── LINKEDIN SEQUENCES SCREEN ─────────────── */
+/* ─────────────── SCREEN 3: LINKEDIN SEQUENCES ─────────────── */
 
 function PhaseTracker(): ReactElement {
   const phases = [
@@ -686,13 +728,12 @@ function PhaseTracker(): ReactElement {
   return (
     <div style={{
       background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 8,
-      marginBottom: 2,
+      marginBottom: 2, flexShrink: 0,
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0, position: 'relative' }}>
         {phases.map((p, i) => (
           <div key={i} style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-            position: 'relative',
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative',
           }}>
             {i < phases.length - 1 && (
               <div style={{
@@ -736,20 +777,22 @@ function LinkedInSequencesScreen(): ReactElement {
       ...SWITZER, background: '#f8fafc', padding: 10, height: '100%',
       display: 'flex', flexDirection: 'column', gap: 5, overflow: 'hidden',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#0f172a' }}>Sequence Builder</div>
-          <div style={{ fontSize: 6.5, color: '#94a3b8' }}>Build automated outreach sequences</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>Sequence Builder</div>
+          <div style={{ fontSize: 6.5, color: '#94a3b8', marginTop: 1 }}>Build automated outreach sequences</div>
         </div>
+        <div style={{
+          background: '#4F46E5', color: 'white', fontSize: 7, fontWeight: 600,
+          borderRadius: 5, padding: '3px 8px',
+        }}>+ New Sequence</div>
       </div>
-      <TopBar />
 
       <SequenceTabs activeTab="linkedin" />
 
-      {/* Info banner */}
       <div style={{
         background: '#EEF2FF', border: '1px solid #c7d2fe', borderRadius: 5,
-        padding: '5px 8px', display: 'flex', alignItems: 'flex-start', gap: 5, marginBottom: 2,
+        padding: '5px 8px', display: 'flex', alignItems: 'flex-start', gap: 5, marginBottom: 2, flexShrink: 0,
       }}>
         <Info size={9} color="#4F46E5" strokeWidth={2.2} style={{ flexShrink: 0, marginTop: 1 }} />
         <div style={{ fontSize: 6, color: '#4F46E5', lineHeight: 1.4 }}>
@@ -757,17 +800,14 @@ function LinkedInSequencesScreen(): ReactElement {
         </div>
       </div>
 
-      {/* Phase tracker */}
       <PhaseTracker />
 
-      {/* Prospect cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flex: 1, minHeight: 0 }}>
         {prospects.map((p, i) => (
           <div key={i} style={{
             background: 'white', borderRadius: 6, border: '1px solid #e5e7eb',
             padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
-            {/* Row 1: identity + badges */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{
                 width: 14, height: 14, borderRadius: '50%', background: '#0077B5',
@@ -798,7 +838,6 @@ function LinkedInSequencesScreen(): ReactElement {
               </div>
             </div>
 
-            {/* Row 2: progress */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ fontSize: 6, color: '#94a3b8', flexShrink: 0 }}>Day {p.day} of 35</div>
               <div style={{ flex: 1, height: 4, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
@@ -834,66 +873,89 @@ function CursorArrow({ style }: { style?: CSSProperties }): ReactElement {
 
 export default function HeroDashboardMockup(): ReactElement {
   const [activeScreen, setActiveScreen] = useState(0)
-  const [cursorTop, setCursorTop] = useState(CURSOR_POSITIONS[0].top)
-  const [cursorLeft, setCursorLeft] = useState(CURSOR_POSITIONS[0].left)
+  const [cursorTop, setCursorTop] = useState(50)
+  const [cursorLeft, setCursorLeft] = useState(20)
   const [ripple, setRipple] = useState(false)
-  const timersRef = useRef<Array<ReturnType<typeof setTimeout>>>([])
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dashboardItemRef = useRef<HTMLDivElement>(null)
+  const leadDbItemRef = useRef<HTMLDivElement>(null)
+  const sequenceItemRef = useRef<HTMLDivElement>(null)
+
+  const getCursorPosition = (itemRef: RefObject<HTMLDivElement>) => {
+    if (!containerRef.current || !itemRef.current) return { top: 50, left: 20 }
+    const containerRect = containerRef.current.getBoundingClientRect()
+    const itemRect = itemRef.current.getBoundingClientRect()
+    return {
+      top: itemRect.top - containerRect.top + itemRect.height / 2 - 4,
+      left: itemRect.left - containerRect.left + 8,
+    }
+  }
+
+  const moveToItem = (ref: RefObject<HTMLDivElement>) => {
+    const pos = getCursorPosition(ref)
+    setCursorTop(pos.top)
+    setCursorLeft(pos.left)
+  }
 
   useEffect(() => {
     let cancelled = false
+    let timeouts: Array<ReturnType<typeof setTimeout>> = []
 
     const addTimer = (delay: number, fn: () => void) => {
       const id = setTimeout(() => { if (!cancelled) fn() }, delay)
-      timersRef.current.push(id)
-    }
-
-    const moveCursor = (idx: number) => {
-      const pos = CURSOR_POSITIONS[idx]
-      setCursorTop(pos.top)
-      setCursorLeft(pos.left)
+      timeouts.push(id)
     }
 
     const fireClick = (screen: number) => {
       setRipple(true)
-      setActiveScreen(screen)
       addTimer(350, () => setRipple(false))
+      setActiveScreen(screen)
     }
 
     const runCycle = () => {
       if (cancelled) return
-      setActiveScreen(0)
-      moveCursor(0)
 
-      // Screen 0 → Screen 1
-      addTimer(3500, () => moveCursor(1))
+      // Screen 0 → 1
+      addTimer(3500, () => moveToItem(leadDbItemRef))
       addTimer(4000, () => fireClick(1))
 
-      // Screen 1 → Screen 2 (Email tab)
-      addTimer(7500, () => moveCursor(2))
+      // Screen 1 → 2 (Sequence Builder, Email tab)
+      addTimer(7500, () => moveToItem(sequenceItemRef))
       addTimer(8000, () => fireClick(2))
 
-      // Screen 2 → Screen 3 (LinkedIn tab, same sidebar item)
-      addTimer(11500, () => moveCursor(3))
+      // Screen 2 → 3 (Sequence Builder, LinkedIn tab — cursor refocuses same item)
+      addTimer(11500, () => moveToItem(sequenceItemRef))
       addTimer(12000, () => fireClick(3))
 
-      // Screen 3 → Screen 0 (loop)
-      addTimer(15500, () => moveCursor(0))
-      addTimer(16000, () => { fireClick(0); addTimer(400, runCycle) })
+      // Screen 3 → 0 (Dashboard)
+      addTimer(15500, () => moveToItem(dashboardItemRef))
+      addTimer(16000, () => { fireClick(0); addTimer(400, () => {
+        timeouts.forEach(clearTimeout)
+        timeouts = []
+        runCycle()
+      }) })
     }
+
+    // Settle initial cursor once refs are mounted
+    const initId = setTimeout(() => {
+      if (!cancelled) moveToItem(dashboardItemRef)
+    }, 100)
 
     runCycle()
 
     return () => {
       cancelled = true
-      timersRef.current.forEach(clearTimeout)
-      timersRef.current = []
+      clearTimeout(initId)
+      timeouts.forEach(clearTimeout)
+      timeouts = []
     }
   }, [])
 
   const screens = [DashboardScreen, LeadDatabaseScreen, SequenceBuilderScreen, LinkedInSequencesScreen]
 
   return (
-    <div style={{
+    <div ref={containerRef} style={{
       ...SWITZER, width: '100%', height: '100%',
       display: 'flex', flexDirection: 'column',
       background: 'white', overflow: 'hidden', position: 'relative',
@@ -940,8 +1002,13 @@ export default function HeroDashboardMockup(): ReactElement {
               }}>{section.heading}</div>
               {section.items.map((item, ii) => {
                 const isActive = item.activeOn?.includes(activeScreen) ?? false
+                const itemRef =
+                  item.label === 'Dashboard' ? dashboardItemRef
+                  : item.label === 'Lead Database' ? leadDbItemRef
+                  : item.label === 'Sequence Builder' ? sequenceItemRef
+                  : undefined
                 return (
-                  <div key={ii} style={{
+                  <div key={ii} ref={itemRef} style={{
                     display: 'flex', alignItems: 'center', gap: 5,
                     padding: '4px 8px', borderRadius: 5, fontSize: 8, fontWeight: 500,
                     marginBottom: 1,
@@ -990,7 +1057,7 @@ export default function HeroDashboardMockup(): ReactElement {
         </div>
       </div>
 
-      {/* Cursor overlay */}
+      {/* Cursor */}
       <div style={{
         position: 'absolute',
         top: cursorTop, left: cursorLeft,
@@ -998,22 +1065,24 @@ export default function HeroDashboardMockup(): ReactElement {
         transition: 'top 0.4s cubic-bezier(0.4,0,0.2,1), left 0.4s cubic-bezier(0.4,0,0.2,1)',
       }}>
         <CursorArrow style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))' }} />
-        {ripple && (
-          <div style={{
-            position: 'absolute', top: -3, left: -3,
-            width: 18, height: 18, borderRadius: '50%',
-            border: '2px solid #4F46E5',
-            animation: 'heroMockupRipple 0.35s ease-out forwards',
-          }} />
-        )}
       </div>
 
-      <style>{`
-        @keyframes heroMockupRipple {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(2.5); opacity: 0; }
-        }
-      `}</style>
+      {/* Ripple */}
+      {ripple && (
+        <div style={{
+          position: 'absolute',
+          top: cursorTop,
+          left: cursorLeft,
+          width: 16,
+          height: 16,
+          borderRadius: '50%',
+          background: 'rgba(79,70,229,0.3)',
+          transformOrigin: 'center',
+          animation: 'rippleExpand 0.35s ease-out forwards',
+          pointerEvents: 'none',
+          zIndex: 49,
+        }} />
+      )}
     </div>
   )
 }
