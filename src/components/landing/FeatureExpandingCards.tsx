@@ -212,8 +212,8 @@ export default function FeatureExpandingCards() {
       }}
     >
       {/* Ambient blobs */}
-      <div style={{ position: 'absolute', top: '5%', left: '-12%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(139,92,246,0.30) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '15%', right: '-12%', width: '550px', height: '550px', background: 'radial-gradient(circle, rgba(79,70,229,0.25) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '5%', left: '-12%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '15%', right: '-12%', width: '550px', height: '550px', background: 'radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
 
       {/* Section header */}
       <motion.div

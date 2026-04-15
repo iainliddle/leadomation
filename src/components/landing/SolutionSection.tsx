@@ -276,7 +276,7 @@ export default function SolutionSection() {
             </motion.div>
             )}
 
-            <div style={{ position: 'relative', zIndex: 1, transform: isMobile ? 'scale(0.85)' : 'none', transformOrigin: 'top center' }}>
+            <div style={{ position: 'relative', zIndex: 1, transform: isMobile ? 'scale(0.75)' : 'none', transformOrigin: 'top center', marginBottom: isMobile ? '-40px' : '0' }}>
               <LeadDatabaseIllustration />
             </div>
           </motion.div>

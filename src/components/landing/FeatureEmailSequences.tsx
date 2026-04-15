@@ -72,7 +72,7 @@ function SequenceStep({
 function SequenceIllustration({ inView }: { inView: boolean }) {
   const steps = [
     { step: 1, accentColor: '#4F46E5', badgeBg: '#EEF2FF', badgeColor: '#4F46E5', subject: 'Quick question about {{business_name}}', meta: 'Day 0 \u00B7 Email', statusLabel: 'Sent', statusColor: '#15803d', statusBg: '#f0fdf4' },
-    { step: 2, accentColor: '#3B82F6', badgeBg: '#EFF6FF', badgeColor: '#3B82F6', subject: 'Following up \u2014 did you get a chance to look?', meta: 'Day 3 \u00B7 Email', statusLabel: 'Opened', statusColor: '#d97706', statusBg: '#fffbeb' },
+    { step: 2, accentColor: '#3B82F6', badgeBg: '#EFF6FF', badgeColor: '#3B82F6', subject: 'Following up - did you get a chance to look?', meta: 'Day 3 \u00B7 Email', statusLabel: 'Opened', statusColor: '#d97706', statusBg: '#fffbeb' },
     { step: 3, accentColor: '#22D3EE', badgeBg: '#ECFEFF', badgeColor: '#06B6D4', subject: 'One last nudge from the Leadomation team', meta: 'Day 7 \u00B7 Email', statusLabel: 'Scheduled', statusColor: '#64748b', statusBg: '#f8fafc' },
     { step: 4, accentColor: '#06B6D4', badgeBg: '#ECFEFF', badgeColor: '#06B6D4', subject: 'Trying a different angle...', meta: 'Day 14 \u00B7 Email', statusLabel: 'Scheduled', statusColor: '#64748b', statusBg: '#f8fafc' },
   ]

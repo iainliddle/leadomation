@@ -23,16 +23,16 @@ export default function LandingPage() {
         background: 'linear-gradient(180deg, #f0e8ff 0%, #e8e4ff 5%, #eef2ff 15%, #f8faff 40%, #ffffff 65%)',
         overflow: 'hidden',
       }}>
-        {/* Fixed ambient blobs */}
-        <div style={{ position: 'fixed', top: '-200px', left: '-300px', width: '900px', height: '900px', background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
-        <div style={{ position: 'fixed', top: '-100px', right: '-200px', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(79,70,229,0.13) 0%, transparent 65%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
-        <div style={{ position: 'fixed', top: '30%', left: '55%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(34,211,238,0.09) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        {/* Ambient blobs - absolute so they only affect hero/top area */}
+        <div style={{ position: 'absolute', top: '-200px', left: '-300px', width: '900px', height: '900px', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', top: '-100px', right: '-200px', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(79,70,229,0.09) 0%, transparent 65%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', top: '600px', left: '55%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(34,211,238,0.07) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
 
         {/* All sections */}
         <div style={{ position: 'relative', zIndex: 1 }}>
           <Hero />
-          <IntegrationMarquee />
           <ProblemSection />
+          <IntegrationMarquee />
           <SolutionSection />
           <FeatureEmailSequences />
           <FeatureGlobalDemand />

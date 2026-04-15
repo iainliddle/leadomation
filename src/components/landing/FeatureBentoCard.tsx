@@ -249,7 +249,7 @@ export default function FeatureBentoCard() {
                 </div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '0', overflowX: 'auto' }}>
+                <div style={{ display: 'flex', gap: '0', overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                   {TABS.map((tab) => {
                     const isActive = activeTab.id === tab.id
                     return (
@@ -261,12 +261,12 @@ export default function FeatureBentoCard() {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          padding: '8px 14px',
+                          padding: isMobile ? '8px 10px' : '8px 14px',
                           background: 'transparent',
                           border: 'none',
                           borderBottom: isActive ? '2px solid #4F46E5' : '2px solid transparent',
                           cursor: 'pointer',
-                          fontSize: '12px',
+                          fontSize: isMobile ? '11px' : '12px',
                           fontWeight: isActive ? 600 : 400,
                           color: isActive ? '#4F46E5' : '#94a3b8',
                           fontFamily: 'Switzer, sans-serif',

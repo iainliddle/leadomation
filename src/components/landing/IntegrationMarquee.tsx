@@ -144,8 +144,8 @@ export default function IntegrationMarquee() {
   return (
     <section style={{
       position: 'relative',
-      background: 'transparent',
-      paddingTop: '8px',
+      background: 'linear-gradient(180deg, #ffffff 0%, #ffffff 100%)',
+      paddingTop: '0',
       paddingBottom: '40px',
       overflow: 'hidden',
     }}>
@@ -153,14 +153,14 @@ export default function IntegrationMarquee() {
       <div style={{
         position: 'absolute', top: 0, left: 0, bottom: 0,
         width: isMobile ? '60px' : '140px',
-        background: 'linear-gradient(to right, rgba(255,255,255,0.95), transparent)',
+        background: 'linear-gradient(to right, rgba(248,250,255,0.9), transparent)',
         zIndex: 3, pointerEvents: 'none',
       }} />
       {/* Right fade mask */}
       <div style={{
         position: 'absolute', top: 0, right: 0, bottom: 0,
         width: isMobile ? '60px' : '140px',
-        background: 'linear-gradient(to left, rgba(255,255,255,0.95), transparent)',
+        background: 'linear-gradient(to left, rgba(248,250,255,0.9), transparent)',
         zIndex: 3, pointerEvents: 'none',
       }} />
 
