@@ -7,29 +7,28 @@ import { useBreakpoint } from '../../hooks/useBreakpoint'
 // ============================================================================
 function LeadDiscoveryIllustration() {
   const rows = [
-    { company: 'Dunmore Dental', role: 'Practice Owner', email: 'kate@dunmore...', status: 'CONTACTED', statusColor: '#fbbf24', intent: 'Hot 95', intentColor: '#ef4444' },
-    { company: 'Smile Clinic NW', role: 'Clinical Director', email: 'amit@smilecl...', status: 'REPLIED', statusColor: '#10b981', intent: 'Warm 63', intentColor: '#f59e0b' },
-    { company: 'Bright Smile Kent', role: 'Practice Owner', email: 's.gallagher@...', status: 'CONTACTED', statusColor: '#fbbf24', intent: 'Hot 76', intentColor: '#ef4444' },
-    { company: 'London Smile', role: 'Clinical Director', email: 'maria@london...', status: 'REPLIED', statusColor: '#10b981', intent: 'Warm 54', intentColor: '#f59e0b' },
+    { company: 'Dunmore Dental', role: 'Practice Owner', email: 'kate@dunmore...', status: 'CONTACTED', intent: 'Hot·95', intentBg: '#fef2f2', intentColor: '#ef4444', intentBorder: '#fecaca' },
+    { company: 'Smile Clinic NW', role: 'Clinical Director', email: 'amit@smilecl...', status: 'REPLIED', intent: 'Warm·63', intentBg: '#fffbeb', intentColor: '#f59e0b', intentBorder: '#fde68a' },
+    { company: 'Bright Smile Kent', role: 'Practice Owner', email: 's.gallagher@...', status: 'CONTACTED', intent: 'Hot·76', intentBg: '#fef2f2', intentColor: '#ef4444', intentBorder: '#fecaca' },
+    { company: 'London Smile', role: 'Clinical Director', email: 'maria@london...', status: 'REPLIED', intent: 'Warm·54', intentBg: '#fffbeb', intentColor: '#f59e0b', intentBorder: '#fde68a' },
   ]
   return (
     <div style={{
-      position: 'absolute', inset: '14px 14px auto 14px', height: '200px',
-      background: 'rgba(255,255,255,0.06)', borderRadius: '10px',
-      border: '1px solid rgba(255,255,255,0.10)', overflow: 'hidden',
-      fontFamily: 'Switzer, sans-serif',
+      flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column',
+      fontFamily: 'Switzer, sans-serif', background: '#ffffff',
     }}>
       {/* Browser bar */}
-      <div style={{ height: '18px', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', padding: '0 8px', gap: '6px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ height: '22px', background: '#f8fafc', display: 'flex', alignItems: 'center', padding: '0 8px', gap: '6px', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ display: 'flex', gap: '3px' }}>
-          {[0, 1, 2].map((i) => <div key={i} style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />)}
+          {[0, 1, 2].map((i) => <div key={i} style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#d1d5db' }} />)}
         </div>
-        <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', borderRadius: '3px', padding: '1px 6px', fontSize: '6px', color: 'rgba(255,255,255,0.5)' }}>
+        <div style={{ flex: 1, fontSize: '6px', color: '#94a3b8' }}>
           app.leadomation.co.uk/lead-database
         </div>
+        <div style={{ background: '#4f46e5', color: 'white', fontSize: '6px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px' }}>+ Add Lead</div>
       </div>
       {/* Header row */}
-      <div style={{ display: 'flex', padding: '6px 8px', background: 'rgba(255,255,255,0.05)', fontSize: '6px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', gap: '6px' }}>
+      <div style={{ display: 'flex', padding: '6px 8px', background: '#f8fafc', fontSize: '6px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.05em', gap: '6px', borderBottom: '1px solid #f1f5f9' }}>
         <div style={{ flex: 1.2 }}>COMPANY</div>
         <div style={{ flex: 1 }}>EMAIL</div>
         <div style={{ flex: 0.7 }}>STATUS</div>
@@ -37,22 +36,20 @@ function LeadDiscoveryIllustration() {
       </div>
       {/* Rows */}
       {rows.map((r, i) => (
-        <div key={i} style={{ display: 'flex', padding: '6px 8px', borderTop: '1px solid rgba(255,255,255,0.06)', alignItems: 'center', gap: '6px' }}>
-          <div style={{ flex: 1.2 }}>
-            <div style={{ fontSize: '7px', fontWeight: 700, color: '#a5b4fc', lineHeight: 1.1 }}>{r.company}</div>
-            <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{r.role}</div>
+        <div key={i} style={{ display: 'flex', padding: '6px 8px', borderTop: i > 0 ? '1px solid #f1f5f9' : 'none', alignItems: 'center', gap: '6px' }}>
+          <div style={{ flex: 1.2, minWidth: 0 }}>
+            <div style={{ fontSize: '8px', fontWeight: 600, color: '#4f46e5', lineHeight: 1.1 }}>{r.company}</div>
+            <div style={{ fontSize: '6px', color: '#94a3b8', marginTop: '1px' }}>{r.role}</div>
           </div>
-          <div style={{ flex: 1, fontSize: '6px', color: 'rgba(255,255,255,0.55)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.email}</div>
+          <div style={{ flex: 1, fontSize: '6px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.email}</div>
           <div style={{ flex: 0.7 }}>
-            <span style={{ fontSize: '5px', fontWeight: 700, padding: '1px 4px', borderRadius: '6px', background: `${r.statusColor}25`, color: r.statusColor, letterSpacing: '0.02em' }}>{r.status}</span>
+            <span style={{ fontSize: '6px', fontWeight: 600, padding: '1px 5px', borderRadius: '4px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #d1fae5' }}>{r.status}</span>
           </div>
           <div style={{ flex: 0.6 }}>
-            <span style={{ fontSize: '5px', fontWeight: 700, padding: '1px 4px', borderRadius: '6px', background: `${r.intentColor}25`, color: r.intentColor }}>{r.intent}</span>
+            <span style={{ fontSize: '6px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: r.intentBg, color: r.intentColor, border: `1px solid ${r.intentBorder}` }}>{r.intent}</span>
           </div>
         </div>
       ))}
-      {/* Add lead button top right */}
-      <div style={{ position: 'absolute', top: '4px', right: '8px', background: '#4f46e5', color: 'white', fontSize: '5px', fontWeight: 700, padding: '2px 5px', borderRadius: '3px' }}>+ Add Lead</div>
     </div>
   )
 }
@@ -62,31 +59,40 @@ function LeadDiscoveryIllustration() {
 // ============================================================================
 function EmailSequencesIllustration() {
   const steps = [
-    { step: 'Step 1 · Day 0', subject: 'Quick question about your practice', status: 'Sent', statusColor: '#10b981', accent: '#4f46e5' },
-    { step: 'Step 2 · Day 3', subject: 'Following up on my last email', status: 'Opened', statusColor: '#f59e0b', accent: '#3b82f6' },
-    { step: 'Step 3 · Day 7', subject: 'One more thing worth checking', status: 'Scheduled', statusColor: 'rgba(255,255,255,0.5)', accent: '#22d3ee' },
-    { step: 'Step 4 · Day 14', subject: 'Last email I will send', status: 'Scheduled', statusColor: 'rgba(255,255,255,0.5)', accent: '#06b6d4' },
+    { step: 'Step 1 · Day 0', subject: 'Quick question about your practice', status: 'Sent', statusBg: '#f0fdf4', statusColor: '#16a34a', accent: '#4f46e5' },
+    { step: 'Step 2 · Day 3', subject: 'Following up on my last email', status: 'Opened', statusBg: '#fffbeb', statusColor: '#f59e0b', accent: '#3b82f6' },
+    { step: 'Step 3 · Day 7', subject: 'One more thing worth checking', status: 'Scheduled', statusBg: '#f8fafc', statusColor: '#94a3b8', accent: '#06b6d4' },
+    { step: 'Step 4 · Day 14', subject: 'Last email I will send', status: 'Scheduled', statusBg: '#f8fafc', statusColor: '#94a3b8', accent: '#22d3ee' },
   ]
   return (
-    <div style={{ position: 'absolute', inset: '14px 14px auto 14px', height: '200px', fontFamily: 'Switzer, sans-serif' }}>
+    <div style={{ flex: 1, minHeight: 0, padding: '12px', display: 'flex', flexDirection: 'column', fontFamily: 'Switzer, sans-serif', background: '#ffffff' }}>
       {steps.map((s, i) => (
         <div key={i} style={{
-          background: 'rgba(255,255,255,0.12)', borderRadius: '6px',
+          background: '#f8fafc', borderRadius: '6px',
           padding: '6px 8px', marginBottom: '4px',
           borderLeft: `2px solid ${s.accent}`,
           display: 'flex', alignItems: 'center', gap: '6px',
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '6px', color: 'rgba(255,255,255,0.6)', fontWeight: 600, marginBottom: '2px' }}>{s.step}</div>
-            <div style={{ fontSize: '8px', color: 'white', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.subject}</div>
+            <div style={{ fontSize: '7px', color: '#4f46e5', fontWeight: 700, marginBottom: '2px' }}>{s.step}</div>
+            <div style={{ fontSize: '9px', color: '#0f172a', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.subject}</div>
           </div>
-          <span style={{ fontSize: '6px', fontWeight: 700, padding: '2px 5px', borderRadius: '100px', background: 'rgba(255,255,255,0.12)', color: s.statusColor }}>{s.status}</span>
+          <span style={{ fontSize: '6px', fontWeight: 600, padding: '2px 6px', borderRadius: '100px', background: s.statusBg, color: s.statusColor }}>{s.status}</span>
         </div>
       ))}
-      <div style={{ display: 'flex', justifyContent: 'space-around', padding: '6px 4px 0', fontSize: '7px', color: 'white', fontWeight: 700 }}>
-        <div><span style={{ color: 'white' }}>847</span> <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>sent</span></div>
-        <div><span style={{ color: '#22d3ee' }}>34.2%</span> <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>open</span></div>
-        <div><span style={{ color: '#22d3ee' }}>12.8%</span> <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>reply</span></div>
+      <div style={{ display: 'flex', justifyContent: 'space-around', padding: '10px 4px 0', marginTop: 'auto' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>847</div>
+          <div style={{ fontSize: '6px', color: '#94a3b8', marginTop: '2px' }}>sent</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: '#16a34a', lineHeight: 1 }}>34.2%</div>
+          <div style={{ fontSize: '6px', color: '#94a3b8', marginTop: '2px' }}>open</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: '#4f46e5', lineHeight: 1 }}>12.8%</div>
+          <div style={{ fontSize: '6px', color: '#94a3b8', marginTop: '2px' }}>reply</div>
+        </div>
       </div>
     </div>
   )
@@ -101,53 +107,60 @@ function VoiceCallingIllustration() {
     'Objections', 'When Yes', 'Voicemail', 'Tone',
   ]
   const objectives = [
-    { label: 'Book Discovery', active: true },
-    { label: 'Qualify Lead', active: false },
-    { label: 'Schedule Demo', active: false },
-    { label: 'Custom', active: false },
+    { label: 'Book Discovery', desc: 'Direct sales path', active: true },
+    { label: 'Qualify Lead', desc: 'Gather intent data', active: false },
+    { label: 'Schedule Demo', desc: 'Book calendar slot', active: false },
+    { label: 'Custom', desc: 'Build your own', active: false },
   ]
   return (
-    <div style={{ position: 'absolute', inset: '14px 14px auto 14px', height: '200px', display: 'flex', gap: '6px', fontFamily: 'Switzer, sans-serif' }}>
+    <div style={{ flex: 1, minHeight: 0, padding: '12px', display: 'flex', gap: '10px', fontFamily: 'Switzer, sans-serif', background: '#ffffff' }}>
       {/* Left: numbered steps */}
-      <div style={{ width: '80px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px', padding: '6px 5px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+      <div style={{ width: '92px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
         {steps.map((label, i) => {
           const active = i === 1
           return (
             <div key={i} style={{
-              display: 'flex', alignItems: 'center', gap: '4px',
-              padding: '2px 4px', borderRadius: '3px',
-              background: active ? 'rgba(34,211,238,0.18)' : 'transparent',
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: active ? '3px 6px' : '3px 0',
+              borderRadius: '4px',
+              background: active ? '#eff6ff' : 'transparent',
             }}>
               <div style={{
-                width: '10px', height: '10px', borderRadius: '50%',
-                background: active ? '#06b6d4' : 'rgba(255,255,255,0.12)',
-                color: 'white', fontSize: '6px', fontWeight: 700,
+                width: '12px', height: '12px', borderRadius: '50%',
+                background: active ? '#3b82f6' : '#f1f5f9',
+                color: active ? 'white' : '#94a3b8', fontSize: '7px', fontWeight: 700,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>{i + 1}</div>
-              <div style={{ fontSize: '6px', color: active ? 'white' : 'rgba(255,255,255,0.55)', fontWeight: active ? 700 : 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
+              <div style={{
+                fontSize: '8px',
+                color: active ? '#1d4ed8' : '#64748b',
+                fontWeight: active ? 600 : 500,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>{label}</div>
             </div>
           )
         })}
       </div>
       {/* Right: objectives grid */}
-      <div style={{ flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: '8px', padding: '7px', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: '6px', color: 'rgba(255,255,255,0.6)', fontWeight: 600, marginBottom: '5px' }}>Call Objective</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', flex: 1 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <div style={{ fontSize: '7px', color: '#94a3b8', fontWeight: 700, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Call Objective</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', flex: 1 }}>
           {objectives.map((o, i) => (
             <div key={i} style={{
-              background: o.active ? 'rgba(34,211,238,0.15)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${o.active ? '#22d3ee' : 'rgba(255,255,255,0.1)'}`,
-              borderRadius: '5px', padding: '5px 4px',
+              background: o.active ? '#eff6ff' : '#f8fafc',
+              border: o.active ? '1.5px solid #3b82f6' : '1px solid #e2e8f0',
+              borderRadius: '6px', padding: '6px 4px',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px',
             }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: o.active ? '#22d3ee' : 'rgba(255,255,255,0.15)' }} />
-              <div style={{ fontSize: '5px', color: 'white', fontWeight: 600, textAlign: 'center' }}>{o.label}</div>
+              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: o.active ? '#3b82f6' : '#e2e8f0' }} />
+              <div style={{ fontSize: '7px', color: '#0f172a', fontWeight: 600, textAlign: 'center' }}>{o.label}</div>
+              <div style={{ fontSize: '6px', color: '#94a3b8', textAlign: 'center' }}>{o.desc}</div>
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
-          <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.5)' }}>Step 2 of 8</div>
-          <div style={{ background: '#06b6d4', color: 'white', fontSize: '5px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px' }}>Next</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+          <div style={{ fontSize: '7px', color: '#64748b' }}>Step 2 of 8</div>
+          <div style={{ background: '#3b82f6', color: 'white', fontSize: '7px', fontWeight: 600, padding: '3px 8px', borderRadius: '4px' }}>Next</div>
         </div>
       </div>
     </div>
@@ -162,42 +175,51 @@ function LinkedInIllustration() {
   const prospects = [
     { name: 'Owen Dental Group', role: 'Dr Liam Owens', phase: 3, day: 14, progress: 40, status: 'ACTIVE' },
     { name: 'London Smile Studio', role: 'Dr Paul Morrison', phase: 2, day: 8, progress: 23, status: 'ACTIVE' },
-    { name: 'Smile Clinic Nw', role: 'Dr Amit Patel', phase: 4, day: 21, progress: 60, status: 'PAUSED' },
+    { name: 'Smile Clinic NW', role: 'Dr Amit Patel', phase: 4, day: 21, progress: 60, status: 'PAUSED' },
   ]
   return (
-    <div style={{ position: 'absolute', inset: '14px 14px auto 14px', height: '200px', fontFamily: 'Switzer, sans-serif' }}>
+    <div style={{ flex: 1, minHeight: 0, padding: '12px 10px', display: 'flex', flexDirection: 'column', fontFamily: 'Switzer, sans-serif', background: '#ffffff' }}>
       {/* Phase tracker */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', position: 'relative' }}>
-        <div style={{ position: 'absolute', left: '8px', right: '8px', top: '7px', height: '1px', background: 'rgba(255,255,255,0.15)' }} />
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px', position: 'relative', padding: '0 4px' }}>
+        <div style={{ position: 'absolute', left: '10px', right: '10px', top: '7px', height: '1px', background: '#e2e8f0' }} />
         {phases.map((p, i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', zIndex: 1 }}>
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', zIndex: 1 }}>
             <div style={{
               width: '14px', height: '14px', borderRadius: '50%',
-              background: i === 0 ? '#4f46e5' : 'rgba(30,27,75,0.9)',
-              border: i === 0 ? '1px solid #818cf8' : '1px solid rgba(255,255,255,0.25)',
-              color: 'white', fontSize: '7px', fontWeight: 700,
+              background: i === 0 ? '#4f46e5' : '#f1f5f9',
+              border: i === 0 ? 'none' : '1px solid #e2e8f0',
+              color: i === 0 ? 'white' : '#94a3b8', fontSize: '8px', fontWeight: 700,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>{i + 1}</div>
-            <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>{p}</div>
+            <div style={{ fontSize: '6px', color: '#64748b', fontWeight: 500 }}>{p}</div>
           </div>
         ))}
       </div>
       {/* Prospect cards */}
       {prospects.map((p, i) => (
         <div key={i} style={{
-          background: 'rgba(255,255,255,0.08)', borderRadius: '6px',
-          padding: '5px 7px', marginBottom: '4px',
-          display: 'flex', alignItems: 'center', gap: '6px',
+          background: '#f8fafc', borderRadius: '6px',
+          padding: '6px 8px', marginBottom: '4px',
+          border: '1px solid #e2e8f0',
+          display: 'flex', alignItems: 'center', gap: '7px',
         }}>
-          <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'linear-gradient(135deg,#0077b5,#3b82f6)', flexShrink: 0 }} />
+          <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'linear-gradient(135deg,#0077b5,#3b82f6)', flexShrink: 0 }} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '7px', fontWeight: 700, color: '#7dd3fc' }}>{p.name}</div>
-            <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.5)' }}>Day {p.day} of 35 · Phase {p.phase}</div>
-            <div style={{ height: '2px', background: 'rgba(255,255,255,0.12)', borderRadius: '100px', marginTop: '3px', overflow: 'hidden' }}>
-              <div style={{ width: `${p.progress}%`, height: '100%', background: '#0077b5' }} />
+            <div style={{ fontSize: '8px', fontWeight: 600, color: '#0f172a' }}>{p.name}</div>
+            <div style={{ fontSize: '6px', color: '#94a3b8' }}>{p.role} · Day {p.day} of 35</div>
+            <div style={{ height: '3px', background: '#e2e8f0', borderRadius: '2px', marginTop: '3px', overflow: 'hidden' }}>
+              <div style={{ width: `${p.progress}%`, height: '100%', background: '#4f46e5' }} />
             </div>
           </div>
-          <span style={{ fontSize: '5px', fontWeight: 700, padding: '1px 4px', borderRadius: '6px', background: p.status === 'ACTIVE' ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)', color: p.status === 'ACTIVE' ? '#10b981' : '#f59e0b' }}>{p.status}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-end', flexShrink: 0 }}>
+            <span style={{ fontSize: '6px', fontWeight: 600, padding: '1px 5px', borderRadius: '4px', background: '#eff6ff', color: '#4f46e5' }}>Phase {p.phase}</span>
+            <span style={{
+              fontSize: '6px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px',
+              background: p.status === 'ACTIVE' ? '#f0fdf4' : '#fffbeb',
+              color: p.status === 'ACTIVE' ? '#16a34a' : '#f59e0b',
+              border: p.status === 'ACTIVE' ? '1px solid #d1fae5' : '1px solid #fde68a',
+            }}>{p.status}</span>
+          </div>
         </div>
       ))}
     </div>
@@ -213,44 +235,52 @@ function KeywordMonitorIllustration() {
     { name: 'UK Hotels - Q2 Outreach', tags: ['hotel direct bookings', 'OTA commission'], hits: 4 },
   ]
   const hits = [
-    { name: 'Emma Fitzgerald', status: 'Pending', statusColor: '#f59e0b' },
-    { name: 'Callum Reid', status: 'Pending', statusColor: '#f59e0b' },
-    { name: 'Simon Adeyemi', status: 'Enrolled', statusColor: '#10b981' },
+    { name: 'Emma Fitzgerald', headline: 'Partner, Reynolds & Co', status: 'Pending', statusBg: '#fffbeb', statusColor: '#f59e0b', statusBorder: '#fde68a' },
+    { name: 'Callum Reid', headline: 'GM, Caledonia Hotels', status: 'Pending', statusBg: '#fffbeb', statusColor: '#f59e0b', statusBorder: '#fde68a' },
+    { name: 'Simon Adeyemi', headline: 'Managing Director', status: 'Enrolled', statusBg: '#f0fdf4', statusColor: '#16a34a', statusBorder: '#d1fae5' },
   ]
   return (
-    <div style={{ position: 'absolute', inset: '14px 14px auto 14px', height: '200px', fontFamily: 'Switzer, sans-serif' }}>
+    <div style={{ flex: 1, minHeight: 0, padding: '12px', display: 'flex', flexDirection: 'column', fontFamily: 'Switzer, sans-serif', background: '#ffffff' }}>
       {/* Info banner */}
       <div style={{
-        background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.25)',
-        borderRadius: '5px', padding: '4px 7px', marginBottom: '5px',
-        fontSize: '6px', color: 'rgba(255,255,255,0.8)',
+        background: '#ecfeff', border: '1px solid #a5f3fc',
+        borderRadius: '5px', padding: '5px 8px', marginBottom: '6px',
+        fontSize: '7px', color: '#0e7490',
       }}>
         Scanning LinkedIn every 2 hours for keyword matches
       </div>
       {/* Campaigns */}
       {campaigns.map((c, i) => (
-        <div key={i} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '5px', padding: '4px 6px', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <div key={i} style={{ background: '#f8fafc', borderRadius: '6px', padding: '6px 8px', marginBottom: '5px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '6px', fontWeight: 700, color: 'white', marginBottom: '2px' }}>{c.name}</div>
+            <div style={{ fontSize: '8px', fontWeight: 600, color: '#0f172a', marginBottom: '3px' }}>{c.name}</div>
             <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap' }}>
               {c.tags.map((t, j) => (
-                <span key={j} style={{ fontSize: '5px', padding: '1px 4px', borderRadius: '100px', background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.35)', color: '#67e8f9' }}>{t}</span>
+                <span key={j} style={{ fontSize: '6px', padding: '1px 5px', borderRadius: '3px', background: '#ecfeff', color: '#0891b2' }}>{t}</span>
               ))}
             </div>
           </div>
-          <div style={{ width: '14px', height: '7px', borderRadius: '100px', background: '#22d3ee', position: 'relative', flexShrink: 0 }}>
-            <div style={{ position: 'absolute', right: '1px', top: '1px', width: '5px', height: '5px', borderRadius: '50%', background: 'white' }} />
+          <span style={{ fontSize: '7px', fontWeight: 600, color: '#06b6d4', flexShrink: 0 }}>{c.hits} hits</span>
+          <div style={{ width: '16px', height: '9px', borderRadius: '9999px', background: '#06b6d4', position: 'relative', flexShrink: 0 }}>
+            <div style={{ position: 'absolute', right: '1px', top: '1px', width: '7px', height: '7px', borderRadius: '50%', background: 'white' }} />
           </div>
         </div>
       ))}
       {/* Recent hits */}
-      <div style={{ marginTop: '5px' }}>
+      <div style={{ marginTop: '4px' }}>
+        <div style={{ fontSize: '6px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '3px', padding: '0 2px' }}>Recent hits</div>
         {hits.map((h, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 4px', fontSize: '6px', color: 'rgba(255,255,255,0.75)' }}>
-            <span style={{ fontWeight: 600 }}>{h.name}</span>
-            <span style={{ fontSize: '5px', fontWeight: 700, padding: '1px 4px', borderRadius: '6px', background: `${h.statusColor}25`, color: h.statusColor }}>{h.status}</span>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 2px', borderTop: i > 0 ? '1px solid #f1f5f9' : 'none', gap: '6px' }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '7px', fontWeight: 600, color: '#0f172a' }}>{h.name}</div>
+              <div style={{ fontSize: '6px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.headline}</div>
+            </div>
+            <span style={{ fontSize: '6px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: h.statusBg, color: h.statusColor, border: `1px solid ${h.statusBorder}`, flexShrink: 0 }}>{h.status}</span>
           </div>
         ))}
+      </div>
+      <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', paddingTop: '6px' }}>
+        <div style={{ background: '#06b6d4', color: 'white', fontSize: '6px', fontWeight: 600, padding: '2px 6px', borderRadius: '4px' }}>Enrol now</div>
       </div>
     </div>
   )
