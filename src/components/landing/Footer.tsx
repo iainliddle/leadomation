@@ -24,7 +24,7 @@ const InstagramIcon = () => (
 const YoutubeIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
     <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/>
-    <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#1e1b4b"/>
+    <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#22d3ee"/>
   </svg>
 )
 
@@ -82,11 +82,14 @@ export default function Footer() {
       zIndex: 2,
     }}>
 
-      {/* Gradient fade from white into footer color */}
-      <div style={{ height: '100px', background: 'linear-gradient(180deg, #ffffff 0%, #1e1b4b 100%)' }} />
+      {/* Gradient fade from CTA ambient into cyan footer */}
+      <div style={{
+        height: '120px',
+        background: 'linear-gradient(180deg, rgba(178,235,242,0.6) 0%, rgba(34,211,238,0.3) 40%, #22d3ee 100%)',
+      }} />
 
       {/* Main footer content */}
-      <div style={{ background: '#1e1b4b' }}>
+      <div style={{ background: '#22d3ee' }}>
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',
@@ -107,10 +110,10 @@ export default function Footer() {
           {/* Brand column */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <img src="/logo-full.png" alt="Leadomation" style={{ height: '28px', filter: 'brightness(0) invert(1)' }} />
+              <img src="/logo-full.png" alt="Leadomation" style={{ height: '28px', filter: 'brightness(0)' }} />
             </div>
 
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: '28px', maxWidth: '280px' }}>
+            <p style={{ fontSize: '14px', color: '#0e7490', lineHeight: 1.7, marginBottom: '28px', maxWidth: '280px' }}>
               B2B lead generation and outreach automation. Find leads, run sequences and book meetings - on autopilot.
             </p>
 
@@ -127,26 +130,26 @@ export default function Footer() {
                     width: '36px',
                     height: '36px',
                     borderRadius: '8px',
-                    background: 'rgba(255,255,255,0.12)',
-                    border: '1px solid rgba(255,255,255,0.18)',
+                    background: 'rgba(255,255,255,0.3)',
+                    border: '1px solid rgba(255,255,255,0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'rgba(255,255,255,0.8)',
+                    color: '#0c4a6e',
                     textDecoration: 'none',
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={e => {
                     const el = e.currentTarget as HTMLElement
-                    el.style.background = 'rgba(79,70,229,0.5)'
-                    el.style.borderColor = 'rgba(79,70,229,0.7)'
-                    el.style.color = 'white'
+                    el.style.background = 'rgba(255,255,255,0.5)'
+                    el.style.borderColor = 'rgba(255,255,255,0.6)'
+                    el.style.color = '#0c4a6e'
                   }}
                   onMouseLeave={e => {
                     const el = e.currentTarget as HTMLElement
-                    el.style.background = 'rgba(255,255,255,0.12)'
-                    el.style.borderColor = 'rgba(255,255,255,0.18)'
-                    el.style.color = 'rgba(255,255,255,0.8)'
+                    el.style.background = 'rgba(255,255,255,0.3)'
+                    el.style.borderColor = 'rgba(255,255,255,0.4)'
+                    el.style.color = '#0c4a6e'
                   }}
                 >
                   {social.icon}
@@ -158,7 +161,7 @@ export default function Footer() {
           {/* Link columns */}
           {COLUMNS.map((col, i) => (
             <div key={i}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#0891b2', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '20px' }}>
                 {col.heading}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -168,13 +171,13 @@ export default function Footer() {
                     href={link.href}
                     style={{
                       fontSize: '14px',
-                      color: 'rgba(255,255,255,0.75)',
+                      color: '#0c4a6e',
                       textDecoration: 'none',
                       transition: 'color 0.2s ease',
                       width: 'fit-content',
                     }}
-                    onMouseEnter={e => (e.target as HTMLElement).style.color = 'white'}
-                    onMouseLeave={e => (e.target as HTMLElement).style.color = 'rgba(255,255,255,0.75)'}
+                    onMouseEnter={e => (e.target as HTMLElement).style.color = '#0e7490'}
+                    onMouseLeave={e => (e.target as HTMLElement).style.color = '#0c4a6e'}
                   >
                     {link.label}
                   </a>
@@ -186,7 +189,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div style={{
-          borderTop: '1px solid rgba(255,255,255,0.15)',
+          borderTop: '1px solid rgba(8,145,178,0.3)',
           paddingTop: '32px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -195,7 +198,7 @@ export default function Footer() {
           gap: '16px',
           flexDirection: isMobile ? 'column' : 'row',
         }}>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+          <p style={{ fontSize: '13px', color: '#0891b2', margin: 0 }}>
             © {new Date().getFullYear()} Leadomation. All rights reserved. A product of Lumarr Ltd.
           </p>
           <div style={{ display: 'flex', gap: '24px' }}>
@@ -203,9 +206,9 @@ export default function Footer() {
               <a
                 key={i}
                 href="#"
-                style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', transition: 'color 0.2s ease' }}
-                onMouseEnter={e => (e.target as HTMLElement).style.color = 'rgba(255,255,255,0.8)'}
-                onMouseLeave={e => (e.target as HTMLElement).style.color = 'rgba(255,255,255,0.5)'}
+                style={{ fontSize: '13px', color: '#0891b2', textDecoration: 'none', transition: 'color 0.2s ease' }}
+                onMouseEnter={e => (e.target as HTMLElement).style.color = '#0e7490'}
+                onMouseLeave={e => (e.target as HTMLElement).style.color = '#0891b2'}
               >
                 {link}
               </a>

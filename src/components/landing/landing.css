@@ -16,6 +16,12 @@
   }
 }
 
+/* Integration marquee scroll */
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* Hero dashboard cursor ripple */
 @keyframes rippleExpand {
   0%   { transform: scale(1); opacity: 1; }

@@ -25,7 +25,7 @@ export default function FeatureGlobalDemand() {
     <div
       ref={sectionRef}
       style={{
-        background: 'linear-gradient(180deg, transparent 0%, #ffffff 120px, #ffffff 100%)',
+        background: 'linear-gradient(180deg, transparent 0%, #ffffff 100px, #ffffff 100%)',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',

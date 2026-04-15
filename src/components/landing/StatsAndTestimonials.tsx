@@ -173,7 +173,7 @@ export default function StatsAndTestimonials() {
       <div
         ref={sectionRef}
         style={{
-          background: 'linear-gradient(180deg, transparent 0%, #ffffff 120px, #ffffff 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, #ffffff 100px, #ffffff 100%)',
           position: 'relative',
           overflow: 'hidden',
           paddingTop: isMobile ? '60px' : '120px',

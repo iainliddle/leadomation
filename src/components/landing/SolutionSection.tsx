@@ -112,7 +112,8 @@ export default function SolutionSection() {
     <section style={{
       position: 'relative',
       padding: isMobile ? '60px 16px' : '100px 24px',
-      background: 'linear-gradient(180deg, #ffffff 0%, transparent 120px, transparent 100%)',
+      paddingTop: isMobile ? '60px' : '100px',
+      background: 'transparent',
       overflow: 'hidden',
     }}>
       {/* Ambient blobs */}
