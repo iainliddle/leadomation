@@ -209,117 +209,161 @@ function PlanCard(): ReactElement {
   return (
     <div style={{
       background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
-      border: '1px solid #c7d2fe', borderRadius: 5, padding: '7px 8px',
-      flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1,
+      border: '1px solid #c7d2fe',
+      borderRadius: 5,
+      padding: '5px 6px',
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      minWidth: 0,
+      overflow: 'hidden',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ fontSize: 5.5, color: '#4F46E5', fontWeight: 700, letterSpacing: '0.06em' }}>CURRENT PLAN</div>
-        <div style={{ position: 'relative', width: 24, height: 24 }}>
-          <svg width={24} height={24} viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9" stroke="#c7d2fe" strokeWidth="2.5" fill="none" />
-            <circle cx="12" cy="12" r="9" stroke="#4F46E5" strokeWidth="2.5" fill="none"
-              strokeDasharray={`${2 * Math.PI * 9 * 0.14} ${2 * Math.PI * 9}`}
-              transform="rotate(-90 12 12)" strokeLinecap="round" />
-          </svg>
-          <div style={{
-            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: 5, fontWeight: 700, color: '#4F46E5',
-          }}>14%</div>
+      {/* Top row: label + gauge */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: 5.5, fontWeight: 700, color: '#4F46E5', letterSpacing: '0.06em', lineHeight: 1.2 }}>
+          CURRENT PLAN
         </div>
+        <svg width="22" height="22" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="8" fill="none" stroke="#c7d2fe" strokeWidth="3" />
+          <circle cx="11" cy="11" r="8" fill="none" stroke="#4F46E5" strokeWidth="3"
+            strokeDasharray={`${2 * Math.PI * 8 * 0.14} ${2 * Math.PI * 8 * 0.86}`}
+            strokeDashoffset={2 * Math.PI * 8 * 0.25}
+            strokeLinecap="round" />
+          <text x="11" y="14" textAnchor="middle" fontSize="5" fill="#4F46E5" fontWeight="700">14%</text>
+        </svg>
       </div>
-      <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>Pro</div>
-      <div style={{ fontSize: 5.5, color: '#6b7280' }}>Pro plan active</div>
+
+      {/* Plan name */}
+      <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', lineHeight: 1, marginTop: 2 }}>
+        Pro
+      </div>
+
+      {/* Subtitle */}
+      <div style={{ fontSize: 5.5, color: '#6b7280', marginTop: 1, marginBottom: 3 }}>
+        Pro plan active
+      </div>
+
+      {/* Manage plan button */}
       <div style={{
-        background: '#4F46E5', color: 'white', fontSize: 5.5, borderRadius: 3,
-        padding: '2px 0', width: '100%', textAlign: 'center', marginTop: 3, fontWeight: 600,
-      }}>Manage plan</div>
+        background: '#4F46E5',
+        color: 'white',
+        fontSize: 5.5,
+        fontWeight: 600,
+        borderRadius: 3,
+        padding: '3px 0',
+        textAlign: 'center',
+        width: '100%',
+      }}>
+        Manage plan
+      </div>
     </div>
   )
 }
 
 function CampaignPerformanceChart(): ReactElement {
-  const greenFill = 'M0,60 C20,58 40,50 60,35 C80,18 100,22 120,40 C140,55 160,62 180,68 C200,70 240,72 280,72 L280,80 L0,80 Z'
-  const greenStroke = 'M0,60 C20,58 40,50 60,35 C80,18 100,22 120,40 C140,55 160,62 180,68 C200,70 240,72 280,72'
-  const cyanFill = 'M0,72 C20,70 40,65 60,60 C80,55 100,52 120,54 C140,56 160,60 180,64 C200,67 240,70 280,70 L280,80 L0,80 Z'
-  const cyanStroke = 'M0,72 C20,70 40,65 60,60 C80,55 100,52 120,54 C140,56 160,60 180,64 C200,67 240,70 280,70'
-  const indigoFill = 'M0,75 C40,74 80,74 120,73 C160,73 200,74 240,74 L280,74 L280,80 L0,80 Z'
-  const indigoStroke = 'M0,75 C40,74 80,74 120,73 C160,73 200,74 240,74 L280,74'
-
   return (
     <div style={{
-      background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 8,
-      flex: 3, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0,
+      flex: 3,
+      background: 'white',
+      borderRadius: 5,
+      border: '1px solid #e5e7eb',
+      padding: '6px 8px',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      minWidth: 0,
+      minHeight: 0,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, flexShrink: 0 }}>
-        <div style={{ fontSize: 8, fontWeight: 700, color: '#0f172a' }}>Campaign Performance</div>
-        <div style={{ fontSize: 5.5, color: '#94a3b8', marginLeft: 'auto' }}>Last 14 days</div>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, marginBottom: 3 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" strokeWidth="2">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          <span style={{ fontSize: 8, fontWeight: 700, color: '#0f172a' }}>Campaign Performance</span>
+        </div>
+        <span style={{ fontSize: 5.5, color: '#94a3b8' }}>Last 14 days</span>
       </div>
 
-      {/* SVG wrapper fills remaining height */}
+      {/* SVG chart — takes all available space */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
-        <svg viewBox="0 0 280 80" preserveAspectRatio="none" width="100%" height="100%" style={{ display: 'block' }}>
+        <svg width="100%" height="100%" viewBox="0 0 280 60" preserveAspectRatio="none">
           <defs>
-            <linearGradient id="gradIndigo" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="gradCyan" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
               <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
             </linearGradient>
+            <linearGradient id="gCyan" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="gIndigo" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
+            </linearGradient>
           </defs>
-
-          {[0, 1, 2, 3, 4].map(i => (
-            <line key={i} x1="10" y1={10 + i * 14} x2="280" y2={10 + i * 14} stroke="#f1f5f9" strokeWidth="0.5" />
+          {[15, 30, 45].map(y => (
+            <line key={y} x1="0" y1={y} x2="280" y2={y} stroke="#f1f5f9" strokeWidth="0.5" />
           ))}
-          {['8', '6', '4', '2', '0'].map((y, i) => (
-            <text key={i} x="2" y={12 + i * 14} fontSize="5" fill="#94a3b8">{y}</text>
+          {/* New Leads - green bell curve peak around x=80 */}
+          <path d="M0,55 C20,52 40,42 60,28 C80,12 100,15 120,28 C140,42 160,50 180,53 C200,55 240,56 280,56 L280,60 L0,60 Z"
+            fill="url(#gGreen)" />
+          <path d="M0,55 C20,52 40,42 60,28 C80,12 100,15 120,28 C140,42 160,50 180,53 C200,55 240,56 280,56"
+            fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinejoin="round" />
+          {/* Emails - cyan lower curve */}
+          <path d="M0,57 C40,55 80,50 120,52 C160,54 200,55 280,56 L280,60 L0,60 Z"
+            fill="url(#gCyan)" />
+          <path d="M0,57 C40,55 80,50 120,52 C160,54 200,55 280,56"
+            fill="none" stroke="#22D3EE" strokeWidth="1.5" strokeLinejoin="round" />
+          {/* AI Calls - indigo flat */}
+          <path d="M0,58 C80,57 160,57 280,57 L280,60 L0,60 Z"
+            fill="url(#gIndigo)" />
+          <path d="M0,58 C80,57 160,57 280,57"
+            fill="none" stroke="#4F46E5" strokeWidth="1.5" strokeLinejoin="round" />
+          {['21 Mar', '25 Mar', '29 Mar', '1 Apr', '3 Apr'].map((label, i) => (
+            <text key={i} x={i * 65} y={59} fontSize="4" fill="#94a3b8">{label}</text>
           ))}
-
-          <path d={indigoFill} fill="url(#gradIndigo)" />
-          <path d={cyanFill} fill="url(#gradCyan)" />
-          <path d={greenFill} fill="url(#gradGreen)" />
-
-          <path d={indigoStroke} fill="none" stroke="#4F46E5" strokeWidth="1.5" strokeLinejoin="round" />
-          <path d={cyanStroke} fill="none" stroke="#22D3EE" strokeWidth="1.5" strokeLinejoin="round" />
-          <path d={greenStroke} fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinejoin="round" />
         </svg>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 5, color: '#94a3b8', marginTop: 2, paddingLeft: 10, flexShrink: 0 }}>
-        {['21 Mar', '23 Mar', '25 Mar', '27 Mar', '29 Mar', '1 Apr', '3 Apr'].map((d, i) => <span key={i}>{d}</span>)}
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, marginTop: 4, flexShrink: 0 }}>
+      {/* Legend row */}
+      <div style={{ display: 'flex', gap: 8, flexShrink: 0, marginTop: 3 }}>
         {[
-          { label: 'AI Calls', color: '#4F46E5' },
-          { label: 'Emails', color: '#22D3EE' },
-          { label: 'New Leads', color: '#10b981' },
-        ].map((l, i) => (
+          { color: '#4F46E5', label: 'AI Calls' },
+          { color: '#22D3EE', label: 'Emails' },
+          { color: '#10b981', label: 'New Leads' },
+        ].map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: l.color }} />
-            <div style={{ fontSize: 5.5, color: '#64748b' }}>{l.label}</div>
+            <div style={{ width: 5, height: 5, borderRadius: '50%', background: item.color }} />
+            <span style={{ fontSize: 5.5, color: '#64748b' }}>{item.label}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', borderTop: '1px solid #f1f5f9', marginTop: 4, paddingTop: 4, flexShrink: 0 }}>
+      {/* Stats bar */}
+      <div style={{
+        display: 'flex',
+        borderTop: '1px solid #f1f5f9',
+        marginTop: 3,
+        paddingTop: 3,
+        flexShrink: 0,
+      }}>
         {[
-          { v: '271', l: 'TOTAL LEADS' },
-          { v: '0', l: 'CONTACTED' },
-          { v: '0', l: 'QUALIFIED' },
-          { v: '10', l: 'DEALS' },
-        ].map((s, i, arr) => (
+          { value: '271', label: 'TOTAL LEADS' },
+          { value: '0', label: 'CONTACTED' },
+          { value: '0', label: 'QUALIFIED' },
+          { value: '10', label: 'DEALS' },
+        ].map((stat, i) => (
           <div key={i} style={{
-            flex: 1, textAlign: 'center',
-            borderRight: i < arr.length - 1 ? '1px solid #f1f5f9' : 'none',
+            flex: 1,
+            textAlign: 'center',
+            borderRight: i < 3 ? '1px solid #f1f5f9' : 'none',
           }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#0f172a' }}>{s.v}</div>
-            <div style={{ fontSize: 5, color: '#94a3b8', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{s.l}</div>
+            <div style={{ fontSize: 9, fontWeight: 800, color: '#0f172a' }}>{stat.value}</div>
+            <div style={{ fontSize: 4.5, color: '#94a3b8', letterSpacing: '0.05em' }}>{stat.label}</div>
           </div>
         ))}
       </div>
@@ -329,38 +373,54 @@ function CampaignPerformanceChart(): ReactElement {
 
 function TopCampaigns(): ReactElement {
   const rows = [
-    { name: 'Dental Clinics - LinkedIn', tag: 'SPECIFIER', tagBg: '#f3e8ff', tagColor: '#9333ea', rate: '6.74%', bar: 20, barColor: '#9333ea' },
-    { name: 'Law Firms - Full Pipeline', tag: 'DIRECT', tagBg: '#EEF2FF', tagColor: '#4F46E5', rate: '11.22%', bar: 75, barColor: '#4F46E5' },
-    { name: 'Plumbers in Edinburgh', tag: 'DIRECT', tagBg: '#EEF2FF', tagColor: '#4F46E5', rate: '0%', bar: 8, barColor: '#4F46E5' },
-    { name: 'Solicitors in Edinburgh', tag: 'DIRECT', tagBg: '#EEF2FF', tagColor: '#4F46E5', rate: '0%', bar: 8, barColor: '#4F46E5' },
+    { name: 'Dental Clinics - LinkedIn', tag: 'SPECIFIER', tagBg: '#f3e8ff', tagColor: '#9333ea', rate: '6.74%', barWidth: '20%', barColor: '#9333ea' },
+    { name: 'Law Firms - Full Pipeline', tag: 'DIRECT', tagBg: '#EEF2FF', tagColor: '#4F46E5', rate: '11.22%', barWidth: '75%', barColor: '#4F46E5' },
+    { name: 'Plumbers in Edinburgh', tag: 'DIRECT', tagBg: '#EEF2FF', tagColor: '#4F46E5', rate: '0%', barWidth: '8%', barColor: '#4F46E5' },
+    { name: 'Solicitors in Edinburgh', tag: 'DIRECT', tagBg: '#EEF2FF', tagColor: '#4F46E5', rate: '0%', barWidth: '8%', barColor: '#4F46E5' },
   ]
   return (
     <div style={{
-      background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 8,
-      flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0,
+      flex: 2,
+      background: 'white',
+      borderRadius: 5,
+      border: '1px solid #e5e7eb',
+      padding: '6px 8px',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      minWidth: 0,
+      minHeight: 0,
     }}>
-      <div style={{ fontSize: 8, fontWeight: 700, color: '#0f172a', marginBottom: 6, flexShrink: 0 }}>Top Performing Campaigns</div>
+      <div style={{ fontSize: 7.5, fontWeight: 700, color: '#0f172a', marginBottom: 5, flexShrink: 0 }}>
+        Top Performing Campaigns
+      </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 0 }}>
-        {rows.map((r, i) => (
+        {rows.map((campaign, i) => (
           <div key={i} style={{
-            paddingBottom: 5,
+            paddingBottom: 3,
             borderBottom: i < rows.length - 1 ? '1px solid #f8fafc' : 'none',
+            marginBottom: 2,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 7.5, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{r.name}</div>
-              <div style={{ fontSize: 7.5, fontWeight: 700, color: '#0f172a', marginLeft: 4 }}>{r.rate}</div>
+              <span style={{ fontSize: 7, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{campaign.name}</span>
+              <span style={{ fontSize: 7, fontWeight: 700, color: '#0f172a', marginLeft: 4 }}>{campaign.rate}</span>
             </div>
             <div style={{
-              display: 'inline-block', fontSize: 5.5, background: r.tagBg, color: r.tagColor,
-              borderRadius: 3, padding: '0 4px', fontWeight: 600, marginTop: 1,
-            }}>{r.tag}</div>
-            <div style={{ height: 3, background: '#f1f5f9', borderRadius: 2, marginTop: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${r.bar}%`, background: r.barColor, borderRadius: 2 }} />
+              display: 'inline-block', fontSize: 5, borderRadius: 3,
+              padding: '0 3px', background: campaign.tagBg, color: campaign.tagColor,
+              fontWeight: 600, marginTop: 1, marginBottom: 2,
+            }}>
+              {campaign.tag}
+            </div>
+            <div style={{ height: 2.5, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: campaign.barWidth, background: campaign.barColor, borderRadius: 2 }} />
             </div>
           </div>
         ))}
       </div>
-      <div style={{ fontSize: 6, color: '#4F46E5', textAlign: 'right', paddingTop: 4, fontWeight: 600, flexShrink: 0 }}>VIEW ALL CAMPAIGNS</div>
+      <div style={{ fontSize: 5.5, color: '#4F46E5', textAlign: 'right', marginTop: 2, flexShrink: 0, fontWeight: 600 }}>
+        VIEW ALL CAMPAIGNS
+      </div>
     </div>
   )
 }
@@ -372,33 +432,35 @@ function RecentActivity(): ReactElement {
     { initials: 'U', text: 'AI call to Fletcher Law Group', time: '27/03/2026', status: 'COMPLETED', statusColor: '#059669' },
     { initials: 'DD', text: 'New lead: Dunmore Dental Care', time: '26/03/2026', status: 'NEW', statusColor: '#4F46E5' },
     { initials: 'OD', text: 'New lead: Owen Dental Group', time: '25/03/2026', status: 'NEW', statusColor: '#4F46E5' },
-    { initials: 'BS', text: 'New lead: Bright Smile Kent', time: '25/03/2026', status: 'NEW', statusColor: '#4F46E5' },
   ]
   return (
     <div style={{
-      background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 7,
+      background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 6,
       flex: 3, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', minHeight: 0,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4, flexShrink: 0 }}>
         <Activity size={8} color="#4F46E5" strokeWidth={2.2} />
-        <div style={{ fontSize: 8, fontWeight: 700, color: '#0f172a' }}>Recent Activity</div>
+        <div style={{ fontSize: 7.5, fontWeight: 700, color: '#0f172a' }}>Recent Activity</div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 3 }}>
           <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e' }} />
-          <div style={{ fontSize: 6, color: '#22c55e', fontWeight: 600 }}>Live Feed</div>
+          <div style={{ fontSize: 5.5, color: '#22c55e', fontWeight: 600 }}>Live Feed</div>
         </div>
       </div>
       {rows.map((r, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, paddingBottom: 3 }}>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, paddingBottom: 2 }}>
           <div style={{
-            width: 13, height: 13, borderRadius: '50%', background: '#EEF2FF',
+            width: 11, height: 11, borderRadius: '50%', background: '#EEF2FF',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 6, fontWeight: 700, color: '#4F46E5', flexShrink: 0,
+            fontSize: 5, fontWeight: 700, color: '#4F46E5', flexShrink: 0,
           }}>{r.initials}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 6.5, color: '#0f172a', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.text}</div>
-            <div style={{ fontSize: 5.5, color: '#94a3b8' }}>{r.time}</div>
+            <div style={{ fontSize: 6, color: '#0f172a', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.text}</div>
+            <div style={{ fontSize: 5, color: '#94a3b8' }}>{r.time}</div>
           </div>
-          <div style={{ fontSize: 5.5, color: r.statusColor, fontWeight: 700, flexShrink: 0 }}>{r.status}</div>
+          <div style={{
+            fontSize: 5, color: r.statusColor, fontWeight: 700, flexShrink: 0,
+            padding: '0 3px',
+          }}>{r.status}</div>
         </div>
       ))}
     </div>
@@ -409,48 +471,46 @@ function UpcomingAndLeads(): ReactElement {
   const events = [
     { name: 'Follow-up Call - Claire Donovan', meta: 'Fri 3 Apr · 09:00-10:00', accent: '#10b981' },
     { name: 'Quarterly Review - Internal', meta: 'Fri 3 Apr · 12:00-13:30', accent: '#4F46E5' },
-    { name: 'Intro Call - Andrew Fletcher', meta: 'Fri 3 Apr · 15:00-17:00', accent: '#22D3EE' },
   ]
   const leads = [
     { i: 'D', name: 'Dunmore Dental Care', date: '26/03/2026' },
     { i: 'O', name: 'Owen Dental Group', date: '25/03/2026' },
     { i: 'B', name: 'Bright Smile Kent', date: '25/03/2026' },
-    { i: 'S', name: 'Surrey Dental Specialists', date: '25/03/2026' },
   ]
   return (
-    <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0, minHeight: 0 }}>
+    <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, minHeight: 0 }}>
       <div style={{ background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 6, flex: 1, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
           <CalendarIcon size={8} color="#4F46E5" strokeWidth={2.2} />
-          <div style={{ fontSize: 7.5, fontWeight: 700, color: '#0f172a' }}>Upcoming events</div>
-          <div style={{ marginLeft: 'auto', fontSize: 5.5, color: '#4F46E5', fontWeight: 600 }}>VIEW CALENDAR</div>
+          <div style={{ fontSize: 7, fontWeight: 700, color: '#0f172a' }}>Upcoming events</div>
+          <div style={{ marginLeft: 'auto', fontSize: 5, color: '#4F46E5', fontWeight: 600 }}>VIEW CALENDAR</div>
         </div>
         {events.map((e, i) => (
-          <div key={i} style={{ borderLeft: `3px solid ${e.accent}`, paddingLeft: 4, marginBottom: 3 }}>
-            <div style={{ fontSize: 6.5, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.name}</div>
-            <div style={{ fontSize: 5.5, color: '#94a3b8' }}>{e.meta}</div>
+          <div key={i} style={{ borderLeft: `2.5px solid ${e.accent}`, paddingLeft: 3, marginBottom: 2 }}>
+            <div style={{ fontSize: 6, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.name}</div>
+            <div style={{ fontSize: 5, color: '#94a3b8' }}>{e.meta}</div>
           </div>
         ))}
       </div>
 
       <div style={{ background: 'white', borderRadius: 5, border: '1px solid #e5e7eb', padding: 6, flex: 1, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
           <Users size={8} color="#4F46E5" strokeWidth={2.2} />
-          <div style={{ fontSize: 7.5, fontWeight: 700, color: '#0f172a' }}>Recent leads</div>
-          <div style={{ marginLeft: 'auto', fontSize: 5.5, color: '#4F46E5', fontWeight: 600 }}>VIEW ALL</div>
+          <div style={{ fontSize: 7, fontWeight: 700, color: '#0f172a' }}>Recent leads</div>
+          <div style={{ marginLeft: 'auto', fontSize: 5, color: '#4F46E5', fontWeight: 600 }}>VIEW ALL</div>
         </div>
         {leads.map((l, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, paddingBottom: 2 }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, paddingBottom: 2 }}>
             <div style={{
-              width: 13, height: 13, borderRadius: '50%', background: '#f1f5f9',
+              width: 11, height: 11, borderRadius: '50%', background: '#f1f5f9',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 6, fontWeight: 700, color: '#4F46E5', flexShrink: 0,
+              fontSize: 5, fontWeight: 700, color: '#4F46E5', flexShrink: 0,
             }}>{l.i}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 6.5, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.name}</div>
-              <div style={{ fontSize: 5.5, color: '#94a3b8' }}>Healthcare</div>
+              <div style={{ fontSize: 6, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.name}</div>
+              <div style={{ fontSize: 5, color: '#94a3b8' }}>Healthcare</div>
             </div>
-            <div style={{ fontSize: 5.5, color: '#94a3b8', flexShrink: 0 }}>{l.date}</div>
+            <div style={{ fontSize: 5, color: '#94a3b8', flexShrink: 0 }}>{l.date}</div>
           </div>
         ))}
       </div>
@@ -463,8 +523,15 @@ function UpcomingAndLeads(): ReactElement {
 function DashboardScreen(): ReactElement {
   return (
     <div style={{
-      ...SWITZER, background: '#f8fafc', padding: 10, height: '100%',
-      display: 'flex', flexDirection: 'column', gap: 5, overflow: 'hidden',
+      ...SWITZER,
+      background: '#f8fafc',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      overflow: 'hidden',
+      padding: '8px 10px',
+      gap: 4,
+      boxSizing: 'border-box',
     }}>
       <DashboardHeader />
 
@@ -473,7 +540,7 @@ function DashboardScreen(): ReactElement {
         <div style={{ fontSize: 6.5, color: '#6b7280' }}>Friday, 3 April 2026 · Let's make today count.</div>
       </div>
 
-      <div style={{ display: 'flex', gap: 5, flexShrink: 0, height: 70 }}>
+      <div style={{ display: 'flex', gap: 5, flexShrink: 0, height: 72 }}>
         <StatCard label="Total Leads" value="271" delta="+0% in last 30 days"
           sparkColor="#22D3EE" type="bars" IconCmp={Users} iconColor="#22D3EE" />
         <StatCard label="Leads with Emails" value="31" delta="+0% verified emails"
@@ -485,12 +552,12 @@ function DashboardScreen(): ReactElement {
         <PlanCard />
       </div>
 
-      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0, maxHeight: 160 }}>
         <CampaignPerformanceChart />
         <TopCampaigns />
       </div>
 
-      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0, maxHeight: 140 }}>
+      <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0, maxHeight: 125, overflow: 'hidden' }}>
         <RecentActivity />
         <UpcomingAndLeads />
       </div>
