@@ -173,9 +173,10 @@ function VoiceCallingIllustration() {
 function LinkedInIllustration() {
   const phases = ['Silent', 'Connect', 'Thanks', 'Advice', 'Follow', 'Offer']
   const prospects = [
-    { name: 'Owen Dental Group', role: 'Dr Liam Owens', phase: 3, day: 14, progress: 40, status: 'ACTIVE' },
-    { name: 'London Smile Studio', role: 'Dr Paul Morrison', phase: 2, day: 8, progress: 23, status: 'ACTIVE' },
-    { name: 'Smile Clinic NW', role: 'Dr Amit Patel', phase: 4, day: 21, progress: 60, status: 'PAUSED' },
+    { name: 'Owen Dental Group', role: 'Dr Liam Owens', initials: 'OD', phase: 3, day: 14, progress: 40, status: 'ACTIVE' },
+    { name: 'London Smile Studio', role: 'Dr Paul Morrison', initials: 'LS', phase: 2, day: 8, progress: 23, status: 'ACTIVE' },
+    { name: 'Smile Clinic NW', role: 'Dr Amit Patel', initials: 'SC', phase: 4, day: 21, progress: 60, status: 'PAUSED' },
+    { name: 'Blackwell Partners LLP', role: 'Tom Blackwell', initials: 'BP', phase: 2, day: 8, progress: 23, status: 'ACTIVE' },
   ]
   return (
     <div style={{ flex: 1, minHeight: 0, padding: '12px 10px', display: 'flex', flexDirection: 'column', fontFamily: 'Switzer, sans-serif', background: '#ffffff' }}>
@@ -203,7 +204,13 @@ function LinkedInIllustration() {
           border: '1px solid #e2e8f0',
           display: 'flex', alignItems: 'center', gap: '7px',
         }}>
-          <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'linear-gradient(135deg,#0077b5,#3b82f6)', flexShrink: 0 }} />
+          <div style={{
+            width: '22px', height: '22px', borderRadius: '50%',
+            background: '#EEF2FF', border: '1px solid #c7d2fe',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '7px', fontWeight: 700, color: '#4f46e5',
+            flexShrink: 0,
+          }}>{p.initials}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '8px', fontWeight: 600, color: '#0f172a' }}>{p.name}</div>
             <div style={{ fontSize: '6px', color: '#94a3b8' }}>{p.role} · Day {p.day} of 35</div>
