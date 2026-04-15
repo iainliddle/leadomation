@@ -265,7 +265,6 @@ type FeatureCardProps = {
   minHeight: number
   cardBg: string
   cardBorder: string
-  illustrationBg: string
   accentColor: string
   eyebrow: string
   title: string
@@ -274,7 +273,7 @@ type FeatureCardProps = {
   delay: number
 }
 
-function FeatureCard({ gridColumn, gridRow, minHeight, cardBg, cardBorder, illustrationBg, accentColor, eyebrow, title, description, illustration, delay }: FeatureCardProps) {
+function FeatureCard({ gridColumn, gridRow, minHeight, cardBg, cardBorder, eyebrow, title, description, illustration, delay }: FeatureCardProps) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
   return (
@@ -297,32 +296,41 @@ function FeatureCard({ gridColumn, gridRow, minHeight, cardBg, cardBorder, illus
         fontFamily: 'Switzer, sans-serif',
       }}
     >
-      {/* Illustration area — dark brand-tinted background */}
+      {/* Illustration area — white floating frame inside dark card */}
       <div style={{
-        position: 'relative',
         flex: 1,
-        minHeight: '240px',
-        background: illustrationBg,
-        overflow: 'hidden',
+        minHeight: 0,
+        padding: '16px',
+        display: 'flex',
+        alignItems: 'stretch',
       }}>
-        {illustration}
+        <div style={{
+          width: '100%',
+          background: '#ffffff',
+          borderRadius: '10px',
+          overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {illustration}
+        </div>
       </div>
 
       {/* Text block */}
       <div style={{
         background: 'transparent',
-        borderTop: '1px solid rgba(0,0,0,0.06)',
+        borderTop: '1px solid rgba(255,255,255,0.12)',
         padding: '16px 20px 20px',
       }}>
         <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          background: `${accentColor}15`,
-          border: `1px solid ${accentColor}30`,
-          color: accentColor,
+          display: 'inline-block',
+          background: 'rgba(255,255,255,0.12)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          color: 'rgba(255,255,255,0.9)',
           fontSize: '10px',
           fontWeight: 700,
-          letterSpacing: '0.06em',
+          letterSpacing: '0.08em',
           borderRadius: '100px',
           padding: '3px 10px',
           textTransform: 'uppercase',
@@ -332,14 +340,14 @@ function FeatureCard({ gridColumn, gridRow, minHeight, cardBg, cardBorder, illus
         <div style={{
           fontSize: '15px',
           fontWeight: 700,
-          color: '#0f172a',
+          color: '#ffffff',
           lineHeight: 1.25,
           marginBottom: '4px',
           fontFamily: 'Switzer, sans-serif',
         }}>{title}</div>
         <div style={{
           fontSize: '12px',
-          color: '#475569',
+          color: 'rgba(255,255,255,0.72)',
           lineHeight: 1.5,
           fontFamily: 'Switzer, sans-serif',
         }}>{description}</div>
@@ -758,9 +766,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '1'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={380}
-            cardBg="#f5f3ff"
-            cardBorder="1px solid rgba(79,70,229,0.12)"
-            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%)"
+            cardBg="linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%)"
+            cardBorder="1px solid rgba(79,70,229,0.3)"
             accentColor="#4f46e5"
             eyebrow="Lead Discovery"
             title="Find and enrich 500+ leads per campaign"
@@ -772,9 +779,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '2'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={300}
-            cardBg="#ecfeff"
-            cardBorder="1px solid rgba(34,211,238,0.15)"
-            illustrationBg="linear-gradient(135deg, #097b8f 0%, #06b6d4 100%)"
+            cardBg="linear-gradient(135deg, #0c4a6e 0%, #097b8f 100%)"
+            cardBorder="1px solid rgba(6,182,212,0.3)"
             accentColor="#06b6d4"
             eyebrow="Email Sequences"
             title="Write once. Follow up automatically."
@@ -786,9 +792,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '3'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={380}
-            cardBg="#eff6ff"
-            cardBorder="1px solid rgba(59,130,246,0.12)"
-            illustrationBg="linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
+            cardBg="linear-gradient(135deg, #1e1b4b 0%, #1d4ed8 100%)"
+            cardBorder="1px solid rgba(59,130,246,0.3)"
             accentColor="#097b8f"
             eyebrow="AI Voice Calling"
             title="An AI agent that calls your prospects."
@@ -800,9 +805,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '1'}
             gridRow={isMobile ? 'auto' : '2'}
             minHeight={380}
-            cardBg="#eef2ff"
-            cardBorder="1px solid rgba(79,70,229,0.12)"
-            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #3b82f6 100%)"
+            cardBg="linear-gradient(135deg, #1e1b4b 0%, #1e40af 100%)"
+            cardBorder="1px solid rgba(59,130,246,0.25)"
             accentColor="#0077b5"
             eyebrow="LinkedIn Outreach"
             title="A 35-day LinkedIn funnel on autopilot."
@@ -823,9 +827,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '3'}
             gridRow={isMobile ? 'auto' : '2'}
             minHeight={380}
-            cardBg="#f0fdfa"
-            cardBorder="1px solid rgba(6,182,212,0.15)"
-            illustrationBg="linear-gradient(135deg, #064e3b 0%, #097b8f 100%)"
+            cardBg="linear-gradient(135deg, #064e3b 0%, #097b8f 100%)"
+            cardBorder="1px solid rgba(6,182,212,0.25)"
             accentColor="#22d3ee"
             eyebrow="Keyword Monitor"
             title="Catch prospects signalling intent in real time."
