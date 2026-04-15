@@ -124,18 +124,24 @@ export default function ProblemSection() {
               }}
             >
               {/* Background image */}
-              <img
-                src={card.image}
-                alt={card.title}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'top center',
-                }}
-              />
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                overflow: 'hidden',
+              }}>
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  style={{
+                    width: '100%',
+                    height: '130%',
+                    objectFit: 'cover',
+                    objectPosition: 'center center',
+                    transform: 'translateY(-20%)',
+                    display: 'block',
+                  }}
+                />
+              </div>
 
               {/* Dark gradient overlay */}
               <div style={{
