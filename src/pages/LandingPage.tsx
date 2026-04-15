@@ -34,8 +34,8 @@ export default function LandingPage() {
           <ProblemSection />
           <IntegrationMarquee />
           <SolutionSection />
-          <FeatureEmailSequences />
           <FeatureGlobalDemand />
+          <FeatureEmailSequences />
           <FeatureExpandingCards />
           <FeatureBentoCard />
           <StatsAndTestimonials />
