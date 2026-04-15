@@ -949,7 +949,7 @@ export default function HeroDashboardMockup(): ReactElement {
   const leadDbItemRef = useRef<HTMLDivElement>(null)
   const sequenceItemRef = useRef<HTMLDivElement>(null)
 
-  const getCursorPosition = (itemRef: RefObject<HTMLDivElement>) => {
+  const getCursorPosition = (itemRef: RefObject<HTMLDivElement | null>) => {
     if (!containerRef.current || !itemRef.current) return { top: 50, left: 20 }
     const containerRect = containerRef.current.getBoundingClientRect()
     const itemRect = itemRef.current.getBoundingClientRect()
@@ -959,7 +959,7 @@ export default function HeroDashboardMockup(): ReactElement {
     }
   }
 
-  const moveToItem = (ref: RefObject<HTMLDivElement>) => {
+  const moveToItem = (ref: RefObject<HTMLDivElement | null>) => {
     const pos = getCursorPosition(ref)
     setCursorTop(pos.top)
     setCursorLeft(pos.left)
