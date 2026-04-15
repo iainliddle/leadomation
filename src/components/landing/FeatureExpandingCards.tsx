@@ -263,7 +263,8 @@ type FeatureCardProps = {
   gridColumn: string
   gridRow: string
   minHeight: number
-  background: string
+  illustrationBg: string
+  accentColor: string
   eyebrow: string
   title: string
   description: string
@@ -271,7 +272,7 @@ type FeatureCardProps = {
   delay: number
 }
 
-function FeatureCard({ gridColumn, gridRow, minHeight, background, eyebrow, title, description, illustration, delay }: FeatureCardProps) {
+function FeatureCard({ gridColumn, gridRow, minHeight, illustrationBg, accentColor, eyebrow, title, description, illustration, delay }: FeatureCardProps) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
   return (
@@ -286,29 +287,59 @@ function FeatureCard({ gridColumn, gridRow, minHeight, background, eyebrow, titl
         borderRadius: '20px',
         overflow: 'hidden',
         position: 'relative',
-        border: '1px solid rgba(226,232,240,0.6)',
-        background,
+        border: '1px solid rgba(226,232,240,0.8)',
+        background: '#ffffff',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
+        display: 'flex',
+        flexDirection: 'column',
         fontFamily: 'Switzer, sans-serif',
       }}
     >
-      {illustration}
+      {/* Illustration area — dark brand-tinted background */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: '20px 22px',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 100%)',
+        position: 'relative',
+        flex: 1,
+        minHeight: '240px',
+        background: illustrationBg,
+        overflow: 'hidden',
+      }}>
+        {illustration}
+      </div>
+
+      {/* Text block — white */}
+      <div style={{
+        background: 'transparent',
+        borderTop: '1px solid rgba(226,232,240,0.6)',
+        padding: '16px 20px',
       }}>
         <div style={{
-          fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em',
-          color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase',
-          marginBottom: '6px', fontFamily: 'Switzer, sans-serif',
+          display: 'inline-flex',
+          alignItems: 'center',
+          background: `${accentColor}12`,
+          border: `1px solid ${accentColor}30`,
+          color: accentColor,
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '0.06em',
+          borderRadius: '100px',
+          padding: '3px 10px',
+          textTransform: 'uppercase',
+          marginBottom: '8px',
+          fontFamily: 'Switzer, sans-serif',
         }}>{eyebrow}</div>
         <div style={{
-          fontSize: '16px', fontWeight: 700, color: 'white',
-          lineHeight: 1.25, marginBottom: '4px', fontFamily: 'Switzer, sans-serif',
+          fontSize: '15px',
+          fontWeight: 700,
+          color: '#0f172a',
+          lineHeight: 1.25,
+          marginBottom: '4px',
+          fontFamily: 'Switzer, sans-serif',
         }}>{title}</div>
         <div style={{
-          fontSize: '12px', color: 'rgba(255,255,255,0.75)',
-          lineHeight: 1.5, fontFamily: 'Switzer, sans-serif',
+          fontSize: '12px',
+          color: '#64748b',
+          lineHeight: 1.5,
+          fontFamily: 'Switzer, sans-serif',
         }}>{description}</div>
       </div>
     </motion.div>
@@ -664,9 +695,16 @@ export default function FeatureExpandingCards() {
           Everything you need
         </div>
         <h2 style={{
-          fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800,
-          color: '#0f172a', letterSpacing: '-0.03em',
-          lineHeight: 1.1, margin: '0 0 16px',
+          fontSize: 'clamp(28px, 4vw, 44px)',
+          fontWeight: 800,
+          letterSpacing: '-0.03em',
+          lineHeight: 1.1,
+          margin: '0 0 16px',
+          background: 'linear-gradient(135deg, #0f172a 0%, #4F46E5 50%, #22D3EE 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          display: 'block',
           fontFamily: 'Switzer, sans-serif',
         }}>
           Five tools. One platform. Zero manual work.
@@ -718,7 +756,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '1'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={380}
-            background="linear-gradient(135deg, #1e1b4b 0%, #4f46e5 60%, #3b82f6 100%)"
+            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)"
+            accentColor="#4f46e5"
             eyebrow="Lead Discovery"
             title="Find and enrich 500+ leads per campaign"
             description="Google Maps scraping with 3-layer enrichment via Hunter.io and Apollo."
@@ -729,7 +768,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '2'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={300}
-            background="linear-gradient(135deg, #097b8f 0%, #06b6d4 50%, #22d3ee 100%)"
+            illustrationBg="linear-gradient(135deg, #0c4a6e 0%, #097b8f 100%)"
+            accentColor="#06b6d4"
             eyebrow="Email Sequences"
             title="Write once. Follow up automatically."
             description="AI-written multi-step sequences with spam checking and A/B testing."
@@ -740,7 +780,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '3'}
             gridRow={isMobile ? 'auto' : '1'}
             minHeight={380}
-            background="linear-gradient(135deg, #1e1b4b 0%, #097b8f 50%, #06b6d4 100%)"
+            illustrationBg="linear-gradient(135deg, #1e1b4b 0%, #0c4a6e 100%)"
+            accentColor="#097b8f"
             eyebrow="AI Voice Calling"
             title="An AI agent that calls your prospects."
             description="8-step call scripts with auto voicemail. 50 calls per month on Pro."
@@ -751,7 +792,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '1'}
             gridRow={isMobile ? 'auto' : '2'}
             minHeight={380}
-            background="linear-gradient(135deg, #1e1b4b 0%, #0077b5 60%, #3b82f6 100%)"
+            illustrationBg="linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%)"
+            accentColor="#0077b5"
             eyebrow="LinkedIn Outreach"
             title="A 35-day LinkedIn funnel on autopilot."
             description="Six phases from silent awareness to soft offer via Unipile."
@@ -771,7 +813,8 @@ export default function FeatureExpandingCards() {
             gridColumn={isMobile ? '1' : '3'}
             gridRow={isMobile ? 'auto' : '2'}
             minHeight={380}
-            background="linear-gradient(135deg, #064e3b 0%, #097b8f 50%, #22d3ee 100%)"
+            illustrationBg="linear-gradient(135deg, #064e3b 0%, #097b8f 100%)"
+            accentColor="#22d3ee"
             eyebrow="Keyword Monitor"
             title="Catch prospects signalling intent in real time."
             description="LinkedIn scanned every 2 hours. Hot leads auto-enrolled instantly."
