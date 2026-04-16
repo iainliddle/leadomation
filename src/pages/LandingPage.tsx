@@ -19,58 +19,43 @@ export default function LandingPage() {
     <div className="landing-page">
       <Nav />
       <div style={{
+        position: 'relative',
         background: `linear-gradient(
           180deg,
-          rgba(196, 181, 253, 0.18) 0%,
-          rgba(167, 139, 250, 0.12) 4%,
-          rgba(255, 255, 255, 0.95) 14%,
-          rgba(255, 255, 255, 1) 22%,
+          rgba(196, 181, 253, 0.55) 0%,
+          rgba(216, 202, 255, 0.40) 5%,
+          rgba(237, 228, 255, 0.20) 10%,
+          rgba(255, 255, 255, 1) 18%,
+          rgba(255, 255, 255, 1) 25%,
           rgba(255, 255, 255, 1) 30%,
-          rgba(196, 181, 253, 0.10) 38%,
-          rgba(167, 139, 250, 0.14) 44%,
-          rgba(199, 210, 254, 0.12) 50%,
-          rgba(255, 255, 255, 0.98) 58%,
-          rgba(255, 255, 255, 1) 64%,
-          rgba(196, 181, 253, 0.08) 70%,
-          rgba(167, 139, 250, 0.10) 75%,
-          rgba(255, 255, 255, 0.96) 82%,
-          rgba(224, 242, 254, 0.20) 88%,
-          rgba(186, 230, 253, 0.35) 93%,
-          rgba(103, 232, 249, 0.55) 97%,
+          rgba(237, 228, 255, 0.20) 35%,
+          rgba(216, 202, 255, 0.40) 40%,
+          rgba(196, 181, 253, 0.55) 45%,
+          rgba(216, 202, 255, 0.40) 50%,
+          rgba(237, 228, 255, 0.20) 55%,
+          rgba(255, 255, 255, 1) 62%,
+          rgba(255, 255, 255, 1) 68%,
+          rgba(237, 228, 255, 0.20) 73%,
+          rgba(216, 202, 255, 0.40) 78%,
+          rgba(196, 181, 253, 0.55) 83%,
+          rgba(216, 202, 255, 0.35) 87%,
+          rgba(200, 240, 250, 0.40) 91%,
+          rgba(150, 235, 245, 0.60) 95%,
           rgba(34, 211, 238, 1) 100%
         )`,
-        position: 'relative',
-        minHeight: '100vh',
       }}>
-        {/* Ambient background blobs */}
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          pointerEvents: 'none',
-          zIndex: 0,
-          overflow: 'hidden',
-        }}>
-          <div className="landingBlob landingBlob1" />
-          <div className="landingBlob landingBlob2" />
-          <div className="landingBlob landingBlob3" />
-          <div className="landingBlob landingBlob4" />
-        </div>
-
-        {/* All sections */}
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <Hero />
-          <IntegrationMarquee />
-          <ProblemSection />
-          <SolutionSection />
-          <FeatureGlobalDemand />
-          <FeatureEmailSequences />
-          <FeatureExpandingCards />
-          <FeatureBentoCard />
-          <StatsAndTestimonials />
-          <PricingSection />
-          <FAQSection />
-          <CTASection />
-        </div>
+        <Hero />
+        <IntegrationMarquee />
+        <ProblemSection />
+        <SolutionSection />
+        <FeatureGlobalDemand />
+        <FeatureEmailSequences />
+        <FeatureExpandingCards />
+        <FeatureBentoCard />
+        <StatsAndTestimonials />
+        <PricingSection />
+        <FAQSection />
+        <CTASection />
       </div>
       <Footer />
     </div>

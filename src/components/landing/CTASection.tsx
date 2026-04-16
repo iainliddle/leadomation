@@ -12,7 +12,7 @@ export default function CTASection() {
     <div
       ref={sectionRef}
       style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, rgba(224,247,250,0.4) 50%, rgba(178,235,242,0.6) 100%)',
+        background: 'transparent',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',
