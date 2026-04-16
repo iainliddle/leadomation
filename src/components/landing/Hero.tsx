@@ -440,8 +440,8 @@ export default function Hero(): ReactElement {
               }}>
                 <div style={{
                   width: '860px',
-                  height: '100%',
-                  transform: 'scale(0.38)',
+                  height: '560px',
+                  transform: 'scale(0.42)',
                   transformOrigin: 'top left',
                   pointerEvents: 'none',
                 }}>
