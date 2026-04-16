@@ -106,12 +106,8 @@ export default function ProblemSection() {
               delay: 0.3,
             },
           ].map((card, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: card.delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-              whileHover={{ y: -6, transition: { duration: 0.25 } }}
               style={{
                 flex: 1,
                 position: 'relative',
@@ -121,6 +117,7 @@ export default function ProblemSection() {
                 cursor: 'default',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.18), 0 4px 20px rgba(0,0,0,0.12)',
                 background: '#0f172a',
+                opacity: 1,
               }}
             >
               {/* Background image */}
@@ -198,7 +195,7 @@ export default function ProblemSection() {
                   {card.description}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

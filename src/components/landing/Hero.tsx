@@ -439,9 +439,9 @@ export default function Hero(): ReactElement {
                 background: 'white',
               }}>
                 <div style={{
-                  width: '700px',
-                  height: '520px',
-                  transform: 'scale(0.44)',
+                  width: '620px',
+                  height: '500px',
+                  transform: 'scale(0.46)',
                   transformOrigin: 'top left',
                   pointerEvents: 'none',
                 }}>
