@@ -438,17 +438,7 @@ export default function Hero(): ReactElement {
                 overflow: 'hidden',
                 background: 'white',
               }}>
-                <img
-                  src="/screenshots/dashboard.png"
-                  alt="Leadomation Dashboard"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'top left',
-                    display: 'block',
-                  }}
-                />
+                <HeroDashboardMockup staticMode={true} />
               </div>
             </div>
           </div>

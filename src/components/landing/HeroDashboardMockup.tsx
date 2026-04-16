@@ -938,7 +938,7 @@ function CursorArrow({ style }: { style?: CSSProperties }): ReactElement {
 
 /* ─────────────── MAIN COMPONENT ─────────────── */
 
-export default function HeroDashboardMockup(): ReactElement {
+export default function HeroDashboardMockup({ staticMode = false }: { staticMode?: boolean }): ReactElement {
   const [activeScreen, setActiveScreen] = useState(0)
   const [cursorTop, setCursorTop] = useState(50)
   const [cursorLeft, setCursorLeft] = useState(20)
@@ -966,6 +966,7 @@ export default function HeroDashboardMockup(): ReactElement {
   }
 
   useEffect(() => {
+    if (staticMode) return
     let cancelled = false
     let timeouts: Array<ReturnType<typeof setTimeout>> = []
 
@@ -1124,31 +1125,35 @@ export default function HeroDashboardMockup(): ReactElement {
         </div>
       </div>
 
-      {/* Cursor */}
-      <div style={{
-        position: 'absolute',
-        top: cursorTop, left: cursorLeft,
-        zIndex: 50, pointerEvents: 'none',
-        transition: 'top 0.4s cubic-bezier(0.4,0,0.2,1), left 0.4s cubic-bezier(0.4,0,0.2,1)',
-      }}>
-        <CursorArrow style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))' }} />
-      </div>
+      {!staticMode && (
+        <>
+          {/* Cursor */}
+          <div style={{
+            position: 'absolute',
+            top: cursorTop, left: cursorLeft,
+            zIndex: 50, pointerEvents: 'none',
+            transition: 'top 0.4s cubic-bezier(0.4,0,0.2,1), left 0.4s cubic-bezier(0.4,0,0.2,1)',
+          }}>
+            <CursorArrow style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))' }} />
+          </div>
 
-      {/* Ripple */}
-      {ripple && (
-        <div style={{
-          position: 'absolute',
-          top: cursorTop,
-          left: cursorLeft,
-          width: 16,
-          height: 16,
-          borderRadius: '50%',
-          background: 'rgba(79,70,229,0.3)',
-          transformOrigin: 'center',
-          animation: 'rippleExpand 0.35s ease-out forwards',
-          pointerEvents: 'none',
-          zIndex: 49,
-        }} />
+          {/* Ripple */}
+          {ripple && (
+            <div style={{
+              position: 'absolute',
+              top: cursorTop,
+              left: cursorLeft,
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              background: 'rgba(79,70,229,0.3)',
+              transformOrigin: 'center',
+              animation: 'rippleExpand 0.35s ease-out forwards',
+              pointerEvents: 'none',
+              zIndex: 49,
+            }} />
+          )}
+        </>
       )}
     </div>
   )
