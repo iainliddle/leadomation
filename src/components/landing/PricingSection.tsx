@@ -91,11 +91,19 @@ export default function PricingSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' })
   const [annual, setAnnual] = useState(false)
+  const [showWaitlist, setShowWaitlist] = useState(false)
+  const [waitlistName, setWaitlistName] = useState('')
+  const [waitlistEmail, setWaitlistEmail] = useState('')
+  const [waitlistCompany, setWaitlistCompany] = useState('')
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false)
+  const [waitlistSuccess, setWaitlistSuccess] = useState(false)
+  const [waitlistError, setWaitlistError] = useState('')
   const { isMobile } = useBreakpoint()
   const ease = [0.21, 0.47, 0.32, 0.98] as any
 
   return (
     <div
+      id="pricing"
       ref={sectionRef}
       className="bg-arch"
       style={{
@@ -249,28 +257,36 @@ export default function PricingSection() {
               </div>
 
               {/* CTA */}
-              <button
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  cursor: plan.comingSoon ? 'default' : 'pointer',
-                  fontFamily: 'Switzer, sans-serif',
-                  transition: 'all 0.2s ease',
-                  border: plan.featured ? 'none' : '1px solid rgba(79,70,229,0.3)',
-                  background: plan.featured
-                    ? 'linear-gradient(135deg, #22D3EE, #06B6D4)'
-                    : plan.comingSoon
-                    ? 'rgba(79,70,229,0.06)'
-                    : 'rgba(79,70,229,0.06)',
-                  color: plan.featured ? 'white' : '#4F46E5',
-                  opacity: plan.comingSoon ? 0.6 : 1,
-                }}
-              >
-                {plan.cta} {!plan.comingSoon && '→'}
-              </button>
+              {plan.name === 'Starter' && (
+                <a href="https://app.leadomation.co.uk/register" style={{
+                  width: '100%', padding: '14px', borderRadius: '10px', fontSize: '14px',
+                  fontWeight: 600, fontFamily: 'Switzer, sans-serif', textDecoration: 'none',
+                  display: 'block', textAlign: 'center' as const,
+                  border: '1px solid rgba(79,70,229,0.3)',
+                  background: 'rgba(79,70,229,0.06)', color: '#4F46E5',
+                }}>Start free trial →</a>
+              )}
+              {plan.name === 'Pro' && (
+                <a href="https://app.leadomation.co.uk/register?plan=pro" style={{
+                  width: '100%', padding: '14px', borderRadius: '10px', fontSize: '14px',
+                  fontWeight: 600, fontFamily: 'Switzer, sans-serif', textDecoration: 'none',
+                  display: 'block', textAlign: 'center' as const,
+                  background: 'linear-gradient(135deg, #22D3EE, #06B6D4)', color: 'white', border: 'none',
+                }}>Start free trial →</a>
+              )}
+              {plan.name === 'Scale' && (
+                <button
+                  onClick={() => setShowWaitlist(true)}
+                  style={{
+                    width: '100%', padding: '14px', borderRadius: '10px', fontSize: '14px',
+                    fontWeight: 600, fontFamily: 'Switzer, sans-serif', cursor: 'pointer',
+                    border: '1px solid rgba(79,70,229,0.3)',
+                    background: 'rgba(79,70,229,0.06)', color: '#4F46E5',
+                  }}
+                >
+                  Join waitlist
+                </button>
+              )}
             </motion.div>
           ))}
         </div>
@@ -288,6 +304,121 @@ export default function PricingSection() {
         </motion.div>
 
       </div>
+
+      {showWaitlist && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '16px',
+        }} onClick={() => setShowWaitlist(false)}>
+          <div style={{
+            background: 'white', borderRadius: '24px', padding: '40px',
+            maxWidth: '440px', width: '100%',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.2)',
+          }} onClick={e => e.stopPropagation()}>
+            {waitlistSuccess ? (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎉</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', marginBottom: '8px', fontFamily: 'Switzer, sans-serif' }}>
+                  You're on the list
+                </div>
+                <p style={{ color: '#64748b', fontFamily: 'Switzer, sans-serif', lineHeight: 1.6 }}>
+                  We'll be in touch when Scale launches. You'll be first to know.
+                </p>
+                <button onClick={() => { setShowWaitlist(false); setWaitlistSuccess(false) }} style={{
+                  marginTop: '24px', background: '#1E1B4B', color: 'white',
+                  border: 'none', borderRadius: '10px', padding: '12px 28px',
+                  fontWeight: 600, fontSize: '14px', cursor: 'pointer', fontFamily: 'Switzer, sans-serif',
+                }}>Close</button>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', marginBottom: '8px', fontFamily: 'Switzer, sans-serif' }}>
+                  Join the Scale waitlist
+                </div>
+                <p style={{ color: '#64748b', fontFamily: 'Switzer, sans-serif', lineHeight: 1.6, marginBottom: '24px', fontSize: '14px' }}>
+                  Scale includes SMS, WhatsApp and AI video prospecting. We'll notify you when it launches.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={waitlistName}
+                    onChange={e => setWaitlistName(e.target.value)}
+                    style={{
+                      padding: '12px 16px', borderRadius: '10px', fontSize: '14px',
+                      border: '1px solid #e2e8f0', fontFamily: 'Switzer, sans-serif',
+                      outline: 'none', width: '100%', boxSizing: 'border-box' as const,
+                    }}
+                  />
+                  <input
+                    type="email"
+                    placeholder="Work email"
+                    value={waitlistEmail}
+                    onChange={e => setWaitlistEmail(e.target.value)}
+                    style={{
+                      padding: '12px 16px', borderRadius: '10px', fontSize: '14px',
+                      border: '1px solid #e2e8f0', fontFamily: 'Switzer, sans-serif',
+                      outline: 'none', width: '100%', boxSizing: 'border-box' as const,
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Company name (optional)"
+                    value={waitlistCompany}
+                    onChange={e => setWaitlistCompany(e.target.value)}
+                    style={{
+                      padding: '12px 16px', borderRadius: '10px', fontSize: '14px',
+                      border: '1px solid #e2e8f0', fontFamily: 'Switzer, sans-serif',
+                      outline: 'none', width: '100%', boxSizing: 'border-box' as const,
+                    }}
+                  />
+                  {waitlistError && (
+                    <p style={{ color: '#ef4444', fontSize: '13px', margin: 0, fontFamily: 'Switzer, sans-serif' }}>{waitlistError}</p>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (!waitlistName.trim() || !waitlistEmail.trim()) {
+                        setWaitlistError('Please enter your name and email.')
+                        return
+                      }
+                      setWaitlistError('')
+                      setWaitlistSubmitting(true)
+                      try {
+                        const res = await fetch('/api/waitlist', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            name: waitlistName.trim(),
+                            email: waitlistEmail.trim(),
+                            company: waitlistCompany.trim(),
+                          }),
+                        })
+                        if (!res.ok) throw new Error('Failed')
+                        setWaitlistSuccess(true)
+                      } catch {
+                        setWaitlistError('Something went wrong. Please try again.')
+                      } finally {
+                        setWaitlistSubmitting(false)
+                      }
+                    }}
+                    disabled={waitlistSubmitting}
+                    style={{
+                      background: '#1E1B4B', color: 'white', border: 'none',
+                      borderRadius: '10px', padding: '14px', fontSize: '14px',
+                      fontWeight: 600, cursor: waitlistSubmitting ? 'default' : 'pointer',
+                      fontFamily: 'Switzer, sans-serif', opacity: waitlistSubmitting ? 0.7 : 1,
+                    }}
+                  >
+                    {waitlistSubmitting ? 'Submitting...' : 'Join waitlist'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

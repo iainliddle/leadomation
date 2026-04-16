@@ -23,6 +23,7 @@ export default function FeatureGlobalDemand() {
 
   return (
     <div
+      id="global-demand"
       ref={sectionRef}
       className="bg-bowl"
       style={{
@@ -101,16 +102,25 @@ export default function FeatureGlobalDemand() {
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button style={{
+            <a href="https://app.leadomation.co.uk/register" style={{
               background: '#1E1B4B', color: 'white', borderRadius: '10px',
               padding: isMobile ? '12px 20px' : '14px 28px', fontWeight: 600, fontSize: '15px',
               border: 'none', cursor: 'pointer', fontFamily: 'Switzer, sans-serif',
-            }}>Start free trial →</button>
-            <button style={{
+              textDecoration: 'none', display: 'inline-block',
+            }}>Start free trial →</a>
+            <a href="#features" onClick={(e) => {
+              e.preventDefault()
+              const target = document.querySelector('#features')
+              if (target) {
+                const top = target.getBoundingClientRect().top + window.scrollY - 80
+                window.scrollTo({ top, behavior: 'smooth' })
+              }
+            }} style={{
               background: '#ECFEFF', color: '#06B6D4', border: '1px solid #22D3EE',
               borderRadius: '10px', padding: isMobile ? '12px 20px' : '14px 28px', fontWeight: 600,
               fontSize: '15px', cursor: 'pointer', fontFamily: 'Switzer, sans-serif',
-            }}>Explore regions</button>
+              textDecoration: 'none', display: 'inline-block',
+            }}>Explore regions</a>
           </div>
         </motion.div>
 

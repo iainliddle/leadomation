@@ -351,7 +351,7 @@ export default function Hero(): ReactElement {
   const cardVisible = cardsVisible && scrollY < 700
 
   return (
-    <div className="bg-arch" style={{
+    <div id="hero" className="bg-arch" style={{
       position: 'relative',
       minHeight: 'auto',
       paddingBottom: '80px',
@@ -379,11 +379,18 @@ export default function Hero(): ReactElement {
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }}
             style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-            <a href="/app/signup" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#1E1B4B', color: '#fff', textDecoration: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: 600, fontFamily: 'Switzer, sans-serif', boxShadow: '0 4px 16px rgba(30,27,75,0.25)' }}>
+            <a href="https://app.leadomation.co.uk/register" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#1E1B4B', color: '#fff', textDecoration: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: 600, fontFamily: 'Switzer, sans-serif', boxShadow: '0 4px 16px rgba(30,27,75,0.25)' }}>
               Start free trial
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
             </a>
-            <a href="#how-it-works" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.85)', color: '#0f172a', textDecoration: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: 500, fontFamily: 'Switzer, sans-serif', border: '1.5px solid rgba(226,232,240,0.8)', backdropFilter: 'blur(8px)' }}>
+            <a href="#how-it-works" onClick={(e) => {
+              e.preventDefault()
+              const target = document.querySelector('#how-it-works')
+              if (target) {
+                const top = target.getBoundingClientRect().top + window.scrollY - 80
+                window.scrollTo({ top, behavior: 'smooth' })
+              }
+            }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.85)', color: '#0f172a', textDecoration: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: 500, fontFamily: 'Switzer, sans-serif', border: '1.5px solid rgba(226,232,240,0.8)', backdropFilter: 'blur(8px)' }}>
               See how it works
             </a>
           </motion.div>

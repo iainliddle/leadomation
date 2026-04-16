@@ -26,6 +26,19 @@ export default function Nav() {
     if (!isMobile) setMenuOpen(false)
   }, [isMobile])
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('#')) {
+      e.preventDefault()
+      const target = document.querySelector(href)
+      if (target) {
+        const offset = 80
+        const top = target.getBoundingClientRect().top + window.scrollY - offset
+        window.scrollTo({ top, behavior: 'smooth' })
+      }
+      setMenuOpen(false)
+    }
+  }
+
   return (
     <header style={{
       position: 'fixed',
@@ -104,6 +117,7 @@ export default function Nav() {
               <a
                 key={link.label}
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 style={{
                   padding: isTablet ? '6px 10px' : '8px 16px',
                   borderRadius: '10px',
@@ -139,7 +153,7 @@ export default function Nav() {
         }}>
           {!isMobile && (
             <a
-              href="/app/login"
+              href="https://app.leadomation.co.uk/login"
               style={{
                 padding: '8px 16px',
                 fontSize: '14px',
@@ -163,7 +177,7 @@ export default function Nav() {
             </a>
           )}
           <a
-            href="/app/signup"
+            href="https://app.leadomation.co.uk/register"
             style={{
               padding: isMobile ? '8px 16px' : '10px 22px',
               fontSize: '14px',
@@ -261,7 +275,7 @@ export default function Nav() {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={() => setMenuOpen(false)}
+                onClick={(e) => handleNavClick(e, link.href)}
                 style={{
                   padding: '14px 16px',
                   fontSize: '15px',
@@ -277,7 +291,7 @@ export default function Nav() {
             ))}
             <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 16px' }} />
             <a
-              href="/app/login"
+              href="https://app.leadomation.co.uk/login"
               onClick={() => setMenuOpen(false)}
               style={{
                 padding: '14px 16px',

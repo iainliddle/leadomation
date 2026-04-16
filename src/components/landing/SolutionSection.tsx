@@ -190,7 +190,7 @@ export default function SolutionSection() {
             </div>
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <a href="/app/signup" style={{
+              <a href="https://app.leadomation.co.uk/register" style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
                 background: '#1E1B4B', color: '#fff', textDecoration: 'none',
                 borderRadius: '10px', padding: '12px 24px',
@@ -202,7 +202,14 @@ export default function SolutionSection() {
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </a>
-              <a href="#features" style={{
+              <a href="#features" onClick={(e) => {
+                e.preventDefault()
+                const target = document.querySelector('#features')
+                if (target) {
+                  const top = target.getBoundingClientRect().top + window.scrollY - 80
+                  window.scrollTo({ top, behavior: 'smooth' })
+                }
+              }} style={{
                 display: 'inline-flex', alignItems: 'center',
                 background: 'transparent', color: '#4F46E5', textDecoration: 'none',
                 borderRadius: '10px', padding: '12px 24px',

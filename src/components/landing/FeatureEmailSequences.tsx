@@ -166,7 +166,7 @@ export default function FeatureEmailSequences() {
   const { isMobile } = useBreakpoint()
 
   return (
-    <section ref={ref} className="bg-arch" style={{
+    <section id="email-sequences" ref={ref} className="bg-arch" style={{
       position: 'relative',
       overflow: 'hidden',
       paddingTop: isMobile ? '60px' : '120px',
@@ -240,7 +240,7 @@ export default function FeatureEmailSequences() {
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '40px' }}>
-              <a href="/app/signup" style={{
+              <a href="https://app.leadomation.co.uk/register" style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
                 background: '#1E1B4B', color: '#ffffff', textDecoration: 'none',
                 borderRadius: '10px', padding: isMobile ? '12px 20px' : '14px 28px',
@@ -251,7 +251,14 @@ export default function FeatureEmailSequences() {
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </a>
-              <a href="#features" style={{
+              <a href="#features" onClick={(e) => {
+                e.preventDefault()
+                const target = document.querySelector('#features')
+                if (target) {
+                  const top = target.getBoundingClientRect().top + window.scrollY - 80
+                  window.scrollTo({ top, behavior: 'smooth' })
+                }
+              }} style={{
                 display: 'inline-flex', alignItems: 'center',
                 background: '#ECFEFF', color: '#06B6D4', textDecoration: 'none',
                 borderRadius: '10px', padding: isMobile ? '12px 20px' : '14px 28px',

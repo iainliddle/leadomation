@@ -47,18 +47,27 @@ export default function CTASection() {
 
           {/* CTAs */}
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
-            <button style={{ background: '#1E1B4B', color: 'white', borderRadius: '12px', padding: isMobile ? '14px 28px' : '16px 36px', fontWeight: 700, fontSize: isMobile ? '15px' : '16px', border: 'none', cursor: 'pointer', fontFamily: 'Switzer, sans-serif', boxShadow: '0 8px 32px rgba(30,27,75,0.25)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
-              onMouseEnter={e => { (e.target as HTMLElement).style.transform = 'translateY(-2px)'; (e.target as HTMLElement).style.boxShadow = '0 12px 40px rgba(30,27,75,0.35)' }}
-              onMouseLeave={e => { (e.target as HTMLElement).style.transform = 'translateY(0)'; (e.target as HTMLElement).style.boxShadow = '0 8px 32px rgba(30,27,75,0.25)' }}
-            >
-              Start free trial →
-            </button>
-            <button style={{ background: 'transparent', color: '#4F46E5', border: '1px solid rgba(79,70,229,0.3)', borderRadius: '12px', padding: isMobile ? '14px 28px' : '16px 36px', fontWeight: 600, fontSize: isMobile ? '15px' : '16px', cursor: 'pointer', fontFamily: 'Switzer, sans-serif', transition: 'all 0.2s ease' }}
-              onMouseEnter={e => { (e.target as HTMLElement).style.background = '#EEF2FF' }}
-              onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent' }}
-            >
-              View pricing
-            </button>
+            <a href="https://app.leadomation.co.uk/register" style={{
+              background: '#1E1B4B', color: 'white', borderRadius: '12px',
+              padding: isMobile ? '14px 28px' : '16px 36px',
+              fontWeight: 700, fontSize: isMobile ? '15px' : '16px',
+              fontFamily: 'Switzer, sans-serif', textDecoration: 'none', display: 'inline-block',
+              boxShadow: '0 8px 32px rgba(30,27,75,0.25)',
+            }}>Start free trial →</a>
+            <a href="#pricing" onClick={(e) => {
+              e.preventDefault()
+              const target = document.querySelector('#pricing')
+              if (target) {
+                const top = target.getBoundingClientRect().top + window.scrollY - 80
+                window.scrollTo({ top, behavior: 'smooth' })
+              }
+            }} style={{
+              background: 'transparent', color: '#4F46E5',
+              border: '1px solid rgba(79,70,229,0.3)', borderRadius: '12px',
+              padding: isMobile ? '14px 28px' : '16px 36px',
+              fontWeight: 600, fontSize: isMobile ? '15px' : '16px',
+              fontFamily: 'Switzer, sans-serif', textDecoration: 'none', display: 'inline-block',
+            }}>View pricing</a>
           </div>
 
           {/* Trust line */}
