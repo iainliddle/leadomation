@@ -120,6 +120,7 @@ export default function ProblemSection() {
                 height: isMobile ? '380px' : '460px',
                 cursor: 'default',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.18), 0 4px 20px rgba(0,0,0,0.12)',
+                background: '#0f172a',
               }}
             >
               {/* Background image */}
@@ -138,6 +139,10 @@ export default function ProblemSection() {
                     objectPosition: 'center center',
                     transform: 'translateY(-20%)',
                     display: 'block',
+                  }}
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement
+                    el.style.display = 'none'
                   }}
                 />
               </div>
