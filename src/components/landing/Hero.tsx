@@ -438,7 +438,15 @@ export default function Hero(): ReactElement {
                 overflow: 'hidden',
                 background: 'white',
               }}>
-                <HeroDashboardMockup staticMode={true} />
+                <div style={{
+                  width: '860px',
+                  height: '100%',
+                  transform: 'scale(0.38)',
+                  transformOrigin: 'top left',
+                  pointerEvents: 'none',
+                }}>
+                  <HeroDashboardMockup staticMode={true} />
+                </div>
               </div>
             </div>
           </div>
