@@ -5,7 +5,7 @@ import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 export default function ProblemSection() {
   const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: '-60px' })
+  const inView = useInView(ref, { once: true, margin: '-10px' })
   const { isMobile } = useBreakpoint()
 
   return (
@@ -108,8 +108,8 @@ export default function ProblemSection() {
           ].map((card, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: card.delay, ease: [0.21, 0.47, 0.32, 0.98] }}
               whileHover={{ y: -6, transition: { duration: 0.25 } }}
               style={{
