@@ -698,8 +698,8 @@ export default function FeatureExpandingCards() {
       className="bg-bowl"
       style={{
         position: 'relative',
-        paddingTop: isMobile ? '60px' : '100px',
-        paddingBottom: isMobile ? '60px' : '140px',
+        paddingTop: isMobile ? '40px' : '100px',
+        paddingBottom: isMobile ? '40px' : '140px',
         fontFamily: 'Switzer, sans-serif',
         overflow: 'hidden',
       }}

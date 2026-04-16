@@ -111,8 +111,8 @@ export default function SolutionSection() {
   return (
     <section className="bg-arch" style={{
       position: 'relative',
-      padding: isMobile ? '60px 16px' : '100px 24px',
-      paddingTop: isMobile ? '60px' : '100px',
+      padding: isMobile ? '40px 16px' : '100px 24px',
+      paddingTop: isMobile ? '40px' : '100px',
       overflow: 'hidden',
     }}>
       {/* Ambient blobs */}
@@ -283,9 +283,24 @@ export default function SolutionSection() {
             </motion.div>
             )}
 
-            <div style={{ position: 'relative', zIndex: 1, transform: isMobile ? 'scale(0.75)' : 'none', transformOrigin: 'top center', marginBottom: isMobile ? '-40px' : '0' }}>
-              <LeadDatabaseIllustration />
-            </div>
+            {isMobile ? (
+              <div style={{
+                borderRadius: '16px',
+                overflow: 'hidden',
+                boxShadow: '0 20px 60px rgba(79,70,229,0.12), 0 4px 16px rgba(0,0,0,0.06)',
+                border: '1px solid #e2e8f0',
+              }}>
+                <img
+                  src="/screenshots/lead-database.png"
+                  alt="Lead Database"
+                  style={{ width: '100%', display: 'block' }}
+                />
+              </div>
+            ) : (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <LeadDatabaseIllustration />
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

@@ -176,8 +176,8 @@ export default function StatsAndTestimonials() {
         style={{
           position: 'relative',
           overflow: 'hidden',
-          paddingTop: isMobile ? '60px' : '120px',
-          paddingBottom: isMobile ? '40px' : '80px',
+          paddingTop: isMobile ? '40px' : '120px',
+          paddingBottom: isMobile ? '20px' : '80px',
           fontFamily: 'Switzer, sans-serif',
         }}
       >
@@ -189,7 +189,7 @@ export default function StatsAndTestimonials() {
             margin: '0 auto',
             paddingLeft: isMobile ? '16px' : '48px',
             paddingRight: isMobile ? '16px' : '48px',
-            marginBottom: isMobile ? '48px' : '80px',
+            marginBottom: isMobile ? '32px' : '80px',
             position: 'relative',
             zIndex: 1,
           }}

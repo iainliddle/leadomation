@@ -11,7 +11,7 @@ export default function ProblemSection() {
   return (
     <section className="bg-bowl" style={{
       position: 'relative',
-      padding: isMobile ? '60px 16px 80px' : '80px 24px 100px',
+      padding: isMobile ? '40px 16px 48px' : '80px 24px 100px',
       overflow: 'hidden',
       fontFamily: 'Switzer, sans-serif',
     }}>

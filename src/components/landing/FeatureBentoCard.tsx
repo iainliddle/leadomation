@@ -181,8 +181,8 @@ export default function FeatureBentoCard() {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        paddingTop: isMobile ? '60px' : '120px',
-        paddingBottom: isMobile ? '60px' : '120px',
+        paddingTop: isMobile ? '40px' : '120px',
+        paddingBottom: isMobile ? '40px' : '120px',
         fontFamily: 'Switzer, sans-serif',
       }}
     >

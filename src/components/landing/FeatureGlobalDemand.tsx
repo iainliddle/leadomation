@@ -28,8 +28,8 @@ export default function FeatureGlobalDemand() {
       className="bg-bowl"
       style={{
         position: 'relative',
-        paddingTop: isMobile ? '60px' : '120px',
-        paddingBottom: isMobile ? '60px' : '120px',
+        paddingTop: isMobile ? '40px' : '120px',
+        paddingBottom: isMobile ? '40px' : '120px',
         fontFamily: 'Switzer, sans-serif',
         overflow: 'hidden',
       }}
@@ -134,7 +134,7 @@ export default function FeatureGlobalDemand() {
           <div style={{ position: 'relative', width: '100%', maxWidth: '500px' }}>
             <CobeGlobe
               markers={GLOBE_MARKERS}
-              size={isMobile ? 300 : 480}
+              size={isMobile ? 280 : 480}
               speed={0.004}
             />
 

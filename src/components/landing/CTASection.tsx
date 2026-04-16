@@ -13,8 +13,8 @@ export default function CTASection() {
       ref={sectionRef}
       style={{
         position: 'relative',
-        paddingTop: isMobile ? '60px' : '120px',
-        paddingBottom: isMobile ? '60px' : '120px',
+        paddingTop: isMobile ? '40px' : '120px',
+        paddingBottom: isMobile ? '40px' : '120px',
         fontFamily: 'Switzer, sans-serif',
         overflow: 'hidden',
         background: '#ffffff',

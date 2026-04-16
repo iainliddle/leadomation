@@ -139,8 +139,8 @@ export default function FAQSection() {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        paddingTop: isMobile ? '60px' : '120px',
-        paddingBottom: isMobile ? '100px' : '180px',
+        paddingTop: isMobile ? '40px' : '120px',
+        paddingBottom: isMobile ? '80px' : '180px',
         fontFamily: 'Switzer, sans-serif',
       }}
     >

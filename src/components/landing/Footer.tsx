@@ -80,16 +80,20 @@ export default function Footer() {
       position: 'relative',
       isolation: 'isolate',
       zIndex: 2,
+      padding: isMobile ? '0 8px 16px' : '0 24px 32px',
+      background: 'transparent',
     }}>
 
-      {/* Gradient fade from CTA ambient into cyan footer */}
-      <div style={{
-        height: '120px',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(103,232,249,0.3) 12%, rgba(34,211,238,0.85) 28%, rgba(34,211,238,1) 45%, rgba(34,211,238,1) 100%)',
-      }} />
+      {/* Spacer */}
+      <div style={{ height: isMobile ? '40px' : '80px' }} />
 
       {/* Main footer content */}
-      <div style={{ background: '#22d3ee' }}>
+      <div style={{
+        background: 'linear-gradient(160deg, #22d3ee 0%, #06c4e0 100%)',
+        borderRadius: isMobile ? '16px' : '28px',
+        overflow: 'hidden',
+        boxShadow: '0 -4px 40px rgba(34,211,238,0.25), 0 20px 60px rgba(34,211,238,0.15)',
+      }}>
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',

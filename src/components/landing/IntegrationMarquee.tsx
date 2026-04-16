@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 type Logo = { src: string; name: string }
 
@@ -39,13 +40,14 @@ const logoSizeOverrides: Record<string, string> = {
 
 export default function IntegrationMarquee() {
   const [hovered, setHovered] = useState<number | null>(null)
+  const { isMobile } = useBreakpoint()
 
   return (
     <section
       style={{
         position: 'relative',
         background: 'transparent',
-        padding: '24px 0',
+        padding: isMobile ? '20px 0' : '48px 0',
         overflow: 'hidden',
       }}
     >

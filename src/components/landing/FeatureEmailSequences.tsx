@@ -169,8 +169,8 @@ export default function FeatureEmailSequences() {
     <section id="email-sequences" ref={ref} className="bg-arch" style={{
       position: 'relative',
       overflow: 'hidden',
-      paddingTop: isMobile ? '60px' : '120px',
-      paddingBottom: isMobile ? '60px' : '120px',
+      paddingTop: isMobile ? '40px' : '120px',
+      paddingBottom: isMobile ? '40px' : '120px',
       fontFamily: 'Switzer, sans-serif',
     }}>
       <div style={{ position: 'relative', zIndex: 1 }}>
