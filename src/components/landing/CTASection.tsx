@@ -11,13 +11,13 @@ export default function CTASection() {
   return (
     <div
       ref={sectionRef}
-      className="bg-arch-cyan"
       style={{
         position: 'relative',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',
         fontFamily: 'Switzer, sans-serif',
         overflow: 'hidden',
+        background: '#ffffff',
       }}
     >
       {/* Subtle background glow */}

@@ -135,12 +135,12 @@ export default function FAQSection() {
     <div
       id="faq"
       ref={sectionRef}
-      className="bg-bowl"
+      className="bg-bowl-deep"
       style={{
         position: 'relative',
         overflow: 'hidden',
         paddingTop: isMobile ? '60px' : '120px',
-        paddingBottom: isMobile ? '60px' : '120px',
+        paddingBottom: isMobile ? '100px' : '180px',
         fontFamily: 'Switzer, sans-serif',
       }}
     >
