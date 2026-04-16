@@ -695,7 +695,7 @@ export default function FeatureExpandingCards() {
     <section
       ref={sectionRef}
       style={{
-        background: 'linear-gradient(180deg, transparent 0%, #ffffff 100px, #ffffff 100%)',
+        background: 'transparent',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '100px',
         paddingBottom: isMobile ? '60px' : '140px',

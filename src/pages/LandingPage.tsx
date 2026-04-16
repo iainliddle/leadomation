@@ -19,20 +19,42 @@ export default function LandingPage() {
     <div className="landing-page">
       <Nav />
       <div style={{
+        background: `linear-gradient(
+          180deg,
+          rgba(196, 181, 253, 0.18) 0%,
+          rgba(167, 139, 250, 0.12) 4%,
+          rgba(255, 255, 255, 0.95) 14%,
+          rgba(255, 255, 255, 1) 22%,
+          rgba(255, 255, 255, 1) 30%,
+          rgba(196, 181, 253, 0.10) 38%,
+          rgba(167, 139, 250, 0.14) 44%,
+          rgba(199, 210, 254, 0.12) 50%,
+          rgba(255, 255, 255, 0.98) 58%,
+          rgba(255, 255, 255, 1) 64%,
+          rgba(196, 181, 253, 0.08) 70%,
+          rgba(167, 139, 250, 0.10) 75%,
+          rgba(255, 255, 255, 0.96) 82%,
+          rgba(224, 242, 254, 0.20) 88%,
+          rgba(186, 230, 253, 0.35) 93%,
+          rgba(103, 232, 249, 0.55) 97%,
+          rgba(34, 211, 238, 1) 100%
+        )`,
         position: 'relative',
-        background: 'linear-gradient(180deg, #f0e8ff 0%, #e8e4ff 5%, #eef2ff 12%, #f8faff 30%, #ffffff 50%, #f8faff 65%, #eef2ff 80%, #f0f9ff 92%, #e0f7fa 100%)',
-        overflow: 'hidden',
+        minHeight: '100vh',
       }}>
-        {/* Ambient blobs - absolute so they only affect hero/top area */}
-        <div style={{ position: 'absolute', top: '-200px', left: '-300px', width: '900px', height: '900px', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
-        <div style={{ position: 'absolute', top: '-100px', right: '-200px', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(79,70,229,0.09) 0%, transparent 65%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
-        <div style={{ position: 'absolute', top: '600px', left: '55%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(34,211,238,0.07) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
-        {/* Blob 4 - mid page indigo */}
-        <div style={{ position: 'absolute', top: '1800px', right: '-200px', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(79,70,229,0.07) 0%, transparent 65%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
-        {/* Blob 5 - lower page cyan */}
-        <div style={{ position: 'absolute', top: '3200px', left: '-150px', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(34,211,238,0.08) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
-        {/* Blob 6 - bottom page indigo */}
-        <div style={{ position: 'absolute', top: '4400px', right: '-100px', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(79,70,229,0.09) 0%, transparent 65%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        {/* Ambient background blobs */}
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          overflow: 'hidden',
+        }}>
+          <div className="landingBlob landingBlob1" />
+          <div className="landingBlob landingBlob2" />
+          <div className="landingBlob landingBlob3" />
+          <div className="landingBlob landingBlob4" />
+        </div>
 
         {/* All sections */}
         <div style={{ position: 'relative', zIndex: 1 }}>

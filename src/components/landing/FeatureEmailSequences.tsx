@@ -169,7 +169,7 @@ export default function FeatureEmailSequences() {
     <section ref={ref} style={{
       position: 'relative',
       overflow: 'hidden',
-      background: 'linear-gradient(180deg, #ffffff 0%, transparent 120px, transparent 100%)',
+      background: 'transparent',
       paddingTop: isMobile ? '60px' : '120px',
       paddingBottom: isMobile ? '60px' : '120px',
       fontFamily: 'Switzer, sans-serif',

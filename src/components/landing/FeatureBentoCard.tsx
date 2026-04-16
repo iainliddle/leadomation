@@ -177,7 +177,7 @@ export default function FeatureBentoCard() {
     <div
       ref={sectionRef}
       style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, transparent 120px, transparent 100%)',
+        background: 'transparent',
         position: 'relative',
         overflow: 'hidden',
         paddingTop: isMobile ? '60px' : '120px',

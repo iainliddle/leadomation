@@ -12,7 +12,7 @@ export default function ProblemSection() {
     <section style={{
       position: 'relative',
       padding: isMobile ? '60px 16px 80px' : '80px 24px 100px',
-      background: 'linear-gradient(180deg, transparent 0%, #ffffff 120px, #ffffff 100%)',
+      background: 'transparent',
       overflow: 'hidden',
       fontFamily: 'Switzer, sans-serif',
     }}>
