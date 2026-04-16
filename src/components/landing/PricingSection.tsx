@@ -97,8 +97,8 @@ export default function PricingSection() {
   return (
     <div
       ref={sectionRef}
+      className="bg-arch"
       style={{
-        background: 'transparent',
         position: 'relative',
         overflow: 'hidden',
         paddingTop: isMobile ? '60px' : '120px',

@@ -166,10 +166,9 @@ export default function FeatureEmailSequences() {
   const { isMobile } = useBreakpoint()
 
   return (
-    <section ref={ref} style={{
+    <section ref={ref} className="bg-arch" style={{
       position: 'relative',
       overflow: 'hidden',
-      background: 'transparent',
       paddingTop: isMobile ? '60px' : '120px',
       paddingBottom: isMobile ? '60px' : '120px',
       fontFamily: 'Switzer, sans-serif',

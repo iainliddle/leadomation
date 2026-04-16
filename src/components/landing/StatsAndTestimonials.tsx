@@ -172,8 +172,8 @@ export default function StatsAndTestimonials() {
 
       <div
         ref={sectionRef}
+        className="bg-bowl"
         style={{
-          background: 'transparent',
           position: 'relative',
           overflow: 'hidden',
           paddingTop: isMobile ? '60px' : '120px',

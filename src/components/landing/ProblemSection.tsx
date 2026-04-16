@@ -9,10 +9,9 @@ export default function ProblemSection() {
   const { isMobile } = useBreakpoint()
 
   return (
-    <section style={{
+    <section className="bg-bowl" style={{
       position: 'relative',
       padding: isMobile ? '60px 16px 80px' : '80px 24px 100px',
-      background: 'transparent',
       overflow: 'hidden',
       fontFamily: 'Switzer, sans-serif',
     }}>

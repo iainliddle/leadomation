@@ -694,8 +694,8 @@ export default function FeatureExpandingCards() {
   return (
     <section
       ref={sectionRef}
+      className="bg-bowl"
       style={{
-        background: 'transparent',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '100px',
         paddingBottom: isMobile ? '60px' : '140px',

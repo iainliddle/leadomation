@@ -134,8 +134,8 @@ export default function FAQSection() {
   return (
     <div
       ref={sectionRef}
+      className="bg-bowl"
       style={{
-        background: 'transparent',
         position: 'relative',
         overflow: 'hidden',
         paddingTop: isMobile ? '60px' : '120px',

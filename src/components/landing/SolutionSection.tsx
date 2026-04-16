@@ -109,11 +109,10 @@ export default function SolutionSection() {
   const { isMobile } = useBreakpoint()
 
   return (
-    <section style={{
+    <section className="bg-arch" style={{
       position: 'relative',
       padding: isMobile ? '60px 16px' : '100px 24px',
       paddingTop: isMobile ? '60px' : '100px',
-      background: 'transparent',
       overflow: 'hidden',
     }}>
       {/* Ambient blobs */}

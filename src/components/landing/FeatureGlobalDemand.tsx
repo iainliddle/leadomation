@@ -24,8 +24,8 @@ export default function FeatureGlobalDemand() {
   return (
     <div
       ref={sectionRef}
+      className="bg-bowl"
       style={{
-        background: 'transparent',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',

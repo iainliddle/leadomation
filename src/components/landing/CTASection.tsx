@@ -11,8 +11,8 @@ export default function CTASection() {
   return (
     <div
       ref={sectionRef}
+      className="bg-arch-cyan"
       style={{
-        background: 'transparent',
         position: 'relative',
         paddingTop: isMobile ? '60px' : '120px',
         paddingBottom: isMobile ? '60px' : '120px',

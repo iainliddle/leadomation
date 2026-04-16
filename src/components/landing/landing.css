@@ -3,7 +3,7 @@
 
 .landing-page {
   font-family: 'Switzer', -apple-system, sans-serif;
-  background: transparent;
+  background: #ffffff;
   color: #0f172a;
   overflow-x: hidden;
 }
@@ -79,4 +79,45 @@
   margin-left: -10px;
   position: absolute;
   width: 40px;
+}
+
+/* ============================================
+   ARCH GRADIENT SYSTEM
+   Each section owns its background.
+   Arch = colour top, white bottom.
+   Bowl = white top, colour bottom.
+   They meet white-to-white so no seam shows.
+   ============================================ */
+
+.bg-arch {
+  background:
+    radial-gradient(
+      ellipse 180% 80% at 50% -5%,
+      rgba(180, 150, 255, 0.40) 0%,
+      rgba(196, 175, 255, 0.20) 45%,
+      rgba(255, 255, 255, 0) 72%
+    ),
+    #ffffff;
+}
+
+.bg-bowl {
+  background:
+    radial-gradient(
+      ellipse 180% 80% at 50% 105%,
+      rgba(180, 150, 255, 0.40) 0%,
+      rgba(196, 175, 255, 0.20) 45%,
+      rgba(255, 255, 255, 0) 72%
+    ),
+    #ffffff;
+}
+
+.bg-arch-cyan {
+  background:
+    radial-gradient(
+      ellipse 180% 80% at 50% -5%,
+      rgba(103, 232, 249, 0.30) 0%,
+      rgba(186, 230, 253, 0.15) 45%,
+      rgba(255, 255, 255, 0) 72%
+    ),
+    #ffffff;
 }

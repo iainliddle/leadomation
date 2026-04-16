@@ -351,51 +351,11 @@ export default function Hero(): ReactElement {
   const cardVisible = cardsVisible && scrollY < 700
 
   return (
-    <div style={{
+    <div className="bg-arch" style={{
       position: 'relative',
-      background: 'linear-gradient(180deg, #f0e8ff 0%, #e8e4ff 5%, #eef2ff 15%, #f8faff 40%, #ffffff 65%)',
       minHeight: 'auto',
       paddingBottom: '80px',
     }}>
-      {/* Ambient animated blobs */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        zIndex: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none',
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: '-20%',
-          left: '-15%',
-          width: '70%',
-          height: '70%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.35) 0%, rgba(79,70,229,0.15) 40%, transparent 70%)',
-          filter: 'blur(60px)',
-          animation: 'heroBlob1 8s ease-in-out infinite alternate',
-        }} />
-        <div style={{
-          position: 'absolute',
-          top: '-10%',
-          right: '-10%',
-          width: '55%',
-          height: '60%',
-          background: 'radial-gradient(circle, rgba(79,70,229,0.25) 0%, rgba(99,102,241,0.10) 50%, transparent 70%)',
-          filter: 'blur(80px)',
-          animation: 'heroBlob2 10s ease-in-out infinite alternate',
-        }} />
-        <div style={{
-          position: 'absolute',
-          top: '40%',
-          left: '30%',
-          width: '50%',
-          height: '50%',
-          background: 'radial-gradient(circle, rgba(34,211,238,0.15) 0%, transparent 65%)',
-          filter: 'blur(70px)',
-          animation: 'heroBlob3 12s ease-in-out infinite alternate',
-        }} />
-      </div>
 
       {/* Hero content */}
       <div style={{ position: 'relative', zIndex: 2 }}>
