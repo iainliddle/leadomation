@@ -111,8 +111,8 @@ export default function IntegrationMarquee() {
                 : wideText.includes(logo.name)
                   ? '20px'
                   : '28px')
-            const baseFilter = isVapi ? 'opacity(0.75)' : 'grayscale(1) opacity(0.6)'
-            const hoverFilter = isVapi ? 'opacity(1)' : 'grayscale(0) opacity(1)'
+            const baseFilter = isVapi ? 'opacity(0.85)' : 'opacity(0.85)'
+            const hoverFilter = 'opacity(1)'
             return (
               <div
                 key={`${logo.name}-${index}`}
