@@ -134,15 +134,10 @@ export default function ProblemSection() {
                   alt={card.title}
                   style={{
                     width: '100%',
-                    height: '130%',
+                    height: '100%',
                     objectFit: 'cover',
-                    objectPosition: 'center center',
-                    transform: 'translateY(-20%)',
+                    objectPosition: 'center top',
                     display: 'block',
-                  }}
-                  onError={(e) => {
-                    const el = e.target as HTMLImageElement
-                    el.style.display = 'none'
                   }}
                 />
               </div>
