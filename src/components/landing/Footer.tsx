@@ -85,7 +85,7 @@ export default function Footer() {
       {/* Gradient fade from CTA ambient into cyan footer */}
       <div style={{
         height: '120px',
-        background: 'linear-gradient(180deg, rgba(178,235,242,0.6) 0%, rgba(34,211,238,0.3) 40%, #22d3ee 100%)',
+        background: 'linear-gradient(180deg, rgba(103,232,249,0) 0%, rgba(103,232,249,0.4) 8%, rgba(34,211,238,0.85) 20%, rgba(34,211,238,1) 35%, rgba(34,211,238,1) 100%)',
       }} />
 
       {/* Main footer content */}
