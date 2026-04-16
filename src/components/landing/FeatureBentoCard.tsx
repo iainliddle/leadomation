@@ -223,7 +223,7 @@ export default function FeatureBentoCard() {
               ))}
             </div>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <a href="https://app.leadomation.co.uk/register" style={{
+              <a href="https://leadomation.co.uk/register" style={{
                 background: '#1E1B4B', color: 'white', borderRadius: '10px',
                 padding: isMobile ? '12px 20px' : '14px 28px', fontWeight: 600, fontSize: '15px',
                 fontFamily: 'Switzer, sans-serif', textDecoration: 'none', display: 'inline-block',

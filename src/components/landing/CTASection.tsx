@@ -47,7 +47,7 @@ export default function CTASection() {
 
           {/* CTAs */}
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
-            <a href="https://app.leadomation.co.uk/register" style={{
+            <a href="https://leadomation.co.uk/register" style={{
               background: '#1E1B4B', color: 'white', borderRadius: '12px',
               padding: isMobile ? '14px 28px' : '16px 36px',
               fontWeight: 700, fontSize: isMobile ? '15px' : '16px',

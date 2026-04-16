@@ -153,7 +153,7 @@ export default function Nav() {
         }}>
           {!isMobile && (
             <a
-              href="https://app.leadomation.co.uk/login"
+              href="https://leadomation.co.uk/login"
               style={{
                 padding: '8px 16px',
                 fontSize: '14px',
@@ -177,7 +177,7 @@ export default function Nav() {
             </a>
           )}
           <a
-            href="https://app.leadomation.co.uk/register"
+            href="https://leadomation.co.uk/register"
             style={{
               padding: isMobile ? '8px 16px' : '10px 22px',
               fontSize: '14px',
@@ -291,7 +291,7 @@ export default function Nav() {
             ))}
             <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 16px' }} />
             <a
-              href="https://app.leadomation.co.uk/login"
+              href="https://leadomation.co.uk/login"
               onClick={() => setMenuOpen(false)}
               style={{
                 padding: '14px 16px',

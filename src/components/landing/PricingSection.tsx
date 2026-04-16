@@ -258,7 +258,7 @@ export default function PricingSection() {
 
               {/* CTA */}
               {plan.name === 'Starter' && (
-                <a href="https://app.leadomation.co.uk/register" style={{
+                <a href="https://leadomation.co.uk/register" style={{
                   width: '100%', padding: '14px', borderRadius: '10px', fontSize: '14px',
                   fontWeight: 600, fontFamily: 'Switzer, sans-serif', textDecoration: 'none',
                   display: 'block', textAlign: 'center' as const,
@@ -267,7 +267,7 @@ export default function PricingSection() {
                 }}>Start free trial →</a>
               )}
               {plan.name === 'Pro' && (
-                <a href="https://app.leadomation.co.uk/register?plan=pro" style={{
+                <a href="https://leadomation.co.uk/register?plan=pro" style={{
                   width: '100%', padding: '14px', borderRadius: '10px', fontSize: '14px',
                   fontWeight: 600, fontFamily: 'Switzer, sans-serif', textDecoration: 'none',
                   display: 'block', textAlign: 'center' as const,
