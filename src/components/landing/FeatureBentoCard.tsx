@@ -301,7 +301,7 @@ export default function FeatureBentoCard() {
               </div>
 
               {/* Tab content */}
-              <div style={{ padding: '16px 24px 24px', minHeight: '320px' }}>
+              <div style={{ padding: '16px 24px 24px', minHeight: isMobile ? 'auto' : '320px' }}>
                 <AnimatePresence mode="popLayout" initial={false}>
                   <motion.div
                     key={activeTab.id}
