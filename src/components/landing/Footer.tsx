@@ -50,20 +50,20 @@ const COLUMNS = [
   {
     heading: 'Use cases',
     links: [
-      { label: 'Email outreach', href: '#' },
-      { label: 'LinkedIn automation', href: '#' },
-      { label: 'AI voice calling', href: '#' },
-      { label: 'Lead enrichment', href: '#' },
-      { label: 'Keyword monitoring', href: '#' },
-      { label: 'Global demand', href: '#' },
+      { label: 'Email outreach', href: '#email-sequences' },
+      { label: 'LinkedIn automation', href: '#features' },
+      { label: 'AI voice calling', href: '#features' },
+      { label: 'Lead enrichment', href: '#features' },
+      { label: 'Keyword monitoring', href: '#features' },
+      { label: 'Global demand', href: '#global-demand' },
     ],
   },
   {
     heading: 'Company',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Contact', href: 'mailto:hello@leadomation.co.uk' },
-      { label: 'Privacy policy', href: '/privacy' },
+      { label: 'Contact', href: 'mailto:support@leadomation.co.uk' },
+      { label: 'Privacy policy', href: 'mailto:privacy@leadomation.co.uk' },
       { label: 'Terms of service', href: '/terms' },
       { label: 'Cookie policy', href: '/cookies' },
       { label: 'Compliance', href: '/compliance' },
@@ -169,6 +169,14 @@ export default function Footer() {
                   <a
                     key={j}
                     href={link.href}
+                    onClick={link.href.startsWith('#') ? (e) => {
+                      e.preventDefault()
+                      const target = document.querySelector(link.href)
+                      if (target) {
+                        const top = target.getBoundingClientRect().top + window.scrollY - 80
+                        window.scrollTo({ top, behavior: 'smooth' })
+                      }
+                    } : undefined}
                     style={{
                       fontSize: '14px',
                       color: '#0c4a6e',
@@ -205,10 +213,8 @@ export default function Footer() {
             {['Privacy policy', 'Terms of service', 'Cookie policy'].map((link, i) => (
               <a
                 key={i}
-                href="#"
-                style={{ fontSize: '13px', color: '#0891b2', textDecoration: 'none', transition: 'color 0.2s ease' }}
-                onMouseEnter={e => (e.target as HTMLElement).style.color = '#0e7490'}
-                onMouseLeave={e => (e.target as HTMLElement).style.color = '#0891b2'}
+                href={i === 0 ? 'mailto:privacy@leadomation.co.uk' : `/${link.toLowerCase().replace(/ /g, '-')}`}
+                style={{ fontSize: '13px', color: '#0891b2', textDecoration: 'none' }}
               >
                 {link}
               </a>

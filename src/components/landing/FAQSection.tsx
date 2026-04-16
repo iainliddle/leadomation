@@ -133,6 +133,7 @@ export default function FAQSection() {
 
   return (
     <div
+      id="faq"
       ref={sectionRef}
       className="bg-bowl"
       style={{
@@ -193,7 +194,7 @@ export default function FAQSection() {
             margin: '0 auto',
             maxWidth: '480px',
           }}>
-            If your question is not here, email us at hello@leadomation.co.uk and we will get back to you within 24 hours.
+            If your question is not here, email us at support@leadomation.co.uk and we will get back to you within 24 hours.
           </p>
         </motion.div>
 

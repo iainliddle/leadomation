@@ -693,6 +693,7 @@ export default function FeatureExpandingCards() {
 
   return (
     <section
+      id="features"
       ref={sectionRef}
       className="bg-bowl"
       style={{
