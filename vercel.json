@@ -9,6 +9,10 @@
         {
             "source": "/cancellation-feedback.html",
             "destination": "/cancellation-feedback.html"
+        },
+        {
+            "source": "/((?!cancellation-feedback.html).*)",
+            "destination": "/index.html"
         }
     ]
 }
