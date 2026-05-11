@@ -88,7 +88,37 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({ error: `Webhook error: ${err.message}` });
     }
 
-    console.log('Stripe webhook received:', event.type);
+    console.log('Stripe webhook received:', event.type, event.id);
+
+    // Idempotency guard (LEA-2)
+    // Stripe retries delivery on transient failures. Try to claim the
+    // event id with an upsert that ignores conflicts. If no row comes
+    // back we have already processed this event; ack 200 and skip the
+    // side effects (db writes, Resend emails, n8n webhooks).
+    try {
+        const { data: claim, error: dedupeError } = await supabase
+            .from('processed_stripe_events')
+            .upsert(
+                { event_id: event.id, event_type: event.type },
+                { onConflict: 'event_id', ignoreDuplicates: true }
+            )
+            .select('event_id');
+
+        if (dedupeError) {
+            console.error('Stripe idempotency insert failed:', dedupeError);
+            // Surface the failure so Stripe retries. Better a retry than
+            // running side effects without a dedupe record.
+            return res.status(500).json({ error: 'Idempotency check failed' });
+        }
+
+        if (!claim || claim.length === 0) {
+            console.log(`Stripe webhook duplicate ignored: ${event.id} (${event.type})`);
+            return res.status(200).json({ received: true, duplicate: true });
+        }
+    } catch (err: any) {
+        console.error('Stripe idempotency guard threw:', err);
+        return res.status(500).json({ error: 'Idempotency check failed' });
+    }
 
     try {
         switch (event.type) {
