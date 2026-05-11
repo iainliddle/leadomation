@@ -265,6 +265,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
     const [keywordResults, setKeywordResults] = useState<any[]>([]);
     const [isLoadingKeywords, setIsLoadingKeywords] = useState(false);
     const [keywordError, setKeywordError] = useState('');
+    const [keywordCapReached, setKeywordCapReached] = useState(false);
     const [selectedCountry, setSelectedCountry] = useState<{ name: string; code: number; flag: string }>({ name: 'United Kingdom', code: 2826, flag: '🇬🇧' });
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
     const [countrySearchQuery, setCountrySearchQuery] = useState('');
@@ -368,41 +369,16 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
 
         setIsLoadingKeywords(true);
         setKeywordError('');
+        setKeywordCapReached(false);
         setKeywordResults([]);
 
         try {
-            // Check plan limits
             const { data: { session } } = await supabase.auth.getSession();
             const user = session?.user;
             if (!user || !session) {
                 setKeywordError('Please sign in to perform searches.');
                 setIsLoadingKeywords(false);
                 return;
-            }
-
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('plan')
-                .eq('id', user.id)
-                .single();
-
-            if (profile?.plan === 'starter') {
-                // Count searches this month
-                const startOfMonth = new Date();
-                startOfMonth.setDate(1);
-                startOfMonth.setHours(0, 0, 0, 0);
-
-                const { count } = await supabase
-                    .from('demand_data')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', user.id)
-                    .gte('searched_at', startOfMonth.toISOString());
-
-                if ((count || 0) >= 50) {
-                    setKeywordError("You've reached your Starter plan limit. Upgrade to Pro for unlimited access.");
-                    setIsLoadingKeywords(false);
-                    return;
-                }
             }
 
             const locationCode = LOCATION_CODES[selectedCountry.name] || 2826;
@@ -422,7 +398,14 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
             const data = await response.json();
 
             if (!response.ok) {
-                setKeywordError(data.error || 'Something went wrong. Please try again.');
+                if (response.status === 402 && data?.code === 'plan_limit_reached') {
+                    setKeywordCapReached(true);
+                    setKeywordError(
+                        `You've used ${data.used}/${data.limit} keyword searches on your ${data.plan} plan this month. Upgrade to keep going.`
+                    );
+                } else {
+                    setKeywordError(data.error || 'Something went wrong. Please try again.');
+                }
                 return;
             }
 
@@ -911,7 +894,7 @@ const GlobalDemand: React.FC<GlobalDemandProps> = ({ onPageChange }) => {
                         {keywordError && (
                             <div className="mt-3 p-4 bg-red-50 border border-red-100 rounded-xl">
                                 <p className="text-sm text-red-600 font-medium">{keywordError}</p>
-                                {keywordError.includes('Upgrade to Pro') && (
+                                {(keywordCapReached || keywordError.includes('Upgrade to Pro')) && (
                                     <button
                                         onClick={() => onPageChange('Pricing')}
                                         className="mt-3 px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-2"

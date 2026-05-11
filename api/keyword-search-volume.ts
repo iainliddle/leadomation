@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { assertWithinPlanCap } from '../src/lib/serverPlanCaps.js';
 
 export const config = {
     api: { bodyParser: true },
@@ -37,26 +38,9 @@ export default async function handler(req: any, res: any) {
         return res.status(401).json({ error: 'Invalid token' });
     }
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', user.id)
-        .single();
-
-    if (profile?.plan === 'starter') {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-
-        const { count } = await supabase
-            .from('demand_data')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .gte('searched_at', startOfMonth.toISOString());
-
-        if ((count || 0) >= 50) {
-            return res.status(403).json({ error: "You've reached your Starter plan limit. Upgrade to Pro for unlimited access." });
-        }
+    const cap = await assertWithinPlanCap(supabase, user.id, 'monthly_keyword_search');
+    if (!cap.ok) {
+        return res.status(cap.status).json(cap.body);
     }
 
     // DataForSEO Basic Auth

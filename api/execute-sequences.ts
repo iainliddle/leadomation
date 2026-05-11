@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { assertWithinPlanCap } from '../src/lib/serverPlanCaps.js';
 
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL!,
@@ -79,6 +80,19 @@ export default async function handler(req: any, res: any) {
 
         try {
             if (step.channel === 'email' && lead.email) {
+                // Enforce per-plan daily email cap (Starter 30/day, Pro 100/day)
+                const cap = await assertWithinPlanCap(supabase, enrollment.user_id, 'daily_emails');
+                if (!cap.ok) {
+                    await supabase
+                        .from('sequence_enrollments')
+                        .update({
+                            next_step_at: cap.body.resetsAt,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', enrollment.id);
+                    continue;
+                }
+
                 // Get user's email config
                 const { data: profile } = await supabase
                     .from('profiles')
